@@ -33,6 +33,7 @@ namespace tmplORM
 			// Make the type behave like it's contained type..
 			operator T() const noexcept { return _value; }
 			bool modified() const noexcept { return _modified; }
+			constexpr static const bool nullable = false;
 
 			void value(const T &newValue) noexcept
 			{
@@ -42,6 +43,12 @@ namespace tmplORM
 
 			// create(); - CREATE TABLE definiton of the field
 		};
+
+		// Tag type to mark the primary key field with
+		template<typename T> struct primary_t : public T { };
+
+		// Tag type to mark nullable fields with
+		template<typename T> struct nullable_t : public T { constexpr static const bool nullable = true; };
 
 		template<typename _fieldName> struct int64_t final : public field_t<_fieldName, std::int64_t>
 		{
