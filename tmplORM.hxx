@@ -50,6 +50,17 @@ namespace tmplORM
 		// Tag type to mark nullable fields with
 		template<typename T> struct nullable_t : public T { constexpr static const bool nullable = true; };
 
+		// Encodes as a VARCHAR type field (NVARCHAR for MSSQL)
+		template<typename _fieldName, uint32_t _length> struct unicode_t final : public field_t<_fieldName, char *>
+		{
+			constexpr uint32_t length() const noexcept { return _length; }
+		};
+
+		// Encodes as a TEXT type field (NTEXT for MSSQL)
+		template<typename _fieldName> struct unicodeText_t final : public field_t<_fieldName, char *>
+		{
+		};
+
 		template<typename _fieldName> struct int64_t final : public field_t<_fieldName, std::int64_t>
 		{
 		};
@@ -64,11 +75,6 @@ namespace tmplORM
 
 		template<typename _fieldName> struct int8_t final : public field_t<_fieldName, std::int8_t>
 		{
-		};
-
-		template<typename _fieldName, uint32_t _length> struct unicode_t final : public field_t<_fieldName, char *>
-		{
-			constexpr uint32_t length() const noexcept { return _length; }
 		};
 
 		// Convinience just in case you don't like using the stdint.h like types above.
