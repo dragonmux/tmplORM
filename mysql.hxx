@@ -69,15 +69,14 @@ struct mySQLClient_t
 private:
 	MYSQL *const con;
 	bool haveConnection;
-	int result;
 
-	constexpr mySQLClient_t() noexcept {}
+	constexpr mySQLClient_t() noexcept : con(nullptr), haveConnection(false) {}
 
 public:
 	bool connect(const char *host, uint32_t port, const char *user, const char *passwd) const noexcept;
 	bool connect(const char *unixSocket, const char *user, const char *passwd) const noexcept;
 	bool selectDB(const char *db) const noexcept;
-	bool query(const char *queryStmt, ...) MySQL_FORMAT_ARGS(2, 3);
+	//bool query(const char *queryStmt, ...) MySQL_FORMAT_ARGS(2, 3);
 	mySQLResult_t queryResult() noexcept;
 	uint32_t errorNum() const noexcept;
 	const char *error() const noexcept;
