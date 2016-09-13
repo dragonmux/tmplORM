@@ -6,7 +6,7 @@
 #include <utility>
 #include <memory>
 
-struct mySQLValue_t
+struct mySQLValue_t final
 {
 private:
 	const char *const data;
@@ -43,7 +43,7 @@ public:
 	operator int64_t() const { return asInt64(); }
 };
 
-struct mySQLRow_t
+struct mySQLRow_t final
 {
 private:
 	MYSQL_RES *const result;
@@ -55,7 +55,7 @@ private:
 
 public:
 	constexpr mySQLRow_t() noexcept : result(nullptr), row(nullptr), rowLengths(nullptr) {}
-	~MySQLRow() noexcept;
+	~mySQLRow_t() noexcept;
 	uint32_t numFields() const noexcept;
 	bool next() noexcept;
 	mySQLValue_t operator [](const uint32_t idx) const noexcept;
@@ -64,7 +64,23 @@ public:
 	mySQLRow_t(const mySQLRow_t &) = delete;
 };
 
-struct mySQLClient_t
+struct mySQLResult_t final
+{
+private:
+	MYSQL_RES *const result;
+
+	mySQLResult_t(const MYSQL *const con) noexcept;
+
+public:
+	constexpr mySQLResult_t() noexcept : result(nullptr) { }
+	~mySQLResult_t() noexcept;
+	uint64_t numRows() const noexcept;
+	mySQLRow_t resultRows() noexcept;
+
+	mySQLResult_t(const mySQLResult_t &) = delete;
+};
+
+struct mySQLClient_t final
 {
 private:
 	MYSQL *const con;
@@ -73,6 +89,10 @@ private:
 	constexpr mySQLClient_t() noexcept : con(nullptr), haveConnection(false) {}
 
 public:
+	~mySQLClient_t() noexcept;
+
+	//constexpr mySQLClient_t(
+	bool valid() const noexcept;
 	bool connect(const char *host, uint32_t port, const char *user, const char *passwd) const noexcept;
 	bool connect(const char *unixSocket, const char *user, const char *passwd) const noexcept;
 	bool selectDB(const char *db) const noexcept;

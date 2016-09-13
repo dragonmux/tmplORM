@@ -1,5 +1,8 @@
 #include "mysql.hxx"
 
+bool mySQLClient_t::valid() const noexcept
+	{ return con != nullptr && !haveConnection; }
+
 bool mySQLClient_t::connect(const char *const host, const uint32_t port, const char *const user, const char *const passwd) const noexcept
 	{ return valid() && mysql_real_connect(con, host, user, passwd, nullptr, port, nullptr, CLIENT_IGNORE_SIGPIPE) != nullptr; }
 
