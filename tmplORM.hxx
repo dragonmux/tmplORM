@@ -9,8 +9,22 @@ namespace tmplORM
 {
 	using namespace irqus;
 
-	template<typename _tableName> struct model_t
+	template<typename... Fields> struct fields_t
 	{
+	protected:
+		constexpr static const size_t N = sizeof...(Fields);
+		std::tuple<Fields...> _fields;
+
+		constexpr fields_t() noexcept : _fields{} {}
+		constexpr fields_t(Fields &&...fields) noexcept : _fields{fields...} { }
+	};
+
+	template<typename _tableName, typename... Fields> struct model_t : public fields_t<Fields...>
+	{
+	public:
+		constexpr model_t() noexcept : fields_t<Fields...>{} {}
+		constexpr model_t(Fields... fields) noexcept : fields_t<Fields...>{fields...} { }
+
 		const char *tableName() const noexcept { return _tableName::data(); }
 
 		// create(); - Creates the table
@@ -84,16 +98,6 @@ namespace tmplORM
 		template<typename fieldName> using short_t = int16_t<fieldName>;
 		template<typename fieldName> using tinyInt_t = int8_t<fieldName>;
 	}
-
-	template<typename... Fields> struct fields_t
-	{
-	protected:
-		constexpr static const size_t N = sizeof...(Fields);
-		std::tuple<Fields...> _fields;
-
-		constexpr fields_t() noexcept : _fields{} {}
-		constexpr fields_t(Fields &&...fields) noexcept : _fields{fields...} { }
-	};
 }
 
 #endif /*tmplORM__HXX*/
