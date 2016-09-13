@@ -2,6 +2,7 @@
 #define tmplORM__HXX
 
 #include <cstdint>
+#include <tuple>
 #include "typestring/typestring.hh"
 
 namespace tmplORM
@@ -70,6 +71,16 @@ namespace tmplORM
 		template<typename fieldName> using short_t = int16_t<fieldName>;
 		template<typename fieldName> using tinyInt_t = int8_t<fieldName>;
 	}
+
+	template<typename... Fields> struct fields_t
+	{
+	protected:
+		constexpr static const size_t N = sizeof...(Fields);
+		std::tuple<Fields...> _fields;
+
+		constexpr fields_t() noexcept : _fields{} {}
+		constexpr fields_t(Fields &&...fields) noexcept : _fields{fields...} { }
+	};
 }
 
 #endif /*tmplORM__HXX*/
