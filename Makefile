@@ -14,13 +14,14 @@ PREFIX ?= /usr
 LIBDIR ?= $(PREFIX)/lib
 
 O = mysql.o
+GCH = tmplORM.gch
 SO = libtmplORM.so
 
 DEPS = .dep
 
 default: all
 
-all: $(DEPS) $(SO)
+all: $(DEPS) $(SO) $(GCH)
 
 $(DEPS):
 	$(call run-cmd,install_dir,$@)
@@ -33,9 +34,13 @@ $(SO): $(O)
 	$(call makedep,$(CXX),$(DEPFLAGS))
 	$(call run-cmd,cxx,$(CFLAGS))
 
+%.gch: %.hxx
+	$(call run-cmd,cxx,-std=c++11 -c -o $@ $<)
+
 clean:
 	$(call run-cmd,rm,tmplORM,$(O) $(SO))
 	$(call run-cmd,rm,makedep,.dep/*.d)
 
 .PHONY: default all clean
+.SUFIXES: .cxx .hxx
 -include .dep/*.d
