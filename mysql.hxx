@@ -6,21 +6,27 @@
 #include <utility>
 #include <memory>
 
+typedef unsigned long sql_ulong_t;
+#define MySQL_FORMAT_ARGS(n, m) __attribute__((format(printf, n, m)))
+
+using mySQLFieldType_t = enum enum_field_types;
+
 struct mySQLValue_t final
 {
 private:
 	const char *const data;
 	const uint64_t len;
-	const uint8_t type;
-
-	//bool checkNumber(bool allowMinus) const noexcept;
+	const mySQLFieldType_t type;
 
 public:
-	mySQLValue_t(const char *const data, const uint64_t len, const uint8_t type) noexcept;
-	bool isNull() const noexcept { return data == nullptr; }
+	constexpr mySQLValue_t() noexcept : data(nullptr), len(0), type(MYSQL_TYPE_NULL) { }
+	mySQLValue_t(const char *const data, const uint64_t len, const mySQLFieldType_t type) noexcept;
+	mySQLValue_t(mySQLValue_t &&value) noexcept;
+	mySQLValue_t &operator =(mySQLValue_t &&value) noexcept;
 
+	bool isNull() const noexcept;
 	std::unique_ptr<char []>asSting() const;
-	bool asBool() const;
+	bool asBool(const uint8_t bit) const;
 	uint32_t asUint8() const;
 	int32_t asInt8() const;
 	uint32_t asUint16() const;
@@ -32,7 +38,7 @@ public:
 
 	operator std::unique_ptr<char []>() const { return asString(); }
 	operator const char *() const { return asString().get(); }
-	explicit operator bool() const { return asBool(); }
+	explicit operator bool() const { return asBool(0); }
 	operator uint8_t() const { return asUint8(); }
 	operator int8_t() const { return asInt8(); }
 	operator uint16_t() const { return asUint16(); }
@@ -41,6 +47,9 @@ public:
 	operator int32_t() const { return asInt32(); }
 	operator uint64_t() const { return asUint64(); }
 	operator int64_t() const { return asInt64(); }
+
+	mySQLValue_t(const mySQLValue_t &) = delete;
+	mySQLValue_t &operator =(const mySQLValue_t &) = delete;
 };
 
 struct mySQLRow_t final
@@ -48,60 +57,102 @@ struct mySQLRow_t final
 private:
 	MYSQL_RES *const result;
 	MYSQL_ROW row;
-	sql_ulong_t *const rowLengths;
+	const uint32_t fields;
+	sql_ulong_t *rowLengths;
+	std::unique_ptr<mySQLFieldType_t []> fieldTypes;
 
 	mySQLRow_t(MYSQL_RES *const result) noexcept;
 	void fetch() noexcept;
+	friend struct mySQLResult_t;
 
 public:
-	constexpr mySQLRow_t() noexcept : result(nullptr), row(nullptr), rowLengths(nullptr) {}
+	constexpr mySQLRow_t() noexcept : result(nullptr), row(nullptr), fields(0), rowLengths(nullptr), fieldTypes(nullptr) { }
+	mySQLRow_t(mySQLRow_t &&row) noexcept;
 	~mySQLRow_t() noexcept;
+
+	bool valid() const noexcept { return row && rowLengths; }
 	uint32_t numFields() const noexcept;
 	bool next() noexcept;
 	mySQLValue_t operator [](const uint32_t idx) const noexcept;
-	bool valid() const noexcept;
 
 	mySQLRow_t(const mySQLRow_t &) = delete;
+	mySQLRow_t &operator =(const mySQLRow_t &) = delete;
 };
 
 struct mySQLResult_t final
 {
 private:
-	MYSQL_RES *const result;
+	MYSQL_RES *result;
 
-	mySQLResult_t(const MYSQL *const con) noexcept;
+protected:
+	mySQLResult_t(MYSQL *const con) noexcept;
+	friend struct mySQLClient_t;
 
 public:
 	constexpr mySQLResult_t() noexcept : result(nullptr) { }
+	mySQLResult_t(mySQLResult_t &&res) noexcept;
 	~mySQLResult_t() noexcept;
+
+	bool valid() const noexcept { return result; }
 	uint64_t numRows() const noexcept;
-	mySQLRow_t resultRows() noexcept;
+	mySQLRow_t resultRows() const noexcept;
 
 	mySQLResult_t(const mySQLResult_t &) = delete;
+	mySQLResult_t &operator =(const mySQLResult_t &) = delete;
 };
 
 struct mySQLClient_t final
 {
 private:
-	MYSQL *const con;
-	bool haveConnection;
-
-	constexpr mySQLClient_t() noexcept : con(nullptr), haveConnection(false) {}
+	static MYSQL *con;
+	static uint32_t handles;
+	static bool haveConnection;
 
 public:
+	mySQLClient_t() noexcept;
+	mySQLClient_t(const mySQLClient_t &) noexcept;
 	~mySQLClient_t() noexcept;
+	mySQLClient_t &operator =(const mySQLClient_t &) noexcept;
 
-	//constexpr mySQLClient_t(
-	bool valid() const noexcept;
-	bool connect(const char *host, uint32_t port, const char *user, const char *passwd) const noexcept;
-	bool connect(const char *unixSocket, const char *user, const char *passwd) const noexcept;
-	bool selectDB(const char *db) const noexcept;
-	//bool query(const char *queryStmt, ...) MySQL_FORMAT_ARGS(2, 3);
-	mySQLResult_t queryResult() noexcept;
+	bool valid() const noexcept { return con && haveConnection; }
+
+	bool connect(const char *const host, uint32_t port, const char *const user, const char *const passwd) const noexcept;
+	bool connect(const char *const unixSocket, const char *const user, const char *const passwd) const noexcept;
+	void disconnect() noexcept;
+	bool selectDB(const char *const db) const noexcept;
+	bool query(const char *const queryStmt, ...) noexcept MySQL_FORMAT_ARGS(2, 3);
+	mySQLResult_t queryResult() const noexcept;
 	uint32_t errorNum() const noexcept;
 	const char *error() const noexcept;
+
+	mySQLClient_t(mySQLClient_t &&) = delete;
+	mySQLClient_t &operator =(mySQLClient_t &&) = delete;
 };
 
-extern mySQLClient_t &database;
+enum class mySQLErrorType_t : uint8_t
+{
+	noError, queryError,
+	stringError, boolError,
+	uint8Error, int8Error,
+	uint16Error, int16Error,
+	uint32Error, int32Error,
+	uint64Error, int64Error
+};
+
+struct mySQLValueError_t final
+{
+private:
+	mySQLErrorType_t errorType;
+
+public:
+	constexpr mySQLValueError_t() noexcept : errorType(mySQLErrorType_t::noError) { }
+	constexpr mySQLValueError_t(mySQLValueError_t type) noexcept : errorType(type) { }
+	const char *error() const noexcept;
+
+	bool operator ==(const mySQLValueError_t &error) const noexcept { return errorType == error.errorType; }
+	bool operator !=(const mySQLValueError_t &error) const noexcept { return errorType != error.errorType; }
+};
+
+extern mySQLClient_t database;
 
 #endif /*MYSQL__HXX*/
