@@ -25,7 +25,7 @@ public:
 	mySQLValue_t &operator =(mySQLValue_t &&value) noexcept;
 
 	bool isNull() const noexcept;
-	std::unique_ptr<char []>asSting() const;
+	std::unique_ptr<char []> asString() const;
 	bool asBool(const uint8_t bit) const;
 	uint32_t asUint8() const;
 	int32_t asInt8() const;
@@ -37,7 +37,7 @@ public:
 	int64_t asInt64() const;
 
 	operator std::unique_ptr<char []>() const { return asString(); }
-	operator const char *() const { return asString().get(); }
+	operator const char *() const { return data; }
 	explicit operator bool() const { return asBool(0); }
 	operator uint8_t() const { return asUint8(); }
 	operator int8_t() const { return asInt8(); }
@@ -146,7 +146,7 @@ private:
 
 public:
 	constexpr mySQLValueError_t() noexcept : errorType(mySQLErrorType_t::noError) { }
-	constexpr mySQLValueError_t(mySQLValueError_t type) noexcept : errorType(type) { }
+	constexpr mySQLValueError_t(mySQLErrorType_t type) noexcept : errorType(type) { }
 	const char *error() const noexcept;
 
 	bool operator ==(const mySQLValueError_t &error) const noexcept { return errorType == error.errorType; }

@@ -22,7 +22,7 @@ mySQLClient_t::mySQLClient_t() noexcept
 	}
 }
 
-mySQLClient_t::mySQLClient_t(const mySQLClient_t &) noexcept { return ++handles; }
+mySQLClient_t::mySQLClient_t(const mySQLClient_t &) noexcept { ++handles; }
 
 mySQLClient_t::~mySQLClient_t() noexcept
 {
@@ -34,16 +34,49 @@ mySQLClient_t::~mySQLClient_t() noexcept
 	}
 }
 
-mySQLClient__t::operator =(const mySQLClient_t &) noexcept { return *this; }
+mySQLClient_t &mySQLClient_t::operator =(const mySQLClient_t &) noexcept { return *this; }
 
 bool mySQLClient_t::connect(const char *const host, const uint32_t port, const char *const user, const char *const passwd) const noexcept
-	{ return valid() && mysql_real_connect(con, host, user, passwd, nullptr, port, nullptr, CLIENT_IGNORE_SIGPIPE) != nullptr; }
+{
+	if (!con)
+		return false;
+	if (haveConnection)
+		return false;
+	haveConnection = mysql_real_connect(con, host, user, passwd, nullptr, port, nullptr, CLIENT_IGNORE_SIGPIPE) != nullptr;
+	return haveConnection;
+}
 
 bool mySQLClient_t::connect(const char *const unixSocket, const char *const user, const char *const passwd) const noexcept
-	{ return valid() && mysql_real_connect(con, nullptr, user, passwd, nullptr, 0, unixSocket, CLIENT_IGNORE_SIGPIPE) != nullptr; }
+{
+	if (!con)
+		return false;
+	if (haveConnection)
+		return false;
+	haveConnection = mysql_real_connect(con, nullptr, user, passwd, nullptr, 0, unixSocket, CLIENT_IGNORE_SIGPIPE) != nullptr;
+	return haveConnection;
+}
 
-bool mySQLClient_t::selectDB(const char *const db) const noexcept
-	{ return valid() && mysql_select_db(con, db) == 0; }
+void mySQLClient_t::disconnect() noexcept
+{
+	if (valid())
+	{
+		mysql_close(con);
+		con = nullptr;
+		haveConnection = false;
+	}
+}
+
+bool mySQLClient_t::selectDB(const char *const db) const noexcept { return valid() && mysql_select_db(con, db) == 0; }
+
+bool mySQLClient_t::query(const char *const queryStmt, ...) noexcept
+{
+	(void)queryStmt;
+	return true;
+}
+
+mySQLResult_t mySQLClient_t::queryResult() const noexcept { return valid() ? mySQLResult_t(con) : mySQLResult_t(); }
+uint32_t mySQLClient_t::errorNum() const noexcept { return valid() ? mysql_errno(con) : 0; }
+const char *mySQLClient_t::error() const noexcept { return valid() ? mysql_error(con) : nullptr; }
 
 uint32_t mySQLRow_t::numFields() const noexcept { return mysql_num_fields(result); }
 
