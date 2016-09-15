@@ -28,7 +28,7 @@ $(DEPS):
 
 $(SO): $(O)
 	$(call run-cmd,ccld,$(LFLAGS))
-	$(call debug-strip,$(EXE))
+	$(call debug-strip,$(SO))
 
 %.o: %.cxx $(DEPS)
 	$(call makedep,$(CXX),$(DEPFLAGS))
