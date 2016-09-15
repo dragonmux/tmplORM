@@ -78,6 +78,12 @@ mySQLResult_t mySQLClient_t::queryResult() const noexcept { return valid() ? myS
 uint32_t mySQLClient_t::errorNum() const noexcept { return valid() ? mysql_errno(con) : 0; }
 const char *mySQLClient_t::error() const noexcept { return valid() ? mysql_error(con) : nullptr; }
 
+mySQLResult_t::mySQLResult_t(MYSQL *const con) noexcept : result(mysql_store_result(con)) { }
+mySQLResult_t::mySQLResult_t(mySQLResult_t &&res) noexcept : mySQLResult_t() { std::swap(result, res.result); }
+mySQLResult_t::~mySQLResult_t() noexcept { mysql_free_result(result); }
+uint64_t mySQLResult_t::numRows() const noexcept { return valid() ? mysql_num_rows(result) : 0; }
+
+//mySQLRow_t::mySQLRow_t(mySQLRow_t &&row) noexcept : mySQLRow_t() { std::swap(result, row.result); }
 uint32_t mySQLRow_t::numFields() const noexcept { return mysql_num_fields(result); }
 
 inline bool isNumber(const char x) noexcept	{ return x >= '0' && x <= '9'; }
