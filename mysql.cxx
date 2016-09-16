@@ -38,9 +38,9 @@ mySQLClient_t &mySQLClient_t::operator =(const mySQLClient_t &) noexcept { retur
 
 bool mySQLClient_t::connect(const char *const host, const uint32_t port, const char *const user, const char *const passwd) const noexcept
 {
-	if (!con)
-		return false;
 	if (haveConnection)
+		return true;
+	else if (!con)
 		return false;
 	haveConnection = mysql_real_connect(con, host, user, passwd, nullptr, port, nullptr, CLIENT_IGNORE_SIGPIPE) != nullptr;
 	return haveConnection;
@@ -48,9 +48,9 @@ bool mySQLClient_t::connect(const char *const host, const uint32_t port, const c
 
 bool mySQLClient_t::connect(const char *const unixSocket, const char *const user, const char *const passwd) const noexcept
 {
-	if (!con)
-		return false;
 	if (haveConnection)
+		return true;
+	else if (!con)
 		return false;
 	haveConnection = mysql_real_connect(con, nullptr, user, passwd, nullptr, 0, unixSocket, CLIENT_IGNORE_SIGPIPE) != nullptr;
 	return haveConnection;
@@ -80,11 +80,11 @@ const char *mySQLClient_t::error() const noexcept { return valid() ? mysql_error
 
 mySQLResult_t::mySQLResult_t(MYSQL *const con) noexcept : result(mysql_store_result(con)) { }
 mySQLResult_t::mySQLResult_t(mySQLResult_t &&res) noexcept : mySQLResult_t() { std::swap(result, res.result); }
-mySQLResult_t::~mySQLResult_t() noexcept { mysql_free_result(result); }
+mySQLResult_t::~mySQLResult_t() noexcept { if (valid()) mysql_free_result(result); }
 uint64_t mySQLResult_t::numRows() const noexcept { return valid() ? mysql_num_rows(result) : 0; }
 
 //mySQLRow_t::mySQLRow_t(mySQLRow_t &&row) noexcept : mySQLRow_t() { std::swap(result, row.result); }
-uint32_t mySQLRow_t::numFields() const noexcept { return mysql_num_fields(result); }
+uint32_t mySQLRow_t::numFields() const noexcept { return valid() ? mysql_num_fields(result) : 0; }
 
 inline bool isNumber(const char x) noexcept	{ return x >= '0' && x <= '9'; }
 inline bool isMinus(const char x) noexcept { return x == '-'; }
