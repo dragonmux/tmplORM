@@ -27,10 +27,10 @@ public:
 	bool isNull() const noexcept;
 	std::unique_ptr<char []> asString() const;
 	bool asBool(const uint8_t bit) const;
-	uint32_t asUint8() const;
-	int32_t asInt8() const;
-	uint32_t asUint16() const;
-	int32_t asInt16() const;
+	uint8_t asUint8() const;
+	int8_t asInt8() const;
+	uint16_t asUint16() const;
+	int16_t asInt16() const;
 	uint32_t asUint32() const;
 	int32_t asInt32() const;
 	uint64_t asUint64() const;

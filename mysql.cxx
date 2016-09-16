@@ -89,6 +89,8 @@ uint32_t mySQLRow_t::numFields() const noexcept { return valid() ? mysql_num_fie
 inline bool isNumber(const char x) noexcept	{ return x >= '0' && x <= '9'; }
 inline bool isMinus(const char x) noexcept { return x == '-'; }
 
+bool mySQLValue_t::isNull() const noexcept { return !data || type == MYSQL_TYPE_NULL; }
+
 template<typename T, mySQLErrorType_t errorType> valueOrError_t<T, mySQLValueError_t> checkedConvertInt(const char *const data, const uint64_t len) noexcept
 {
 	typedef typename make_unsigned<T>::type U;
@@ -112,4 +114,14 @@ template<typename T, mySQLErrorType_t errorType> valueOrError_t<T, mySQLValueErr
 	if (sign)
 		return T(-num);
 	return T(num);
+}
+
+uint8_t mySQLValue_t::asUint8() const
+{
+	if (isNull() || type != MYSQL_TYPE_TINY)
+		throw mySQLValueError_t(mySQLErrorType_t::uint8Error);
+	auto num = checkedConvertInt<uint8_t, mySQLErrorType_t::uint8Error>(data, len);
+	if (num.isError())
+		throw num.error();
+	return num;
 }
