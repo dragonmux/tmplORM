@@ -113,6 +113,14 @@ namespace tmplORM
 			return true;
 		}
 		template<typename... models_t> bool add(const models_t &...models) noexcept { return collect(add_(models)...); }
+
+		template<typename tableName, typename...> using deleteTable__ = toString<tycat<ts("DROP TABLE "), backtick<tableName>, ts(";")>>;
+		template<typename tableName, typename... fields> bool deleteTable_(const model_t<tableName, fields...> &model) noexcept
+		{
+			using deleteTable = deleteTable__<tableName, fields...>;
+			return true;
+		}
+		template<typename... models> bool deleteTable() noexcept { return collect(deleteTable_(models())...); }
 	};
 };
 
