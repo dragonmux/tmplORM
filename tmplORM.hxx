@@ -103,6 +103,15 @@ namespace tmplORM
 		template<typename fieldName> using short_t = int16_t<fieldName>;
 		template<typename fieldName> using tinyInt_t = int8_t<fieldName>;
 	}
+
+	template<typename> struct toString { };
+	template<char... C> struct toString<typestring<C...>>
+		{ static const char data[sizeof...(C) + 1]; };
+	template<char... C> const char toString<typestring<C...>>::data[sizeof...(C) + 1] = {C..., '\0'};
+
+	constexpr bool collect(const bool value) noexcept { return value; }
+	template<typename... values_t> constexpr bool collect(const bool value, values_t ...values) noexcept
+		{ return value && collect(values...); }
 }
 
 #endif /*tmplORM__HXX*/
