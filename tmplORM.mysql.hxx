@@ -56,9 +56,9 @@ namespace tmplORM
 		{
 			template<typename fieldName, typename T> constexpr static auto value(const type_t<fieldName, T> &) ->
 				typename fieldName_t<N, type_t<fieldName, T>>::value;
-			template<typename T> constexpr auto value(const primary_t<T> &) -> typestring<>;
+			template<typename T> constexpr static auto value(const primary_t<T> &) -> typestring<>;
 		};
-		template<size_t N, typename T> using insertList__ = decltype(selectList__t<N>::value(T()));
+		template<size_t N, typename T> using insertList__ = decltype(insertList__t<N>::value(T()));
 
 		template<size_t N, typename field, typename... fields> struct insertList_t
 			{ using value = tycat<insertList__<N, field>, typename insertList_t<N - 1, fields...>::value>; };
@@ -106,7 +106,7 @@ namespace tmplORM
 		template<typename... models> bool select() noexcept { return collect(select_(models())...); }
 
 		template<typename tableName, typename... fields> using add__ = toString<tycat<ts("INSERT INTO "), backtick<tableName>,
-			ts(" ("), insertList<tableName>, ts(") VALUES ("), ts("..."), ts(");")>>;
+			ts(" ("), insertList<fields...>, ts(") VALUES ("), ts("..."), ts(");")>>;
 		template<typename tableName, typename... fields> bool add_(const model_t<tableName, fields...> &model) noexcept
 		{
 			using insert = add__<tableName, fields...>;

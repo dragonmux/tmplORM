@@ -119,8 +119,8 @@ namespace tmplORM
 
 	template<typename> struct toString { };
 	template<char... C> struct toString<typestring<C...>>
-		{ static const char data[sizeof...(C) + 1]; };
-	template<char... C> const char toString<typestring<C...>>::data[sizeof...(C) + 1] = {C..., '\0'};
+		{ static const char value[sizeof...(C) + 1]; };
+	template<char... C> const char toString<typestring<C...>>::value[sizeof...(C) + 1] = {C..., '\0'};
 
 	constexpr bool collect(const bool value) noexcept { return value; }
 	template<typename... values_t> constexpr bool collect(const bool value, values_t ...values) noexcept
