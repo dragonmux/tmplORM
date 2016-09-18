@@ -11,17 +11,17 @@ namespace tmplORM
 		using tmplORM::model_t;
 
 		template<typename> struct stringType_t { };
-		template<> struct stringType_t<int8_t> { using value = ts("TINYINT"); }
-		template<> struct stringType_t<uint8_t> { using value = ts("TINYINT UNSIGNED"); }
-		template<> struct stringType_t<int16_t> { using value = ts("SHORT"); }
-		template<> struct stringType_t<uint16_t> { using value = ts("SHORT UNSIGNED"); }
-		template<> struct stringType_t<int32_t> { using value = ts("INT"); }
-		template<> struct stringType_t<uint32_t> { using value = ts("INT UNSIGNED"); }
-		template<> struct stringType_t<int64_t> { using value = ts("BIGINT"); }
-		template<> struct stringType_t<uint64_t> { using value = ts("BIGINT UNSIGNED"); }
-		template<> struct stringType_t<bool> { using value = ts("BIT(1)"); }
-		template<> struct stringType_t<float> { using value = ts("FLOAT"); }
-		template<> struct stringType_t<double> { using value = ts("DOUBLE"); }
+		template<> struct stringType_t<int8_t> { using value = ts("TINYINT"); };
+		template<> struct stringType_t<uint8_t> { using value = ts("TINYINT UNSIGNED"); };
+		template<> struct stringType_t<int16_t> { using value = ts("SHORT"); };
+		template<> struct stringType_t<uint16_t> { using value = ts("SHORT UNSIGNED"); };
+		template<> struct stringType_t<int32_t> { using value = ts("INT"); };
+		template<> struct stringType_t<uint32_t> { using value = ts("INT UNSIGNED"); };
+		template<> struct stringType_t<int64_t> { using value = ts("BIGINT"); };
+		template<> struct stringType_t<uint64_t> { using value = ts("BIGINT UNSIGNED"); };
+		template<> struct stringType_t<bool> { using value = ts("BIT(1)"); };
+		template<> struct stringType_t<float> { using value = ts("FLOAT"); };
+		template<> struct stringType_t<double> { using value = ts("DOUBLE"); };
 		template<typename T> using stringType = typename stringType_t<T>::value;
 
 		template<typename name> using backtick = tycat<ts("`"), name, ts("`")>;
