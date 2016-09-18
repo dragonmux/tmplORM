@@ -29,10 +29,18 @@ namespace tmplORM
 
 		template<typename name> using backtick = tycat<ts("`"), name, ts("`")>;
 
+		template<size_t N> struct comma_t { using value = ts(", "); };
+		template<> struct comma_t<1> { using value = typestring<>; };
+		template<size_t N> using comma = typename comma_t<N>::value;
+
 		template<size_t, typename> struct fieldName_t { };
 		template<size_t N, typename fieldName, typename T> struct fieldName_t<N, type_t<fieldName, T>>
 			{ using value = tycat<backtick<fieldName>, ts(", ")>; };
 		template<typename fieldName, typename T> struct fieldName_t<1, type_t<fieldName, T>> { using value = backtick<fieldName>; };
+
+		template<typename> struct createName_t { };
+		template<typename fieldName, typename T> struct createName_t<type_t<fieldName, T>>
+			{ using value = tycat<backtick<fieldName>, ts(" "), stringType<T>>; };
 
 		template<size_t N> struct selectList__t
 		{
@@ -57,8 +65,37 @@ namespace tmplORM
 			{ using value = tycat<insertList__<N, field>, typename insertList_t<N - 1, fields...>::value>; };
 		template<typename field> struct insertList_t<1, field> { using value = insertList__<1, field>; };
 
+		template<bool isNull> struct nullable__t { using value = ts(" NOT NULL"); };
+		template<> struct nullable__t<true> { using value = ts(" NULL"); };
+		template<bool isNull> using nullable = typename nullable__t<isNull>::value;
+
+		template<size_t N, typename field> struct createList__t
+		{
+			template<typename fieldName, typename T> constexpr static auto _name(const type_t<fieldName, T> &) ->
+				typename createName_t<type_t<fieldName, T>>::value;
+			template<typename T> constexpr static auto _name(const primary_t<T> &) -> tycat<decltype(_name(T())), ts(" PRIMARY KEY")>;
+			using name = decltype(_name(field()));
+
+			constexpr static auto value() -> tycat<name, nullable<field::nullable>, comma<N>>;
+		};
+		template<size_t N, typename T> using createList__ = decltype(createList__t<N, T>::value());
+
+		template<size_t N, typename field, typename... fields> struct createList_t
+			{ using value = tycat<createList__<N, field>, typename createList_t<N - 1, fields...>::value>; };
+		template<typename field> struct createList_t<1, field> { using value = createList__<1, field>; };
+
+		template<typename... fields> using createList = typename createList_t<sizeof...(fields), fields...>::value;
 		template<typename... fields> using selectList = typename selectList_t<sizeof...(fields), fields...>::value;
 		template<typename... fields> using insertList = typename insertList_t<sizeof...(fields), fields...>::value;
+
+		template<typename tableName, typename... fields> using createTable__ = tycat<ts("CREATE TABLE "), backtick<tableName>,
+			ts("("), createList<fields...>, ts(");")>;
+		template<typename tableName, typename... fields> bool createTable_(const model_t<tableName, fields...> &) noexcept
+		{
+			using create = createTable__<tableName, fields...>;
+			return true;
+		}
+		template<typename... models> bool createTable() noexcept { return collect(createTable_(models())...); }
 
 		template<typename tableName, typename... fields> using select__ = tycat<ts("SELECT "), selectList<fields...>,
 			ts(" FROM "), backtick<tableName>, ts(";")>;
