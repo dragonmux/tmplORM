@@ -96,6 +96,18 @@ namespace tmplORM
 		{
 		};
 
+		template<typename _fieldName> struct bool_t final : public type_t<_fieldName, bool>
+		{
+		};
+
+		template<typename _fieldName> struct float_t final : public type_t<_fieldName, float>
+		{
+		};
+
+		template<typename _fieldName> struct double_t final : public type_t<_fieldName, double>
+		{
+		};
+
 		// Convinience just in case you don't like using the stdint.h like types above.
 		template<typename fieldName> using bigInt_t = int64_t<fieldName>;
 		template<typename fieldName> using long_t = int64_t<fieldName>;
