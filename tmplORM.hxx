@@ -70,41 +70,41 @@ namespace tmplORM
 		template<typename T> struct nullable_t : public T { constexpr static const bool nullable = true; };
 
 		// Encodes as a VARCHAR type field (NVARCHAR for MSSQL)
-		template<typename _fieldName, uint32_t _length> struct unicode_t final : public type_t<_fieldName, char *>
+		template<typename _fieldName, uint32_t _length> struct unicode_t : public type_t<_fieldName, char *>
 		{
 			constexpr uint32_t length() const noexcept { return _length; }
 		};
 
 		// Encodes as a TEXT type field (NTEXT for MSSQL)
-		template<typename _fieldName> struct unicodeText_t final : public type_t<_fieldName, char *>
+		template<typename _fieldName> struct unicodeText_t : public type_t<_fieldName, char *>
 		{
 		};
 
-		template<typename _fieldName> struct int64_t final : public type_t<_fieldName, std::int64_t>
+		template<typename _fieldName> struct int64_t : public type_t<_fieldName, std::int64_t>
 		{
 		};
 
-		template<typename _fieldName> struct int32_t final : public type_t<_fieldName, std::int32_t>
+		template<typename _fieldName> struct int32_t : public type_t<_fieldName, std::int32_t>
 		{
 		};
 
-		template<typename _fieldName> struct int16_t final : public type_t<_fieldName, std::int16_t>
+		template<typename _fieldName> struct int16_t : public type_t<_fieldName, std::int16_t>
 		{
 		};
 
-		template<typename _fieldName> struct int8_t final : public type_t<_fieldName, std::int8_t>
+		template<typename _fieldName> struct int8_t : public type_t<_fieldName, std::int8_t>
 		{
 		};
 
-		template<typename _fieldName> struct bool_t final : public type_t<_fieldName, bool>
+		template<typename _fieldName> struct bool_t : public type_t<_fieldName, bool>
 		{
 		};
 
-		template<typename _fieldName> struct float_t final : public type_t<_fieldName, float>
+		template<typename _fieldName> struct float_t : public type_t<_fieldName, float>
 		{
 		};
 
-		template<typename _fieldName> struct double_t final : public type_t<_fieldName, double>
+		template<typename _fieldName> struct double_t : public type_t<_fieldName, double>
 		{
 		};
 
