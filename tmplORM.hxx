@@ -28,6 +28,7 @@ namespace tmplORM
 		constexpr model_t(Fields... fields) noexcept : fields_t<Fields...>{fields...} { }
 
 		const char *tableName() const noexcept { return _tableName::data(); }
+		constexpr static const size_t N = fields_t<Fields...>::N;
 
 		// create(); - Creates the table
 		// add(); - CRUD Create
