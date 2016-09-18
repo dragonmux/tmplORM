@@ -8,6 +8,9 @@ namespace tmplORM
 	namespace mysql
 	{
 		using tmplORM::types::type_t;
+		using tmplORM::types::autoInc_t;
+		using tmplORM::types::primary_t;
+		using tmplORM::types::nullable_t;
 		using tmplORM::model_t;
 
 		template<typename> struct stringType_t { };
@@ -42,7 +45,20 @@ namespace tmplORM
 			{ using value = tycat<selectList__<N, field>, typename selectList_t<N - 1, fields...>::value>; };
 		template<typename field> struct selectList_t<1, field> { using value = selectList__<1, field>; };
 
+		template<size_t N> struct insertList__t
+		{
+			template<typename fieldName, typename T> constexpr static auto value(const type_t<fieldName, T> &) ->
+				typename fieldName_t<N, type_t<fieldName, T>>::value;
+			template<typename T> constexpr auto value(const primary_t<T> &) -> typestring<>;
+		};
+		template<size_t N, typename T> using insertList__ = decltype(selectList__t<N>::value(T()));
+
+		template<size_t N, typename field, typename... fields> struct insertList_t
+			{ using value = tycat<insertList__<N, field>, typename insertList_t<N - 1, fields...>::value>; };
+		template<typename field> struct insertList_t<1, field> { using value = insertList__<1, field>; };
+
 		template<typename... fields> using selectList = typename selectList_t<sizeof...(fields), fields...>::value;
+		template<typename... fields> using insertList = typename insertList_t<sizeof...(fields), fields...>::value;
 
 		template<typename tableName, typename... fields> using select__ = tycat<ts("SELECT "), selectList<fields...>,
 			ts(" FROM "), backtick<tableName>, ts(";")>;
@@ -52,6 +68,15 @@ namespace tmplORM
 			return true;
 		}
 		template<typename... models> bool select() noexcept { return collect(select_(models())...); }
+
+		template<typename tableName, typename... fields> using add__ = tycat<ts("INSERT INTO "), backtick<tableName>,
+			ts(" ("), insertList<tableName>, ts(") VALUES ("), ts("..."), ts(");")>;
+		template<typename tableName, typename... fields> bool add_(const model_t<tableName, fields...> &model) noexcept
+		{
+			using insert = add__<tableName, fields...>;
+			return true;
+		}
+		template<typename... models_t> bool add(const models_t &...models) noexcept { return collect(add_(models)...); }
 	};
 };
 
