@@ -5,6 +5,8 @@
 #include <tuple>
 #include "typestring/typestring.hh"
 
+#define ts(x) typestring_is(x)
+
 namespace tmplORM
 {
 	using namespace irqus;
@@ -35,12 +37,12 @@ namespace tmplORM
 
 	namespace types
 	{
-		template<typename _fieldName, typename T> struct field_t
+		template<typename _fieldName, typename T> struct type_t
 		{
 			T _value;
 			bool _modified;
 
-			field_t() noexcept : _value(), _modified(false) { }
+			type_t() noexcept : _value(), _modified(false) { }
 
 			constexpr const char *fieldName() const noexcept { return _fieldName::data(); }
 			const T value() const noexcept { return _value; }
@@ -58,6 +60,9 @@ namespace tmplORM
 			// create(); - CREATE TABLE definiton of the field
 		};
 
+		// Tag type to mark auto increment fields with
+		template<typename T> struct autoInc_t : public T { };
+
 		// Tag type to mark the primary key field with
 		template<typename T> struct primary_t : public T { };
 
@@ -65,29 +70,29 @@ namespace tmplORM
 		template<typename T> struct nullable_t : public T { constexpr static const bool nullable = true; };
 
 		// Encodes as a VARCHAR type field (NVARCHAR for MSSQL)
-		template<typename _fieldName, uint32_t _length> struct unicode_t final : public field_t<_fieldName, char *>
+		template<typename _fieldName, uint32_t _length> struct unicode_t final : public type_t<_fieldName, char *>
 		{
 			constexpr uint32_t length() const noexcept { return _length; }
 		};
 
 		// Encodes as a TEXT type field (NTEXT for MSSQL)
-		template<typename _fieldName> struct unicodeText_t final : public field_t<_fieldName, char *>
+		template<typename _fieldName> struct unicodeText_t final : public type_t<_fieldName, char *>
 		{
 		};
 
-		template<typename _fieldName> struct int64_t final : public field_t<_fieldName, std::int64_t>
+		template<typename _fieldName> struct int64_t final : public type_t<_fieldName, std::int64_t>
 		{
 		};
 
-		template<typename _fieldName> struct int32_t final : public field_t<_fieldName, std::int32_t>
+		template<typename _fieldName> struct int32_t final : public type_t<_fieldName, std::int32_t>
 		{
 		};
 
-		template<typename _fieldName> struct int16_t final : public field_t<_fieldName, std::int16_t>
+		template<typename _fieldName> struct int16_t final : public type_t<_fieldName, std::int16_t>
 		{
 		};
 
-		template<typename _fieldName> struct int8_t final : public field_t<_fieldName, std::int8_t>
+		template<typename _fieldName> struct int8_t final : public type_t<_fieldName, std::int8_t>
 		{
 		};
 
