@@ -35,8 +35,7 @@ namespace tmplORM
 
 		template<size_t, typename> struct fieldName_t { };
 		template<size_t N, typename fieldName, typename T> struct fieldName_t<N, type_t<fieldName, T>>
-			{ using value = tycat<backtick<fieldName>, ts(", ")>; };
-		template<typename fieldName, typename T> struct fieldName_t<1, type_t<fieldName, T>> { using value = backtick<fieldName>; };
+			{ using value = tycat<backtick<fieldName>, comma<N>>; };
 
 		template<typename> struct createName_t { };
 		template<typename fieldName, typename T> struct createName_t<type_t<fieldName, T>>
@@ -88,8 +87,8 @@ namespace tmplORM
 		template<typename... fields> using selectList = typename selectList_t<sizeof...(fields), fields...>::value;
 		template<typename... fields> using insertList = typename insertList_t<sizeof...(fields), fields...>::value;
 
-		template<typename tableName, typename... fields> using createTable__ = tycat<ts("CREATE TABLE "), backtick<tableName>,
-			ts("("), createList<fields...>, ts(");")>;
+		template<typename tableName, typename... fields> using createTable__ = typename toString<tycat<ts("CREATE TABLE "),
+			backtick<tableName>, ts("("), createList<fields...>, ts(");")>>::value;
 		template<typename tableName, typename... fields> bool createTable_(const model_t<tableName, fields...> &) noexcept
 		{
 			using create = createTable__<tableName, fields...>;
@@ -97,8 +96,8 @@ namespace tmplORM
 		}
 		template<typename... models> bool createTable() noexcept { return collect(createTable_(models())...); }
 
-		template<typename tableName, typename... fields> using select__ = tycat<ts("SELECT "), selectList<fields...>,
-			ts(" FROM "), backtick<tableName>, ts(";")>;
+		template<typename tableName, typename... fields> using select__ = typename toString<tycat<ts("SELECT "),
+			selectList<fields...>, ts(" FROM "), backtick<tableName>, ts(";")>>::value;
 		template<typename tableName, typename... fields> bool select_(const model_t<tableName, fields...> &) noexcept
 		{
 			using select = select__<tableName, fields...>;
@@ -106,8 +105,8 @@ namespace tmplORM
 		}
 		template<typename... models> bool select() noexcept { return collect(select_(models())...); }
 
-		template<typename tableName, typename... fields> using add__ = tycat<ts("INSERT INTO "), backtick<tableName>,
-			ts(" ("), insertList<tableName>, ts(") VALUES ("), ts("..."), ts(");")>;
+		template<typename tableName, typename... fields> using add__ = typename toString<tycat<ts("INSERT INTO "),
+			backtick<tableName>, ts(" ("), insertList<tableName>, ts(") VALUES ("), ts("..."), ts(");")>>::value;
 		template<typename tableName, typename... fields> bool add_(const model_t<tableName, fields...> &model) noexcept
 		{
 			using insert = add__<tableName, fields...>;
