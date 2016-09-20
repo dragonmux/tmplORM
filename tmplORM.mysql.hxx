@@ -7,7 +7,11 @@ namespace tmplORM
 {
 	namespace mysql
 	{
+		using namespace tmplORM::common;
+
 		using tmplORM::types::type_t;
+		using tmplORM::types::unicode_t;
+
 		using tmplORM::types::autoInc_t;
 		using tmplORM::types::primary_t;
 		using tmplORM::types::nullable_t;
@@ -64,7 +68,7 @@ namespace tmplORM
 		template<typename... fields> using insertList = typename insertList_t<sizeof...(fields), fields...>::value;
 
 		template<typename tableName, typename... fields> using createTable__ = toString<tycat<ts("CREATE TABLE "), backtick<tableName>,
-			ts("("), createList<fields...>, ts(");")>>;
+			ts(" ("), createList<fields...>, ts(");")>>;
 		template<typename tableName, typename... fields> bool createTable_(const model_t<tableName, fields...> &) noexcept
 		{
 			using create = createTable__<tableName, fields...>;
