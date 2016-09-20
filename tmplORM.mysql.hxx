@@ -43,6 +43,7 @@ namespace tmplORM
 			template<typename fieldName, typename T> constexpr static auto _name(const type_t<fieldName, T> &) ->
 				typename createName_t<type_t<fieldName, T>>::value;
 			template<typename T> constexpr static auto _name(const primary_t<T> &) -> tycat<decltype(_name(T())), ts(" PRIMARY KEY")>;
+			template<typename T> constexpr static auto _name(const autoInc_t<T> &) -> tycat<decltype(_name(T())), ts(" AUTO_INCREMENT")>;
 			using name = decltype(_name(field()));
 
 			constexpr static auto value() -> tycat<name, nullable<field::nullable>, comma<N>>;
