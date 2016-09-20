@@ -11,7 +11,6 @@ namespace tmplORM
 		using tmplORM::types::autoInc_t;
 		using tmplORM::types::primary_t;
 		using tmplORM::types::nullable_t;
-		using tmplORM::model_t;
 
 		template<typename> struct stringType_t { };
 		template<> struct stringType_t<int8_t> { using value = ts("TINYINT"); };
@@ -29,10 +28,6 @@ namespace tmplORM
 
 		template<typename name> using backtick = tycat<ts("`"), name, ts("`")>;
 
-		template<size_t N> struct comma_t { using value = ts(", "); };
-		template<> struct comma_t<1> { using value = typestring<>; };
-		template<size_t N> using comma = typename comma_t<N>::value;
-
 		template<size_t, typename> struct fieldName_t { };
 		template<size_t N, typename fieldName, typename T> struct fieldName_t<N, type_t<fieldName, T>>
 			{ using value = tycat<backtick<fieldName>, comma<N>>; };
@@ -41,32 +36,7 @@ namespace tmplORM
 		template<typename fieldName, typename T> struct createName_t<type_t<fieldName, T>>
 			{ using value = tycat<backtick<fieldName>, ts(" "), stringType<T>>; };
 
-		template<size_t N> struct selectList__t
-		{
-			template<typename fieldName, typename T> constexpr static auto value(const type_t<fieldName, T> &) ->
-				typename fieldName_t<N, type_t<fieldName, T>>::value;
-		};
-		template<size_t N, typename T> using selectList__ = decltype(selectList__t<N>::value(T()));
-
-		template<size_t N, typename field, typename... fields> struct selectList_t
-			{ using value = tycat<selectList__<N, field>, typename selectList_t<N - 1, fields...>::value>; };
-		template<typename field> struct selectList_t<1, field> { using value = selectList__<1, field>; };
-
-		template<size_t N> struct insertList__t
-		{
-			template<typename fieldName, typename T> constexpr static auto value(const type_t<fieldName, T> &) ->
-				typename fieldName_t<N, type_t<fieldName, T>>::value;
-			template<typename T> constexpr static auto value(const primary_t<T> &) -> typestring<>;
-		};
-		template<size_t N, typename T> using insertList__ = decltype(insertList__t<N>::value(T()));
-
-		template<size_t N, typename field, typename... fields> struct insertList_t
-			{ using value = tycat<insertList__<N, field>, typename insertList_t<N - 1, fields...>::value>; };
-		template<typename field> struct insertList_t<1, field> { using value = insertList__<1, field>; };
-
-		template<bool isNull> struct nullable__t { using value = ts(" NOT NULL"); };
-		template<> struct nullable__t<true> { using value = ts(" NULL"); };
-		template<bool isNull> using nullable = typename nullable__t<isNull>::value;
+#include "tmplORM.common.hxx"
 
 		template<size_t N, typename field> struct createList__t
 		{
@@ -121,7 +91,7 @@ namespace tmplORM
 			return true;
 		}
 		template<typename... models> bool deleteTable() noexcept { return collect(deleteTable_(models())...); }
-	};
-};
+	}
+}
 
 #endif /*tmplORM_MYSQL__HXX*/

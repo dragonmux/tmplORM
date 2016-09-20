@@ -125,6 +125,14 @@ namespace tmplORM
 	constexpr bool collect(const bool value) noexcept { return value; }
 	template<typename... values_t> constexpr bool collect(const bool value, values_t ...values) noexcept
 		{ return value && collect(values...); }
+
+	template<size_t N> struct comma_t { using value = ts(", "); };
+	template<> struct comma_t<1> { using value = typestring<>; };
+	template<size_t N> using comma = typename comma_t<N>::value;
+
+	template<bool isNull> struct nullable__t { using value = ts(" NOT NULL"); };
+	template<> struct nullable__t<true> { using value = ts(" NULL"); };
+	template<bool isNull> using nullable = typename nullable__t<isNull>::value;
 }
 
 #endif /*tmplORM__HXX*/
