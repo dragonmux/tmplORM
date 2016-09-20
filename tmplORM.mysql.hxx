@@ -24,6 +24,7 @@ namespace tmplORM
 		template<> struct stringType_t<bool> { using value = ts("BIT(1)"); };
 		template<> struct stringType_t<float> { using value = ts("FLOAT"); };
 		template<> struct stringType_t<double> { using value = ts("DOUBLE"); };
+		template<> struct stringType_t<char *> { using value = ts("TEXT"); };
 		template<typename T> using stringType = typename stringType_t<T>::value;
 
 		template<typename name> using backtick = tycat<ts("`"), name, ts("`")>;
@@ -35,6 +36,8 @@ namespace tmplORM
 		template<typename> struct createName_t { };
 		template<typename fieldName, typename T> struct createName_t<type_t<fieldName, T>>
 			{ using value = tycat<backtick<fieldName>, ts(" "), stringType<T>>; };
+		template<typename fieldName, uint32_t length> struct createName_t<unicode_t<fieldName, length>>
+			{ using value = tycat<backtick<fieldName>, ts(" VARCHAR("), /*toTypestring<length>,*/ ts(")")>; };
 
 #include "tmplORM.common.hxx"
 
@@ -42,6 +45,8 @@ namespace tmplORM
 		{
 			template<typename fieldName, typename T> constexpr static auto _name(const type_t<fieldName, T> &) ->
 				typename createName_t<type_t<fieldName, T>>::value;
+			template<typename fieldName, uint32_t length> constexpr static auto _name(const unicode_t<fieldName, length> &) ->
+				typename createName_t<unicode_t<fieldName, length>>::value;
 			template<typename T> constexpr static auto _name(const primary_t<T> &) -> tycat<decltype(_name(T())), ts(" PRIMARY KEY")>;
 			template<typename T> constexpr static auto _name(const autoInc_t<T> &) -> tycat<decltype(_name(T())), ts(" AUTO_INCREMENT")>;
 			using name = decltype(_name(field()));
