@@ -16,7 +16,7 @@ namespace tmplORM
 		using tmplORM::types::primary_t;
 		using tmplORM::types::nullable_t;
 
-		template<typename> struct stringType_t { };
+		template<typename> struct stringType_t { using value = typestring<>; };
 		template<> struct stringType_t<int8_t> { using value = ts("TINYINT"); };
 		template<> struct stringType_t<uint8_t> { using value = ts("TINYINT UNSIGNED"); };
 		template<> struct stringType_t<int16_t> { using value = ts("SHORT"); };
