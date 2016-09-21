@@ -40,6 +40,8 @@ namespace tmplORM
 		template<typename> struct createName_t { };
 		template<typename fieldName, typename T> struct createName_t<type_t<fieldName, T>>
 			{ using value = tycat<bracket<fieldName>, ts(" "), stringType<T>>; };
+		template<typename fieldName, uint32_t length> struct createName_t<unicode_t<fieldName, length>>
+			{ using value = tycat<bracket<fieldName>, ts(" NVARCHAR("), toTypestring<length>, ts(")")>; };
 
 #include "tmplORM.common.hxx"
 
@@ -47,6 +49,8 @@ namespace tmplORM
 		{
 			template<typename fieldName, typename T> constexpr static auto _name(const type_t<fieldName, T> &) ->
 				typename createName_t<type_t<fieldName, T>>::value;
+			template<typename fieldName, uint32_t length> constexpr static auto _name(const unicode_t<fieldName, length> &) ->
+				typename createName_t<unicode_t<fieldName, length>>::value;
 			template<typename T> constexpr static auto _name(const primary_t<T> &) -> tycat<decltype(_name(T())), ts(" PRIMARY KEY")>;
 			template<typename T> constexpr static auto _name(const autoInc_t<T> &) -> tycat<decltype(_name(T())), ts(" IDENTITY")>;
 			using name = decltype(_name(field()));

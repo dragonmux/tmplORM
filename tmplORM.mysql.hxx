@@ -41,7 +41,7 @@ namespace tmplORM
 		template<typename fieldName, typename T> struct createName_t<type_t<fieldName, T>>
 			{ using value = tycat<backtick<fieldName>, ts(" "), stringType<T>>; };
 		template<typename fieldName, uint32_t length> struct createName_t<unicode_t<fieldName, length>>
-			{ using value = tycat<backtick<fieldName>, ts(" VARCHAR("), /*toTypestring<length>,*/ ts(")")>; };
+			{ using value = tycat<backtick<fieldName>, ts(" VARCHAR("), toTypestring<length>, ts(")")>; };
 
 #include "tmplORM.common.hxx"
 
