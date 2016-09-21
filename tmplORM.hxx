@@ -124,6 +124,27 @@ namespace tmplORM
 			{ static const char value[sizeof...(C) + 1]; };
 		template<char... C> const char toString<typestring<C...>>::value[sizeof...(C) + 1] = {C..., '\0'};
 
+		namespace intConversion
+		{
+			template<size_t N> struct fromInt_t;
+
+			template<size_t N, bool = N < 10> struct value_t { using value = typestring<char(N) + '0'>; };
+			template<size_t N> struct value_t<N, false>
+			{
+				using inner = fromInt_t<N / 10>;
+				using value = tycat<typename inner::value, typestring<char(N - (inner::number * 10)) + '0'>>;
+			};
+
+			template<size_t N> struct fromInt_t
+			{
+				constexpr static size_t number = N;
+				using value = typename value_t<N>::value;
+			};
+		}
+		using intConversion::fromInt_t;
+		template<size_t N> using toTypestring = typename fromInt_t<N>::value;
+		template<size_t N> using fromInt = toString<toTypestring<N>>;
+
 		constexpr bool collect(const bool value) noexcept { return value; }
 		template<typename... values_t> constexpr bool collect(const bool value, values_t ...values) noexcept
 			{ return value && collect(values...); }
