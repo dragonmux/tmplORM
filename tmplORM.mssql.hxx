@@ -48,15 +48,15 @@ namespace tmplORM
 
 		template<size_t N, typename field> struct createList__t
 		{
-			template<typename fieldName, typename T> constexpr static auto _name(const type_t<fieldName, T> &) ->
+			template<typename fieldName, typename T> static auto _name(const type_t<fieldName, T> &) ->
 				typename createName_t<type_t<fieldName, T>>::value;
-			template<typename fieldName, uint32_t length> constexpr static auto _name(const unicode_t<fieldName, length> &) ->
+			template<typename fieldName, uint32_t length> static auto _name(const unicode_t<fieldName, length> &) ->
 				typename createName_t<unicode_t<fieldName, length>>::value;
-			template<typename T> constexpr static auto _name(const primary_t<T> &) -> tycat<decltype(_name(T())), ts(" PRIMARY KEY")>;
-			template<typename T> constexpr static auto _name(const autoInc_t<T> &) -> tycat<decltype(_name(T())), ts(" IDENTITY")>;
+			template<typename T> static auto _name(const primary_t<T> &) -> tycat<decltype(_name(T())), ts(" PRIMARY KEY")>;
+			template<typename T> static auto _name(const autoInc_t<T> &) -> tycat<decltype(_name(T())), ts(" IDENTITY")>;
 			using name = decltype(_name(field()));
 
-			constexpr static auto value() -> tycat<name, nullable<field::nullable>, comma<N>>;
+			static auto value() -> tycat<name, nullable<field::nullable>, comma<N>>;
 		};
 		template<size_t N, typename T> using createList__ = decltype(createList__t<N, T>::value());
 

@@ -2,7 +2,7 @@ inline namespace common
 {
 	template<size_t N> struct selectList__t
 	{
-		template<typename fieldName, typename T> constexpr static auto value(const type_t<fieldName, T> &) ->
+		template<typename fieldName, typename T> static auto value(const type_t<fieldName, T> &) ->
 			typename fieldName_t<N, type_t<fieldName, T>>::value;
 	};
 	template<size_t N, typename T> using selectList__ = decltype(selectList__t<N>::value(T()));
@@ -13,9 +13,9 @@ inline namespace common
 
 	template<size_t N> struct insertList__t
 	{
-		template<typename fieldName, typename T> constexpr static auto value(const type_t<fieldName, T> &) ->
+		template<typename fieldName, typename T> static auto value(const type_t<fieldName, T> &) ->
 			typename fieldName_t<N, type_t<fieldName, T>>::value;
-		template<typename T> constexpr static auto value(const primary_t<T> &) -> typestring<>;
+		template<typename T> static auto value(const primary_t<T> &) -> typestring<>;
 	};
 	template<size_t N, typename T> using insertList__ = decltype(insertList__t<N>::value(T()));
 
