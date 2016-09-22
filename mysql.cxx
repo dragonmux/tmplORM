@@ -1,6 +1,6 @@
-#include <new>
 #include "mysql.hxx"
 #include "value.hxx"
+#include "string.hxx"
 
 using namespace std;
 
@@ -71,8 +71,13 @@ bool mySQLClient_t::selectDB(const char *const db) const noexcept { return valid
 
 bool mySQLClient_t::query(const char *const queryStmt, ...) noexcept
 {
-	(void)queryStmt;
-	return true;
+	if (mysql_ping(con) != 0)
+		return false;
+	va_list args;
+	va_start(args, queryStmt);
+	auto query = vaFormatString(queryStmt, args);
+	va_end(args);
+	return mysql_query(con, query.get()) == 0;
 }
 
 mySQLResult_t mySQLClient_t::queryResult() const noexcept { return valid() ? mySQLResult_t(con) : mySQLResult_t(); }

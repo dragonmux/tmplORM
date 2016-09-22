@@ -13,7 +13,7 @@ LFLAGS = $(OPTIM_FLAGS) -shared $(O) $(LIBS) -o $@
 PREFIX ?= /usr
 LIBDIR ?= $(PREFIX)/lib
 
-O = mysql.o
+O = string.o mysql.o
 GCH = tmplORM.gch
 SO = libtmplORM.so
 
