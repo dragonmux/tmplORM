@@ -156,6 +156,10 @@ namespace tmplORM
 		template<bool isNull> struct nullable__t { using value = ts(" NOT NULL"); };
 		template<> struct nullable__t<true> { using value = ts(" NULL"); };
 		template<bool isNull> using nullable = typename nullable__t<isNull>::value;
+
+		template<size_t N> struct placeholder_t { using value = tycat<typestring<'?'>, comma<N>, typename placeholder_t<N - 1>::value>; };
+		template<> struct placeholder_t<0> { using value = typestring<>; };
+		template<size_t N> using placeholder = typename placeholder_t<N>::value;
 	}
 }
 
