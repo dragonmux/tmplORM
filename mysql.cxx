@@ -136,7 +136,7 @@ mySQLValue_t mySQLRow_t::operator [](const uint32_t idx) const noexcept
 	return mySQLValue_t(row[idx], rowLengths[idx], fieldTypes[idx]);
 }
 
-inline bool isNumber(const char x) noexcept	{ return x >= '0' && x <= '9'; }
+inline bool isNumber(const char x) noexcept { return x >= '0' && x <= '9'; }
 inline bool isMinus(const char x) noexcept { return x == '-'; }
 
 bool mySQLValue_t::isNull() const noexcept { return !data || type == MYSQL_TYPE_NULL; }
@@ -171,6 +171,76 @@ uint8_t mySQLValue_t::asUint8() const
 	if (isNull() || type != MYSQL_TYPE_TINY)
 		throw mySQLValueError_t(mySQLErrorType_t::uint8Error);
 	auto num = checkedConvertInt<uint8_t, mySQLErrorType_t::uint8Error>(data, len);
+	if (num.isError())
+		throw num.error();
+	return num;
+}
+
+int8_t mySQLValue_t::asInt8() const
+{
+	if (isNull() || type != MYSQL_TYPE_TINY)
+		throw mySQLValueError_t(mySQLErrorType_t::int8Error);
+	auto num = checkedConvertInt<int8_t, mySQLErrorType_t::int8Error>(data, len);
+	if (num.isError())
+		throw num.error();
+	return num;
+}
+
+uint16_t mySQLValue_t::asUint16() const
+{
+	if (isNull() || type != MYSQL_TYPE_SHORT)
+		throw mySQLValueError_t(mySQLErrorType_t::uint16Error);
+	auto num = checkedConvertInt<uint16_t, mySQLErrorType_t::uint16Error>(data, len);
+	if (num.isError())
+		throw num.error();
+	return num;
+}
+
+int16_t mySQLValue_t::asInt16() const
+{
+	if (isNull() || type != MYSQL_TYPE_SHORT)
+		throw mySQLValueError_t(mySQLErrorType_t::uint16Error);
+	auto num = checkedConvertInt<int16_t, mySQLErrorType_t::int16Error>(data, len);
+	if (num.isError())
+		throw num.error();
+	return num;
+}
+
+uint32_t mySQLValue_t::asUint32() const
+{
+	if (isNull() || type != MYSQL_TYPE_LONG)
+		throw mySQLValueError_t(mySQLErrorType_t::uint32Error);
+	auto num = checkedConvertInt<uint32_t, mySQLErrorType_t::uint32Error>(data, len);
+	if (num.isError())
+		throw num.error();
+	return num;
+}
+
+int32_t mySQLValue_t::asInt32() const
+{
+	if (isNull() || type != MYSQL_TYPE_LONG)
+		throw mySQLValueError_t(mySQLErrorType_t::int32Error);
+	auto num = checkedConvertInt<int32_t, mySQLErrorType_t::int32Error>(data, len);
+	if (num.isError())
+		throw num.error();
+	return num;
+}
+
+uint64_t mySQLValue_t::asUint64() const
+{
+	if (isNull() || type != MYSQL_TYPE_LONGLONG)
+		throw mySQLValueError_t(mySQLErrorType_t::uint64Error);
+	auto num = checkedConvertInt<uint64_t, mySQLErrorType_t::uint64Error>(data, len);
+	if (num.isError())
+		throw num.error();
+	return num;
+}
+
+int64_t mySQLValue_t::asInt64() const
+{
+	if (isNull() || type != MYSQL_TYPE_LONGLONG)
+		throw mySQLValueError_t(mySQLErrorType_t::int64Error);
+	auto num = checkedConvertInt<int64_t, mySQLErrorType_t::int64Error>(data, len);
 	if (num.isError())
 		throw num.error();
 	return num;
