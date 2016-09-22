@@ -67,8 +67,9 @@ namespace tmplORM
 		template<typename... fields> using selectList = typename selectList_t<sizeof...(fields), fields...>::value;
 		template<typename... fields> using insertList = typename insertList_t<sizeof...(fields), fields...>::value;
 
-		template<typename tableName, typename... fields> using createTable__ = toString<tycat<ts("CREATE TABLE "), backtick<tableName>,
-			ts(" ("), createList<fields...>, ts(");")>>;
+		template<typename tableName, typename... fields> using createTable__ = toString<
+			tycat<ts("CREATE TABLE "), backtick<tableName>, ts(" ("), createList<fields...>, ts(");")>
+		>;
 		template<typename tableName, typename... fields> bool createTable_(const model_t<tableName, fields...> &) noexcept
 		{
 			using create = createTable__<tableName, fields...>;
@@ -76,17 +77,19 @@ namespace tmplORM
 		}
 		template<typename... models> bool createTable() noexcept { return collect(createTable_(models())...); }
 
-		template<typename tableName, typename... fields> using select__ = toString<tycat<ts("SELECT "), selectList<fields...>,
-			ts(" FROM "), backtick<tableName>, ts(";")>>;
-		template<typename tableName, typename... fields> bool select_(const model_t<tableName, fields...> &) noexcept
+		template<typename tableName, typename... fields> using select__ = toString<
+			tycat<ts("SELECT "), selectList<fields...>, ts(" FROM "), backtick<tableName>, ts(";")>
+		>;
+		template<typename T, typename tableName, typename... fields> T select_(const model_t<tableName, fields...> &) noexcept
 		{
 			using select = select__<tableName, fields...>;
-			return true;
+			return T();
 		}
-		template<typename... models> bool select() noexcept { return collect(select_(models())...); }
+		template<typename model> model select() noexcept { return select_<model>(model()); }
 
-		template<typename tableName, typename... fields> using add__ = toString<tycat<ts("INSERT INTO "), backtick<tableName>,
-			ts(" ("), insertList<fields...>, ts(") VALUES ("), ts("..."), ts(");")>>;
+		template<typename tableName, typename... fields> using add__ = toString<
+			tycat<ts("INSERT INTO "), backtick<tableName>, ts(" ("), insertList<fields...>, ts(") VALUES ("), placeholder<sizeof...(fields)>, ts(");")>
+		>;
 		template<typename tableName, typename... fields> bool add_(const model_t<tableName, fields...> &model) noexcept
 		{
 			using insert = add__<tableName, fields...>;
@@ -94,10 +97,22 @@ namespace tmplORM
 		}
 		template<typename... models_t> bool add(const models_t &...models) noexcept { return collect(add_(models)...); }
 
-		template<typename tableName, typename...> using deleteTable__ = toString<tycat<ts("DROP TABLE "), backtick<tableName>, ts(";")>>;
-		template<typename tableName, typename... fields> bool deleteTable_(const model_t<tableName, fields...> &model) noexcept
+		template<typename tableName, typename... fields> using update__ = toString<
+			tycat<ts("UPDATE "), backtick<tableName>, ts(" ..."), ts(";")>
+		>;
+		template<typename tableName, typename... fields> bool update_(const model_t<tableName, fields...> &model) noexcept
 		{
-			using deleteTable = deleteTable__<tableName, fields...>;
+			using update = update__<tableName, fields...>;
+			return true;
+		}
+		template<typename... models_t> bool update(const models_t &...models) noexcept { return collect(update_(models)...); }
+
+		template<typename tableName> using deleteTable__ = toString<
+			tycat<ts("DROP TABLE "), backtick<tableName>, ts(";")>
+		>;
+		template<typename tableName, typename... fields> bool deleteTable_(const model_t<tableName, fields...> &) noexcept
+		{
+			using deleteTable = deleteTable__<tableName>;
 			return true;
 		}
 		template<typename... models> bool deleteTable() noexcept { return collect(deleteTable_(models())...); }
