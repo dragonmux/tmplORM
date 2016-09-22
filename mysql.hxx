@@ -67,10 +67,10 @@ private:
 
 public:
 	constexpr mySQLRow_t() noexcept : result(nullptr), row(nullptr), fields(0), rowLengths(nullptr), fieldTypes(nullptr) { }
-	mySQLRow_t(mySQLRow_t &&row) noexcept;
+	mySQLRow_t(mySQLRow_t &&r) noexcept;
 	~mySQLRow_t() noexcept;
 
-	bool valid() const noexcept { return row && rowLengths; }
+	bool valid() const noexcept { return row && rowLengths && fieldTypes; }
 	uint32_t numFields() const noexcept;
 	bool next() noexcept;
 	mySQLValue_t operator [](const uint32_t idx) const noexcept;
@@ -92,6 +92,7 @@ public:
 	constexpr mySQLResult_t() noexcept : result(nullptr) { }
 	mySQLResult_t(mySQLResult_t &&res) noexcept;
 	~mySQLResult_t() noexcept;
+	mySQLResult_t &operator =(mySQLResult_t &&res) noexcept;
 
 	bool valid() const noexcept { return result; }
 	uint64_t numRows() const noexcept;

@@ -1,3 +1,4 @@
+#include <new>
 #include "mysql.hxx"
 #include "value.hxx"
 
@@ -81,10 +82,59 @@ const char *mySQLClient_t::error() const noexcept { return valid() ? mysql_error
 mySQLResult_t::mySQLResult_t(MYSQL *const con) noexcept : result(mysql_store_result(con)) { }
 mySQLResult_t::mySQLResult_t(mySQLResult_t &&res) noexcept : mySQLResult_t() { std::swap(result, res.result); }
 mySQLResult_t::~mySQLResult_t() noexcept { if (valid()) mysql_free_result(result); }
+mySQLResult_t &mySQLResult_t::operator =(mySQLResult_t &&res) noexcept { std::swap(result, res.result); return *this; }
 uint64_t mySQLResult_t::numRows() const noexcept { return valid() ? mysql_num_rows(result) : 0; }
+mySQLRow_t mySQLResult_t::resultRows() const noexcept { return mySQLRow_t(result); }
 
-//mySQLRow_t::mySQLRow_t(mySQLRow_t &&row) noexcept : mySQLRow_t() { std::swap(result, row.result); }
-uint32_t mySQLRow_t::numFields() const noexcept { return valid() ? mysql_num_fields(result) : 0; }
+mySQLRow_t::mySQLRow_t(MYSQL_RES *const res) noexcept : result(res), fields(res ? mysql_num_fields(res) : 0),
+	fieldTypes(new (std::nothrow) mySQLFieldType_t[fields]())
+{
+	if (result)
+		fetch();
+}
+
+mySQLRow_t::mySQLRow_t(mySQLRow_t &&r) noexcept : result(r.result), fields(r.fields), fieldTypes(std::move(r.fieldTypes))
+{
+	std::swap(row, r.row);
+	std::swap(rowLengths, r.rowLengths);
+}
+
+mySQLRow_t::~mySQLRow_t() noexcept
+{
+	while (valid())
+		fetch();
+}
+
+void mySQLRow_t::fetch() noexcept
+{
+	if (result && fieldTypes)
+	{
+		row = mysql_fetch_row(result);
+		rowLengths = mysql_fetch_lengths(result);
+		if (valid())
+		{
+			MYSQL_FIELD *field = mysql_fetch_fields(result);
+			for (uint32_t i = 0; i < fields; ++i)
+				fieldTypes[i] = row[i] ? field[i].type : MYSQL_TYPE_NULL;
+		}
+	}
+}
+
+uint32_t mySQLRow_t::numFields() const noexcept { return valid() ? fields : 0; }
+
+bool mySQLRow_t::next() noexcept
+{
+	if (valid())
+		fetch();
+	return valid();
+}
+
+mySQLValue_t mySQLRow_t::operator [](const uint32_t idx) const noexcept
+{
+	if (!valid() || idx >= fields)
+		return mySQLValue_t();
+	return mySQLValue_t(row[idx], rowLengths[idx], fieldTypes[idx]);
+}
 
 inline bool isNumber(const char x) noexcept	{ return x >= '0' && x <= '9'; }
 inline bool isMinus(const char x) noexcept { return x == '-'; }
