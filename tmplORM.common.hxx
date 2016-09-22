@@ -22,4 +22,10 @@ inline namespace common
 	template<size_t N, typename field, typename... fields> struct insertList_t
 		{ using value = tycat<insertList__<N, field>, typename insertList_t<N - 1, fields...>::value>; };
 	template<typename field> struct insertList_t<1, field> { using value = insertList__<1, field>; };
+
+	template<typename fieldName, typename T> constexpr size_t countInsert_(const type_t<fieldName, T> &) noexcept { return 1; }
+	template<typename T> constexpr size_t countInsert_(const autoInc_t<T> &) noexcept { return 0; }
+	template<typename field, typename... fields> struct countInsert_t
+		{ constexpr static const size_t count = countInsert_(field()) + countInsert_t<fields...>::count; };
+	template<typename field> struct countInsert_t<field> { constexpr static const size_t count = countInsert_(field()); };
 }

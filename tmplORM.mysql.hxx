@@ -88,7 +88,7 @@ namespace tmplORM
 		template<typename model> model select() noexcept { return select_<model>(model()); }
 
 		template<typename tableName, typename... fields> using add__ = toString<
-			tycat<ts("INSERT INTO "), backtick<tableName>, ts(" ("), insertList<fields...>, ts(") VALUES ("), placeholder<sizeof...(fields)>, ts(");")>
+			tycat<ts("INSERT INTO "), backtick<tableName>, ts(" ("), insertList<fields...>, ts(") VALUES ("), placeholder<countInsert_t<fields...>::count>, ts(");")>
 		>;
 		template<typename tableName, typename... fields> bool add_(const model_t<tableName, fields...> &model) noexcept
 		{

@@ -43,7 +43,8 @@ namespace tmplORM
 			T _value;
 			bool _modified;
 
-			type_t() noexcept : _value(), _modified(false) { }
+			constexpr type_t() noexcept : _value(), _modified(false) { }
+			constexpr type_t(T value) noexcept : _value(value), _modified(false) { }
 
 			constexpr const char *fieldName() const noexcept { return _fieldName::data(); }
 			const T value() const noexcept { return _value; }
