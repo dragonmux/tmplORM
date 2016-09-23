@@ -70,7 +70,7 @@ void mySQLClient_t::disconnect() noexcept
 
 bool mySQLClient_t::selectDB(const char *const db) const noexcept { return valid() && mysql_select_db(con, db) == 0; }
 
-bool mySQLClient_t::query(const char *const queryStmt, ...) noexcept
+bool mySQLClient_t::query(const char *const queryStmt, ...) const noexcept
 {
 	if (mysql_ping(con) != 0)
 		return false;
@@ -82,6 +82,8 @@ bool mySQLClient_t::query(const char *const queryStmt, ...) noexcept
 }
 
 mySQLResult_t mySQLClient_t::queryResult() const noexcept { return valid() ? mySQLResult_t(con) : mySQLResult_t(); }
+mySQLPreparedQuery_t mySQLClient_t::prepare(const char *const queryStmt) const noexcept
+	{ return valid() ? mySQLPreparedQuery_t(con, queryStmt) : mySQLPreparedQuery_t(); }
 uint32_t mySQLClient_t::errorNum() const noexcept { return valid() ? mysql_errno(con) : 0; }
 const char *mySQLClient_t::error() const noexcept { return valid() ? mysql_error(con) : nullptr; }
 

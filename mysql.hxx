@@ -141,13 +141,13 @@ public:
 	mySQLClient_t &operator =(const mySQLClient_t &) noexcept;
 
 	bool valid() const noexcept { return con && haveConnection; }
-
 	bool connect(const char *const host, uint32_t port, const char *const user, const char *const passwd) const noexcept;
 	bool connect(const char *const unixSocket, const char *const user, const char *const passwd) const noexcept;
 	void disconnect() noexcept;
 	bool selectDB(const char *const db) const noexcept;
-	bool query(const char *const queryStmt, ...) noexcept MySQL_FORMAT_ARGS(2, 3);
+	bool query(const char *const queryStmt, ...) const noexcept MySQL_FORMAT_ARGS(2, 3);
 	mySQLResult_t queryResult() const noexcept;
+	mySQLPreparedQuery_t prepare(const char *const queryStmt) const noexcept;
 	uint32_t errorNum() const noexcept;
 	const char *error() const noexcept;
 
