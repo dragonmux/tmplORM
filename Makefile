@@ -35,7 +35,7 @@ $(SO): $(O)
 	$(call run-cmd,cxx,$(CFLAGS))
 
 %.gch: %.hxx
-	$(call run-cmd,cxx,-std=c++11 -c -o $@ $<)
+	$(call run-cmd,cxx,$(CFLAGS))
 
 clean:
 	$(call run-cmd,rm,tmplORM,$(O) $(SO))
