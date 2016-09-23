@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <tuple>
+#include <chrono>
 #include "typestring/typestring.hh"
 
 #define ts(x) typestring_is(x)
@@ -78,37 +79,16 @@ namespace tmplORM
 		};
 
 		// Encodes as a TEXT type field (NTEXT for MSSQL)
-		template<typename _fieldName> struct unicodeText_t : public type_t<_fieldName, char *>
-		{
-		};
-
-		template<typename _fieldName> struct int64_t : public type_t<_fieldName, std::int64_t>
-		{
-		};
-
-		template<typename _fieldName> struct int32_t : public type_t<_fieldName, std::int32_t>
-		{
-		};
-
-		template<typename _fieldName> struct int16_t : public type_t<_fieldName, std::int16_t>
-		{
-		};
-
-		template<typename _fieldName> struct int8_t : public type_t<_fieldName, std::int8_t>
-		{
-		};
-
-		template<typename _fieldName> struct bool_t : public type_t<_fieldName, bool>
-		{
-		};
-
-		template<typename _fieldName> struct float_t : public type_t<_fieldName, float>
-		{
-		};
-
-		template<typename _fieldName> struct double_t : public type_t<_fieldName, double>
-		{
-		};
+		template<typename _fieldName> struct unicodeText_t : public type_t<_fieldName, char *> { };
+		template<typename _fieldName> struct int64_t : public type_t<_fieldName, std::int64_t> { };
+		template<typename _fieldName> struct int32_t : public type_t<_fieldName, std::int32_t> { };
+		template<typename _fieldName> struct int16_t : public type_t<_fieldName, std::int16_t> { };
+		template<typename _fieldName> struct int8_t : public type_t<_fieldName, std::int8_t> { };
+		template<typename _fieldName> struct bool_t : public type_t<_fieldName, bool> { };
+		template<typename _fieldName> struct float_t : public type_t<_fieldName, float> { };
+		template<typename _fieldName> struct double_t : public type_t<_fieldName, double> { };
+		using _dateTime_t = std::chrono::time_point<std::chrono::system_clock>;
+		template<typename _fieldName> struct dateTime_t : public type_t<_fieldName, _dateTime_t> { };
 
 		// Convinience just in case you don't like using the stdint.h like types above.
 		template<typename fieldName> using bigInt_t = int64_t<fieldName>;
