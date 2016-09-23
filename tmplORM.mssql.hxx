@@ -11,6 +11,7 @@ namespace tmplORM
 
 		using tmplORM::types::type_t;
 		using tmplORM::types::unicode_t;
+		using tmplORM::types::_dateTime_t;
 
 		using tmplORM::types::autoInc_t;
 		using tmplORM::types::primary_t;
@@ -30,6 +31,7 @@ namespace tmplORM
 		// Yes really.. this represents a full double (8-bit float) when given no parameters..
 		template<> struct stringType_t<double> { using value = ts("FLOAT"); };
 		template<> struct stringType_t<char *> { using value = ts("NTEXT"); };
+		template<> struct stringType_t<_dateTime_t> { using value = ts("DATETIME"); };
 		template<typename T> using stringType = typename stringType_t<T>::value;
 
 		template<typename name> using bracket = tycat<ts("["), name, ts("]")>;
