@@ -120,6 +120,9 @@ namespace tmplORM
 
 	namespace common
 	{
+		using tmplORM::types::type_t;
+		using tmplORM::types::autoInc_t;
+
 		template<typename> struct toString { };
 		template<char... C> struct toString<typestring<C...>>
 			{ static const char value[sizeof...(C) + 1]; };
@@ -161,6 +164,18 @@ namespace tmplORM
 		template<size_t N> struct placeholder_t { using value = tycat<typestring<'?'>, comma<N>, typename placeholder_t<N - 1>::value>; };
 		template<> struct placeholder_t<0> { using value = typestring<>; };
 		template<size_t N> using placeholder = typename placeholder_t<N>::value;
+
+		template<typename fieldName, typename T> bool isAutoInc(const type_t<fieldName, T> &) { return false; }
+		template<typename T> constexpr bool isAutoInc(const autoInc_t<T> &) { return true; }
+
+		template<typename field, typename... fields> constexpr bool hasAutoInc() noexcept { return isAutoInc(field()) || hasAutoInc<fields...>(); }
+		template<typename field> constexpr bool hasAutoInc() noexcept { return isAutoInc(field()); }
+
+		template<typename field, typename... fields> struct autoIncIndex_t
+			{ constexpr static const size_t index = isAutoInc(field()) ? 0 : (1 + autoIncIndex_t<fields...>::index); };
+		template<typename field> struct autoIncIndex_t<field> { constexpr static const size_t index = isAutoInc(field()) ? 0 : 1; };
+		template<typename tableName, typename... fields> auto getAutoInc() noexcept -> decltype(std::get<autoIncIndex_t<fields...>::index>())
+			{ return std::get<autoIncIndex_t<fields...>::index>(); }
 	}
 }
 
