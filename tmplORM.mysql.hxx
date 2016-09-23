@@ -66,9 +66,22 @@ namespace tmplORM
 			{ using value = tycat<createList__<N, field>, typename createList_t<N - 1, fields...>::value>; };
 		template<typename field> struct createList_t<1, field> { using value = createList__<1, field>; };
 
+		template<size_t N> struct updateList__t
+		{
+			template<typename fieldName, typename T> static auto value(const type_t<fieldName, T> &) ->
+				tycat<typename fieldName_t<1, type_t<fieldName, T>>::value, ts(" = "), placeholder<1>, comma<N>>;
+			template<typename T> static auto value(const autoInc_t<T> &) -> typestring<>;
+		};
+		template<size_t N, typename T> using updateList__ = decltype(updateList__t<N>::value(T()));
+
+		template<size_t N, typename field, typename... fields> struct updateList_t
+			{ using value = tycat<updateList__<N, field>, typename updateList_t<N - 1, fields...>::value>; };
+		template<typename field> struct updateList_t<1, field> { using value = updateList__<1, field>; };
+
 		template<typename... fields> using createList = typename createList_t<sizeof...(fields), fields...>::value;
 		template<typename... fields> using selectList = typename selectList_t<sizeof...(fields), fields...>::value;
 		template<typename... fields> using insertList = typename insertList_t<sizeof...(fields), fields...>::value;
+		template<typename... fields> using updateList = typename updateList_t<sizeof...(fields), fields...>::value;
 
 		template<typename tableName, typename... fields> using createTable__ = toString<
 			tycat<ts("CREATE TABLE "), backtick<tableName>, ts(" ("), createList<fields...>, ts(");")>
@@ -102,7 +115,7 @@ namespace tmplORM
 		template<typename... models_t> bool add(const models_t &...models) noexcept { return collect(add_(models)...); }
 
 		template<typename tableName, typename... fields> using update__ = toString<
-			tycat<ts("UPDATE "), backtick<tableName>, ts(" ..."), ts(";")>
+			tycat<ts("UPDATE "), backtick<tableName>, ts(" SET "), updateList<fields...>, ts(";")>
 		>;
 		template<typename tableName, typename... fields> bool update_(const model_t<tableName, fields...> &model) noexcept
 		{
