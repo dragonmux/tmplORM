@@ -87,6 +87,48 @@ mySQLPreparedQuery_t mySQLClient_t::prepare(const char *const queryStmt) const n
 uint32_t mySQLClient_t::errorNum() const noexcept { return valid() ? mysql_errno(con) : 0; }
 const char *mySQLClient_t::error() const noexcept { return valid() ? mysql_error(con) : nullptr; }
 
+mySQLPreparedQuery_t::mySQLPreparedQuery_t(MYSQL *const con, const char *const queryStmt) noexcept : query(mysql_stmt_init(con)), executed(false)
+{
+	if (!query)
+		return;
+	if (mysql_stmt_prepare(query, queryStmt, strlen(queryStmt) + 1) != 0)
+		dtor();
+}
+
+mySQLPreparedQuery_t::mySQLPreparedQuery_t(mySQLPreparedQuery_t &&qry) noexcept : mySQLPreparedQuery_t()
+{
+	std::swap(query, qry.query);
+	std::swap(executed, qry.executed);
+}
+
+mySQLPreparedQuery_t::~mySQLPreparedQuery_t() noexcept
+{
+	if (valid())
+		dtor();
+}
+
+mySQLPreparedQuery_t &mySQLPreparedQuery_t::operator =(mySQLPreparedQuery_t &&qry) noexcept
+{
+	std::swap(query, qry.query);
+	std::swap(executed, qry.executed);
+	return *this;
+}
+
+void mySQLPreparedQuery_t::dtor() noexcept
+{
+	mysql_stmt_close(query);
+	query = nullptr;
+}
+
+bool mySQLPreparedQuery_t::execute() noexcept
+{
+	if (valid())
+		executed = mysql_stmt_execute(query) == 0;
+	return executed;
+}
+
+uint64_t mySQLPreparedQuery_t::rowID() const noexcept { return executed ? mysql_stmt_insert_id(query) : 0; }
+
 mySQLResult_t::mySQLResult_t(MYSQL *const con) noexcept : result(mysql_store_result(con)) { }
 mySQLResult_t::mySQLResult_t(mySQLResult_t &&res) noexcept : mySQLResult_t() { std::swap(result, res.result); }
 mySQLResult_t::~mySQLResult_t() noexcept { if (valid()) mysql_free_result(result); }

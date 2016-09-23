@@ -111,16 +111,18 @@ private:
 	void dtor() noexcept;
 
 protected:
-	mySQLPreparedQuery_t(MYSQL *const con, const char *const queryStmt);
+	mySQLPreparedQuery_t(MYSQL *const con, const char *const queryStmt) noexcept;
+	friend struct mySQLClient_t;
 
 public:
 	constexpr mySQLPreparedQuery_t() noexcept : query(nullptr), executed(false) { }
 	mySQLPreparedQuery_t(mySQLPreparedQuery_t &&qry) noexcept;
-	~mySQLPreparedQuery_t();
+	~mySQLPreparedQuery_t() noexcept;
 	mySQLPreparedQuery_t &operator =(mySQLPreparedQuery_t &&qry) noexcept;
 
 	bool valid() const noexcept { return query; }
-	bool execute() const noexcept;
+	// bind() noexcept
+	bool execute() noexcept;
 	uint64_t rowID() const noexcept;
 
 	mySQLPreparedQuery_t(const mySQLPreparedQuery_t &) = delete;
