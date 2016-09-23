@@ -124,6 +124,16 @@ namespace tmplORM
 		}
 		template<typename... models_t> bool update(const models_t &...models) noexcept { return collect(update_(models)...); }
 
+		template<typename tableName, typename... fields> using del__ = toString<
+			tycat<ts("DELETE * FROM "), backtick<tableName>, ts(";")>
+		>;
+		template<typename tableName, typename... fields> bool del_(const model_t<tableName, fields...> &model) noexcept
+		{
+			using del = del__<tableName, fields...>;
+			return database.query(del::value);
+		}
+		template<typename... models_t> bool del(const models_t &...models) noexcept { return collect(del_(models)...); }
+
 		template<typename tableName> using deleteTable__ = toString<
 			tycat<ts("DROP TABLE "), backtick<tableName>, ts(";")>
 		>;
