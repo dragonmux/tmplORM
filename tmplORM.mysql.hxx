@@ -110,6 +110,15 @@ namespace tmplORM
 		template<typename tableName, typename... fields> bool add_(const model_t<tableName, fields...> &model) noexcept
 		{
 			using insert = add__<tableName, fields...>;
+			mySQLPreparedQuery_t query = database.prepare(insert::value);
+			//bindInsert(model, query);
+			if (query.execute())
+			{
+				if (hasAutoInc<fields...>())
+					getAutoInc(model) = query.rowID();
+			}
+			else
+				return false;
 			return true;
 		}
 		template<typename... models_t> bool add(const models_t &...models) noexcept { return collect(add_(models)...); }
