@@ -102,6 +102,31 @@ public:
 	mySQLResult_t &operator =(const mySQLResult_t &) = delete;
 };
 
+struct mySQLPreparedQuery_t final
+{
+private:
+	MYSQL_STMT *query;
+	bool executed;
+
+	void dtor() noexcept;
+
+protected:
+	mySQLPreparedQuery_t(MYSQL *const con, const char *const queryStmt);
+
+public:
+	constexpr mySQLPreparedQuery_t() noexcept : query(nullptr), executed(false) { }
+	mySQLPreparedQuery_t(mySQLPreparedQuery_t &&qry) noexcept;
+	~mySQLPreparedQuery_t();
+	mySQLPreparedQuery_t &operator =(mySQLPreparedQuery_t &&qry) noexcept;
+
+	bool valid() const noexcept { return query; }
+	bool execute() const noexcept;
+	uint64_t rowID() const noexcept;
+
+	mySQLPreparedQuery_t(const mySQLPreparedQuery_t &) = delete;
+	mySQLPreparedQuery_t &operator =(const mySQLPreparedQuery_t &) = delete;
+};
+
 struct mySQLClient_t final
 {
 private:
