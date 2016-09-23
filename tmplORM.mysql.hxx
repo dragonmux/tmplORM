@@ -2,6 +2,7 @@
 #define tmplORM_MYSQL__HXX
 
 #include "tmplORM.hxx"
+#include "mysql.hxx"
 
 namespace tmplORM
 {
@@ -73,7 +74,7 @@ namespace tmplORM
 		template<typename tableName, typename... fields> bool createTable_(const model_t<tableName, fields...> &) noexcept
 		{
 			using create = createTable__<tableName, fields...>;
-			return true;
+			return database.query(create::value);
 		}
 		template<typename... models> bool createTable() noexcept { return collect(createTable_(models())...); }
 
@@ -83,6 +84,7 @@ namespace tmplORM
 		template<typename T, typename tableName, typename... fields> T select_(const model_t<tableName, fields...> &) noexcept
 		{
 			using select = select__<tableName, fields...>;
+			database.query(select::value);
 			return T();
 		}
 		template<typename model> model select() noexcept { return select_<model>(model()); }
@@ -113,7 +115,7 @@ namespace tmplORM
 		template<typename tableName, typename... fields> bool deleteTable_(const model_t<tableName, fields...> &) noexcept
 		{
 			using deleteTable = deleteTable__<tableName>;
-			return true;
+			return database.query(deleteTable::value);
 		}
 		template<typename... models> bool deleteTable() noexcept { return collect(deleteTable_(models())...); }
 	}
