@@ -1,3 +1,4 @@
+#include <string.h>
 #include "mysql.hxx"
 #include "value.hxx"
 #include "string.hxx"
@@ -145,6 +146,24 @@ inline bool isNumber(const char x) noexcept { return x >= '0' && x <= '9'; }
 inline bool isMinus(const char x) noexcept { return x == '-'; }
 
 bool mySQLValue_t::isNull() const noexcept { return !data || type == MYSQL_TYPE_NULL; }
+
+std::unique_ptr<char []> mySQLValue_t::asString() const
+{
+	//if (type != MYSQL_TYPE_
+	const size_t strLen = data[len - 1] == 0 ? len : len + 1;
+	std::unique_ptr<char []> ret(new char[strLen]());
+	memcpy(ret.get(), data, len);
+	ret[strLen - 1] = 0;
+	return ret;
+}
+
+bool mySQLValue_t::asBool(const uint8_t bit) const
+{
+	if (isNull() || type != MYSQL_TYPE_BIT || bit >= 64)
+		throw mySQLValueError_t(mySQLErrorType_t::boolError);
+	const char byte = data[bit >> 3];
+	return byte & (bit & 7);
+}
 
 template<typename T, mySQLErrorType_t errorType> valueOrError_t<T, mySQLValueError_t> checkedConvertInt(const char *const data, const uint64_t len) noexcept
 {
