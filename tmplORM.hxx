@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <tuple>
 #include <chrono>
+#include <type_traits>
 #include "typestring/typestring.hh"
 
 #define ts(x) typestring_is(x)
@@ -11,6 +12,7 @@
 namespace tmplORM
 {
 	using namespace irqus;
+	using std::nullptr_t;
 
 	template<typename... Fields> struct fields_t
 	{
@@ -18,8 +20,11 @@ namespace tmplORM
 		constexpr static const size_t N = sizeof...(Fields);
 		std::tuple<Fields...> _fields;
 
-		constexpr fields_t() noexcept : _fields{} {}
+		constexpr fields_t() noexcept : _fields{} { }
 		constexpr fields_t(Fields &&...fields) noexcept : _fields{fields...} { }
+
+	public:
+		const std::tuple<Fields...> &fields() const noexcept { return _fields; }
 	};
 
 	template<typename _tableName, typename... Fields> struct model_t : public fields_t<Fields...>
@@ -43,9 +48,10 @@ namespace tmplORM
 		{
 			T _value;
 			bool _modified;
+			typedef T type;
 
 			constexpr type_t() noexcept : _value(), _modified(false) { }
-			constexpr type_t(T value) noexcept : _value(value), _modified(false) { }
+			constexpr type_t(const T &value) noexcept : _value(value), _modified(false) { }
 
 			constexpr const char *fieldName() const noexcept { return _fieldName::data(); }
 			const T value() const noexcept { return _value; }
@@ -64,13 +70,33 @@ namespace tmplORM
 		};
 
 		// Tag type to mark auto increment fields with
-		template<typename T> struct autoInc_t : public T { };
+		template<typename T> struct autoInc_t : public T { typedef typename T::type type; };
 
 		// Tag type to mark the primary key field with
-		template<typename T> struct primary_t : public T { };
+		template<typename T> struct primary_t : public T { typedef typename T::type type; };
 
 		// Tag type to mark nullable fields with
-		template<typename T> struct nullable_t : public T { constexpr static const bool nullable = true; };
+		template<typename T> struct nullable_t : public T
+		{
+		private:
+			bool _null;
+
+		public:
+			typedef typename T::type type;
+			constexpr static const bool nullable = true;
+
+			constexpr nullable_t() noexcept : T(), _null(true) { }
+			constexpr nullable_t(const nullptr_t) noexcept : T(), _null(true) { }
+			constexpr nullable_t(const type &value) noexcept : T(value), _null(false) { }
+
+			bool isNull() const noexcept { return _null; }
+
+			void value(const nullptr_t) noexcept
+			{
+				_null = true;
+				this->_modified = true;
+			}
+		};
 
 		// Encodes as a VARCHAR type field (NVARCHAR for MSSQL)
 		template<typename _fieldName, uint32_t _length> struct unicode_t : public type_t<_fieldName, char *>
@@ -159,6 +185,8 @@ namespace tmplORM
 
 		template<typename T> struct isBoolean : std::false_type { };
 		template<> struct isBoolean<bool> : std::true_type { };
+
+		template<typename T> struct isNumeric : std::integral_constant<bool, std::is_integral<T>::value && !isBoolean<T>::value> { };
 	}
 }
 

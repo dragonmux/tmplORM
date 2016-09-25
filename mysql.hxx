@@ -13,6 +13,8 @@ namespace tmplORM
 		namespace driver
 		{
 
+using std::nullptr_t;
+
 typedef unsigned long sql_ulong_t;
 #define MySQL_FORMAT_ARGS(n, m) __attribute__((format(printf, n, m)))
 
@@ -132,7 +134,8 @@ public:
 	bool valid() const noexcept { return query; }
 	bool execute() noexcept;
 	uint64_t rowID() const noexcept;
-	template<typename T> void bind(const T &param) noexcept;
+	template<typename T> void bind(const size_t index, const T &value) noexcept;
+	template<typename T> void bind(const size_t index, const nullptr_t) noexcept;
 
 	mySQLPreparedQuery_t(const mySQLPreparedQuery_t &) = delete;
 	mySQLPreparedQuery_t &operator =(const mySQLPreparedQuery_t &) = delete;
