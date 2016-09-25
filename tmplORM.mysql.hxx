@@ -207,20 +207,21 @@ namespace tmplORM
 			{
 				if (hasAutoInc<fields_t...>())
 					getAutoInc(model) = query.rowID();
+				return true;
 			}
-			else
-				return false;
-			return true;
+			return false;
 		}
 		template<typename... models_t> bool add(const models_t &...models) noexcept { return collect(add_(models)...); }
 
 		template<typename tableName, typename... fields> using update__ = toString<
 			tycat<ts("UPDATE "), backtick<tableName>, ts(" SET "), updateList<fields...>, ts(";")>
 		>;
-		template<typename tableName, typename... fields> bool update_(const model_t<tableName, fields...> &model) noexcept
+		template<typename tableName, typename... fields_t> bool update_(const model_t<tableName, fields_t...> &model) noexcept
 		{
-			using update = update__<tableName, fields...>;
-			return true;
+			using update = update__<tableName, fields_t...>;
+			mySQLPreparedQuery_t query = database.prepare(update::value, countInsert_t<fields_t...>::count);
+			// TODO: perform binds here.
+			return query.execute();
 		}
 		template<typename... models_t> bool update(const models_t &...models) noexcept { return collect(update_(models)...); }
 
