@@ -6,6 +6,13 @@
 #include <utility>
 #include <memory>
 
+namespace tmplORM
+{
+	namespace mysql
+	{
+		namespace driver
+		{
+
 typedef unsigned long sql_ulong_t;
 #define MySQL_FORMAT_ARGS(n, m) __attribute__((format(printf, n, m)))
 
@@ -184,5 +191,10 @@ public:
 };
 
 extern mySQLClient_t database;
+
+#undef MySQL_FORMAT_ARGS
+		}
+	}
+}
 
 #endif /*MYSQL__HXX*/

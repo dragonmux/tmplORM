@@ -4,6 +4,7 @@
 #include "string.hxx"
 
 using namespace std;
+using namespace tmplORM::mysql::driver;
 
 mySQLClient_t database;
 

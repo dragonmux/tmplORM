@@ -10,6 +10,7 @@ namespace tmplORM
 	namespace mysql
 	{
 		using namespace tmplORM::common;
+		using namespace tmplORM::mysql::driver;
 
 		using tmplORM::types::type_t;
 		using tmplORM::types::unicode_t;
