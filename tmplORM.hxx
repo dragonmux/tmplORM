@@ -156,6 +156,9 @@ namespace tmplORM
 		template<typename field> struct autoIncIndex_t<field> { constexpr static const size_t index = isAutoInc(field()) ? 0 : 1; };
 		template<typename tableName, typename... fields> auto getAutoInc() noexcept -> decltype(std::get<autoIncIndex_t<fields...>::index>())
 			{ return std::get<autoIncIndex_t<fields...>::index>(); }
+
+		template<typename T> struct isBoolean : std::false_type { };
+		template<> struct isBoolean<bool> : std::true_type { };
 	}
 }
 

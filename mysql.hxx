@@ -126,9 +126,6 @@ public:
 	bool execute() noexcept;
 	uint64_t rowID() const noexcept;
 	template<typename T> void bind(const T &param) noexcept;
-	//{
-	//	;
-	//}
 
 	mySQLPreparedQuery_t(const mySQLPreparedQuery_t &) = delete;
 	mySQLPreparedQuery_t &operator =(const mySQLPreparedQuery_t &) = delete;
