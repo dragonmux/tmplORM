@@ -82,24 +82,26 @@ bool mySQLClient_t::query(const char *const queryStmt, ...) const noexcept
 }
 
 mySQLResult_t mySQLClient_t::queryResult() const noexcept { return valid() ? mySQLResult_t(con) : mySQLResult_t(); }
-mySQLPreparedQuery_t mySQLClient_t::prepare(const char *const queryStmt) const noexcept
-	{ return valid() ? mySQLPreparedQuery_t(con, queryStmt) : mySQLPreparedQuery_t(); }
+mySQLPreparedQuery_t mySQLClient_t::prepare(const char *const queryStmt, const size_t paramsCount) const noexcept
+	{ return valid() ? mySQLPreparedQuery_t(con, queryStmt, paramsCount) : mySQLPreparedQuery_t(); }
 uint32_t mySQLClient_t::errorNum() const noexcept { return valid() ? mysql_errno(con) : 0; }
 const char *mySQLClient_t::error() const noexcept { return valid() ? mysql_error(con) : nullptr; }
 
-mySQLPreparedQuery_t::mySQLPreparedQuery_t(MYSQL *const con, const char *const queryStmt) noexcept : query(mysql_stmt_init(con)), executed(false)
+mySQLPreparedQuery_t::mySQLPreparedQuery_t(MYSQL *const con, const char *const queryStmt, const size_t paramsCount) noexcept :
+	query(mysql_stmt_init(con)), params(paramsCount ? new (std::nothrow) MYSQL_BIND[paramsCount]() : nullptr), numParams(paramsCount), executed(false)
 {
-	if (!query)
+	if (!query || (numParams && !params))
 		return;
+	else if (numParams)
+	{
+		for (size_t i = 0; i < numParams; ++i)
+			params[i].buffer_type = MYSQL_TYPE_NULL;
+	}
 	if (mysql_stmt_prepare(query, queryStmt, strlen(queryStmt) + 1) != 0)
 		dtor();
 }
 
-mySQLPreparedQuery_t::mySQLPreparedQuery_t(mySQLPreparedQuery_t &&qry) noexcept : mySQLPreparedQuery_t()
-{
-	std::swap(query, qry.query);
-	std::swap(executed, qry.executed);
-}
+mySQLPreparedQuery_t::mySQLPreparedQuery_t(mySQLPreparedQuery_t &&qry) noexcept : mySQLPreparedQuery_t() { *this = std::move(qry); }
 
 mySQLPreparedQuery_t::~mySQLPreparedQuery_t() noexcept
 {
@@ -110,6 +112,8 @@ mySQLPreparedQuery_t::~mySQLPreparedQuery_t() noexcept
 mySQLPreparedQuery_t &mySQLPreparedQuery_t::operator =(mySQLPreparedQuery_t &&qry) noexcept
 {
 	std::swap(query, qry.query);
+	std::swap(params, qry.params);
+	std::swap(numParams, qry.numParams);
 	std::swap(executed, qry.executed);
 	return *this;
 }
@@ -123,7 +127,11 @@ void mySQLPreparedQuery_t::dtor() noexcept
 bool mySQLPreparedQuery_t::execute() noexcept
 {
 	if (valid())
+	{
+		if (params)
+			mysql_stmt_bind_param(query, params.get());
 		executed = mysql_stmt_execute(query) == 0;
+	}
 	return executed;
 }
 

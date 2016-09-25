@@ -106,24 +106,29 @@ struct mySQLPreparedQuery_t final
 {
 private:
 	MYSQL_STMT *query;
+	std::unique_ptr<MYSQL_BIND []> params;
+	size_t numParams;
 	bool executed;
 
 	void dtor() noexcept;
 
 protected:
-	mySQLPreparedQuery_t(MYSQL *const con, const char *const queryStmt) noexcept;
+	mySQLPreparedQuery_t(MYSQL *const con, const char *const queryStmt, const size_t paramsCount) noexcept;
 	friend struct mySQLClient_t;
 
 public:
-	constexpr mySQLPreparedQuery_t() noexcept : query(nullptr), executed(false) { }
+	constexpr mySQLPreparedQuery_t() noexcept : query(nullptr), params(nullptr), numParams(0), executed(false) { }
 	mySQLPreparedQuery_t(mySQLPreparedQuery_t &&qry) noexcept;
 	~mySQLPreparedQuery_t() noexcept;
 	mySQLPreparedQuery_t &operator =(mySQLPreparedQuery_t &&qry) noexcept;
 
 	bool valid() const noexcept { return query; }
-	// bind() noexcept
 	bool execute() noexcept;
 	uint64_t rowID() const noexcept;
+	template<typename T> void bind(const T &param) noexcept;
+	//{
+	//	;
+	//}
 
 	mySQLPreparedQuery_t(const mySQLPreparedQuery_t &) = delete;
 	mySQLPreparedQuery_t &operator =(const mySQLPreparedQuery_t &) = delete;
@@ -149,7 +154,7 @@ public:
 	bool selectDB(const char *const db) const noexcept;
 	bool query(const char *const queryStmt, ...) const noexcept MySQL_FORMAT_ARGS(2, 3);
 	mySQLResult_t queryResult() const noexcept;
-	mySQLPreparedQuery_t prepare(const char *const queryStmt) const noexcept;
+	mySQLPreparedQuery_t prepare(const char *const queryStmt, const size_t paramsCount) const noexcept;
 	uint32_t errorNum() const noexcept;
 	const char *error() const noexcept;
 

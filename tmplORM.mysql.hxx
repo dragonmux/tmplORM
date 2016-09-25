@@ -110,7 +110,7 @@ namespace tmplORM
 		template<typename tableName, typename... fields> bool add_(const model_t<tableName, fields...> &model) noexcept
 		{
 			using insert = add__<tableName, fields...>;
-			mySQLPreparedQuery_t query = database.prepare(insert::value);
+			mySQLPreparedQuery_t query = database.prepare(insert::value, countInsert_t<fields...>::count);
 			//bindInsert(model, query);
 			if (query.execute())
 			{
