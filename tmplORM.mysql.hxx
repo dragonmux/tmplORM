@@ -244,6 +244,9 @@ namespace tmplORM
 		{
 			using update = update__<tableName, fields_t...>;
 			mySQLPreparedQuery_t query = database.prepare(update::value, countInsert_t<fields_t...>::count);
+			bindInsert<fields_t...>::bind(model.fields(), query);
+			// This pulls back the ID field and binds it last so it tags to the WHERE clause for this query.
+			bindUpdate<fields_t...>::bind(model.fields(), query);
 			// TODO: perform binds here.
 			return query.execute();
 		}
