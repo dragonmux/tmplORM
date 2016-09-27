@@ -75,6 +75,7 @@ namespace tmplORM
 		template<typename tableName, typename... fields> bool createTable_(const model_t<tableName, fields...> &) noexcept
 		{
 			using create = createTable__<tableName, fields...>;
+			create::value;
 			return true;
 		}
 		template<typename... models> bool createTable() noexcept { return collect(createTable_(models())...); }
@@ -83,6 +84,7 @@ namespace tmplORM
 		template<typename tableName, typename... fields> bool deleteTable_(const model_t<tableName, fields...> &model) noexcept
 		{
 			using deleteTable = deleteTable__<tableName, fields...>;
+			deleteTable::value;
 			return true;
 		}
 		template<typename... models> bool deleteTable() noexcept { return collect(deleteTable_(models())...); }
