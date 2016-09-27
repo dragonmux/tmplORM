@@ -99,6 +99,8 @@ namespace tmplORM
 		template<size_t N, typename fieldName, typename T> struct fieldName_t<N, type_t<fieldName, T>>
 			{ using value = tycat<backtick<fieldName>, comma<N>>; };
 
+		template<typename fieldName, typename T> auto toFieldName(const type_t<fieldName, T> &) -> fieldName;
+
 		template<typename> struct createName_t { };
 		template<typename fieldName, typename T> struct createName_t<type_t<fieldName, T>>
 			{ using value = tycat<backtick<fieldName>, ts(" "), stringType<T>>; };
@@ -174,6 +176,28 @@ namespace tmplORM
 			{ static void bind(const std::tuple<fields_t...> &, mySQLPreparedQuery_t &) { } };
 		template<typename... fields_t> using bindInsert = bindInsert_t<sizeof...(fields_t) - 1, countInsert_t<fields_t...>::count - 1, fields_t...>;
 
+		template<size_t N, typename field, typename... fields> struct idField_t
+			{ using type = typename idField_t<N - 1, fields...>::type; };
+		template<typename field, typename... fields> struct idField_t<0, field, fields...>
+			{ using type = updateList<type_t<decltype(toFieldName(field())), bool>>; };
+
+		template<typename... fields> using idField = typename idField_t<autoIncIndex_t<fields...>::index, fields...>::type;
+
+		template<bool, typename... fields> struct updateWhere_t { using value = typestring<>; };
+		template<typename... fields> struct updateWhere_t<true, fields...>
+			{ using value = tycat<ts(" WHERE "), idField<fields...>>; };
+		template<typename... fields> using updateWhere = typename updateWhere_t<hasAutoInc<fields...>(), fields...>::value;
+
+		template<size_t index, size_t bindIndex, typename... fields_t> struct bindUpdate_t
+		{
+			static void bind(const std::tuple<fields_t...> &fields, mySQLPreparedQuery_t &query) noexcept
+			{
+				const auto &field = std::get<index>(fields);
+				query.bind(bindIndex, field.value());
+			}
+		};
+		template<typename... fields> using bindUpdate = bindUpdate_t<autoIncIndex_t<fields...>::index, countInsert_t<fields...>::count, fields...>;
+
 		template<typename tableName, typename... fields> using createTable__ = toString<
 			tycat<ts("CREATE TABLE "), backtick<tableName>, ts(" ("), createList<fields...>, ts(");")>
 		>;
@@ -214,7 +238,7 @@ namespace tmplORM
 		template<typename... models_t> bool add(const models_t &...models) noexcept { return collect(add_(models)...); }
 
 		template<typename tableName, typename... fields> using update__ = toString<
-			tycat<ts("UPDATE "), backtick<tableName>, ts(" SET "), updateList<fields...>, ts(";")>
+			tycat<ts("UPDATE "), backtick<tableName>, ts(" SET "), updateList<fields...>, updateWhere<fields...>, ts(";")>
 		>;
 		template<typename tableName, typename... fields_t> bool update_(const model_t<tableName, fields_t...> &model) noexcept
 		{
