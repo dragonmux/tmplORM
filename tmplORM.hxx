@@ -159,6 +159,10 @@ namespace tmplORM
 		template<typename... values_t> constexpr bool collect(const bool value, values_t ...values) noexcept
 			{ return value && collect(values...); }
 
+		constexpr bool bundle(const bool value) noexcept { return value; }
+		template<typename... values_t> constexpr bool bundle(const bool value, values_t ...values) noexcept
+			{ return value || bundle(values...); }
+
 		template<size_t N> struct comma_t { using value = ts(", "); };
 		template<> struct comma_t<1> { using value = typestring<>; };
 		template<size_t N> using comma = typename comma_t<N>::value;
@@ -171,17 +175,16 @@ namespace tmplORM
 		template<> struct placeholder_t<0> { using value = typestring<>; };
 		template<size_t N> using placeholder = typename placeholder_t<N>::value;
 
-		template<typename fieldName, typename T> bool isAutoInc(const type_t<fieldName, T> &) { return false; }
+		template<typename fieldName, typename T> constexpr bool isAutoInc(const type_t<fieldName, T> &) { return false; }
 		template<typename T> constexpr bool isAutoInc(const autoInc_t<T> &) { return true; }
 
-		template<typename field, typename... fields> constexpr bool hasAutoInc() noexcept { return isAutoInc(field()) || hasAutoInc<fields...>(); }
-		template<typename field> constexpr bool hasAutoInc() noexcept { return isAutoInc(field()); }
+		template<typename... fields> constexpr bool hasAutoInc() noexcept { return bundle(isAutoInc(fields())...); }
 
 		template<typename field, typename... fields> struct autoIncIndex_t
 			{ constexpr static const size_t index = isAutoInc(field()) ? 0 : (1 + autoIncIndex_t<fields...>::index); };
 		template<typename field> struct autoIncIndex_t<field> { constexpr static const size_t index = isAutoInc(field()) ? 0 : 1; };
-		template<typename tableName, typename... fields> auto getAutoInc() noexcept -> decltype(std::get<autoIncIndex_t<fields...>::index>())
-			{ return std::get<autoIncIndex_t<fields...>::index>(); }
+		template<typename tableName, typename... fields_t> auto getAutoInc(const model_t<tableName, fields_t...> &model) noexcept ->
+			decltype(std::get<autoIncIndex_t<fields_t...>::index>()) { return std::get<autoIncIndex_t<fields_t...>::index>(model.fields()); }
 
 		template<typename T> struct isBoolean : std::false_type { };
 		template<> struct isBoolean<bool> : std::true_type { };
