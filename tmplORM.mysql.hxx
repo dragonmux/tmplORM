@@ -99,7 +99,7 @@ namespace tmplORM
 		template<size_t N, typename fieldName, typename T> struct fieldName_t<N, type_t<fieldName, T>>
 			{ using value = tycat<backtick<fieldName>, comma<N>>; };
 
-		template<typename fieldName, typename T> auto toFieldName(const type_t<fieldName, T> &) -> fieldName;
+		//template<typename fieldName, typename T> auto toFieldName(const type_t<fieldName, T> &) -> fieldName;
 
 		template<typename> struct createName_t { };
 		template<typename fieldName, typename T> struct createName_t<type_t<fieldName, T>>
@@ -179,11 +179,11 @@ namespace tmplORM
 		template<size_t N, typename field, typename... fields> struct idField_t
 			{ using type = typename idField_t<N - 1, fields...>::type; };
 		template<typename field, typename... fields> struct idField_t<0, field, fields...>
-			{ using type = updateList<type_t<decltype(toFieldName(field())), bool>>; };
+			{ using type = updateList<toType<field>>; };
 
-		template<typename... fields> using idField = typename idField_t<autoIncIndex_t<fields...>::index, fields...>::type;
+		template<typename... fields> using idField = typename idField_t<primaryIndex_t<fields...>::index, fields...>::type;
 
-		template<bool, typename... fields> struct updateWhere_t { using value = typestring<>; };
+		template<bool, typename... fields> struct updateWhere_t { };
 		template<typename... fields> struct updateWhere_t<true, fields...>
 			{ using value = tycat<ts(" WHERE "), idField<fields...>>; };
 		template<typename... fields> using updateWhere = typename updateWhere_t<hasAutoInc<fields...>(), fields...>::value;
