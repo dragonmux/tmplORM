@@ -144,31 +144,39 @@ namespace tmplORM
 		template<typename... fields> using insertList = typename insertList_t<sizeof...(fields), fields...>::value;
 		template<typename... fields> using updateList = typename updateList_t<sizeof...(fields), fields...>::value;
 
-		template<size_t index, size_t bindIndex, typename... fields_t> struct bindInsert_t
+		template<size_t bindIndex, typename field_t> struct bindField_t
 		{
-			template<size_t N, typename field, typename... fields> struct field_t { using type = typename field_t<N - 1, fields...>::type; };
-			template<typename field, typename... fields> struct field_t<0, field, fields...> { using type = field; };
-			// This should make the case where N >= sizeof...(fields) invalid.
-			template<size_t N, typename field> struct field_t<N, field> { };
-			template<size_t N, typename... fields> using field = typename field_t<N, fields...>::type;
+			template<typename std::enable_if<!field_t::nullable, void *>::type = nullptr>
+				static void bind(const field_t &field, mySQLPreparedQuery_t &query) noexcept
+			{ query.bind(bindIndex, field.value()); }
 
-			template<typename std::enable_if<!field<index, fields_t...>::nullable, void *>::type = nullptr>
-				static void bind(const std::tuple<fields_t...> &fields, mySQLPreparedQuery_t &query) noexcept
+			template<typename std::enable_if<field_t::nullable, void *>::type = nullptr>
+				static void bind(const field_t &field, mySQLPreparedQuery_t &query) noexcept
 			{
-				bindInsert_t<index - 1, bindIndex - 1, fields_t...>::bind(fields, query);
-				const auto &field = std::get<index>(fields);
-				query.bind(bindIndex, field.value());
-			}
-
-			template<typename std::enable_if<field<index, fields_t...>::nullable, void *>::type = nullptr>
-				static void bind(const std::tuple<fields_t...> &fields, mySQLPreparedQuery_t &query) noexcept
-			{
-				bindInsert_t<index - 1, bindIndex - 1, fields_t...>::bind(fields, query);
-				const auto &field = std::get<index>(fields);
 				if (field.isNull())
 					query.bind<typename decltype(field)::type>(bindIndex, nullptr);
 				else
 					query.bind(bindIndex, field.value());
+			}
+		};
+
+		template<size_t index, size_t bindIndex, typename... fields_t> struct bindInsert_t
+		{
+			template<typename fieldName, typename T, typename field_t>
+				static void bindField(const type_t<fieldName, T> &, const field_t &field, const std::tuple<fields_t...> &fields, mySQLPreparedQuery_t &query) noexcept
+			{
+				bindInsert_t<index - 1, bindIndex - 1, fields_t...>::bind(fields, query);
+				bindField_t<bindIndex, field_t>::bind(field, query);
+			}
+
+			template<typename T, typename field_t>
+				static void bindField(const autoInc_t<T> &, const field_t &, const std::tuple<fields_t...> &fields, mySQLPreparedQuery_t &query) noexcept
+			{ bindInsert_t<index - 1, bindIndex, fields_t...>::bind(fields, query); }
+
+			static void bind(const std::tuple<fields_t...> &fields, mySQLPreparedQuery_t &query) noexcept
+			{
+				const auto &field = std::get<index>(fields);
+				bindField(field, field, fields, query);
 			}
 		};
 
