@@ -206,7 +206,7 @@ namespace tmplORM
 			}
 
 			template<typename T, typename field_t>
-				static void bindField(const primary_t<T> &, const field_t &, const std::tuple<fields_t...> &fields, mySQLPreparedQuery_t &query) noexcept
+				static void bindField(const primary_t<T> &, const field_t &field, const std::tuple<fields_t...> &fields, mySQLPreparedQuery_t &query) noexcept
 			{
 				bindField_t<bindIndex - 1, field_t>::bind(field, query);
 				bindUpdate_t<index - 1, bindIndex - 1, fields_t...>::bind(fields, query);
@@ -222,7 +222,7 @@ namespace tmplORM
 
 		template<size_t index, typename... fields_t> struct bindUpdate_t<index, 0, fields_t...>
 			{ static void bind(const std::tuple<fields_t...> &, mySQLPreparedQuery_t &) { } };
-		template<typename... fields> using bindUpdate = bindUpdate_t<autoIncIndex_t<fields...>::index, countInsert_t<fields...>::count, fields...>;
+		template<typename... fields> using bindUpdate = bindUpdate_t<sizeof...(fields), countInsert_t<fields...>::count, fields...>;
 
 		template<typename tableName, typename... fields> using createTable__ = toString<
 			tycat<ts("CREATE TABLE "), backtick<tableName>, ts(" ("), createList<fields...>, ts(");")>
