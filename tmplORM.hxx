@@ -179,8 +179,8 @@ namespace tmplORM
 		template<> struct placeholder_t<0> { using value = typestring<>; };
 		template<size_t N> using placeholder = typename placeholder_t<N>::value;
 
-		template<typename fieldName, typename T> constexpr bool isAutoInc(const type_t<fieldName, T> &) { return false; }
-		template<typename T> constexpr bool isAutoInc(const autoInc_t<T> &) { return true; }
+		template<typename fieldName, typename T> constexpr bool isAutoInc(const type_t<fieldName, T> &) noexcept { return false; }
+		template<typename T> constexpr bool isAutoInc(const autoInc_t<T> &) noexcept { return true; }
 		template<typename... fields> constexpr bool hasAutoInc() noexcept { return bundle(isAutoInc(fields())...); }
 
 		template<typename field, typename... fields> struct autoIncIndex_t
@@ -189,8 +189,8 @@ namespace tmplORM
 		template<typename tableName, typename... fields_t> auto getAutoInc(const model_t<tableName, fields_t...> &model) noexcept ->
 			decltype(std::get<autoIncIndex_t<fields_t...>::index>()) { return std::get<autoIncIndex_t<fields_t...>::index>(model.fields()); }
 
-		template<typename fieldName, typename T> constexpr bool isPrimaryKey(const type_t<fieldName, T> &) { return false; }
-		template<typename T> constexpr bool isPrimaryKey(const primary_t<T> &) { return true; }
+		template<typename fieldName, typename T> constexpr bool isPrimaryKey(const type_t<fieldName, T> &) noexcept { return false; }
+		template<typename T> constexpr bool isPrimaryKey(const primary_t<T> &) noexcept { return true; }
 		template<typename... fields> constexpr bool hasPrimaryKey() noexcept { return bundle(isPrimaryKey(fields())...); }
 
 		template<typename field, typename... fields> struct primaryIndex_t
