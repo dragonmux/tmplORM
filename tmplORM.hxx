@@ -37,7 +37,7 @@ namespace tmplORM
 
 		const char *tableName() const noexcept { return _tableName::data(); }
 		constexpr static const size_t N = fields_t<Fields...>::N;
-		static_assert(!tmplORM::common::hasPrimaryKey<Fields...>(), "model_t must be instanciated with a primary key");
+		static_assert(tmplORM::common::hasPrimaryKey<Fields...>(), "model_t must be instanciated with a primary key");
 
 		// create(); - Creates the table
 		// add(); - CRUD Create
