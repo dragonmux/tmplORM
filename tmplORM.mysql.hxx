@@ -198,12 +198,30 @@ namespace tmplORM
 
 		template<size_t index, size_t bindIndex, typename... fields_t> struct bindUpdate_t
 		{
+			template<typename fieldName, typename T, typename field_t>
+				static void bindField(const type_t<fieldName, T> &, const field_t &field, const std::tuple<fields_t...> &fields, mySQLPreparedQuery_t &query) noexcept
+			{
+				bindUpdate_t<index - 1, bindIndex - 1, fields_t...>::bind(fields, query);
+				bindField_t<bindIndex - 1, field_t>::bind(field, query);
+			}
+
+			template<typename T, typename field_t>
+				static void bindField(const primary_t<T> &, const field_t &, const std::tuple<fields_t...> &fields, mySQLPreparedQuery_t &query) noexcept
+			{
+				bindField_t<bindIndex - 1, field_t>::bind(field, query);
+				bindUpdate_t<index - 1, bindIndex - 1, fields_t...>::bind(fields, query);
+				// TODO: This actually won't work quite right.. but it is closer than what we had.
+			}
+
 			static void bind(const std::tuple<fields_t...> &fields, mySQLPreparedQuery_t &query) noexcept
 			{
 				const auto &field = std::get<index>(fields);
-				query.bind(bindIndex, field.value());
+				bindField(field, field, fields, query);
 			}
 		};
+
+		template<size_t index, typename... fields_t> struct bindUpdate_t<index, 0, fields_t...>
+			{ static void bind(const std::tuple<fields_t...> &, mySQLPreparedQuery_t &) { } };
 		template<typename... fields> using bindUpdate = bindUpdate_t<autoIncIndex_t<fields...>::index, countInsert_t<fields...>::count, fields...>;
 
 		template<typename tableName, typename... fields> using createTable__ = toString<
@@ -252,10 +270,8 @@ namespace tmplORM
 		{
 			using update = update__<tableName, fields_t...>;
 			mySQLPreparedQuery_t query = database.prepare(update::value, countInsert_t<fields_t...>::count);
-			bindInsert<fields_t...>::bind(model.fields(), query);
-			// This pulls back the ID field and binds it last so it tags to the WHERE clause for this query.
+			// This binds the fields, primary key last so it tags to the WHERE clause for this query.
 			bindUpdate<fields_t...>::bind(model.fields(), query);
-			// TODO: perform binds here.
 			return query.execute();
 		}
 		template<typename... models_t> bool update(const models_t &...models) noexcept { return collect(update_(models)...); }
