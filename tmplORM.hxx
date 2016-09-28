@@ -27,6 +27,8 @@ namespace tmplORM
 		const std::tuple<Fields...> &fields() const noexcept { return _fields; }
 	};
 
+	namespace common { template<typename... fields> constexpr bool hasPrimaryKey() noexcept; }
+
 	template<typename _tableName, typename... Fields> struct model_t : public fields_t<Fields...>
 	{
 	public:
@@ -35,6 +37,7 @@ namespace tmplORM
 
 		const char *tableName() const noexcept { return _tableName::data(); }
 		constexpr static const size_t N = fields_t<Fields...>::N;
+		static_assert(!tmplORM::common::hasPrimaryKey<Fields...>(), "model_t must be instanciated with a primary key");
 
 		// create(); - Creates the table
 		// add(); - CRUD Create
@@ -128,6 +131,7 @@ namespace tmplORM
 	{
 		using tmplORM::types::type_t;
 		using tmplORM::types::autoInc_t;
+		using tmplORM::types::primary_t;
 
 		template<typename> struct toString { };
 		template<char... C> struct toString<typestring<C...>>
@@ -177,7 +181,6 @@ namespace tmplORM
 
 		template<typename fieldName, typename T> constexpr bool isAutoInc(const type_t<fieldName, T> &) { return false; }
 		template<typename T> constexpr bool isAutoInc(const autoInc_t<T> &) { return true; }
-
 		template<typename... fields> constexpr bool hasAutoInc() noexcept { return bundle(isAutoInc(fields())...); }
 
 		template<typename field, typename... fields> struct autoIncIndex_t
@@ -185,6 +188,19 @@ namespace tmplORM
 		template<typename field> struct autoIncIndex_t<field> { constexpr static const size_t index = isAutoInc(field()) ? 0 : 1; };
 		template<typename tableName, typename... fields_t> auto getAutoInc(const model_t<tableName, fields_t...> &model) noexcept ->
 			decltype(std::get<autoIncIndex_t<fields_t...>::index>()) { return std::get<autoIncIndex_t<fields_t...>::index>(model.fields()); }
+
+		template<typename fieldName, typename T> constexpr bool isPrimaryKey(const type_t<fieldName, T> &) { return false; }
+		template<typename T> constexpr bool isPrimaryKey(const primary_t<T> &) { return true; }
+		template<typename... fields> constexpr bool hasPrimaryKey() noexcept { return bundle(isPrimaryKey(fields())...); }
+
+		template<typename field, typename... fields> struct primaryIndex_t
+			{ constexpr static const size_t index = isPrimaryKey(field()) ? 0 : (1 + primaryIndex_t<fields...>::index); };
+		template<typename field> struct primaryIndex_t<field> { constexpr static const size_t index = isPrimaryKey(field()) ? 0 : 1; };
+		/*template<typename tableName, typename... fields_t> auto getPrimaryKey(const model_t<tableName, fields_t...> &model) noexcept ->
+			decltype(std::get<primaryIndex_t<fields_t...>::index>()) { return std::get<primaryIndex_t<fields_t...>::index>(model.fields()); }*/
+
+		template<typename fieldName, typename T> auto toType_(const type_t<fieldName, T> &) -> type_t<fieldName, T>;
+		template<typename field> using toType = decltype(toType_(field()));
 
 		template<typename T> struct isBoolean : std::false_type { };
 		template<> struct isBoolean<bool> : std::true_type { };
