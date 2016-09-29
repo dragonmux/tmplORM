@@ -7,6 +7,16 @@
 extern std::unique_ptr<const char []> formatString(const char *format, ...) noexcept;
 extern std::unique_ptr<const char []> vaFormatString(const char *format, va_list args) noexcept;
 
+struct toUTF16_t
+{
+private:
+	constexpr toUTF16_t() noexcept { }
+
+public:
+	std::unique_ptr<char16_t []> convert(const char *const str) noexcept;
+	std::unique_ptr<char []> convert(const char16_t *const str) noexcept;
+};
+
 #if __cplusplus <= 201103L
 template<typename T> struct makeUnique_ { using singleType = std::unique_ptr<T>; };
 template<typename T> struct makeUnique_<T []> { using arrayType = std::unique_ptr<T []>; };

@@ -73,3 +73,18 @@ size_t countUnits(const char *const str) noexcept
 	}
 	return count;
 }
+
+std::unique_ptr<char16_t []> toUTF16_t::convert(const char *const str) noexcept
+{
+	const size_t len = countUnits(str);
+	auto result = make_unique<char16_t []>(len);
+
+	return nullptr;
+}
+
+std::unique_ptr<char []> toUTF16_t::convert(const char16_t *const) noexcept
+{
+	//make_unique<char []>(len);
+
+	return nullptr;
+}
