@@ -54,9 +54,9 @@ size_t countUnits(const char *const str) noexcept
 				// 3 code units.. check that the second and third units are valid and return 0 if not
 				if (!isMultiValid(byteB, safeIndex(str, ++i, len)))
 					return 0;
-				// Also check that the whole only contributes one UTF-16 unit - if it does not, pre-increment count
-				if (byteA & 0x0F)
-					++count;
+				// (needs re-commenting)
+				else if ((byteA & 0x0F) == 0x0D && (byteB & 0x20))
+					return 0;
 			}
 			else if ((byteA & 0x78) == 0x70)
 			{
@@ -76,13 +76,43 @@ size_t countUnits(const char *const str) noexcept
 
 std::unique_ptr<char16_t []> toUTF16_t::convert(const char *const str) noexcept
 {
-	const size_t len = countUnits(str);
-	auto result = make_unique<char16_t []>(len);
-
-	return nullptr;
+	const size_t lenUTF8 = strlen(str) + 1;
+	const size_t lenUTF16 = countUnits(str);
+	auto result = make_unique<char16_t []>(lenUTF16);
+	if (!result || !lenUTF16)
+		return nullptr;
+	for (size_t i = 0, j = 0; i < lenUTF8; ++i, ++j)
+	{
+		const char byteA = str[i];
+		if (byteA & 0x80)
+		{
+			const char byteB = safeIndex(str, ++i, lenUTF8);
+			if ((byteA & 0x60) == 0x40)
+				result[j] = (char16_t(byteA & 0x1F) << 6) | char16_t(byteB & 0x3F);
+			else if ((byteA & 0x70) == 0x60)
+			{
+				const char byteC = safeIndex(str, ++i, lenUTF8);
+				result[j] = (char16_t(byteA & 0x0F) << 12) | (char16_t(byteB & 0x3F) << 6) | char16_t(byteC & 0x3F);
+			}
+			else
+			{
+				const char byteC = safeIndex(str, ++i, lenUTF8);
+				const char byteD = safeIndex(str, ++i, lenUTF8);
+				// First, collect the upper 11 bits into a value..
+				const char16_t upper = (char16_t(byteA & 0x07) << 8) | (char16_t(byteB & 0x3F) << 2) | (char16_t(byteC & 0x30) >> 8);
+				// Then take off the (0x010000 >> 10) value, and generate the first part of the surrogate pair
+				result[j] = char16_t(0xD800) | (upper - 0x0040);
+				// Then collect together the lower 10 bits and generate the second part of the surrogate pair
+				result[++j] = char16_t(0xDC00) | (char16_t(byteC & 0x0F) << 6) | char16_t(byteD & 0x3F);
+			}
+		}
+		else
+			result[j] = char16_t(byteA);
+	}
+	return result;
 }
 
-std::unique_ptr<char []> toUTF16_t::convert(const char16_t *const) noexcept
+std::unique_ptr<char []> toUTF16_t::convert(const char16_t *const str) noexcept
 {
 	//make_unique<char []>(len);
 
