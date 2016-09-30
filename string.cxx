@@ -25,7 +25,7 @@ inline bool isMultiValid() noexcept { return true; }
 template<typename... values_t> inline bool isMultiValid(const char c, values_t ...values) noexcept
 	{ return (c & 0xC0) == 0x80 && isMultiValid(values...); }
 
-inline char safeIndex(const char *const str, const size_t index, const size_t len) noexcept
+template<typename T> inline T safeIndex(const T *const str, const size_t index, const size_t len) noexcept
 {
 	if (index >= len)
 		return -1;
