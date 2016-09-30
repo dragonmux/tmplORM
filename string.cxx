@@ -14,7 +14,7 @@ std::unique_ptr<const char []> formatString(const char *format, ...) noexcept
 std::unique_ptr<const char []> vaFormatString(const char *format, va_list args) noexcept
 {
 	const size_t len = vsnprintf(NULL, 0, format, args) + 1;
-	std::unique_ptr<char []> ret(new (std::nothrow) char[len]);
+	auto ret = makeUnique<char []>(len);
 	if (!ret)
 		return nullptr;
 	vsprintf(ret.get(), format, args);
@@ -78,7 +78,7 @@ std::unique_ptr<char16_t []> toUTF16_t::convert(const char *const str) noexcept
 {
 	const size_t lenUTF8 = strlen(str) + 1;
 	const size_t lenUTF16 = countUnits(str);
-	auto result = make_unique<char16_t []>(lenUTF16);
+	auto result = makeUnique<char16_t []>(lenUTF16);
 	if (!result || !lenUTF16)
 		return nullptr;
 	for (size_t i = 0, j = 0; i < lenUTF8; ++i, ++j)
@@ -114,7 +114,7 @@ std::unique_ptr<char16_t []> toUTF16_t::convert(const char *const str) noexcept
 
 std::unique_ptr<char []> toUTF16_t::convert(const char16_t *const str) noexcept
 {
-	//make_unique<char []>(len);
+	//makeUnique<char []>(len);
 
 	return nullptr;
 }

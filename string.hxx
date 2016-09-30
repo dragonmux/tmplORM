@@ -2,6 +2,7 @@
 #define STRING__HXX
 
 #include <memory>
+#include <new>
 #include <cstdarg>
 
 extern std::unique_ptr<const char []> formatString(const char *format, ...) noexcept;
@@ -17,20 +18,22 @@ public:
 	std::unique_ptr<char []> convert(const char16_t *const str) noexcept;
 };
 
-#if __cplusplus <= 201103L
-template<typename T> struct makeUnique_ { using singleType = std::unique_ptr<T>; };
+template<typename T> struct makeUnique_ { using uniqueType = std::unique_ptr<T>; };
 template<typename T> struct makeUnique_<T []> { using arrayType = std::unique_ptr<T []>; };
 template<typename T, size_t N> struct makeUnique_<T [N]> { struct invalidType { }; };
 
-template<typename T, typename... Args> inline typename makeUnique_<T>::singleType make_unique(Args &&...args)
-	{ return std::unique_ptr<T>(new T(std::forward<Args>(args)...)); }
+template<typename T, typename... Args> inline typename makeUnique_<T>::uniqueType makeUnique(Args &&...args) noexcept
+{
+	using consT = typename std::remove_const<T>::type;
+	return std::unique_ptr<T>(new (std::nothrow) consT(std::forward<Args>(args)...));
+}
 
-template<typename T> inline typename makeUnique_<T>::arrayType make_unique(size_t num)
-	{ return std::unique_ptr<T>(new typename std::remove_extent<T>::type[num]()); }
+template<typename T> inline typename makeUnique_<T>::arrayType makeUnique(const size_t num) noexcept
+{
+	using consT = typename std::remove_const<typename std::remove_extent<T>::type>::type;
+	return std::unique_ptr<T>(new (std::nothrow) consT[num]());
+}
 
-template<typename T, typename... Args> inline typename makeUnique_<T>::invalidType make_unique(Args &&...) = delete;
-#else
-using std::make_unique;
-#endif
+template<typename T, typename... Args> inline typename makeUnique_<T>::invalidType makeUnique(Args &&...) noexcept = delete;
 
 #endif /*STRING__HXX*/
