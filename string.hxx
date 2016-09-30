@@ -8,13 +8,55 @@
 extern std::unique_ptr<const char []> formatString(const char *format, ...) noexcept;
 extern std::unique_ptr<const char []> vaFormatString(const char *format, va_list args) noexcept;
 
-struct toUTF16_t
+struct utf16_t final
+{
+private:
+	std::unique_ptr<char16_t []> str;
+	constexpr utf16_t() noexcept : str() { }
+
+public:
+	constexpr utf16_t(const std::nullptr_t) noexcept : str() { }
+	utf16_t(std::unique_ptr<char16_t []> &_str) noexcept : str(std::move(_str)) { }
+	utf16_t(std::unique_ptr<char16_t []> &&_str) noexcept : str(std::move(_str)) { }
+	utf16_t(utf16_t &&_str) noexcept : str(std::move(_str.str)) { }
+	utf16_t &operator =(utf16_t &&_str) noexcept { str = std::move(_str.str); return *this; }
+	operator const std::unique_ptr<char16_t[]> &() const noexcept { return str; }
+	operator const char16_t *() const noexcept { return str.get(); }
+	operator char16_t *() const noexcept { return str.get(); }
+	operator const uint16_t *() const noexcept { return reinterpret_cast<uint16_t *const>(str.get()); }
+	operator uint16_t *() const noexcept { return reinterpret_cast<uint16_t *const>(str.get()); }
+	explicit operator bool() const noexcept { return bool(str); }
+};
+
+struct utf8_t final
+{
+private:
+	std::unique_ptr<char []> str;
+	constexpr utf8_t() noexcept : str() { }
+	utf8_t(const utf8_t &) = delete;
+	utf8_t &operator =(const utf8_t &) = delete;
+
+public:
+	constexpr utf8_t(const std::nullptr_t) noexcept : str() { }
+	utf8_t(std::unique_ptr<char []> &_str) noexcept : str(std::move(_str)) { }
+	utf8_t(std::unique_ptr<char []> &&_str) noexcept : str(std::move(_str)) { }
+	utf8_t(utf8_t &&_str) noexcept : str(std::move(_str.str)) { }
+	utf8_t &operator =(utf8_t &&_str) noexcept { str = std::move(_str.str); return *this; }
+	operator const std::unique_ptr<char []> &() const noexcept { return str; }
+	operator const char *() const noexcept { return str.get(); }
+	operator char *() const noexcept { return str.get(); }
+	operator const uint8_t *() const noexcept { return reinterpret_cast<uint8_t *const>(str.get()); }
+	operator uint8_t *() const noexcept { return reinterpret_cast<uint8_t *const>(str.get()); }
+	explicit operator bool() const noexcept { return bool(str); }
+};
+
+struct toUTF16_t final
 {
 private:
 	constexpr toUTF16_t() noexcept { }
 
 public:
-	std::unique_ptr<char16_t []> convert(const char *const str) noexcept;
+	utf16_t convert(const char *const str) noexcept;
 	std::unique_ptr<char []> convert(const char16_t *const str) noexcept;
 };
 
