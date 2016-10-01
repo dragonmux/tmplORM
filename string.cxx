@@ -34,7 +34,7 @@ template<typename T> inline T safeIndex(const T *const str, const size_t index, 
 
 size_t countUnits(const char *const str) noexcept
 {
-	const size_t len = strlen(str);
+	const size_t len = utf16::length(str) + 1;
 	size_t count = 0;
 	for (size_t i = 0; i < len; ++i)
 	{
@@ -74,7 +74,7 @@ size_t countUnits(const char *const str) noexcept
 	return count;
 }
 
-utf16_t toUTF16_t::convert(const char *const str) noexcept
+utf16_t utf16::convert(const char *const str) noexcept
 {
 	const size_t lenUTF8 = strlen(str) + 1;
 	const size_t lenUTF16 = countUnits(str);
@@ -112,7 +112,7 @@ utf16_t toUTF16_t::convert(const char *const str) noexcept
 	return result;
 }
 
-std::unique_ptr<char []> toUTF16_t::convert(const char16_t *const str) noexcept
+utf8_t utf16::convert(const char16_t *const str) noexcept
 {
 	//makeUnique<char []>(len);
 

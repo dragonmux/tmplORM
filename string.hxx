@@ -1,9 +1,10 @@
 #ifndef STRING__HXX
 #define STRING__HXX
 
+#include <cstdarg>
 #include <memory>
 #include <new>
-#include <cstdarg>
+#include <string>
 
 extern std::unique_ptr<const char []> formatString(const char *format, ...) noexcept;
 extern std::unique_ptr<const char []> vaFormatString(const char *format, va_list args) noexcept;
@@ -50,14 +51,19 @@ public:
 	explicit operator bool() const noexcept { return bool(str); }
 };
 
-struct toUTF16_t final
+struct utf16 final
 {
 private:
-	constexpr toUTF16_t() noexcept { }
+	constexpr utf16() noexcept { }
 
 public:
-	utf16_t convert(const char *const str) noexcept;
-	std::unique_ptr<char []> convert(const char16_t *const str) noexcept;
+	static utf16_t convert(const char *const str) noexcept;
+	static utf8_t convert(const char16_t *const str) noexcept;
+
+	template<typename T> static size_t length(const T *const str) noexcept
+		{ return std::char_traits<T>::length(str); }
+	static size_t length(const utf16_t &str) noexcept { return str ? length<char16_t>(str) + 1 : 0; }
+	static size_t length(const utf8_t &str) noexcept { return str ? length<char>(str) + 1 : 0; }
 };
 
 template<typename T> struct makeUnique_ { using uniqueType = std::unique_ptr<T>; };
