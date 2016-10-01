@@ -99,7 +99,7 @@ utf16_t utf16::convert(const char *const str) noexcept
 				const char byteC = safeIndex(str, ++i, lenUTF8);
 				const char byteD = safeIndex(str, ++i, lenUTF8);
 				// First, collect the upper 11 bits into a value..
-				const char16_t upper = (char16_t(byteA & 0x07) << 8) | (char16_t(byteB & 0x3F) << 2) | (char16_t(byteC & 0x30) >> 8);
+				const char16_t upper = (char16_t(byteA & 0x07) << 8) | (char16_t(byteB & 0x3F) << 2) | (char16_t(byteC & 0x30) >> 4);
 				// Then take off the (0x010000 >> 10) value, and generate the first part of the surrogate pair
 				result[j] = char16_t(0xD800) | (upper - 0x0040);
 				// Then collect together the lower 10 bits and generate the second part of the surrogate pair
