@@ -74,9 +74,40 @@ size_t countUnits(const char *const str) noexcept
 	return count;
 }
 
+size_t countUnits(const char16_t *const str) noexcept
+{
+	const size_t len = utf16::length(str) + 1;
+	size_t count = 0;
+	for (size_t i = 0; i < len; ++i)
+	{
+		const char16_t uintA = str[i];
+		if ((uintA & 0xFE00) == 0xD800)
+		{
+			const char16_t uintB = safeIndex(str, ++i, len);
+			// Ok, should be a surrogate. Check validity..
+			if ((uintB & 0xFE00) != 0xDC00)
+				return 0;
+			// Guaranteed this is 4-byte.
+			count += 3;
+		}
+		else
+		{
+			// Nope.. well.. let's do the checks then.
+			// If we have a value more than 0x007F, we're guaranteed multi-byte.
+			if (uintA > 0x007F)
+				++count;
+			// If we're also above 0x07FF, it's 3-byte.
+			if (uintA > 0x07FF)
+				++count;
+		}
+		++count;
+	}
+	return count;
+}
+
 utf16_t utf16::convert(const char *const str) noexcept
 {
-	const size_t lenUTF8 = strlen(str) + 1;
+	const size_t lenUTF8 = utf16::length(str) + 1;
 	const size_t lenUTF16 = countUnits(str);
 	auto result = makeUnique<char16_t []>(lenUTF16);
 	if (!result || !lenUTF16)
@@ -114,7 +145,43 @@ utf16_t utf16::convert(const char *const str) noexcept
 
 utf8_t utf16::convert(const char16_t *const str) noexcept
 {
-	//makeUnique<char []>(len);
+	const size_t lenUTF16 = utf16::length(str) + 1;
+	const size_t lenUTF8 = countUnits(str);
+	auto result = makeUnique<char []>(lenUTF8);
+	if (!result || !lenUTF8)
+		return nullptr;
+	for (size_t i = 0, j = 0; i < lenUTF16; ++i, ++j)
+	{
+		const char16_t uintA = str[i];
+		// Surrogate pair?
+		if ((uintA & 0xFE00) == 0xD800)
+		{
+			// Recover the upper 10 (11) bits from the first surrogate pair.
+			const char16_t upper = (uintA & 0x03FF) + 0x0040;
+			// Recover the lower 10 bits from the second surrogate pair.
+			const char16_t lower = safeIndex(str, ++i, lenUTF16) & 0x03FF;
 
-	return nullptr;
+			result[j] = char(0xF0) | (char(upper >> 8) & 0x07);
+			result[++j] = char(0x80) | (char(upper >> 2) & 0x3F);
+			result[++j] = char(0x80) | (char(upper << 4) & 0x30) | (char(lower >> 6) & 0x0F);
+			result[++j] = char(0x80) | char(lower & 0x3F);
+		}
+		else
+		{
+			if (uintA <= 0x007F)
+				result[j] = char(uintA);
+			else if (uintA <= 0x07FF)
+			{
+				result[j] = char(0xC0) | (char(uintA >> 6) & 0x1F);
+				result[++j] = char(0x80) | char(uintA & 0x3F);
+			}
+			else
+			{
+				result[j] = char(0xE0) | (char(uintA >> 12) & 0x0F);
+				result[++j] = char(0x80) | (char(uintA >> 6) & 0x3F);
+				result[++j] = char(0x80) | char(uintA & 0x3F);
+			}
+		}
+	}
+	return result;
 }
