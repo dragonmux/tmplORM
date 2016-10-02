@@ -87,6 +87,31 @@ void tSQLClient_t::disconnect() const noexcept
 		haveConnection = error(SQLDisconnect(connection), SQL_HANDLE_DBC, connection);
 }
 
+bool tSQLClient_t::beginTransact() const noexcept
+{
+	if (valid() && !needsCommit)
+	{
+		needsCommit = !error(SQLSetConnectAttr(connection, SQL_ATTR_AUTOCOMMIT, reinterpret_cast<void *>(long(SQL_AUTOCOMMIT_ON)), 0),
+			SQL_HANDLE_DBC, connection);
+	}
+	return needsCommit;
+}
+
+bool tSQLClient_t::endTransact(const bool commitSuccess) const noexcept
+{
+	if (valid() && needsCommit)
+		needsCommit = error(SQLEndTran(SQL_HANDLE_DBC, connection, commitSuccess ? SQL_COMMIT : SQL_ROLLBACK), SQL_HANDLE_DBC, connection);
+	return !needsCommit;
+}
+
+tSQLResult_t tSQLClient_t::query(const char *const queryStmt) const noexcept
+{
+	auto query = prepare(queryStmt, 0);
+	if (!query.valid())
+		return tSQLResult_t();
+	return query.execute();
+}
+
 bool tSQLClient_t::error(const tSQLExecErrorType_t err, const int16_t handleType, void *const handle) const noexcept
 {
 	_error = std::move(tSQLExecError_t(err, handleType, handle));

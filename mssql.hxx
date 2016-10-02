@@ -74,7 +74,10 @@ struct tSQLQuery_t final
 {
 private:
 	const tSQLClient_t *const client;
-	void *const handle;
+	void *const queryHandle;
+	const size_t numParams;
+	const std::unique_ptr<long []> dataLengths;
+	mutable bool executed;
 
 protected:
 	tSQLQuery_t(const tSQLClient_t *const client, void *const handle, const char *const queryStmt, const size_t paramsCount) noexcept;
@@ -82,10 +85,15 @@ protected:
 	friend struct tSQLClient_t;
 
 public:
-	constexpr tSQLQuery_t() noexcept : client(nullptr), handle(nullptr) { }
+	constexpr tSQLQuery_t() noexcept : client(nullptr), queryHandle(nullptr), numParams(0), dataLengths(), executed(true) { }
 	tSQLQuery_t(tSQLQuery_t &&qry) noexcept : tSQLQuery_t() { *this = std::move(qry); }
 	~tSQLQuery_t();
 	tSQLQuery_t &operator =(tSQLQuery_t &&qry) noexcept;
+
+	bool valid() const noexcept { return client && queryHandle; }
+	tSQLResult_t execute() const noexcept;
+	template<typename T> void bind(const size_t index, const T &value) noexcept;
+	template<typename T> void bind(const size_t index, const nullptr_t) noexcept;
 
 	tSQLQuery_t(const tSQLQuery_t &) = delete;
 	tSQLQuery_t &operator =(const tSQLQuery_t &) = delete;
