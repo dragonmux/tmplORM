@@ -125,13 +125,6 @@ public:
 	tSQLClient_t(const tSQLClient_t &) = delete;
 	tSQLClient_t &operator =(const tSQLClient_t &) = delete;
 };
-
-			// Build a session_t<> in tmplORM.hxx, taking one of these from one of tmplORM.*.hxx, to yeild a uniform interface object..
-			// Or.. make this the session object directly. In the former case, the generator call generators move into session_t<>
-			// and the real calls go into api_t's + any additional functionality gets exposed as wanted (eg, how to connect to a given DB API)
-			struct api_t
-			{
-			};
 		}
 	}
 }
