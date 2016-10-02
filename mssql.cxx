@@ -10,6 +10,9 @@ namespace tmplORM
 	{
 		namespace driver
 		{
+template<typename T> void swap(const T &a, const T &b) noexcept//(std::swap(const_cast<T &>(a), const_cast<T &>(b)))
+	{ std::swap(const_cast<T &>(a), const_cast<T &>(b)); }
+
 tSQLExecErrorType_t translateError(const int16_t result)
 {
 	if (result == SQL_NEED_DATA)
@@ -50,6 +53,16 @@ tSQLClient_t::~tSQLClient_t() noexcept
 	}
 	SQLFreeHandle(SQL_HANDLE_DBC, connection);
 	SQLFreeHandle(SQL_HANDLE_ENV, dbHandle);
+}
+
+tSQLClient_t &tSQLClient_t::operator =(tSQLClient_t &&con) noexcept
+{
+	swap(dbHandle, con.dbHandle);
+	swap(connection, con.connection);
+	std::swap(haveConnection, con.haveConnection);
+	std::swap(needsCommit, con.needsCommit);
+	std::swap(_error, con._error);
+	return *this;
 }
 
 bool tSQLClient_t::connect(const stringPtr_t &connString) const noexcept
