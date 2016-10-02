@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <array>
 #include <memory>
+#include <utility>
 
 namespace tmplORM
 {
@@ -92,8 +93,8 @@ public:
 struct tSQLClient_t final
 {
 private:
-	void *const dbHandle;
-	void *const connection;
+	void *dbHandle;
+	void *connection;
 	mutable bool haveConnection, needsCommit;
 	mutable tSQLExecError_t _error;
 
@@ -105,8 +106,9 @@ protected:
 	bool error(const tSQLExecErrorType_t err) const noexcept;
 
 public:
-	constexpr tSQLClient_t() noexcept : dbHandle(nullptr), connection(nullptr), haveConnection(false), needsCommit(false), _error() { }
-	tSQLClient_t(tSQLClient_t &&) noexcept;
+	tSQLClient_t() noexcept;
+	tSQLClient_t(tSQLClient_t &&con) noexcept : dbHandle(nullptr), connection(nullptr), haveConnection(false),
+		needsCommit(false), _error() { *this = std::move(con); }
 	~tSQLClient_t() noexcept;
 	tSQLClient_t &operator =(tSQLClient_t &&) noexcept;
 

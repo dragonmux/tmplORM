@@ -29,6 +29,29 @@ tSQLExecErrorType_t translateError(const int16_t result)
 	return tSQLExecErrorType_t::ok;
 }
 
+tSQLClient_t::tSQLClient_t() noexcept : dbHandle(nullptr), connection(nullptr), haveConnection(false), needsCommit(false), _error()
+{
+	if (error(SQLAllocHandle(SQL_HANDLE_ENV, nullptr, &dbHandle), SQL_HANDLE_ENV, dbHandle) || !dbHandle)
+		return;
+
+	else if (error(SQLSetEnvAttr(dbHandle, SQL_ATTR_ODBC_VERSION, reinterpret_cast<void *>(long(SQL_OV_ODBC3)), 0), SQL_HANDLE_ENV, dbHandle))
+		return;
+	else if (error(SQLAllocHandle(SQL_HANDLE_DBC, dbHandle, &connection), SQL_HANDLE_DBC, connection) || !connection)
+		return;
+}
+
+tSQLClient_t::~tSQLClient_t() noexcept
+{
+	if (haveConnection)
+	{
+		if (needsCommit)
+			rollback();
+		disconnect();
+	}
+	SQLFreeHandle(SQL_HANDLE_DBC, connection);
+	SQLFreeHandle(SQL_HANDLE_ENV, dbHandle);
+}
+
 bool tSQLClient_t::connect(const stringPtr_t &connString) const noexcept
 {
 	if (!dbHandle || !connection || haveConnection)
