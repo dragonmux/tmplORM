@@ -12,7 +12,6 @@ namespace tmplORM
 	{
 		namespace driver
 		{
-
 using std::nullptr_t;
 
 typedef unsigned long sql_ulong_t;
