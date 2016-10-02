@@ -112,7 +112,7 @@ public:
 
 	bool valid() const noexcept { return dbHandle && connection && haveConnection; }
 	bool connect(const char *const driver, const char *const host, const uint32_t port, const char *const user, const char *const passwd) const noexcept;
-	void disconnect() noexcept;
+	void disconnect() const noexcept;
 	bool selectDB(const char *const db) const noexcept;
 	bool beginTransact() const noexcept;
 	bool endTransact(const bool commitSuccess) const noexcept;
