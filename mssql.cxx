@@ -57,8 +57,8 @@ tSQLClient_t::~tSQLClient_t() noexcept
 
 tSQLClient_t &tSQLClient_t::operator =(tSQLClient_t &&con) noexcept
 {
-	swap(dbHandle, con.dbHandle);
-	swap(connection, con.connection);
+	std::swap(dbHandle, con.dbHandle);
+	std::swap(connection, con.connection);
 	std::swap(haveConnection, con.haveConnection);
 	std::swap(needsCommit, con.needsCommit);
 	std::swap(_error, con._error);
@@ -87,6 +87,19 @@ void tSQLClient_t::disconnect() const noexcept
 		haveConnection = error(SQLDisconnect(connection), SQL_HANDLE_DBC, connection);
 }
 
+bool tSQLClient_t::error(const tSQLExecErrorType_t err, const int16_t handleType, void *const handle) const noexcept
+{
+	_error = std::move(tSQLExecError_t(err, handleType, handle));
+	return err != tSQLExecErrorType_t::ok;
+}
+
+bool tSQLClient_t::error(const int16_t err, const int16_t handleType, void *const handle) const noexcept
+	{ return error(translateError(err), handleType, handle); }
+bool tSQLClient_t::error(const tSQLExecErrorType_t err) const noexcept
+	{ return error(err, SQL_HANDLE_ENV, nullptr); }
+
+bool tSQLQuery_t::error(const int16_t err) const noexcept
+	{ return !client || client->error(err, SQL_HANDLE_STMT, queryHandle); }
 		}
 	}
 }

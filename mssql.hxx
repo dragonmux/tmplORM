@@ -78,6 +78,7 @@ private:
 
 protected:
 	tSQLQuery_t(const tSQLClient_t *const client, void *const handle, const char *const queryStmt, const size_t paramsCount) noexcept;
+	bool error(const int16_t err) const noexcept;
 	friend struct tSQLClient_t;
 
 public:
@@ -104,6 +105,8 @@ protected:
 	bool error(const int16_t err, const int16_t handleType, void *const handle) const noexcept;
 	bool error(const tSQLExecErrorType_t err, const int16_t handleType, void *const handle) const noexcept;
 	bool error(const tSQLExecErrorType_t err) const noexcept;
+	friend struct tSQLResult_t;
+	friend struct tSQLQuery_t;
 
 public:
 	tSQLClient_t() noexcept;
