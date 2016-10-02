@@ -27,7 +27,12 @@ namespace tmplORM
 		const std::tuple<Fields...> &fields() const noexcept { return _fields; }
 	};
 
-	namespace common { template<typename... fields> constexpr bool hasPrimaryKey() noexcept; }
+	namespace common
+	{
+		template<typename... fields> constexpr bool hasPrimaryKey() noexcept;
+		template<size_t N, typename fieldName, typename... fields> struct findFieldIndex_t;
+	}
+	template<typename fieldName, typename... fields> using findFieldIndex = tmplORM::common::findFieldIndex_t<0, fieldName, fields...>;
 
 	template<typename _tableName, typename... Fields> struct model_t : public fields_t<Fields...>
 	{
@@ -38,6 +43,9 @@ namespace tmplORM
 		const char *tableName() const noexcept { return _tableName::data(); }
 		constexpr static const size_t N = fields_t<Fields...>::N;
 		static_assert(tmplORM::common::hasPrimaryKey<Fields...>(), "model_t must be instanciated with a primary key");
+		template<char... C> auto operator [](const typestring<C...> &) const noexcept ->
+			decltype(std::get<findFieldIndex<typestring<C...>, Fields...>::index>(this->fields()))
+		{ return std::get<findFieldIndex<typestring<C...>, Fields...>::index>(this->fields()); }
 
 		// create(); - Creates the table
 		// add(); - CRUD Create
@@ -201,6 +209,13 @@ namespace tmplORM
 
 		template<typename fieldName, typename T> auto toType_(const type_t<fieldName, T> &) -> type_t<fieldName, T>;
 		template<typename field> using toType = decltype(toType_(field()));
+
+		template<typename A, typename B> constexpr bool typestrcmp() noexcept { return std::is_same<A, B>::value; }
+
+		template<typename name, typename fieldName, typename T> constexpr bool isFieldsName(const type_t<fieldName, T> &) noexcept
+			{ return typestrcmp<name, fieldName>(); }
+		template<size_t N, typename fieldName, typename field, typename... fields> struct findFieldIndex_t<N, fieldName, field, fields...>
+			{ constexpr static size_t index = isFieldsName<fieldName>(field()) ? N : findFieldIndex_t<N + 1, fieldName, fields...>::index; };
 
 		template<typename T> struct isBoolean : std::false_type { };
 		template<> struct isBoolean<bool> : std::true_type { };
