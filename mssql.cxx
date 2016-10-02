@@ -10,6 +10,25 @@ namespace tmplORM
 	{
 		namespace driver
 		{
+tSQLExecErrorType_t translateError(const int16_t result)
+{
+	if (result == SQL_NEED_DATA)
+		return tSQLExecErrorType_t::needData;
+	else if (result == SQL_NO_DATA)
+		return tSQLExecErrorType_t::noData;
+#ifdef SQL_PARAM_DATA_AVAILABLE
+	else if (result == SQL_PARAM_DATA_AVAILABLE)
+		return tSQLExecErrorType_t::dataAvail;
+#endif
+	else if (result == SQL_INVALID_HANDLE)
+		return tSQLExecErrorType_t::handleInv;
+	else if (result == SQL_ERROR)
+		return tSQLExecErrorType_t::generalError;
+	else if (result != SQL_SUCCESS && result != SQL_SUCCESS_WITH_INFO)
+		return tSQLExecErrorType_t::unknown;
+	return tSQLExecErrorType_t::ok;
+}
+
 bool tSQLClient_t::connect(const stringPtr_t &connString) const noexcept
 {
 	if (!dbHandle || !connection || haveConnection)
