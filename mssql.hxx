@@ -63,6 +63,7 @@ private:
 
 public:
 	constexpr tSQLValue_t() noexcept : data(), length(0), type(0) { }
+	tSQLValue_t(const void *const _data, const uint16_t _length, const int16_t _type) noexcept;
 };
 
 struct tSQLResult_t final

@@ -262,6 +262,46 @@ bool tSQLResult_t::next() const noexcept { return valid() && !error(SQLFetch(que
 inline bool isCharType(const int16_t type) noexcept { return type == SQL_LONGVARCHAR || type ==  SQL_VARCHAR || type == SQL_CHAR; }
 inline bool isWCharType(const int16_t type) noexcept { return type == SQL_WLONGVARCHAR || type == SQL_WVARCHAR || type == SQL_WCHAR; }
 inline bool isBinType(const int16_t type) noexcept { return type == SQL_LONGVARBINARY || type == SQL_VARBINARY || type == SQL_BINARY; }
+
+tSQLValue_t tSQLResult_t::operator [](const uint16_t idx) const noexcept
+{
+	if (idx >= fields || !valid())
+		return tSQLValue_t();
+	const uint16_t column = idx + 1;
+
+	// Pitty this can't use C++17 syntax: [const int16_t type, const uint32_t valueLength] = fieldInfo[idx];
+	int16_t type;
+	uint32_t valueLength;
+	std::tie(type, valueLength) = fieldInfo[idx];
+	const int16_t cType = odbcToCType(type);
+	if (isCharType(type) || isWCharType(type) || isBinType(type))
+	{
+		uint32_t temp = 0;
+		long length = 0;
+		if (error(SQLGetData(queryHandle, column, cType, &temp, 0, &length)) || length == SQL_NULL_DATA || length == SQL_NO_TOTAL)
+			return tSQLValue_t();
+		valueLength = uint32_t(length) + 1;
+		if (isWCharType(type))
+			++valueLength;
+	}
+
+	auto valueStorage = makeUnique<char []>(valueLength);
+	if (!valueStorage)
+		return tSQLValue_t();
+	valueStorage[valueLength - 1] = 0;
+	if (isWCharType(type))
+		valueStorage[valueLength - 2] = 0;
+	// Hmm.. I think this might actually be wrong.. needs more thought.
+	if (!(isBinType(type) && valueLength == 1))
+	{
+		if (error(SQLGetData(queryHandle, column, cType, valueStorage.get(), valueLength, nullptr)))
+			return tSQLValue_t();
+	}
+	return tSQLValue_t(valueStorage.release(), valueLength, type);
+}
+
+bool tSQLResult_t::error(const int16_t err) const noexcept
+	{ return !client || client->error(err, SQL_HANDLE_STMT, queryHandle); }
 		}
 	}
 }
