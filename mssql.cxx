@@ -32,6 +32,36 @@ tSQLExecErrorType_t translateError(const int16_t result)
 	return tSQLExecErrorType_t::ok;
 }
 
+inline int16_t odbcToCType(const int16_t typeODBC) noexcept
+{
+	switch (typeODBC)
+	{
+		case SQL_CHAR:
+		case SQL_VARCHAR:
+		case SQL_LONGVARCHAR:
+			return SQL_C_CHAR;
+		case SQL_WCHAR:
+		case SQL_WVARCHAR:
+		case SQL_WLONGVARCHAR:
+			return SQL_C_WCHAR;
+		case SQL_BINARY:
+		case SQL_VARBINARY:
+		case SQL_LONGVARBINARY:
+			return SQL_C_BINARY;
+		case SQL_BIGINT:
+			return SQL_C_SBIGINT;
+		case SQL_INTEGER:
+			return SQL_C_SLONG;
+		case SQL_SMALLINT:
+			return SQL_C_SSHORT;
+		case SQL_TINYINT:
+			return SQL_C_STINYINT;
+		case SQL_GUID:
+			return SQL_C_GUID;
+	}
+	return typeODBC;
+}
+
 tSQLClient_t::tSQLClient_t() noexcept : dbHandle(nullptr), connection(nullptr), haveConnection(false), needsCommit(false), _error()
 {
 	if (SQLAllocHandle(SQL_HANDLE_ENV, nullptr, &dbHandle) != SQL_SUCCESS || !dbHandle)
