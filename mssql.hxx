@@ -118,10 +118,10 @@ protected:
 
 public:
 	tSQLClient_t() noexcept;
-	tSQLClient_t(tSQLClient_t &&con) noexcept : dbHandle(nullptr), connection(nullptr), haveConnection(false),
-		needsCommit(false), _error() { *this = std::move(con); }
+	tSQLClient_t(tSQLClient_t &&con) noexcept : dbHandle(nullptr), connection(nullptr), haveConnection(false), needsCommit(false), _error()
+		{ *this = std::move(con); }
 	~tSQLClient_t() noexcept;
-	tSQLClient_t &operator =(tSQLClient_t &&) noexcept;
+	tSQLClient_t &operator =(tSQLClient_t &&con) noexcept;
 
 	bool valid() const noexcept { return dbHandle && connection && haveConnection; }
 	bool connect(const char *const driver, const char *const host, const uint32_t port, const char *const user, const char *const passwd) const noexcept;
