@@ -63,7 +63,10 @@ private:
 
 public:
 	constexpr tSQLValue_t() noexcept : data(), length(0), type(0) { }
-	tSQLValue_t(const void *const _data, const uint16_t _length, const int16_t _type) noexcept;
+	tSQLValue_t(const void *const _data, const uint64_t _length, const int16_t _type) noexcept;
+	tSQLValue_t(tSQLValue_t &&value) noexcept : tSQLValue_t() { *this = std::move(value); }
+	~tSQLValue_t() noexcept { }
+	tSQLValue_t &operator =(tSQLValue_t &&value) noexcept;
 };
 
 struct tSQLResult_t final

@@ -302,6 +302,25 @@ tSQLValue_t tSQLResult_t::operator [](const uint16_t idx) const noexcept
 
 bool tSQLResult_t::error(const int16_t err) const noexcept
 	{ return !client || client->error(err, SQL_HANDLE_STMT, queryHandle); }
+
+tSQLValue_t::tSQLValue_t(const void *const _data, const size_t _length, const int16_t _type) noexcept :
+	data(static_cast<const char *const>(_data)), length(_length), type(_type)
+{
+	if (isWCharType(type))
+	{
+		using mutStringPtr_t = std::unique_ptr<char []>;
+		const mutStringPtr_t &newData = utf16::convert(static_cast<const char16_t *const>(_data));
+		data.reset(const_cast<mutStringPtr_t &>(newData).release());
+	}
+}
+
+tSQLValue_t &tSQLValue_t::operator =(tSQLValue_t &&value) noexcept
+{
+	std::swap(data, value.data);
+	swap(length, value.length);
+	swap(type, value.type);
+	return *this;
+}
 		}
 	}
 }
