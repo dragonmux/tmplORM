@@ -59,18 +59,27 @@ struct tSQLResult_t final
 private:
 	using fieldType_t = std::pair<int16_t, uint32_t>;
 	const tSQLClient_t *const client;
-	void *const handle;
+	void *const queryHandle;
+	const bool _hasData, _freeHandle;
+	const uint16_t fields;
+	std::unique_ptr<fieldType_t []> fieldInfo;
 
 protected:
-	tSQLResult_t(const tSQLClient_t *const client, void *const &&handle, const bool hasData, const bool freeHandle = true) noexcept;
+	tSQLResult_t(const tSQLClient_t *const _client, void *const &&handle, const bool hasData, const bool freeHandle = true) noexcept;
 	bool error(const int16_t err) const noexcept;
 	friend struct tSQLQuery_t;
 
 public:
-	constexpr tSQLResult_t() noexcept : client(nullptr), handle(nullptr) { }
+	constexpr tSQLResult_t() noexcept : client(nullptr), queryHandle(nullptr), _hasData(false), _freeHandle(true), fields(0), fieldInfo() { }
 	tSQLResult_t(tSQLResult_t &&row) noexcept : tSQLResult_t() { *this = std::move(row); }
 	~tSQLResult_t();
 	tSQLResult_t &operator =(tSQLResult_t &&row) noexcept;
+	bool valid() const noexcept { return client && queryHandle && (fields == 0 || fieldInfo) && _hasData; }
+	bool hasData() const noexcept { return _hasData; }
+	uint64_t numRows() const noexcept;
+	uint16_t numFields() const noexcept { return fields; }
+	uint64_t rowID() const noexcept;
+	bool next() const noexcept;
 
 	tSQLResult_t(const tSQLResult_t &) = delete;
 	tSQLResult_t &operator =(const tSQLResult_t &) = delete;

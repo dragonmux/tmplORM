@@ -204,6 +204,64 @@ tSQLResult_t tSQLQuery_t::execute() const noexcept
 
 bool tSQLQuery_t::error(const int16_t err) const noexcept
 	{ return !client || client->error(err, SQL_HANDLE_STMT, queryHandle); }
+
+tSQLResult_t::tSQLResult_t(const tSQLClient_t *const _client, void *const &&handle, const bool hasData, const bool freeHandle) noexcept :
+	client(_client), queryHandle(), _hasData(hasData), _freeHandle(freeHandle), fields(0), fieldInfo()
+{
+	uint16_t &_fields = const_cast<uint16_t &>(fields);
+	swap(queryHandle, handle);
+	if (error(SQLNumResultCols(queryHandle, reinterpret_cast<int16_t *>(&_fields))) || (fields & 0x8000))
+	{
+		_fields = 0;
+		return;
+	}
+	else if (fields)
+	{
+		fieldInfo = makeUnique<fieldType_t []>(fields);
+		if (!fieldInfo)
+			return;
+		for (uint16_t i = 0; i < fields; ++i)
+		{
+			long type = 0, length = 0;
+			if (error(SQLColAttribute(queryHandle, i + 1, SQL_DESC_TYPE, nullptr, 0, nullptr, &type)) || !type ||
+				error(SQLColAttribute(queryHandle, i + 1, SQL_DESC_OCTET_LENGTH, nullptr, 0, nullptr, &length)) || length < 0)
+			{
+				fieldInfo.reset();
+				return;
+			}
+			fieldInfo[i] = std::make_pair(int16_t(type), uint32_t(length));
+		}
+	}
+}
+
+tSQLResult_t::~tSQLResult_t() noexcept
+{
+	if (_freeHandle)
+		SQLFreeHandle(SQL_HANDLE_STMT, queryHandle);
+}
+
+tSQLResult_t &tSQLResult_t::operator =(tSQLResult_t &&res) noexcept
+{
+	swap(client, res.client);
+	swap(queryHandle, res.queryHandle);
+	swap(_hasData, res._hasData);
+	swap(_freeHandle, res._freeHandle);
+	swap(fields, res.fields);
+	return *this;
+}
+
+uint64_t tSQLResult_t::numRows() const noexcept
+{
+	long rows = 0;
+	if (!valid() || error(SQLRowCount(queryHandle, &rows)) || rows < 0)
+		return 0;
+	return uint64_t(rows);
+}
+
+bool tSQLResult_t::next() const noexcept { return valid() && !error(SQLFetch(queryHandle)); }
+inline bool isCharType(const int16_t type) noexcept { return type == SQL_LONGVARCHAR || type ==  SQL_VARCHAR || type == SQL_CHAR; }
+inline bool isWCharType(const int16_t type) noexcept { return type == SQL_WLONGVARCHAR || type == SQL_WVARCHAR || type == SQL_WCHAR; }
+inline bool isBinType(const int16_t type) noexcept { return type == SQL_LONGVARBINARY || type == SQL_VARBINARY || type == SQL_BINARY; }
 		}
 	}
 }
