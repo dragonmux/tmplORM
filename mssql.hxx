@@ -72,14 +72,14 @@ public:
 	std::unique_ptr<char []> asString(const bool release = true) const;
 	const void *asBuffer(size_t &bufferLength, const bool release = false) const;
 	bool asBool() const;
-	bool asInt8() const;
-	bool asUint8() const;
-	bool asInt16() const;
-	bool asUint16() const;
-	bool asInt32() const;
-	bool asUint32() const;
-	bool asInt64() const;
-	bool asUint64() const;
+	uint8_t asUint8() const;
+	int8_t asInt8() const;
+	uint16_t asUint16() const;
+	int16_t asInt16() const;
+	uint32_t asUint32() const;
+	int32_t asInt32() const;
+	uint64_t asUint64() const;
+	int64_t asInt64() const;
 	// asDate() const;
 	// asDateTime() const;
 
