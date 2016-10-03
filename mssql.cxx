@@ -322,6 +322,25 @@ tSQLValue_t &tSQLValue_t::operator =(tSQLValue_t &&value) noexcept
 	return *this;
 }
 
+template<typename T> const T &reinterpret(const stringPtr_t &data) noexcept
+	{ return *reinterpret_cast<const T *const>(data.get()); }
+
+std::unique_ptr<char []> tSQLValue_t::asString(const bool release) const
+{
+	if (isNull() || (!isCharType(type) && !isWCharType(type)))
+		throw tSQLValueError_t(tSQLErrorType_t::stringError);
+	return std::unique_ptr<char []>(const_cast<char *>(release ? data.release() : strNewDup(data.get()).release()));
+}
+
+//
+
+bool tSQLValue_t::asBool() const
+{
+	if (isNull() || type != SQL_BIT)
+		throw tSQLValueError_t(tSQLErrorType_t::boolError);
+	return reinterpret<uint8_t>(data) != 0;
+}
+
 tSQLExecError_t::tSQLExecError_t(const tSQLExecErrorType_t error, const int16_t handleType, void *const handle) noexcept : _error(error), _state{{}}, _message()
 {
 	if (handle)
