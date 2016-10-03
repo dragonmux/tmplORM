@@ -54,6 +54,17 @@ public:
 	tSQLExecError_t &operator =(const tSQLExecError_t &) = delete;
 };
 
+struct tSQLValue_t final
+{
+private:
+	mutable stringPtr_t data;
+	const uint64_t length;
+	const int16_t type;
+
+public:
+	constexpr tSQLValue_t() noexcept : data(), length(0), type(0) { }
+};
+
 struct tSQLResult_t final
 {
 private:
@@ -80,6 +91,7 @@ public:
 	uint16_t numFields() const noexcept { return fields; }
 	uint64_t rowID() const noexcept;
 	bool next() const noexcept;
+	tSQLValue_t operator [](const uint16_t idx) const noexcept;
 
 	tSQLResult_t(const tSQLResult_t &) = delete;
 	tSQLResult_t &operator =(const tSQLResult_t &) = delete;
