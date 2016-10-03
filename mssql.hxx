@@ -67,6 +67,38 @@ public:
 	tSQLValue_t(tSQLValue_t &&value) noexcept : tSQLValue_t() { *this = std::move(value); }
 	~tSQLValue_t() noexcept { }
 	tSQLValue_t &operator =(tSQLValue_t &&value) noexcept;
+
+	bool isNull() const noexcept { return !data; }
+	std::unique_ptr<char []> asString(const bool release = true) const;
+	const void *asBuffer(size_t &bufferLength, const bool release = false) const;
+	bool asBool() const;
+	bool asInt8() const;
+	bool asUint8() const;
+	bool asInt16() const;
+	bool asUint16() const;
+	bool asInt32() const;
+	bool asUint32() const;
+	bool asInt64() const;
+	bool asUint64() const;
+	// asDate() const;
+	// asDateTime() const;
+
+	operator std::unique_ptr<char []>() const { return asString(); }
+	operator const char *() const { return data.get(); }
+	operator bool() const { return asBool(); }
+	operator int8_t() const { return asInt8(); }
+	operator uint8_t() const { return asUint8(); }
+	operator int16_t() const { return asInt16(); }
+	operator uint16_t() const { return asUint16(); }
+	operator int32_t() const { return asInt32(); }
+	operator uint32_t() const { return asUint32(); }
+	operator int64_t() const { return asInt64(); }
+	operator uint64_t() const { return asUint64(); }
+	// operator () const { return asDate(); }
+	// operator () const { return asDateTime(); }
+
+	tSQLValue_t(const tSQLValue_t &) = delete;
+	tSQLValue_t &operator =(const tSQLValue_t &) = delete;
 };
 
 struct tSQLResult_t final
