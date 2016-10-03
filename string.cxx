@@ -21,6 +21,15 @@ std::unique_ptr<const char []> vaFormatString(const char *format, va_list args) 
 	return std::unique_ptr<const char []>(ret.release());
 }
 
+std::unique_ptr<const char []> strNewDup(const char *const str) noexcept
+{
+	auto ret = makeUnique<const char []>(strlen(str) + 1);
+	if (!ret)
+		return nullptr;
+	strcpy(const_cast<char *>(ret.get()), str);
+	return ret;
+}
+
 inline bool isMultiValid() noexcept { return true; }
 template<typename... values_t> inline bool isMultiValid(const char c, values_t ...values) noexcept
 	{ return (c & 0xC0) == 0x80 && isMultiValid(values...); }

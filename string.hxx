@@ -6,8 +6,9 @@
 #include <new>
 #include <string>
 
-extern std::unique_ptr<const char []> formatString(const char *format, ...) noexcept;
-extern std::unique_ptr<const char []> vaFormatString(const char *format, va_list args) noexcept;
+std::unique_ptr<const char []> formatString(const char *format, ...) noexcept;
+std::unique_ptr<const char []> vaFormatString(const char *format, va_list args) noexcept;
+std::unique_ptr<const char []> strNewDup(const char *const str) noexcept;
 
 struct utf16_t final
 {
