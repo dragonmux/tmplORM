@@ -355,6 +355,14 @@ bool tSQLValue_t::asBool() const
 	return reinterpret<uint8_t>(data) != 0;
 }
 
+const void *tSQLValue_t::asBuffer(size_t &bufferLength, const bool release) const
+{
+	if (isNull() || !isBinType(type))
+		throw tSQLValueError_t(tSQLErrorType_t::binError);
+	bufferLength = length;
+	return release ? data.release() : data.get();
+}
+
 tSQLExecError_t::tSQLExecError_t(const tSQLExecErrorType_t error, const int16_t handleType, void *const handle) noexcept : _error(error), _state{{}}, _message()
 {
 	if (handle)
@@ -366,7 +374,6 @@ tSQLExecError_t::tSQLExecError_t(const tSQLExecErrorType_t error, const int16_t 
 		SQLGetDiagField(handleType, handle, 1, SQL_DIAG_SQLSTATE, state.data(), state.size(), nullptr);
 		std::swap(_state, state);
 		SQLGetDiagField(handleType, handle, 1, SQL_DIAG_MESSAGE_TEXT, nullptr, 0, &messageLen);
-		//_message.reset(new (std::nothrow) char[++messageLen]());
 		_message = makeUnique<char []>(++messageLen);
 		if (_message)
 		{
