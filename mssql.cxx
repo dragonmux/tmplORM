@@ -94,10 +94,20 @@ bool tSQLClient_t::connect(const char *const driver, const char *const host, con
 bool tSQLClient_t::selectDB(const char *const db) const noexcept
 	{ return haveConnection = connect(formatString("DATABASE=%s", db)); }
 
-void tSQLClient_t::disconnect() const noexcept
+tSQLQuery_t tSQLClient_t::prepare(const char *const queryStmt, const size_t paramsCount) const noexcept
 {
-	if (haveConnection)
-		haveConnection = error(SQLDisconnect(connection), SQL_HANDLE_DBC, connection);
+	void *queryHandle = nullptr;
+	if (!valid() || error(SQLAllocHandle(SQL_HANDLE_STMT, connection, &queryHandle), SQL_HANDLE_STMT, queryHandle) || !queryHandle)
+		return tSQLQuery_t();
+	return tSQLQuery_t(this, queryHandle, queryStmt, paramsCount);
+}
+
+tSQLResult_t tSQLClient_t::query(const char *const queryStmt) const noexcept
+{
+	auto query = prepare(queryStmt, 0);
+	if (query.valid())
+		return query.execute();
+	return tSQLResult_t();
 }
 
 bool tSQLClient_t::beginTransact() const noexcept
@@ -117,13 +127,6 @@ bool tSQLClient_t::endTransact(const bool commitSuccess) const noexcept
 	return !needsCommit;
 }
 
-tSQLResult_t tSQLClient_t::query(const char *const queryStmt) const noexcept
-{
-	auto query = prepare(queryStmt, 0);
-	if (!query.valid())
-		return tSQLResult_t();
-	return query.execute();
-}
 
 bool tSQLClient_t::error(const tSQLExecErrorType_t err, const int16_t handleType, void *const handle) const noexcept
 {
