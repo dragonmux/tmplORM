@@ -321,6 +321,60 @@ tSQLValue_t &tSQLValue_t::operator =(tSQLValue_t &&value) noexcept
 	swap(type, value.type);
 	return *this;
 }
+
+tSQLExecError_t::tSQLExecError_t(const tSQLExecErrorType_t error, const int16_t handleType, void *const handle) noexcept : _error(error), _state{{}}, _message()
+{
+	if (handle)
+	{
+		sqlState_t state;
+		int16_t messageLen = 0;
+		static_assert(state.size() == SQL_SQLSTATE_SIZE + 1, "sqlState_t not the correct length for this ODBC interface");
+
+		SQLGetDiagField(handleType, handle, 1, SQL_DIAG_SQLSTATE, state.data(), state.size(), nullptr);
+		std::swap(_state, state);
+		SQLGetDiagField(handleType, handle, 1, SQL_DIAG_MESSAGE_TEXT, nullptr, 0, &messageLen);
+		//_message.reset(new (std::nothrow) char[++messageLen]());
+		_message = makeUnique<char []>(++messageLen);
+		if (_message)
+		{
+			SQLGetDiagField(handleType, handle, 1, SQL_DIAG_MESSAGE_TEXT, _message.get(), messageLen, nullptr);
+			_message[messageLen - 1] = 0;
+		}
+	}
+}
+
+tSQLExecError_t &tSQLExecError_t::operator =(tSQLExecError_t &&err) noexcept
+{
+	swap(_error, err._error);
+	std::swap(_state, err._state);
+	std::swap(_message, err._message);
+	return *this;
+}
+
+const char *tSQLExecError_t::error() const noexcept
+{
+	switch(_error)
+	{
+		case tSQLExecErrorType_t::ok:
+			return "No error";
+		case tSQLExecErrorType_t::connect:
+			return "Could not connect to database";
+		case tSQLExecErrorType_t::query:
+			return "Could not execute query";
+		case tSQLExecErrorType_t::handleInv:
+			return "Invalid handle returned";
+		case tSQLExecErrorType_t::generalError:
+			return "General error from the SQL server";
+		case tSQLExecErrorType_t::needData:
+			return "SQL server is requesting more data for call";
+		case tSQLExecErrorType_t::noData:
+			return "SQL server could not return data for call";
+		case tSQLExecErrorType_t::dataAvail:
+			return "SQL server is claiming more data is available";
+		default:
+			return "Unknown error";
+	}
+}
 		}
 	}
 }
