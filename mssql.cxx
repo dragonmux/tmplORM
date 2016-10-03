@@ -80,16 +80,19 @@ bool tSQLClient_t::connect(const stringPtr_t &connString) const noexcept
 	if (!dbHandle || !connection || haveConnection)
 		return !error(tSQLExecErrorType_t::connect);
 	auto odbcString = utf16::convert(connString.get());
-	int16_t temp;
+	int16_t resultLen = 0;
 
-	return !error(SQLBrowseConnect(connection, odbcString, utf16::length(odbcString), nullptr, 0, &temp), SQL_HANDLE_DBC, connection);
+	return !error(SQLBrowseConnect(connection, odbcString, utf16::length(odbcString), nullptr, 0, &resultLen), SQL_HANDLE_DBC, connection);
 }
 
 bool tSQLClient_t::connect(const char *const driver, const char *const host, const uint32_t port, const char *const user, const char *const passwd) const noexcept
-	{ return connect(formatString("Driver=%s;Server=tcp:%s,%u;Trusted_Connection=no;UID=%s;PID=%s", driver, host, port, user, passwd)); }
+{
+	return connect(formatString("DRIVER=%s;SERVER=tcp:%s,%u;UID=%s;PID=%s;TRUSTED_CONNECTION=no", driver, host, port ? port : 1433, user, passwd)) ||
+		_error == tSQLExecErrorType_t::needData;
+}
 
 bool tSQLClient_t::selectDB(const char *const db) const noexcept
-	{ return connect(formatString("Database=%s", db)); }
+	{ return haveConnection = connect(formatString("DATABASE=%s", db)); }
 
 void tSQLClient_t::disconnect() const noexcept
 {
