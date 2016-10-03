@@ -28,8 +28,9 @@ enum class tSQLExecErrorType_t : uint8_t
 struct tSQLExecError_t final
 {
 private:
+	using sqlState_t = std::array<char, 6>;
 	const tSQLExecErrorType_t _error;
-	std::array<char, 6> _state;
+	sqlState_t _state;
 	std::unique_ptr<char []> _message;
 
 public:
@@ -43,6 +44,11 @@ public:
 	const char *state() const noexcept { return _state.data(); }
 	const char *message() const noexcept { return _message.get(); }
 	tSQLExecErrorType_t errorNum() const noexcept { return _error; }
+
+	bool operator ==(const tSQLExecError_t &err) const noexcept { return _error == err._error && _state == err._state; }
+	bool operator !=(const tSQLExecError_t &err) const noexcept { return _error != err._error || _state != err._state; }
+	bool operator ==(const tSQLExecErrorType_t &error) const noexcept { return _error == error; }
+	bool operator !=(const tSQLExecErrorType_t &error) const noexcept { return _error != error; }
 
 	tSQLExecError_t(const tSQLExecError_t &) = delete;
 	tSQLExecError_t &operator =(const tSQLExecError_t &) = delete;
