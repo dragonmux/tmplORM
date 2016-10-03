@@ -112,17 +112,15 @@ tSQLResult_t tSQLClient_t::query(const char *const queryStmt) const noexcept
 
 bool tSQLClient_t::beginTransact() const noexcept
 {
-	if (valid() && !needsCommit)
-	{
-		needsCommit = !error(SQLSetConnectAttr(connection, SQL_ATTR_AUTOCOMMIT, reinterpret_cast<void *>(long(SQL_AUTOCOMMIT_ON)), 0),
-			SQL_HANDLE_DBC, connection);
-	}
-	return needsCommit;
+	if (needsCommit || !valid() || error(SQLSetConnectAttr(connection, SQL_ATTR_AUTOCOMMIT,
+		reinterpret_cast<void *>(long(SQL_AUTOCOMMIT_OFF)), 0), SQL_HANDLE_DBC, connection))
+		return false;
+	return needsCommit = true;
 }
 
 bool tSQLClient_t::endTransact(const bool commitSuccess) const noexcept
 {
-	if (valid() && needsCommit)
+	if (needsCommit && valid())
 		needsCommit = error(SQLEndTran(SQL_HANDLE_DBC, connection, commitSuccess ? SQL_COMMIT : SQL_ROLLBACK), SQL_HANDLE_DBC, connection);
 	return !needsCommit;
 }
