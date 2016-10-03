@@ -332,7 +332,15 @@ std::unique_ptr<char []> tSQLValue_t::asString(const bool release) const
 	return std::unique_ptr<char []>(const_cast<char *>(release ? data.release() : strNewDup(data.get()).release()));
 }
 
-//
+template<int16_t rawType, int16_t cType, tSQLErrorType_t error, typename T> T asInt(const tSQLValue_t &val, const stringPtr_t &data, const int16_t type)
+{
+	if (val.isNull() || (type != rawType && type != cType))
+		throw tSQLValueError_t(error);
+	return reinterpret<T>(data);
+}
+
+uint8_t tSQLValue_t::asUint8() const { return asInt<SQL_TINYINT, SQL_C_UTINYINT, tSQLErrorType_t::uint8Error, uint8_t>(*this, data, type); }
+int8_t tSQLValue_t::asInt8() const { return asInt<SQL_TINYINT, SQL_C_STINYINT, tSQLErrorType_t::int8Error, uint8_t>(*this, data, type); }
 
 bool tSQLValue_t::asBool() const
 {
