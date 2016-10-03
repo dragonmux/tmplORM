@@ -341,6 +341,12 @@ template<int16_t rawType, int16_t cType, tSQLErrorType_t error, typename T> T as
 
 uint8_t tSQLValue_t::asUint8() const { return asInt<SQL_TINYINT, SQL_C_UTINYINT, tSQLErrorType_t::uint8Error, uint8_t>(*this, data, type); }
 int8_t tSQLValue_t::asInt8() const { return asInt<SQL_TINYINT, SQL_C_STINYINT, tSQLErrorType_t::int8Error, uint8_t>(*this, data, type); }
+uint16_t tSQLValue_t::asUint16() const { return asInt<SQL_SMALLINT, SQL_C_USHORT, tSQLErrorType_t::uint16Error, uint16_t>(*this, data, type); }
+int16_t tSQLValue_t::asInt16() const { return asInt<SQL_SMALLINT, SQL_C_SSHORT, tSQLErrorType_t::int16Error, uint16_t>(*this, data, type); }
+uint32_t tSQLValue_t::asUint32() const { return asInt<SQL_INTEGER, SQL_C_ULONG, tSQLErrorType_t::uint32Error, uint32_t>(*this, data, type); }
+int32_t tSQLValue_t::asInt32() const { return asInt<SQL_INTEGER, SQL_C_SLONG, tSQLErrorType_t::int32Error, uint32_t>(*this, data, type); }
+uint64_t tSQLValue_t::asUint64() const { return asInt<SQL_BIGINT, SQL_C_UBIGINT, tSQLErrorType_t::uint64Error, uint64_t>(*this, data, type); }
+int64_t tSQLValue_t::asInt64() const { return asInt<SQL_BIGINT, SQL_C_SBIGINT, tSQLErrorType_t::int64Error, uint64_t>(*this, data, type); }
 
 bool tSQLValue_t::asBool() const
 {
