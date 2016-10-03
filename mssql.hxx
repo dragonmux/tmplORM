@@ -200,6 +200,31 @@ public:
 	tSQLClient_t(const tSQLClient_t &) = delete;
 	tSQLClient_t &operator =(const tSQLClient_t &) = delete;
 };
+
+enum class tSQLErrorType_t : uint8_t
+{
+	noError, binError,
+	stringError, boolError,
+	uint8Error, int8Error,
+	uint16Error, int16Error,
+	uint32Error, int32Error,
+	uint64Error, int64Error,
+	dateError, dateTimeError
+};
+
+struct tSQLValueError_t final
+{
+private:
+	const tSQLErrorType_t errorType;
+
+public:
+	constexpr tSQLValueError_t() noexcept : errorType(tSQLErrorType_t::noError) { }
+	constexpr tSQLValueError_t(const tSQLErrorType_t type) noexcept : errorType(type) { }
+	//tSQLValueError_t(tSQLValueError_t &&err) noexcept : tSQLValueError_t() { *this = std::move(err); }
+	~tSQLValueError_t() noexcept { }
+	//tSQLValueError_t &operator =(tSQLValueError_t &&err) const noexcept;
+	const char *error() const noexcept;
+};
 		}
 	}
 }
