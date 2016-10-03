@@ -125,17 +125,16 @@ bool tSQLClient_t::endTransact(const bool commitSuccess) const noexcept
 	return !needsCommit;
 }
 
-
-bool tSQLClient_t::error(const tSQLExecErrorType_t err, const int16_t handleType, void *const handle) const noexcept
-{
-	_error = std::move(tSQLExecError_t(err, handleType, handle));
-	return err != tSQLExecErrorType_t::ok;
-}
-
 bool tSQLClient_t::error(const int16_t err, const int16_t handleType, void *const handle) const noexcept
 	{ return error(translateError(err), handleType, handle); }
 bool tSQLClient_t::error(const tSQLExecErrorType_t err) const noexcept
-	{ return error(err, SQL_HANDLE_ENV, nullptr); }
+	{ return error(err, 0, nullptr); }
+
+bool tSQLClient_t::error(const tSQLExecErrorType_t err, const int16_t handleType, void *const handle) const noexcept
+{
+	_error = tSQLExecError_t(err, handleType, handle);
+	return err != tSQLExecErrorType_t::ok;
+}
 
 bool tSQLQuery_t::error(const int16_t err) const noexcept
 	{ return !client || client->error(err, SQL_HANDLE_STMT, queryHandle); }
