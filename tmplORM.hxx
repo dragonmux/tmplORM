@@ -8,6 +8,7 @@
 #include "typestring/typestring.hh"
 
 #define ts(x) typestring_is(x)
+#define ts_(x) ts(x)()
 
 namespace tmplORM
 {
@@ -221,14 +222,12 @@ namespace tmplORM
 			{ return typestrcmp<name, fieldName>(); }
 		template<typename fieldName, typename field, typename... fields>
 			using fieldIndex_ = fieldIndex__t<isFieldsName<fieldName>(field()), fieldName, fields...>;
-
 		template<typename fieldName, typename field, typename... fields> struct fieldIndex__t<false, fieldName, field, fields...>
 			{ constexpr static size_t index = fieldIndex_<fieldName, field, fields...>::index + 1; };
 		template<typename fieldName, typename... fields> struct fieldIndex__t<true, fieldName, fields...>
 			{ constexpr static size_t index = 0; };
 		template<typename fieldName, typename field, typename... fields> struct fieldIndex_t
 			{ constexpr static size_t index = fieldIndex_<fieldName, field, fields...>::index; };
-		//isFieldsName<fieldName>(field()) ? N : fieldIndex_t<N + 1, fieldName, fields...>::index; };
 
 		template<size_t N, typename field, typename... fields> struct fieldType_t
 			{ using type = typename fieldType_t<N - 1, fields...>::type; };
