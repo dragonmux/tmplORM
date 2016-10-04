@@ -30,9 +30,14 @@ namespace tmplORM
 	namespace common
 	{
 		template<typename... fields> constexpr bool hasPrimaryKey() noexcept;
-		template<size_t N, typename fieldName, typename... fields> struct findFieldIndex_t;
+		template<size_t N, typename fieldName, typename... fields> struct fieldIndex_t;
+		template<size_t N, typename... fields> struct fieldType_t;
+
+		template<typename fieldName, typename... fields> using fieldIndex = fieldIndex_t<0, fieldName, fields...>;
+		template<typename fieldName, typename... fields> using fieldType = typename fieldType_t<fieldIndex<fieldName, fields...>::index, fields...>::type;
 	}
-	template<typename fieldName, typename... fields> using findFieldIndex = tmplORM::common::findFieldIndex_t<0, fieldName, fields...>;
+	using tmplORM::common::fieldIndex;
+	using tmplORM::common::fieldType;
 
 	template<typename _tableName, typename... Fields> struct model_t : public fields_t<Fields...>
 	{
@@ -43,9 +48,8 @@ namespace tmplORM
 		const char *tableName() const noexcept { return _tableName::data(); }
 		constexpr static const size_t N = fields_t<Fields...>::N;
 		static_assert(tmplORM::common::hasPrimaryKey<Fields...>(), "model_t must be instanciated with a primary key");
-		template<char... C> auto operator [](const typestring<C...> &) const noexcept ->
-			decltype(std::get<findFieldIndex<typestring<C...>, Fields...>::index>(this->fields()))
-		{ return std::get<findFieldIndex<typestring<C...>, Fields...>::index>(this->fields()); }
+		template<char... C> auto operator [](typestring<C...> &&) const noexcept -> fieldType<typestring<C...>, Fields...>
+			{ return std::get<fieldIndex<typestring<C...>, Fields...>::index>(this->fields()); }
 
 		// create(); - Creates the table
 		// add(); - CRUD Create
@@ -214,8 +218,12 @@ namespace tmplORM
 
 		template<typename name, typename fieldName, typename T> constexpr bool isFieldsName(const type_t<fieldName, T> &) noexcept
 			{ return typestrcmp<name, fieldName>(); }
-		template<size_t N, typename fieldName, typename field, typename... fields> struct findFieldIndex_t<N, fieldName, field, fields...>
-			{ constexpr static size_t index = isFieldsName<fieldName>(field()) ? N : findFieldIndex_t<N + 1, fieldName, fields...>::index; };
+		template<size_t N, typename fieldName, typename field, typename... fields> struct fieldIndex_t<N, fieldName, field, fields...>
+			{ constexpr static size_t index = isFieldsName<fieldName>(field()) ? N : fieldIndex_t<N + 1, fieldName, fields...>::index; };
+
+		template<size_t N, typename field, typename... fields> struct fieldType_t<N, field, fields...>
+			{ using type = typename fieldType_t<N - 1, fields...>::type; };
+		template<typename field, typename... fields> struct fieldType_t<0, field, fields...> { using type = field; };
 
 		template<typename T> struct isBoolean : std::false_type { };
 		template<> struct isBoolean<bool> : std::true_type { };
