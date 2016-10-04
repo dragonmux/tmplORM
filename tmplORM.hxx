@@ -216,15 +216,15 @@ namespace tmplORM
 
 		template<typename A, typename B> constexpr bool typestrcmp() noexcept { return std::is_same<A, B>::value; }
 
-		template<bool, typename fieldName, typename field, typename... fields> struct fieldIndex__t;
+		template<bool, typename fieldName, typename... fields> struct fieldIndex__t;
 		template<typename name, typename fieldName, typename T> constexpr bool isFieldsName(const type_t<fieldName, T> &) noexcept
 			{ return typestrcmp<name, fieldName>(); }
 		template<typename fieldName, typename field, typename... fields>
 			using fieldIndex_ = fieldIndex__t<isFieldsName<fieldName>(field()), fieldName, fields...>;
 
-		template<bool, typename fieldName, typename field, typename... fields> struct fieldIndex__t
+		template<typename fieldName, typename field, typename... fields> struct fieldIndex__t<false, fieldName, field, fields...>
 			{ constexpr static size_t index = fieldIndex_<fieldName, field, fields...>::index + 1; };
-		template<typename fieldName, typename field, typename... fields> struct fieldIndex__t<true, fieldName, field, fields...>
+		template<typename fieldName, typename... fields> struct fieldIndex__t<true, fieldName, fields...>
 			{ constexpr static size_t index = 0; };
 		template<typename fieldName, typename field, typename... fields> struct fieldIndex_t
 			{ constexpr static size_t index = fieldIndex_<fieldName, field, fields...>::index; };
