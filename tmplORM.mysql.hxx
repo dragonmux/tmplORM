@@ -58,14 +58,14 @@ namespace tmplORM
 			static const bool isNull = true;
 
 			template<typename T> typename std::enable_if<!isNumeric<T>::value>::type
-				bindValue(MYSQL_BIND &param, const T &value) noexcept
+				bindValue(MYSQL_BIND &param, const T &) noexcept
 			{
 				param.is_null = &isNotNull;
 				param.is_unsigned = false;
 			}
 
 			template<typename T> typename std::enable_if<isNumeric<T>::value>::type
-				bindValue(MYSQL_BIND &param, const T &value) noexcept
+				bindValue(MYSQL_BIND &param, const T &) noexcept
 			{
 				param.is_null = &isNotNull;
 				param.is_unsigned = std::is_unsigned<T>::value;
