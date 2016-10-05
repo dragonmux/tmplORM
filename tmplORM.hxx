@@ -15,19 +15,6 @@ namespace tmplORM
 	using namespace irqus;
 	using std::nullptr_t;
 
-	template<typename... Fields> struct fields_t
-	{
-	protected:
-		constexpr static const size_t N = sizeof...(Fields);
-		std::tuple<Fields...> _fields;
-
-		constexpr fields_t() noexcept : _fields{} { }
-		constexpr fields_t(Fields &&...fields) noexcept : _fields{fields...} { }
-
-	public:
-		const std::tuple<Fields...> &fields() const noexcept { return _fields; }
-	};
-
 	namespace common
 	{
 		template<typename... fields> constexpr bool hasPrimaryKey() noexcept;
@@ -40,17 +27,30 @@ namespace tmplORM
 	using tmplORM::common::fieldIndex;
 	using tmplORM::common::fieldType;
 
+	template<typename... Fields> struct fields_t
+	{
+	protected:
+		constexpr static const size_t N = sizeof...(Fields);
+		std::tuple<Fields...> _fields;
+
+		constexpr fields_t() noexcept : _fields{} { }
+		constexpr fields_t(Fields &&...fields) noexcept : _fields{fields...} { }
+
+	public:
+		const std::tuple<Fields...> &fields() const noexcept { return _fields; }
+		template<char... C> auto operator [](const typestring<C...> &) noexcept -> fieldType<typestring<C...>, Fields...> &
+			{ return std::get<fieldIndex<typestring<C...>, Fields...>::index>(_fields); }
+	};
+
 	template<typename _tableName, typename... Fields> struct model_t : public fields_t<Fields...>
 	{
 	public:
 		constexpr model_t() noexcept : fields_t<Fields...>{} {}
 		constexpr model_t(Fields... fields) noexcept : fields_t<Fields...>{fields...} { }
 
+		static_assert(tmplORM::common::hasPrimaryKey<Fields...>(), "Model must have a primary key!");
 		const char *tableName() const noexcept { return _tableName::data(); }
 		constexpr static const size_t N = fields_t<Fields...>::N;
-		static_assert(tmplORM::common::hasPrimaryKey<Fields...>(), "model_t must be instanciated with a primary key");
-		template<char... C> auto operator [](typestring<C...> &&) const noexcept -> fieldType<typestring<C...>, Fields...>
-			{ return std::get<fieldIndex<typestring<C...>, Fields...>::index>(this->fields()); }
 
 		// create(); - Creates the table
 		// add(); - CRUD Create
