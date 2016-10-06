@@ -67,8 +67,6 @@ namespace tmplORM
 		template<typename field> struct createList_t<1, field> { using value = createList__<1, field>; };
 
 		template<typename... fields> using createList = typename createList_t<sizeof...(fields), fields...>::value;
-		template<typename... fields> using selectList = typename selectList_t<sizeof...(fields), fields...>::value;
-		template<typename... fields> using insertList = typename insertList_t<sizeof...(fields), fields...>::value;
 
 		template<typename tableName, typename... fields> using createTable__ = toString<
 			tycat<ts("CREATE TABLE "), bracket<tableName>, ts(" ("), createList<fields...>, ts(");")>
