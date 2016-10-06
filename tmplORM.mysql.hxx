@@ -227,74 +227,87 @@ namespace tmplORM
 		template<typename tableName, typename... fields> using createTable__ = toString<
 			tycat<ts("CREATE TABLE "), backtick<tableName>, ts(" ("), createList<fields...>, ts(");")>
 		>;
-		template<typename tableName, typename... fields> bool createTable_(const model_t<tableName, fields...> &) noexcept
-		{
-			using create = createTable__<tableName, fields...>;
-			return database.query(create::value);
-		}
-		template<typename... models> bool createTable() noexcept { return collect(createTable_(models())...); }
-
 		template<typename tableName, typename... fields> using select__ = toString<
 			tycat<ts("SELECT "), selectList<fields...>, ts(" FROM "), backtick<tableName>, ts(";")>
 		>;
-		template<typename T, typename tableName, typename... fields> T select_(const model_t<tableName, fields...> &) noexcept
-		{
-			using select = select__<tableName, fields...>;
-			database.query(select::value);
-			return T();
-		}
-		template<typename model> model select() noexcept { return select_<model>(model()); }
-
 		template<typename tableName, typename... fields> using add__ = toString<
 			tycat<ts("INSERT INTO "), backtick<tableName>, ts(" ("), insertList<fields...>, ts(") VALUES ("), placeholder<countInsert_t<fields...>::count>, ts(");")>
 		>;
-		template<typename tableName, typename... fields_t> bool add_(const model_t<tableName, fields_t...> &model) noexcept
-		{
-			using insert = add__<tableName, fields_t...>;
-			mySQLPreparedQuery_t query = database.prepare(insert::value, countInsert_t<fields_t...>::count);
-			bindInsert<fields_t...>::bind(model.fields(), query);
-			if (query.execute())
-			{
-				if (hasAutoInc<fields_t...>())
-					getAutoInc(model) = query.rowID();
-				return true;
-			}
-			return false;
-		}
-		template<typename... models_t> bool add(const models_t &...models) noexcept { return collect(add_(models)...); }
-
 		template<typename tableName, typename... fields> using update__ = toString<
 			tycat<ts("UPDATE "), backtick<tableName>, ts(" SET "), updateList<fields...>, updateWhere<fields...>, ts(";")>
 		>;
-		template<typename tableName, typename... fields_t> bool update_(const model_t<tableName, fields_t...> &model) noexcept
-		{
-			using update = update__<tableName, fields_t...>;
-			mySQLPreparedQuery_t query = database.prepare(update::value, countInsert_t<fields_t...>::count);
-			// This binds the fields, primary key last so it tags to the WHERE clause for this query.
-			bindUpdate<fields_t...>::bind(model.fields(), query);
-			return query.execute();
-		}
-		template<typename... models_t> bool update(const models_t &...models) noexcept { return collect(update_(models)...); }
-
 		template<typename tableName, typename... fields> using del__ = toString<
 			tycat<ts("DELETE * FROM "), backtick<tableName>, ts(";")>
 		>;
-		template<typename tableName, typename... fields> bool del_(const model_t<tableName, fields...> &model) noexcept
-		{
-			using del = del__<tableName, fields...>;
-			return database.query(del::value);
-		}
-		template<typename... models_t> bool del(const models_t &...models) noexcept { return collect(del_(models)...); }
-
 		template<typename tableName> using deleteTable__ = toString<
 			tycat<ts("DROP TABLE "), backtick<tableName>, ts(";")>
 		>;
-		template<typename tableName, typename... fields> bool deleteTable_(const model_t<tableName, fields...> &) noexcept
+
+		struct session_t final
 		{
-			using deleteTable = deleteTable__<tableName>;
-			return database.query(deleteTable::value);
-		}
-		template<typename... models> bool deleteTable() noexcept { return collect(deleteTable_(models())...); }
+		private:
+			//using driver::mySQLClient_t;
+			driver::mySQLClient_t database;
+
+		public:
+			session_t() noexcept : database() { }
+			~session_t() noexcept { }
+
+			template<typename tableName, typename... fields> bool createTable(const model_t<tableName, fields...> &) noexcept
+			{
+				using create = createTable__<tableName, fields...>;
+				return database.query(create::value);
+			}
+
+			template<typename T, typename tableName, typename... fields> T select_(const model_t<tableName, fields...> &) noexcept
+			{
+				using select = select__<tableName, fields...>;
+				database.query(select::value);
+				return T();
+			}
+
+			template<typename tableName, typename... fields_t> bool add(const model_t<tableName, fields_t...> &model) noexcept
+			{
+				using insert = add__<tableName, fields_t...>;
+				mySQLPreparedQuery_t query = database.prepare(insert::value, countInsert_t<fields_t...>::count);
+				bindInsert<fields_t...>::bind(model.fields(), query);
+				if (query.execute())
+				{
+					if (hasAutoInc<fields_t...>())
+						getAutoInc(model) = query.rowID();
+					return true;
+				}
+				return false;
+			}
+
+			template<typename tableName, typename... fields_t> bool update(const model_t<tableName, fields_t...> &model) noexcept
+			{
+				using update = update__<tableName, fields_t...>;
+				mySQLPreparedQuery_t query = database.prepare(update::value, countInsert_t<fields_t...>::count);
+				// This binds the fields, primary key last so it tags to the WHERE clause for this query.
+				bindUpdate<fields_t...>::bind(model.fields(), query);
+				return query.execute();
+			}
+
+			template<typename tableName, typename... fields> bool del(const model_t<tableName, fields...> &model) noexcept
+			{
+				using del = del__<tableName, fields...>;
+				return database.query(del::value);
+			}
+
+			template<typename tableName, typename... fields> bool deleteTable(const model_t<tableName, fields...> &) noexcept
+			{
+				using deleteTable = deleteTable__<tableName>;
+				return database.query(deleteTable::value);
+			}
+		};
+
+		//template<typename... models> bool createTable() noexcept { return collect(createTable_(models())...); }
+		//template<typename model> model select() noexcept { return select_<model>(model()); }
+		//template<typename... models_t> bool add(const models_t &...models) noexcept { return collect(add_(models)...); }
+		//template<typename... models_t> bool update(const models_t &...models) noexcept { return collect(update_(models)...); }
+		//template<typename... models_t> bool del(const models_t &...models) noexcept { return collect(del_(models)...); }
+		//template<typename... models> bool deleteTable() noexcept { return collect(deleteTable_(models())...); }
 	}
 }
 

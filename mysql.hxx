@@ -192,8 +192,6 @@ public:
 	bool operator !=(const mySQLValueError_t &error) const noexcept { return errorType != error.errorType; }
 };
 
-extern mySQLClient_t database;
-
 #undef MySQL_FORMAT_ARGS
 		}
 	}
