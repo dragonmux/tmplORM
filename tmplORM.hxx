@@ -238,6 +238,20 @@ namespace tmplORM
 
 		template<typename T> struct isNumeric : std::integral_constant<bool, std::is_integral<T>::value && !isBoolean<T>::value> { };
 	}
+
+	template<typename api_t> struct session_t final
+	{
+	private:
+		api_t session;
+
+	public:
+		template<typename... models> bool createTable() noexcept { return collect(session.createTable(models())...); }
+		template<typename model> model select() noexcept { return session.select<model>(model()); }
+		template<typename... models_t> bool add(const models_t &...models) noexcept { return collect(session.add(models)...); }
+		template<typename... models_t> bool update(const models_t &...models) noexcept { return collect(session.update(models)...); }
+		template<typename... models_t> bool del(const models_t &...models) noexcept { return collect(session.del(models)...); }
+		template<typename... models> bool deleteTable() noexcept { return collect(session.deleteTable(models())...); }
+	};
 }
 
 #endif /*tmplORM__HXX*/
