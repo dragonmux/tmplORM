@@ -286,13 +286,6 @@ namespace tmplORM
 				return database.query(deleteTable::value);
 			}
 		};
-
-		//template<typename... models> bool createTable() noexcept { return collect(createTable_(models())...); }
-		//template<typename model> model select() noexcept { return select_<model>(model()); }
-		//template<typename... models_t> bool add(const models_t &...models) noexcept { return collect(add_(models)...); }
-		//template<typename... models_t> bool update(const models_t &...models) noexcept { return collect(update_(models)...); }
-		//template<typename... models_t> bool del(const models_t &...models) noexcept { return collect(del_(models)...); }
-		//template<typename... models> bool deleteTable() noexcept { return collect(deleteTable_(models())...); }
 	}
 }
 
