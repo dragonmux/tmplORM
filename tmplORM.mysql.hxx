@@ -244,7 +244,7 @@ namespace tmplORM
 				return database.query(create::value);
 			}
 
-			template<typename T, typename tableName, typename... fields> T select_(const model_t<tableName, fields...> &) noexcept
+			template<typename T, typename tableName, typename... fields> T select(const model_t<tableName, fields...> &) noexcept
 			{
 				using select = select__<tableName, fields...>;
 				database.query(select::value);
@@ -287,6 +287,7 @@ namespace tmplORM
 			}
 		};
 	}
+	using mysql_t = mysql::session_t;
 }
 
 #endif /*tmplORM_MYSQL__HXX*/
