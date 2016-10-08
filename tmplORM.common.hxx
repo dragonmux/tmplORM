@@ -55,5 +55,5 @@ inline namespace common
 	template<bool, typename... fields> struct updateWhere_t { };
 	template<typename... fields> struct updateWhere_t<true, fields...>
 		{ using value = tycat<ts(" WHERE "), idField<fields...>>; };
-	template<typename... fields> using updateWhere = typename updateWhere_t<hasAutoInc<fields...>(), fields...>::value;
+	template<typename... fields> using updateWhere = typename updateWhere_t<hasPrimaryKey<fields...>(), fields...>::value;
 }
