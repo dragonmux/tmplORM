@@ -245,12 +245,12 @@ namespace tmplORM
 		api_t session;
 
 	public:
-		template<typename... models> bool createTable() noexcept { return collect(session.createTable(models())...); }
-		template<typename model> model select() noexcept { return session.select<model>(model()); }
-		template<typename... models_t> bool add(const models_t &...models) noexcept { return collect(session.add(models)...); }
-		template<typename... models_t> bool update(const models_t &...models) noexcept { return collect(session.update(models)...); }
-		template<typename... models_t> bool del(const models_t &...models) noexcept { return collect(session.del(models)...); }
-		template<typename... models> bool deleteTable() noexcept { return collect(session.deleteTable(models())...); }
+		template<typename... models> bool createTable() noexcept { return collect(session.template createTable(models())...); }
+		template<typename model> model select() noexcept { return session.template select<model>(model()); }
+		template<typename... models_t> bool add(const models_t &...models) noexcept { return collect(session.template add(models)...); }
+		template<typename... models_t> bool update(const models_t &...models) noexcept { return collect(session.template update(models)...); }
+		template<typename... models_t> bool del(const models_t &...models) noexcept { return collect(session.template del(models)...); }
+		template<typename... models> bool deleteTable() noexcept { return collect(session.template deleteTable(models())...); }
 	};
 }
 
