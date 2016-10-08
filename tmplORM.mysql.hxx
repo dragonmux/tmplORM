@@ -228,7 +228,7 @@ namespace tmplORM
 			tycat<ts("UPDATE "), backtick<tableName>, ts(" SET "), updateList<fields...>, updateWhere<fields...>, ts(";")>
 		>;
 		template<typename tableName, typename... fields> using del__ = toString<
-			tycat<ts("DELETE * FROM "), backtick<tableName>, ts(";")>
+			tycat<ts("DELETE * FROM "), backtick<tableName>, updateWhere<fields...>, ts(";")>
 		>;
 		template<typename tableName> using deleteTable__ = toString<
 			tycat<ts("DROP TABLE "), backtick<tableName>, ts(";")>
@@ -237,7 +237,6 @@ namespace tmplORM
 		struct session_t final
 		{
 		private:
-			//using driver::mySQLClient_t;
 			driver::mySQLClient_t database;
 
 		public:
