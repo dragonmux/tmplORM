@@ -44,4 +44,16 @@ inline namespace common
 	template<typename... fields> using selectList = typename selectList_t<sizeof...(fields), fields...>::value;
 	template<typename... fields> using insertList = typename insertList_t<sizeof...(fields), fields...>::value;
 	template<typename... fields> using updateList = typename updateList_t<sizeof...(fields), fields...>::value;
+
+	template<size_t N, typename field, typename... fields> struct idField_t
+		{ using type = typename idField_t<N - 1, fields...>::type; };
+	template<typename field, typename... fields> struct idField_t<0, field, fields...>
+		{ using type = updateList<toType<field>>; };
+
+	template<typename... fields> using idField = typename idField_t<primaryIndex_t<fields...>::index, fields...>::type;
+
+	template<bool, typename... fields> struct updateWhere_t { };
+	template<typename... fields> struct updateWhere_t<true, fields...>
+		{ using value = tycat<ts(" WHERE "), idField<fields...>>; };
+	template<typename... fields> using updateWhere = typename updateWhere_t<hasAutoInc<fields...>(), fields...>::value;
 }

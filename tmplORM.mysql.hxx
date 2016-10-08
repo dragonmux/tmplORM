@@ -169,18 +169,6 @@ namespace tmplORM
 			{ static void bind(const std::tuple<fields_t...> &, mySQLPreparedQuery_t &) { } };
 		template<typename... fields_t> using bindInsert = bindInsert_t<sizeof...(fields_t) - 1, countInsert_t<fields_t...>::count - 1, fields_t...>;
 
-		template<size_t N, typename field, typename... fields> struct idField_t
-			{ using type = typename idField_t<N - 1, fields...>::type; };
-		template<typename field, typename... fields> struct idField_t<0, field, fields...>
-			{ using type = updateList<toType<field>>; };
-
-		template<typename... fields> using idField = typename idField_t<primaryIndex_t<fields...>::index, fields...>::type;
-
-		template<bool, typename... fields> struct updateWhere_t { };
-		template<typename... fields> struct updateWhere_t<true, fields...>
-			{ using value = tycat<ts(" WHERE "), idField<fields...>>; };
-		template<typename... fields> using updateWhere = typename updateWhere_t<hasAutoInc<fields...>(), fields...>::value;
-
 		template<size_t index, size_t bindIndex, typename... fields_t> struct bindUpdate_t
 		{
 			template<typename fieldName, typename T, typename field_t>
