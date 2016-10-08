@@ -94,6 +94,9 @@ namespace tmplORM
 		template<typename tableName, typename... fields> using add__ = toString<
 			tycat<ts("INSERT INTO "), bracket<tableName>, ts(" ("), insertList<fields...>, ts(") VALUES ("), placeholder<countInsert_t<fields...>::count>, ts(");")>
 		>;
+		template<typename tableName, typename... fields> using update__ = toString<
+			tycat<ts("UPDATE "), bracket<tableName>, ts(" SET "), updateList<fields...>, updateWhere<fields...>, ts(";")>
+		>;
 
 		template<typename tableName, typename...> using deleteTable__ = toString<
 			tycat<ts("DROP TABLE "), bracket<tableName>, ts(";")>
@@ -122,15 +125,19 @@ namespace tmplORM
 				return T();
 			}
 
-			template<typename tableName, typename... fields> bool add(const model_t<tableName, fields...> &model) noexcept
+			template<typename tableName, typename... fields_t> bool add(const model_t<tableName, fields_t...> &model) noexcept
 			{
-				using insert = add__<tableName, fields...>;
+				using insert = add__<tableName, fields_t...>;
 				insert::value;
 				return true;
 			}
 
 			template<typename tableName, typename... fields_t> bool update(const model_t<tableName, fields_t...> &model) noexcept
-				{ return true; }
+			{
+				using update = update__<tableName, fields_t...>;
+				update::value;
+				return true;
+			}
 
 			template<typename tableName, typename... fields> bool del(const model_t<tableName, fields...> &model) noexcept
 				{ return true; }
