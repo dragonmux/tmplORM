@@ -38,9 +38,10 @@ $(SO): $(O)
 	$(call run-cmd,cxx,$(CFLAGS))
 
 clean:
-	$(call run-cmd,rm,tmplORM,$(O) $(SO))
+	$(call run-cmd,rm,tmplORM,$(O) $(SO) $(GCH))
 	$(call run-cmd,rm,makedep,.dep/*.d)
 
+#mysql.o: CFLAGS_EXTRA += $(shell mysql_config --include)
 .PHONY: default all clean
 .SUFIXES: .cxx .hxx
 -include .dep/*.d
