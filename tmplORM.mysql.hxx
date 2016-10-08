@@ -129,6 +129,21 @@ namespace tmplORM
 
 		template<typename... fields> using createList = typename createList_t<sizeof...(fields), fields...>::value;
 
+		template<size_t idx, typename... fields_t> struct bindSelect_t
+		{
+			constexpr static size_t index = idx - 1;
+
+			static void bind(std::tuple<fields_t...> &fields, mySQLRow_t &result) noexcept
+			{
+				bindSelect_t<index, fields_t...>::bind(fields, result);
+				std::get<index>(fields) = result[index];
+			}
+		};
+
+		template<typename... fields> struct bindSelect_t<0, fields...>
+			{ static void bind(std::tuple<fields...> &, mySQLRow_t &) { } };
+		template<typename... fields> using bindSelect = bindSelect_t<sizeof...(fields), fields...>;
+
 		template<size_t bindIndex, typename field_t> struct bindField_t
 		{
 			template<typename std::enable_if<!field_t::nullable, void *>::type = nullptr>
@@ -232,10 +247,21 @@ namespace tmplORM
 				return database.query(create::value);
 			}
 
-			template<typename T, typename tableName, typename... fields> T select(const model_t<tableName, fields...> &) noexcept
+			template<typename T, typename tableName, typename... fields_t> T select(const model_t<tableName, fields_t...> &) noexcept
 			{
-				using select = select__<tableName, fields...>;
-				database.query(select::value);
+				using select = select__<tableName, fields_t...>;
+				if (database.query(select::value))
+				{
+					mySQLResult_t result = database.queryResult();
+					// result.numRows() == number of rows in this result set..
+					mySQLRow_t row = result.resultRows();
+					do
+					{
+						T value;
+						bindSelect<fields_t...>::bind(value.fields(), row);
+					}
+					while (row.next());
+				}
 				return T();
 			}
 
