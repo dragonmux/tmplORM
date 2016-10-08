@@ -34,7 +34,7 @@ private:
 	std::unique_ptr<char []> _message;
 
 public:
-	constexpr tSQLExecError_t() noexcept : _error(tSQLExecErrorType_t::ok), _state{{}}, _message() { }
+	tSQLExecError_t() noexcept : _error(tSQLExecErrorType_t::ok), _state{{}}, _message() { }
 	tSQLExecError_t(const tSQLExecErrorType_t error, const int16_t handleType, void *const handle) noexcept;
 	tSQLExecError_t(tSQLExecError_t &&err) noexcept : tSQLExecError_t() { *this = std::move(err); }
 	~tSQLExecError_t() { }
@@ -62,7 +62,7 @@ private:
 	const int16_t type;
 
 public:
-	constexpr tSQLValue_t() noexcept : data(), length(0), type(0) { }
+	tSQLValue_t() noexcept : data(), length(0), type(0) { }
 	tSQLValue_t(const void *const _data, const uint64_t _length, const int16_t _type) noexcept;
 	tSQLValue_t(tSQLValue_t &&value) noexcept : tSQLValue_t() { *this = std::move(value); }
 	~tSQLValue_t() noexcept { }
@@ -117,7 +117,7 @@ protected:
 	friend struct tSQLQuery_t;
 
 public:
-	constexpr tSQLResult_t() noexcept : client(nullptr), queryHandle(nullptr), _hasData(false), _freeHandle(true), fields(0), fieldInfo() { }
+	tSQLResult_t() noexcept : client(nullptr), queryHandle(nullptr), _hasData(false), _freeHandle(true), fields(0), fieldInfo() { }
 	tSQLResult_t(tSQLResult_t &&row) noexcept : tSQLResult_t() { *this = std::move(row); }
 	~tSQLResult_t();
 	tSQLResult_t &operator =(tSQLResult_t &&row) noexcept;
@@ -148,7 +148,7 @@ protected:
 	friend struct tSQLClient_t;
 
 public:
-	constexpr tSQLQuery_t() noexcept : client(nullptr), queryHandle(nullptr), numParams(0), dataLengths(), executed(true) { }
+	tSQLQuery_t() noexcept : client(nullptr), queryHandle(nullptr), numParams(0), dataLengths(), executed(true) { }
 	tSQLQuery_t(tSQLQuery_t &&qry) noexcept : tSQLQuery_t() { *this = std::move(qry); }
 	~tSQLQuery_t();
 	tSQLQuery_t &operator =(tSQLQuery_t &&qry) noexcept;

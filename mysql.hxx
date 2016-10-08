@@ -74,7 +74,7 @@ private:
 	friend struct mySQLResult_t;
 
 public:
-	constexpr mySQLRow_t() noexcept : result(nullptr), row(nullptr), fields(0), rowLengths(nullptr), fieldTypes(nullptr) { }
+	mySQLRow_t() noexcept : result(nullptr), row(nullptr), fields(0), rowLengths(nullptr), fieldTypes() { }
 	mySQLRow_t(mySQLRow_t &&r) noexcept;
 	~mySQLRow_t() noexcept;
 
@@ -125,7 +125,7 @@ protected:
 	friend struct mySQLClient_t;
 
 public:
-	constexpr mySQLPreparedQuery_t() noexcept : query(nullptr), params(nullptr), numParams(0), executed(false) { }
+	mySQLPreparedQuery_t() noexcept : query(nullptr), params(), numParams(0), executed(false) { }
 	mySQLPreparedQuery_t(mySQLPreparedQuery_t &&qry) noexcept;
 	~mySQLPreparedQuery_t() noexcept;
 	mySQLPreparedQuery_t &operator =(mySQLPreparedQuery_t &&qry) noexcept;
