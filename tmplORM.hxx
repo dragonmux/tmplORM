@@ -212,6 +212,12 @@ namespace tmplORM
 		/*template<typename tableName, typename... fields_t> auto getPrimaryKey(const model_t<tableName, fields_t...> &model) noexcept ->
 			decltype(std::get<primaryIndex_t<fields_t...>::index>()) { return std::get<primaryIndex_t<fields_t...>::index>(model.fields()); }*/
 
+		template<size_t N, typename... fields> struct countPrimary_t { };
+		template<size_t N, typename field, typename... fields> struct countPrimary_t<N, field, fields...>
+			{ constexpr static size_t count = (isPrimaryKey(field()) ? 1 : 0) + countPrimary_t<N - 1, fields...>::count; };
+		template<> struct countPrimary_t<0> { constexpr static size_t count = 0; };
+		template<typename... fields> using countPrimary = countPrimary_t<sizeof...(fields), fields...>;
+
 		template<typename fieldName, typename T> auto toType_(const type_t<fieldName, T> &) -> type_t<fieldName, T>;
 		template<typename field> using toType = decltype(toType_(field()));
 
