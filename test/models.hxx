@@ -75,5 +75,7 @@ namespace models
 		types::primary_t<types::unicode_t<ts("CustomerTypeID"), 10>>, types::nullable_t<types::unicodeText_t<ts("CustomerDesc")>>
 	> { };
 
-	//struct customerDemographic_t : public model_t<ts("CustomerCustDemographics"),
+	struct customerDemographic_t : public model_t<ts("CustomerCustDemographics"),
+		types::primary_t<types::unicode_t<ts("CustomerID"), 5>>, types::primary_t<types::unicode_t<ts("CustomerTypeID"), 10>>
+	> { };
 }
