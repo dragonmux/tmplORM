@@ -51,7 +51,15 @@ inline namespace common
 		{ using value = updateList<toType<field>>; };
 	template<typename... fields> using idField = typename idField_t<primaryIndex_t<fields...>::index, fields...>::value;
 
-	template<typename... fields> using idField = typename idField_t<primaryIndex_t<fields...>::index, fields...>::type;
+	template<size_t, size_t, typename...> struct idFields_t;
+	template<size_t N, typename... fields> using idFields_ = typename idFields_t<N, primaryIndex_t<fields...>::index, fields...>::value;
+	template<size_t N, size_t index, typename field, typename... fields> struct idFields_t<N, index, field, fields...>
+		{ using value = idFields_<N, fields...>; };
+	template<size_t N, typename field, typename... fields> struct idFields_t<N, 0, field, fields...>
+		{ using value = tycat<idField<field>, ts(" AND "), idFields_<N - 1, fields...>>; };
+	template<typename... fields> struct idFields_t<1, 0, fields...> { using value = idField<fields...>; };
+	template<typename... fields> struct idFields_t<0, 0, fields...> { using value = typestring<>; };
+	template<typename... fields> using idFields = idFields_<countPrimary<fields...>::count, fields...>;
 
 	template<bool, typename... fields> struct updateWhere_t { };
 	template<typename... fields> struct updateWhere_t<true, fields...>
