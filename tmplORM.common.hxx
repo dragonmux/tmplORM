@@ -46,9 +46,10 @@ inline namespace common
 	template<typename... fields> using updateList = typename updateList_t<sizeof...(fields), fields...>::value;
 
 	template<size_t N, typename field, typename... fields> struct idField_t
-		{ using type = typename idField_t<N - 1, fields...>::type; };
+		{ using value = typename idField_t<N - 1, fields...>::type; };
 	template<typename field, typename... fields> struct idField_t<0, field, fields...>
-		{ using type = updateList<toType<field>>; };
+		{ using value = updateList<toType<field>>; };
+	template<typename... fields> using idField = typename idField_t<primaryIndex_t<fields...>::index, fields...>::value;
 
 	template<typename... fields> using idField = typename idField_t<primaryIndex_t<fields...>::index, fields...>::type;
 
