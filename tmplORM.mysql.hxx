@@ -215,22 +215,22 @@ namespace tmplORM
 			{ static void bind(const std::tuple<fields_t...> &, mySQLPreparedQuery_t &) { } };
 		template<typename... fields> using bindUpdate = bindUpdate_t<sizeof...(fields), countInsert_t<fields...>::count, fields...>;
 
-		template<typename tableName, typename... fields> using createTable__ = toString<
+		template<typename tableName, typename... fields> using createTable_ = toString<
 			tycat<ts("CREATE TABLE "), backtick<tableName>, ts(" ("), createList<fields...>, ts(");")>
 		>;
-		template<typename tableName, typename... fields> using select__ = toString<
+		template<typename tableName, typename... fields> using select_ = toString<
 			tycat<ts("SELECT "), selectList<fields...>, ts(" FROM "), backtick<tableName>, ts(";")>
 		>;
-		template<typename tableName, typename... fields> using add__ = toString<
+		template<typename tableName, typename... fields> using add_ = toString<
 			tycat<ts("INSERT INTO "), backtick<tableName>, ts(" ("), insertList<fields...>, ts(") VALUES ("), placeholder<countInsert_t<fields...>::count>, ts(");")>
 		>;
-		template<typename tableName, typename... fields> using update__ = toString<
+		template<typename tableName, typename... fields> using update_ = toString<
 			tycat<ts("UPDATE "), backtick<tableName>, ts(" SET "), updateList<fields...>, updateWhere<fields...>, ts(";")>
 		>;
-		template<typename tableName, typename... fields> using del__ = toString<
+		template<typename tableName, typename... fields> using del_ = toString<
 			tycat<ts("DELETE * FROM "), backtick<tableName>, updateWhere<fields...>, ts(";")>
 		>;
-		template<typename tableName> using deleteTable__ = toString<
+		template<typename tableName> using deleteTable_ = toString<
 			tycat<ts("DROP TABLE "), backtick<tableName>, ts(";")>
 		>;
 
@@ -245,13 +245,13 @@ namespace tmplORM
 
 			template<typename tableName, typename... fields> bool createTable(const model_t<tableName, fields...> &) noexcept
 			{
-				using create = createTable__<tableName, fields...>;
+				using create = createTable_<tableName, fields...>;
 				return database.query(create::value);
 			}
 
 			template<typename T, typename tableName, typename... fields_t> T select(const model_t<tableName, fields_t...> &) noexcept
 			{
-				using select = select__<tableName, fields_t...>;
+				using select = select_<tableName, fields_t...>;
 				if (database.query(select::value))
 				{
 					mySQLResult_t result = database.queryResult();
@@ -269,7 +269,7 @@ namespace tmplORM
 
 			template<typename tableName, typename... fields_t> bool add(const model_t<tableName, fields_t...> &model) noexcept
 			{
-				using insert = add__<tableName, fields_t...>;
+				using insert = add_<tableName, fields_t...>;
 				mySQLPreparedQuery_t query = database.prepare(insert::value, countInsert_t<fields_t...>::count);
 				bindInsert<fields_t...>::bind(model.fields(), query);
 				if (query.execute())
@@ -283,7 +283,7 @@ namespace tmplORM
 
 			template<typename tableName, typename... fields_t> bool update(const model_t<tableName, fields_t...> &model) noexcept
 			{
-				using update = update__<tableName, fields_t...>;
+				using update = update_<tableName, fields_t...>;
 				mySQLPreparedQuery_t query = database.prepare(update::value, countInsert_t<fields_t...>::count);
 				// This binds the fields, primary key last so it tags to the WHERE clause for this query.
 				bindUpdate<fields_t...>::bind(model.fields(), query);
@@ -292,13 +292,13 @@ namespace tmplORM
 
 			template<typename tableName, typename... fields> bool del(const model_t<tableName, fields...> &model) noexcept
 			{
-				using del = del__<tableName, fields...>;
+				using del = del_<tableName, fields...>;
 				return database.query(del::value);
 			}
 
 			template<typename tableName, typename... fields> bool deleteTable(const model_t<tableName, fields...> &) noexcept
 			{
-				using deleteTable = deleteTable__<tableName>;
+				using deleteTable = deleteTable_<tableName>;
 				return database.query(deleteTable::value);
 			}
 		};

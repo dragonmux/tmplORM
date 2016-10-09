@@ -3,17 +3,17 @@
 #include "models.hxx"
 
 using namespace models;
-using tmplORM::mysql::createTable__;
-using tmplORM::mysql::select__;
-using tmplORM::mysql::add__;
-using tmplORM::mysql::update__;
-using tmplORM::mysql::del__;
-using tmplORM::mysql::deleteTable__;
+using tmplORM::mysql::createTable_;
+using tmplORM::mysql::select_;
+using tmplORM::mysql::add_;
+using tmplORM::mysql::update_;
+using tmplORM::mysql::del_;
+using tmplORM::mysql::deleteTable_;
 
 template<typename tableName, typename... fields> const char *add(const model_t<tableName, fields...> &) noexcept
-	{ return add__<tableName, fields...>::value; }
+	{ return add_<tableName, fields...>::value; }
 template<typename tableName, typename... fields> const char *update(const model_t<tableName, fields...> &) noexcept
-	{ return update__<tableName, fields...>::value; }
+	{ return update_<tableName, fields...>::value; }
 
 category_t category;
 supplier_t supplier;
