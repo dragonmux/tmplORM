@@ -52,16 +52,27 @@ public:
 
 	void testUpdateGen()
 	{
-		puts(update(category));
-		puts(update(supplier));
-		puts(update(product));
-		puts(update(customer));
-		puts(update(shipper));
-		puts(update(region));
-		puts(update(territory));
-		puts(update(employee));
-		puts(update(order));
-		puts(update(demographic));
+		assertEqual(update(category), "UPDATE `Categories` SET `CategoryName` = ?, `Description` = ? WHERE `CategoryID` = ?;");
+		assertEqual(update(supplier), "UPDATE `Suppliers` SET `CompanyName` = ?, `ContactName` = ?, `ContactTitle` = ?, "
+			"`Address` = ?, `City` = ?, `Region` = ?, `PostalCode` = ?, `Country` = ?, `Phone` = ?, `Fax` = ?, `HomePage` = ? "
+			"WHERE `SupplierID` = ?;");
+		assertEqual(update(product), "UPDATE `Products` SET `ProductName` = ?, `SupplierID` = ?, `CategoryID` = ?, "
+			"`QuantityPerUnit` = ?, `UnitsInStock` = ?, `UnitsOnOrder` = ?, `ReorderLevel` = ?, `Discontinued` = ? WHERE `ProductID` = ?;");
+		assertEqual(update(customer), "UPDATE `Customers` SET `CustomerID` = ?, `CompanyName` = ?, `ContactName` = ?, "
+			"`ContactTitle` = ?, `Address` = ?, `City` = ?, `Region` = ?, `PostalCode` = ?, `Country` = ?, `Phone` = ?, "
+			"`Fax` = ? WHERE `CustomerID` = ?;");
+		assertEqual(update(shipper), "UPDATE `Shippers` SET `CompanyName` = ?, `Phone` = ? WHERE `ShipperID` = ?;");
+		assertEqual(update(region), "UPDATE `Regions` SET `RegionDescription` = ? WHERE `RegionID` = ?;");
+		assertEqual(update(territory), "UPDATE `Territories` SET `TerritoryID` = ?, `TerritoryDescription` = ?, `RegionID` = ? "
+			"WHERE `TerritoryID` = ?;");
+		assertEqual(update(employee), "UPDATE `Employees` SET `LastName` = ?, `FirstName` = ?, `Title` = ?, `TitleOfCourtesy` = ?, "
+			"`BirthDate` = ?, `HireDate` = ?, `Address` = ?, `City` = ?, `Region` = ?, `PostalCode` = ?, `Country` = ?, "
+			"`HomePhone` = ?, `Extension` = ?, `Notes` = ?, `ReportsTo` = ?, `PhotoPath` = ? WHERE `EmployeeID` = ?;");
+		assertEqual(update(order), "UPDATE `Orders` SET `CustomerID` = ?, `EmployeeID` = ?, `OrderDate` = ?, `RequiredDate` = ?, "
+			"`ShippedDate` = ?, `ShipVia` = ?, `ShipName` = ?, `ShipAddress` = ?, `ShipCity` = ?, `ShipRegion` = ?, "
+			"`ShipPostalCode` = ?, `ShipCountry` = ? WHERE `OrderID` = ?;");
+		assertEqual(update(demographic), "UPDATE `CustomerDemographics` SET `CustomerTypeID` = ?, `CustomerDesc` = ? "
+			"WHERE `CustomerTypeID` = ?;");
 	}
 
 	void registerTests() final override
