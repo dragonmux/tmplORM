@@ -34,7 +34,7 @@ inline namespace common
 	{
 		template<typename fieldName, typename T> static auto value(const type_t<fieldName, T> &) ->
 			tycat<typename fieldName_t<1, type_t<fieldName, T>>::value, ts(" = "), placeholder<1>, comma<N>>;
-		template<typename T> static auto value(const autoInc_t<T> &) -> typestring<>;
+		template<typename T> static auto value(const primary_t<T> &) -> typestring<>;
 	};
 	template<size_t N, typename T> using updateList__ = decltype(updateList__t<N>::value(T()));
 
