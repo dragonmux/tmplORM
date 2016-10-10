@@ -25,9 +25,10 @@ inline namespace common
 
 	template<typename fieldName, typename T> constexpr size_t countInsert_(const type_t<fieldName, T> &) noexcept { return 1; }
 	template<typename T> constexpr size_t countInsert_(const autoInc_t<T> &) noexcept { return 0; }
-	template<typename field, typename... fields> struct countInsert_t
+	template<typename...> struct countInsert_t;
+	template<typename field, typename... fields> struct countInsert_t<field, fields...>
 		{ constexpr static const size_t count = countInsert_(field()) + countInsert_t<fields...>::count; };
-	template<typename field> struct countInsert_t<field> { constexpr static const size_t count = countInsert_(field()); };
+	template<> struct countInsert_t<> { constexpr static const size_t count = 0; };
 
 	template<size_t N> struct updateList__t
 	{
