@@ -213,7 +213,7 @@ namespace tmplORM
 
 		template<size_t index, typename... fields_t> struct bindUpdate_t<index, 0, fields_t...>
 			{ static void bind(const std::tuple<fields_t...> &, mySQLPreparedQuery_t &) { } };
-		template<typename... fields> using bindUpdate = bindUpdate_t<sizeof...(fields), countInsert_t<fields...>::count, fields...>;
+		template<typename... fields> using bindUpdate = bindUpdate_t<sizeof...(fields), countUpdate_t<fields...>::count, fields...>;
 
 		template<typename tableName, typename... fields> using createTable_ = toString<
 			tycat<ts("CREATE TABLE "), backtick<tableName>, ts(" ("), createList<fields...>, ts(");")>

@@ -25,6 +25,7 @@ territory_t territory;
 employee_t employee;
 order_t order;
 demographic_t demographic;
+customerDemographic_t customerDemographic;
 
 class testMySQLMapper final : public testsuit
 {
