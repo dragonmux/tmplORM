@@ -27,8 +27,8 @@ inline namespace common
 	template<typename T> constexpr size_t countInsert_(const autoInc_t<T> &) noexcept { return 0; }
 	template<typename...> struct countInsert_t;
 	template<typename field, typename... fields> struct countInsert_t<field, fields...>
-		{ constexpr static const size_t count = countInsert_(field()) + countInsert_t<fields...>::count; };
-	template<> struct countInsert_t<> { constexpr static const size_t count = 0; };
+		{ constexpr static size_t count = countInsert_(field()) + countInsert_t<fields...>::count; };
+	template<> struct countInsert_t<> { constexpr static size_t count = 0; };
 
 	template<size_t N> struct updateList__t
 	{
@@ -46,8 +46,8 @@ inline namespace common
 	template<typename T> constexpr size_t countUpdate_(const primary_t<T> &) noexcept { return 0; }
 	template<typename...> struct countUpdate_t;
 	template<typename field, typename... fields> struct countUpdate_t<field, fields...>
-		{ constexpr static const size_t count = countUpdate_(field()) + countUpdate_t<fields...>::count; };
-	template<> struct countUpdate_t<> { constexpr static const size_t count = 0; };
+		{ constexpr static size_t count = countUpdate_(field()) + countUpdate_t<fields...>::count; };
+	template<> struct countUpdate_t<> { constexpr static size_t count = 0; };
 
 	template<typename... fields> using selectList = typename selectList_t<sizeof...(fields), fields...>::value;
 	template<typename... fields> using insertList = typename insertList_t<sizeof...(fields), fields...>::value;
