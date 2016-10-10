@@ -42,6 +42,13 @@ inline namespace common
 		{ using value = tycat<updateList__<N, field>, typename updateList_t<N - 1, fields...>::value>; };
 	template<typename field> struct updateList_t<1, field> { using value = updateList__<1, field>; };
 
+	template<typename fieldName, typename T> constexpr size_t countUpdate_(const type_t<fieldName, T> &) noexcept { return 1; }
+	template<typename T> constexpr size_t countUpdate_(const primary_t<T> &) noexcept { return 0; }
+	template<typename...> struct countUpdate_t;
+	template<typename field, typename... fields> struct countUpdate_t<field, fields...>
+		{ constexpr static const size_t count = countUpdate_(field()) + countUpdate_t<fields...>::count; };
+	template<> struct countUpdate_t<> { constexpr static const size_t count = 0; };
+
 	template<typename... fields> using selectList = typename selectList_t<sizeof...(fields), fields...>::value;
 	template<typename... fields> using insertList = typename insertList_t<sizeof...(fields), fields...>::value;
 	template<typename... fields> using updateList = typename updateList_t<sizeof...(fields), fields...>::value;
