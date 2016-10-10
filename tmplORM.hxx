@@ -192,6 +192,10 @@ namespace tmplORM
 		template<> struct placeholder_t<0> { using value = typestring<>; };
 		template<size_t N> using placeholder = typename placeholder_t<N>::value;
 
+		template<size_t> struct and_t { using value = ts(" AND "); };
+		template<> struct and_t<0> { using value = typestring<>; };
+		template<size_t N> using and_ = typename and_t<N - 1>::value;
+
 		template<typename fieldName, typename T> constexpr bool isAutoInc(const type_t<fieldName, T> &) noexcept { return false; }
 		template<typename T> constexpr bool isAutoInc(const autoInc_t<T> &) noexcept { return true; }
 		template<typename... fields> constexpr bool hasAutoInc() noexcept { return bundle(isAutoInc(fields())...); }

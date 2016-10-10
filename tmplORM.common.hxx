@@ -51,18 +51,20 @@ inline namespace common
 		{ using value = updateList<toType<field>>; };
 	template<typename... fields> using idField = typename idField_t<primaryIndex_t<fields...>::index, fields...>::value;
 
-	template<size_t, size_t, typename...> struct idFields_t;
-	template<size_t N, typename... fields> using idFields_ = typename idFields_t<N, primaryIndex_t<fields...>::index, fields...>::value;
-	template<size_t N, size_t index, typename field, typename... fields> struct idFields_t<N, index, field, fields...>
-		{ using value = idFields_<N, fields...>; };
-	template<size_t N, typename field, typename... fields> struct idFields_t<N, 0, field, fields...>
-		{ using value = tycat<idField<field>, ts(" AND "), idFields_<N - 1, fields...>>; };
-	template<typename... fields> struct idFields_t<1, 0, fields...> { using value = idField<fields...>; };
-	template<typename... fields> struct idFields_t<0, 0, fields...> { using value = typestring<>; };
+	template<bool, size_t N, typename field> struct maybeIDField_t
+		{ using value = tycat<idField<field>, and_<N>>; };
+	template<size_t N, typename field> struct maybeIDField_t<false, N, field> { using value = typestring<>; };
+	template<size_t N, typename field> using maybeIDField = typename maybeIDField_t<isPrimaryKey(field()), N, field>::value;
+
+	template<size_t, typename...> struct idFields_t;
+	template<size_t N, typename... fields> using idFields_ = typename idFields_t<N, fields...>::value;
+	template<size_t N, typename field, typename... fields> struct idFields_t<N, field, fields...>
+		{ using value = tycat<maybeIDField<N, field>, idFields_<N - (isPrimaryKey(field()) ? 1 : 0), fields...>>; };
+	template<> struct idFields_t<0> { using value = typestring<>; };
 	template<typename... fields> using idFields = idFields_<countPrimary<fields...>::count, fields...>;
 
 	template<bool, typename... fields> struct updateWhere_t { };
 	template<typename... fields> struct updateWhere_t<true, fields...>
-		{ using value = tycat<ts(" WHERE "), idField<fields...>>; };
+		{ using value = tycat<ts(" WHERE "), idFields<fields...>>; };
 	template<typename... fields> using updateWhere = typename updateWhere_t<hasPrimaryKey<fields...>(), fields...>::value;
 }
