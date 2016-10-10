@@ -29,7 +29,8 @@ all: $(GCH) $(TESTS)
 #testMSSQL.so: O_FILE = ../mssql.o
 #testMySQL.so
 testMySQLMapper.so: CRUNCHMAKE += $(shell mysql_config --cflags --libs)
-$(TESTS): $(subst .so,.cxx,$@)
+#$(TESTS): $(subst .so,.cxx,$@)
+%.so: %.cxx
 	$(call run-cmd,crunchMake,$(subst .so,.cxx,$@))
 
 check: all
