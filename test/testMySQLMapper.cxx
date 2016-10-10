@@ -37,18 +37,19 @@ public:
 			"`Region`, `PostalCode`, `Country`, `Phone`, `Fax`, `HomePage`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 		assertEqual(add(product), "INSERT INTO `Products` (`ProductName`, `SupplierID`, `CategoryID`, `QuantityPerUnit`, "
 			"`UnitsInStock`, `UnitsOnOrder`, `ReorderLevel`, `Discontinued`) VALUES (?, ?, ?, ?, ?, ?, ?, ?);");
-		assertEqual(add(customer), "INSERT INTO `Customers` (`CompanyName`, `ContactName`, `ContactTitle`, `Address`, `City`, "
-			"`Region`, `PostalCode`, `Country`, `Phone`, `Fax`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+		assertEqual(add(customer), "INSERT INTO `Customers` (`CustomerID`, `CompanyName`, `ContactName`, `ContactTitle`, "
+			"`Address`, `City`, `Region`, `PostalCode`, `Country`, `Phone`, `Fax`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 		assertEqual(add(shipper), "INSERT INTO `Shippers` (`CompanyName`, `Phone`) VALUES (?, ?);");
 		assertEqual(add(region), "INSERT INTO `Regions` (`RegionDescription`) VALUES (?);");
-		assertEqual(add(territory), "INSERT INTO `Territories` (`TerritoryDescription`, `RegionID`) VALUES (?, ?, ?);");
+		assertEqual(add(territory), "INSERT INTO `Territories` (`TerritoryID`, `TerritoryDescription`, `RegionID`) VALUES (?, ?, ?);");
 		assertEqual(add(employee), "INSERT INTO `Employees` (`LastName`, `FirstName`, `Title`, `TitleOfCourtesy`, "
 			"`BirthDate`, `HireDate`, `Address`, `City`, `Region`, `PostalCode`, `Country`, `HomePhone`, `Extension`, "
 			"`Notes`, `ReportsTo`, `PhotoPath`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 		assertEqual(add(order), "INSERT INTO `Orders` (`CustomerID`, `EmployeeID`, `OrderDate`, `RequiredDate`, "
 			"`ShippedDate`, `ShipVia`, `ShipName`, `ShipAddress`, `ShipCity`, `ShipRegion`, `ShipPostalCode`, `ShipCountry`) "
 			"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
-		assertEqual(add(demographic), "INSERT INTO `CustomerDemographics` (`CustomerDesc`) VALUES (?, ?);");
+		assertEqual(add(demographic), "INSERT INTO `CustomerDemographics` (`CustomerTypeID`, `CustomerDesc`) VALUES (?, ?);");
+		assertEqual(add(customerDemographic), "INSERT INTO `CustomerCustDemographics` (`CustomerID`, `CustomerTypeID`) VALUES (?, ?);");
 	}
 
 	void testUpdateGen()
