@@ -15,7 +15,7 @@ inline namespace common
 	{
 		template<typename fieldName, typename T> static auto value(const type_t<fieldName, T> &) ->
 			typename fieldName_t<N, type_t<fieldName, T>>::value;
-		template<typename T> static auto value(const primary_t<T> &) -> typestring<>;
+		template<typename T> static auto value(const autoInc_t<T> &) -> typestring<>;
 	};
 	template<size_t N, typename T> using insertList__ = decltype(insertList__t<N>::value(T()));
 
