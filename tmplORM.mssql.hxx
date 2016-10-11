@@ -77,14 +77,6 @@ namespace tmplORM
 
 		template<typename... fields> using createList = typename createList_t<sizeof...(fields), fields...>::value;
 
-		// bindField_t
-
-		// bindInsert_t
-		// bindInsert
-
-		// bindUpdate_t
-		// bindUpdate
-
 		template<typename tableName, typename... fields> using createTable__ = toString<
 			tycat<ts("CREATE TABLE "), bracket<tableName>, ts(" ("), createList<fields...>, ts(");")>
 		>;
