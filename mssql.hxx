@@ -121,7 +121,7 @@ public:
 	tSQLResult_t(tSQLResult_t &&row) noexcept : tSQLResult_t() { *this = std::move(row); }
 	~tSQLResult_t();
 	tSQLResult_t &operator =(tSQLResult_t &&row) noexcept;
-	bool valid() const noexcept { return client && queryHandle && (fields == 0 || fieldInfo) && _hasData; }
+	bool valid() const noexcept { return client && queryHandle && (fields == 0 || (fieldInfo && _hasData)); }
 	bool hasData() const noexcept { return _hasData; }
 	uint64_t numRows() const noexcept;
 	uint16_t numFields() const noexcept { return fields; }
