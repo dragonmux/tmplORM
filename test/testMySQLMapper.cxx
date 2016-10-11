@@ -75,6 +75,7 @@ public:
 			"`ShippedDate` = ?, `ShipVia` = ?, `ShipName` = ?, `ShipAddress` = ?, `ShipCity` = ?, `ShipRegion` = ?, "
 			"`ShipPostalCode` = ?, `ShipCountry` = ? WHERE `OrderID` = ?;");
 		assertEqual(update(demographic), "UPDATE `CustomerDemographics` SET `CustomerDesc` = ? WHERE `CustomerTypeID` = ?;");
+		assertEqual(update(customerDemographic), "");
 	}
 
 	void testDeleteGen()
