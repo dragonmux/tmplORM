@@ -92,7 +92,7 @@ namespace tmplORM
 		template<typename tableName, typename... fields> using del__ = toString<
 			tycat<ts("DELETE FROM "), bracket<tableName>, updateWhere<fields...>, ts(";")>
 		>;
-		template<typename tableName, typename...> using deleteTable__ = toString<
+		template<typename tableName> using deleteTable__ = toString<
 			tycat<ts("DROP TABLE "), bracket<tableName>, ts(";")>
 		>;
 
@@ -112,9 +112,9 @@ namespace tmplORM
 				return true;
 			}
 
-			template<typename T, typename tableName, typename... fields> T select(const model_t<tableName, fields...> &) noexcept
+			template<typename T, typename tableName, typename... fields_t> T select(const model_t<tableName, fields_t...> &) noexcept
 			{
-				using select = select__<tableName, fields...>;
+				using select = select__<tableName, fields_t...>;
 				select::value;
 				return T();
 			}
@@ -133,12 +133,16 @@ namespace tmplORM
 				return true;
 			}
 
-			template<typename tableName, typename... fields> bool del(const model_t<tableName, fields...> &model) noexcept
-				{ return true; }
-
-			template<typename tableName, typename... fields> bool deleteTable(const model_t<tableName, fields...> &model) noexcept
+			template<typename tableName, typename... fields_t> bool del(const model_t<tableName, fields_t...> &model) noexcept
 			{
-				using deleteTable = deleteTable__<tableName, fields...>;
+				using del = del__<tableName, fields_t...>;
+				del::value;
+				return true;
+			}
+
+			template<typename tableName, typename... fields> bool deleteTable(const model_t<tableName, fields...> &) noexcept
+			{
+				using deleteTable = deleteTable__<tableName>;
 				deleteTable::value;
 				return true;
 			}
