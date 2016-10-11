@@ -9,6 +9,7 @@ namespace tmplORM
 	namespace mssql
 	{
 		using namespace tmplORM::common;
+		using namespace tmplORM::mssql::driver;
 
 		using tmplORM::types::type_t;
 		using tmplORM::types::unicode_t;
@@ -108,8 +109,7 @@ namespace tmplORM
 			template<typename tableName, typename... fields> bool createTable(const model_t<tableName, fields...> &) noexcept
 			{
 				using create = createTable__<tableName, fields...>;
-				create::value;
-				return true;
+				return database.query(create::value).valid();
 			}
 
 			template<typename T, typename tableName, typename... fields_t> T select(const model_t<tableName, fields_t...> &) noexcept
@@ -129,8 +129,9 @@ namespace tmplORM
 			template<typename tableName, typename... fields_t> bool update(const model_t<tableName, fields_t...> &model) noexcept
 			{
 				using update = update__<tableName, fields_t...>;
-				update::value;
-				return true;
+				tSQLQuery_t query(database.prepare(update::value, sizeof...(fields_t)));
+				bindUpdate<fields_t...>::bind(model.fields(), query);
+				return query.execute().valid();
 			}
 
 			template<typename tableName, typename... fields_t> bool del(const model_t<tableName, fields_t...> &model) noexcept
