@@ -15,6 +15,9 @@ template<typename tableName, typename... fields> const char *add(const model_t<t
 template<typename tableName, typename... fields> const char *update(const model_t<tableName, fields...> &) noexcept
 	{ return update_<tableName, fields...>::value; }
 
+template<typename tableName, typename... fields> const char *del(const model_t<tableName, fields...> &) noexcept
+	{ return del_<tableName, fields...>::value; }
+
 category_t category;
 supplier_t supplier;
 product_t product;
@@ -74,10 +77,26 @@ public:
 		assertEqual(update(demographic), "UPDATE `CustomerDemographics` SET `CustomerDesc` = ? WHERE `CustomerTypeID` = ?;");
 	}
 
+	void testDeleteGen()
+	{
+		assertEqual(del(category), "DELETE FROM `Categories` WHERE `CategoryID` = ?;");
+		assertEqual(del(supplier), "DELETE FROM `Suppliers` WHERE `SupplierID` = ?;");
+		assertEqual(del(product), "DELETE FROM `Products` WHERE `ProductID` = ?;");
+		assertEqual(del(customer), "DELETE FROM `Customers` WHERE `CustomerID` = ?;");
+		assertEqual(del(shipper), "DELETE FROM `Shippers` WHERE `ShipperID` = ?;");
+		assertEqual(del(region), "DELETE FROM `Regions` WHERE `RegionID` = ?;");
+		assertEqual(del(territory), "DELETE FROM `Territories` WHERE `TerritoryID` = ?;");
+		assertEqual(del(employee), "DELETE FROM `Employees` WHERE `EmployeeID` = ?;");
+		assertEqual(del(order), "DELETE FROM `Orders` WHERE `OrderID` = ?;");
+		assertEqual(del(demographic), "DELETE FROM `CustomerDemographics` WHERE `CustomerTypeID` = ?;");
+		assertEqual(del(customerDemographic), "DELETE FROM `CustomerCustDemographics` WHERE `CustomerID` = ? AND `CustomerTypeID` = ?;");
+	}
+
 	void registerTests() final override
 	{
 		CXX_TEST(testInsertGen)
 		CXX_TEST(testUpdateGen)
+		CXX_TEST(testDeleteGen)
 	}
 };
 
