@@ -126,14 +126,14 @@ namespace tmplORM
 		template<size_t N, typename field, typename... fields> struct createList_t
 			{ using value = tycat<createList__<N, field>, typename createList_t<N - 1, fields...>::value>; };
 		template<typename field> struct createList_t<1, field> { using value = createList__<1, field>; };
-
+		// Alias to make the above easier to use
 		template<typename... fields> using createList = typename createList_t<sizeof...(fields), fields...>::value;
 
 		template<size_t idx, typename... fields_t> struct bindSelect_t
 		{
 			constexpr static size_t index = idx - 1;
 
-			static void bind(std::tuple<fields_t...> &fields, mySQLRow_t &result) noexcept
+			template<typename result_t> static void bind(std::tuple<fields_t...> &fields, result_t &result) noexcept
 			{
 				bindSelect_t<index, fields_t...>::bind(fields, result);
 				std::get<index>(fields) = result[index];
@@ -141,17 +141,17 @@ namespace tmplORM
 		};
 
 		template<typename... fields> struct bindSelect_t<0, fields...>
-			{ static void bind(std::tuple<fields...> &, mySQLRow_t &) { } };
+			{ template<typename result_t> static void bind(std::tuple<fields...> &, result_t &) { } };
 		template<typename... fields> using bindSelect = bindSelect_t<sizeof...(fields), fields...>;
 
 		template<size_t bindIndex, typename field_t> struct bindField_t
 		{
-			template<typename std::enable_if<!field_t::nullable, void *>::type = nullptr>
-				static void bind(const field_t &field, mySQLPreparedQuery_t &query) noexcept
+			template<typename query_t, typename std::enable_if<!field_t::nullable, void *>::type = nullptr>
+				static void bind(const field_t &field, query_t &query) noexcept
 			{ query.bind(bindIndex, field.value()); }
 
-			template<typename std::enable_if<field_t::nullable, void *>::type = nullptr>
-				static void bind(const field_t &field, mySQLPreparedQuery_t &query) noexcept
+			template<typename query_t, typename std::enable_if<field_t::nullable, void *>::type = nullptr>
+				static void bind(const field_t &field, query_t &query) noexcept
 			{
 				if (field.isNull())
 					query.bind<typename decltype(field)::type>(bindIndex, nullptr);
@@ -165,18 +165,18 @@ namespace tmplORM
 			constexpr static size_t index = idx - 1;
 			constexpr static size_t bindIndex = bindIdx - 1;
 
-			template<typename fieldName, typename T, typename field_t>
-				static void bindField(const type_t<fieldName, T> &, const field_t &field, const std::tuple<fields_t...> &fields, mySQLPreparedQuery_t &query) noexcept
+			template<typename fieldName, typename T, typename field_t, typename query_t>
+				static void bindField(const type_t<fieldName, T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
 			{
 				bindInsert_t<index, bindIndex, fields_t...>::bind(fields, query);
 				bindField_t<bindIdx, field_t>::bind(field, query);
 			}
 
-			template<typename T, typename field_t>
-				static void bindField(const autoInc_t<T> &, const field_t &, const std::tuple<fields_t...> &fields, mySQLPreparedQuery_t &query) noexcept
+			template<typename T, typename field_t, typename query_t>
+				static void bindField(const autoInc_t<T> &, const field_t &, const std::tuple<fields_t...> &fields, query_t &query) noexcept
 			{ bindInsert_t<index, bindIdx, fields_t...>::bind(fields, query); }
 
-			static void bind(const std::tuple<fields_t...> &fields, mySQLPreparedQuery_t &query) noexcept
+			template<typename query_t> static void bind(const std::tuple<fields_t...> &fields, query_t &query) noexcept
 			{
 				const auto &field = std::get<index>(fields);
 				bindField(field, field, fields, query);
@@ -184,27 +184,27 @@ namespace tmplORM
 		};
 
 		template<size_t index, typename... fields_t> struct bindInsert_t<index, 0, fields_t...>
-			{ static void bind(const std::tuple<fields_t...> &, mySQLPreparedQuery_t &) { } };
+			{ template<typename query_t> static void bind(const std::tuple<fields_t...> &, query_t &) { } };
 		template<typename... fields> using bindInsert = bindInsert_t<sizeof...(fields), countInsert_t<fields...>::count, fields...>;
 
 		template<size_t index, size_t bindIndex, typename... fields_t> struct bindUpdate_t
 		{
-			template<typename fieldName, typename T, typename field_t>
-				static void bindField(const type_t<fieldName, T> &, const field_t &field, const std::tuple<fields_t...> &fields, mySQLPreparedQuery_t &query) noexcept
+			template<typename fieldName, typename T, typename field_t, typename query_t>
+				static void bindField(const type_t<fieldName, T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
 			{
 				bindUpdate_t<index - 1, bindIndex - 1, fields_t...>::bind(fields, query);
 				bindField_t<bindIndex - 1, field_t>::bind(field, query);
 			}
 
-			template<typename T, typename field_t>
-				static void bindField(const primary_t<T> &, const field_t &field, const std::tuple<fields_t...> &fields, mySQLPreparedQuery_t &query) noexcept
+			template<typename T, typename field_t, typename query_t>
+				static void bindField(const primary_t<T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
 			{
 				bindField_t<bindIndex - 1, field_t>::bind(field, query);
 				bindUpdate_t<index - 1, bindIndex - 1, fields_t...>::bind(fields, query);
 				// TODO: This actually won't work quite right.. but it is closer than what we had.
 			}
 
-			static void bind(const std::tuple<fields_t...> &fields, mySQLPreparedQuery_t &query) noexcept
+			template<typename query_t> static void bind(const std::tuple<fields_t...> &fields, query_t &query) noexcept
 			{
 				const auto &field = std::get<index>(fields);
 				bindField(field, field, fields, query);
@@ -212,7 +212,7 @@ namespace tmplORM
 		};
 
 		template<size_t index, typename... fields_t> struct bindUpdate_t<index, 0, fields_t...>
-			{ static void bind(const std::tuple<fields_t...> &, mySQLPreparedQuery_t &) { } };
+			{ template<typename query_t> static void bind(const std::tuple<fields_t...> &, query_t &) { } };
 		template<typename... fields> using bindUpdate = bindUpdate_t<sizeof...(fields), countUpdate_t<fields...>::count, fields...>;
 
 		template<typename tableName, typename... fields> using createTable_ = toString<
