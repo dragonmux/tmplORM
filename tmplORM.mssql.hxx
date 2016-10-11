@@ -138,8 +138,9 @@ namespace tmplORM
 			template<typename tableName, typename... fields_t> bool del(const model_t<tableName, fields_t...> &model) noexcept
 			{
 				using del = del__<tableName, fields_t...>;
-				del::value;
-				return true;
+				tSQLQuery_t query(database.prepare(del::value, countPrimary<fields_t...>::count));
+				bindDelete<fields_t...>::bind(model.fields(), query);
+				return query.execute().valid();
 			}
 
 			template<typename tableName, typename... fields> bool deleteTable(const model_t<tableName, fields...> &) noexcept
