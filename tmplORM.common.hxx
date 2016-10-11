@@ -77,4 +77,90 @@ inline namespace common
 	template<typename... fields> struct updateWhere_t<true, fields...>
 		{ using value = tycat<ts(" WHERE "), idFields<fields...>>; };
 	template<typename... fields> using updateWhere = typename updateWhere_t<hasPrimaryKey<fields...>(), fields...>::value;
+
+	template<size_t idx, typename... fields_t> struct bindSelect_t
+	{
+		constexpr static size_t index = idx - 1;
+
+		template<typename result_t> static void bind(std::tuple<fields_t...> &fields, result_t &result) noexcept
+		{
+			bindSelect_t<index, fields_t...>::bind(fields, result);
+			std::get<index>(fields) = result[index];
+		}
+	};
+
+	template<typename... fields> struct bindSelect_t<0, fields...>
+		{ template<typename result_t> static void bind(std::tuple<fields...> &, result_t &) { } };
+	template<typename... fields> using bindSelect = bindSelect_t<sizeof...(fields), fields...>;
+
+	template<size_t bindIndex, typename field_t> struct bindField_t
+	{
+		template<typename query_t, typename std::enable_if<!field_t::nullable, void *>::type = nullptr>
+			static void bind(const field_t &field, query_t &query) noexcept
+		{ query.bind(bindIndex, field.value()); }
+
+		template<typename query_t, typename std::enable_if<field_t::nullable, void *>::type = nullptr>
+			static void bind(const field_t &field, query_t &query) noexcept
+		{
+			if (field.isNull())
+				query.bind<typename decltype(field)::type>(bindIndex, nullptr);
+			else
+				query.bind(bindIndex, field.value());
+		}
+	};
+
+	template<size_t idx, size_t bindIdx, typename... fields_t> struct bindInsert_t
+	{
+		constexpr static size_t index = idx - 1;
+		constexpr static size_t bindIndex = bindIdx - 1;
+
+		template<typename fieldName, typename T, typename field_t, typename query_t>
+			static void bindField(const type_t<fieldName, T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
+		{
+			bindInsert_t<index, bindIndex, fields_t...>::bind(fields, query);
+			bindField_t<bindIdx, field_t>::bind(field, query);
+		}
+
+		template<typename T, typename field_t, typename query_t>
+			static void bindField(const autoInc_t<T> &, const field_t &, const std::tuple<fields_t...> &fields, query_t &query) noexcept
+		{ bindInsert_t<index, bindIdx, fields_t...>::bind(fields, query); }
+
+		template<typename query_t> static void bind(const std::tuple<fields_t...> &fields, query_t &query) noexcept
+		{
+			const auto &field = std::get<index>(fields);
+			bindField(field, field, fields, query);
+		}
+	};
+
+	template<size_t index, typename... fields_t> struct bindInsert_t<index, 0, fields_t...>
+		{ template<typename query_t> static void bind(const std::tuple<fields_t...> &, query_t &) { } };
+	template<typename... fields> using bindInsert = bindInsert_t<sizeof...(fields), countInsert_t<fields...>::count, fields...>;
+
+	template<size_t index, size_t bindIndex, typename... fields_t> struct bindUpdate_t
+	{
+		template<typename fieldName, typename T, typename field_t, typename query_t>
+			static void bindField(const type_t<fieldName, T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
+		{
+			bindUpdate_t<index - 1, bindIndex - 1, fields_t...>::bind(fields, query);
+			bindField_t<bindIndex - 1, field_t>::bind(field, query);
+		}
+
+		template<typename T, typename field_t, typename query_t>
+			static void bindField(const primary_t<T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
+		{
+			bindField_t<bindIndex - 1, field_t>::bind(field, query);
+			bindUpdate_t<index - 1, bindIndex - 1, fields_t...>::bind(fields, query);
+			// TODO: This actually won't work quite right.. but it is closer than what we had.
+		}
+
+		template<typename query_t> static void bind(const std::tuple<fields_t...> &fields, query_t &query) noexcept
+		{
+			const auto &field = std::get<index>(fields);
+			bindField(field, field, fields, query);
+		}
+	};
+
+	template<size_t index, typename... fields_t> struct bindUpdate_t<index, 0, fields_t...>
+		{ template<typename query_t> static void bind(const std::tuple<fields_t...> &, query_t &) { } };
+	template<typename... fields> using bindUpdate = bindUpdate_t<sizeof...(fields), countUpdate_t<fields...>::count, fields...>;
 }
