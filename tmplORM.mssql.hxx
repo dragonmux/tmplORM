@@ -89,7 +89,9 @@ namespace tmplORM
 		template<typename tableName, typename... fields> using update__ = toString<
 			tycat<ts("UPDATE "), bracket<tableName>, ts(" SET "), updateList<fields...>, updateWhere<fields...>, ts(";")>
 		>;
-
+		template<typename tableName, typename... fields> using del__ = toString<
+			tycat<ts("DELETE FROM "), bracket<tableName>, updateWhere<fields...>, ts(";")>
+		>;
 		template<typename tableName, typename...> using deleteTable__ = toString<
 			tycat<ts("DROP TABLE "), bracket<tableName>, ts(";")>
 		>;
