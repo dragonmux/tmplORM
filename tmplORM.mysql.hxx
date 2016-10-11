@@ -228,7 +228,7 @@ namespace tmplORM
 			tycat<ts("UPDATE "), backtick<tableName>, ts(" SET "), updateList<fields...>, updateWhere<fields...>, ts(";")>
 		>;
 		template<typename tableName, typename... fields> using del_ = toString<
-			tycat<ts("DELETE * FROM "), backtick<tableName>, updateWhere<fields...>, ts(";")>
+			tycat<ts("DELETE FROM "), backtick<tableName>, updateWhere<fields...>, ts(";")>
 		>;
 		template<typename tableName> using deleteTable_ = toString<
 			tycat<ts("DROP TABLE "), backtick<tableName>, ts(";")>
