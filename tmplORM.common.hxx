@@ -169,4 +169,31 @@ inline namespace common
 	template<size_t index, typename... fields_t> struct bindUpdate_t<index, 0, fields_t...>
 		{ template<typename query_t> static void bind(const std::tuple<fields_t...> &, query_t &) { } };
 	template<typename... fields> using bindUpdate = bindUpdate_t<sizeof...(fields), countUpdate_t<fields...>::count, fields...>;
+
+	template<size_t idx, size_t bindIdx, typename... fields_t> struct bindDelete_t
+	{
+		constexpr static size_t index = idx - 1;
+		constexpr static size_t bindIndex = bindIdx - 1;
+
+		template<typename fieldName, typename T, typename field_t, typename query_t>
+			static void bindField(const type_t<fieldName, T> &, const field_t &, const std::tuple<fields_t...> &fields, query_t &query) noexcept
+		{ bindDelete_t<index, bindIdx, fields_t...>::bind(fields, query); }
+
+		template<typename T, typename field_t, typename query_t>
+			static void bindField(const primary_t<T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
+		{
+			bindDelete_t<index, bindIndex, fields_t...>::bind(fields, query);
+			bindField_t<bindIndex, field_t>::bind(field, query);
+		}
+
+		template<typename query_t> static void bind(const std::tuple<fields_t...> &fields, query_t &query) noexcept
+		{
+			const auto &field = std::get<index>(fields);
+			bindField(field, field, fields, query);
+		}
+	};
+
+	template<size_t index, typename... fields_t> struct bindDelete_t<index, 0, fields_t...>
+		{ template<typename query_t> static void bind(const std::tuple<fields_t...> &, query_t &) { } };
+	template<typename... fields> using bindDelete = bindDelete_t<sizeof...(fields), countPrimary<fields...>::count, fields...>;
 }
