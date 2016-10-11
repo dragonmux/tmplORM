@@ -87,9 +87,8 @@ namespace tmplORM
 		template<typename tableName, typename... fields> using add__ = toString<
 			tycat<ts("INSERT INTO "), bracket<tableName>, ts(" ("), insertList<fields...>, ts(") VALUES ("), placeholder<countInsert_t<fields...>::count>, ts(");")>
 		>;
-		template<typename tableName, typename... fields> using update__ = toString<
-			tycat<ts("UPDATE "), bracket<tableName>, ts(" SET "), updateList<fields...>, updateWhere<fields...>, ts(";")>
-		>;
+		template<typename tableName, typename... fields> struct update_t<false, tableName, fields...>
+			{ using value = tycat<ts("UPDATE "), bracket<tableName>, ts(" SET "), updateList<fields...>, updateWhere<fields...>, ts(";")>; };
 		template<typename tableName, typename... fields> using del__ = toString<
 			tycat<ts("DELETE FROM "), bracket<tableName>, updateWhere<fields...>, ts(";")>
 		>;
@@ -128,7 +127,9 @@ namespace tmplORM
 
 			template<typename tableName, typename... fields_t> bool update(const model_t<tableName, fields_t...> &model) noexcept
 			{
-				using update = update__<tableName, fields_t...>;
+				using update = update_<tableName, fields_t...>;
+				if (std::is_same<update, toString<typestring<>>>::value)
+					return false;
 				tSQLQuery_t query(database.prepare(update::value, sizeof...(fields_t)));
 				bindUpdate<fields_t...>::bind(model.fields(), query);
 				return query.execute().valid();

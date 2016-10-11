@@ -78,6 +78,9 @@ inline namespace common
 		{ using value = tycat<ts(" WHERE "), idFields<fields...>>; };
 	template<typename... fields> using updateWhere = typename updateWhere_t<hasPrimaryKey<fields...>(), fields...>::value;
 
+	template<bool, typename tableName, typename... fields> struct update_t { using value = typestring<>; };
+	template<typename tableName, typename... fields> using update_ = toString<typename update_t<sizeof...(fields) == countPrimary<fields...>::count, tableName, fields...>::value>;
+
 	template<size_t idx, typename... fields_t> struct bindSelect_t
 	{
 		constexpr static size_t index = idx - 1;

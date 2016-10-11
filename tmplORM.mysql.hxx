@@ -138,9 +138,8 @@ namespace tmplORM
 		template<typename tableName, typename... fields> using add_ = toString<
 			tycat<ts("INSERT INTO "), backtick<tableName>, ts(" ("), insertList<fields...>, ts(") VALUES ("), placeholder<countInsert_t<fields...>::count>, ts(");")>
 		>;
-		template<typename tableName, typename... fields> using update_ = toString<
-			tycat<ts("UPDATE "), backtick<tableName>, ts(" SET "), updateList<fields...>, updateWhere<fields...>, ts(";")>
-		>;
+		template<typename tableName, typename... fields> struct update_t<false, tableName, fields...>
+			{ using value = tycat<ts("UPDATE "), backtick<tableName>, ts(" SET "), updateList<fields...>, updateWhere<fields...>, ts(";")>; };
 		template<typename tableName, typename... fields> using del_ = toString<
 			tycat<ts("DELETE FROM "), backtick<tableName>, updateWhere<fields...>, ts(";")>
 		>;
@@ -198,6 +197,8 @@ namespace tmplORM
 			template<typename tableName, typename... fields_t> bool update(const model_t<tableName, fields_t...> &model) noexcept
 			{
 				using update = update_<tableName, fields_t...>;
+				if (std::is_same<update, toString<typestring<>>>::value)
+					return false;
 				mySQLPreparedQuery_t query = database.prepare(update::value, countInsert_t<fields_t...>::count);
 				// This binds the fields, primary key last so it tags to the WHERE clause for this query.
 				bindUpdate<fields_t...>::bind(model.fields(), query);
