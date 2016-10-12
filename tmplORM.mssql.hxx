@@ -81,6 +81,23 @@ namespace tmplORM
 			{ using value = tycat<createList__<N, field>, typename createList_t<N - 1, fields...>::value>; };
 		template<> struct createList_t<0> { using value = typestring<>; };
 
+		template<size_t N, typename field, typename... fields> struct outputField_t
+			{ using value = typename outputField_t<N - 1, fields...>::value; };
+		template<typename field, typename... fields> struct outputField_t<0, field, fields...>
+		{
+			template<typename fieldName, typename T> static auto _value(const type_t<fieldName, T> &) ->
+				typename fieldName_t<1, type_t<fieldName, T>>::value;
+			using value = tycat<ts("INSERTED."), decltype(_value(field()))>;
+		};
+		// Alias to make outputField_t easier to use
+		template<typename... fields> using outputField = typename outputField_t<autoIncIndex_t<fields...>::index, fields...>::value;
+
+		template<bool, typename... fields> struct outputInsert_t { using value = typestring<>; };
+		template<typename... fields> struct outputInsert_t<true, fields...>
+			{ using value = tycat<ts(" OUTPUT "), outputField<fields...>>; };
+		// Alias to make otuputInsert_t easier to use
+		template<typename... fields> using outputInsert = typename outputInsert_t<hasAutoInc<fields...>(), fields...>::value;
+
 		template<typename tableName, typename... fields> using createTable__ = toString<
 			tycat<ts("CREATE TABLE "), bracket<tableName>, ts(" ("), createList<fields...>, ts(");")>
 		>;
@@ -88,7 +105,7 @@ namespace tmplORM
 			tycat<ts("SELECT "), selectList<fields...>, ts(" FROM "), bracket<tableName>, ts(";")>
 		>;
 		template<typename tableName, typename... fields> using add__ = toString<
-			tycat<ts("INSERT INTO "), bracket<tableName>, ts(" ("), insertList<fields...>, ts(") VALUES ("), placeholder<countInsert_t<fields...>::count>, ts(");")>
+			tycat<ts("INSERT INTO "), bracket<tableName>, ts(" ("), insertList<fields...>, ts(")"), outputInsert<fields...>, ts(" VALUES ("), placeholder<countInsert_t<fields...>::count>, ts(");")>
 		>;
 		template<typename tableName, typename... fields> struct update_t<false, tableName, fields...>
 			{ using value = tycat<ts("UPDATE "), bracket<tableName>, ts(" SET "), updateList<fields...>, updateWhere<fields...>, ts(";")>; };
