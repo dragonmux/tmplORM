@@ -72,11 +72,14 @@ namespace tmplORM
 		};
 		template<size_t N, typename T> using createList__ = decltype(createList__t<N, T>::value());
 
-		template<size_t N, typename field, typename... fields> struct createList_t
-			{ using value = tycat<createList__<N, field>, typename createList_t<N - 1, fields...>::value>; };
-		template<typename field> struct createList_t<1, field> { using value = createList__<1, field>; };
-		// Alias to make the above easier to use
+		// Constructs a list of fields suitable for use in a CREATE query
+		template<size_t, typename...> struct createList_t;
+		// Alias to make createList_t easier to use
 		template<typename... fields> using createList = typename createList_t<sizeof...(fields), fields...>::value;
+		// Primary specialisation generates the list
+		template<size_t N, typename field, typename... fields> struct createList_t<N, field, fields...>
+			{ using value = tycat<createList__<N, field>, typename createList_t<N - 1, fields...>::value>; };
+		template<> struct createList_t<0> { using value = typestring<>; };
 
 		template<typename tableName, typename... fields> using createTable__ = toString<
 			tycat<ts("CREATE TABLE "), bracket<tableName>, ts(" ("), createList<fields...>, ts(");")>
