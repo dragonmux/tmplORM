@@ -125,7 +125,6 @@ public:
 	bool hasData() const noexcept { return _hasData; }
 	uint64_t numRows() const noexcept;
 	uint16_t numFields() const noexcept { return fields; }
-	uint64_t rowID() const noexcept;
 	bool next() const noexcept;
 	tSQLValue_t operator [](const uint16_t idx) const noexcept;
 
