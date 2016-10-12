@@ -141,8 +141,16 @@ namespace tmplORM
 			template<typename tableName, typename... fields_t> bool add(const model_t<tableName, fields_t...> &model) noexcept
 			{
 				using insert = add__<tableName, fields_t...>;
-				insert::value;
-				return true;
+				tSQLQuery_t query(database.prepare(insert::value, countInsert_t<fields_t...>::count));
+				bindInsert<fields_t...>::bind(model.fields(), query);
+				tSQLResult_t result(query.execute());
+				if (result.valid())
+				{
+					if (hasAutoInc<fields_t...>())
+						getAutoInc(model) = result[0];
+					return true;
+				}
+				return false;
 			}
 
 			template<typename tableName, typename... fields_t> bool update(const model_t<tableName, fields_t...> &model) noexcept
