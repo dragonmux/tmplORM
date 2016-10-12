@@ -174,8 +174,7 @@ namespace tmplORM
 			template<typename tableName, typename... fields> bool deleteTable(const model_t<tableName, fields...> &) noexcept
 			{
 				using deleteTable = deleteTable__<tableName>;
-				deleteTable::value;
-				return true;
+				return database.query(deleteTable::value).valid();
 			}
 		};
 	}
