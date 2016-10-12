@@ -7,11 +7,14 @@ inline namespace common
 	};
 	template<size_t N, typename T> using selectList__ = decltype(selectList__t<N>::value(T()));
 
-	template<size_t N, typename field, typename... fields> struct selectList_t
-		{ using value = tycat<selectList__<N, field>, typename selectList_t<N - 1, fields...>::value>; };
-	template<typename field> struct selectList_t<1, field> { using value = selectList__<1, field>; };
-	// Alias to make the above easier to use
+	// Constructs a list of fields suitable for use in a SELECT query
+	template<size_t, typename...> struct selectList_t;
+	// Alias to make selectList_t easier to use
 	template<typename... fields> using selectList = typename selectList_t<sizeof...(fields), fields...>::value;
+	// Primary specialisation generates the list
+	template<size_t N, typename field, typename... fields> struct selectList_t<N, field, fields...>
+		{ using value = tycat<selectList__<N, field>, selectList<fields...>>; };
+	template<> struct selectList_t<0> { using value = typestring<>; };
 
 	template<size_t N> struct insertList__t
 	{
@@ -21,11 +24,14 @@ inline namespace common
 	};
 	template<size_t N, typename T> using insertList__ = decltype(insertList__t<N>::value(T()));
 
-	template<size_t N, typename field, typename... fields> struct insertList_t
-		{ using value = tycat<insertList__<N, field>, typename insertList_t<N - 1, fields...>::value>; };
-	template<typename field> struct insertList_t<1, field> { using value = insertList__<1, field>; };
-	// Alias to make the above easier to use
+	// Constructs a list of fields suitable for use in an INSERT query
+	template<size_t, typename...> struct insertList_t;
+	// Alias to make insertList_t easier to use
 	template<typename... fields> using insertList = typename insertList_t<sizeof...(fields), fields...>::value;
+	// Primary specialisation generates the list
+	template<size_t N, typename field, typename... fields> struct insertList_t<N, field, fields...>
+		{ using value = tycat<insertList__<N, field>, insertList<fields...>>; };
+	template<> struct insertList_t<0> { using value = typestring<>; };
 
 	template<typename fieldName, typename T> constexpr size_t countInsert_(const type_t<fieldName, T> &) noexcept { return 1; }
 	template<typename T> constexpr size_t countInsert_(const autoInc_t<T> &) noexcept { return 0; }
@@ -42,11 +48,14 @@ inline namespace common
 	};
 	template<size_t N, typename T> using updateList__ = decltype(updateList__t<N>::value(T()));
 
-	template<size_t N, typename field, typename... fields> struct updateList_t
-		{ using value = tycat<updateList__<N, field>, typename updateList_t<N - 1, fields...>::value>; };
-	template<typename field> struct updateList_t<1, field> { using value = updateList__<1, field>; };
-	// Alias to make the above easier to use
+	// Constructs a list of fields suitable for use in an UPDATE query
+	template<size_t, typename...> struct updateList_t;
+	// Alias to make updateList_t easier to use
 	template<typename... fields> using updateList = typename updateList_t<sizeof...(fields), fields...>::value;
+	// Primary specialisation generates the list
+	template<size_t N, typename field, typename... fields> struct updateList_t<N, field, fields...>
+		{ using value = tycat<updateList__<N, field>, updateList<fields...>>; };
+	template<> struct updateList_t<0> { using value = typestring<>; };
 
 	template<typename fieldName, typename T> constexpr size_t countUpdate_(const type_t<fieldName, T> &) noexcept { return 1; }
 	template<typename T> constexpr size_t countUpdate_(const primary_t<T> &) noexcept { return 0; }
