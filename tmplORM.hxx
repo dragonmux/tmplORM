@@ -257,7 +257,7 @@ namespace tmplORM
 
 	public:
 		template<typename... models> bool createTable() noexcept { return collect(session.template createTable(models())...); }
-		template<typename model> model select() noexcept { return session.template select<model>(model()); }
+		template<typename model> fixedVector_t<model> select() noexcept { return session.template select<model>(model()); }
 		template<typename... models_t> bool add(const models_t &...models) noexcept { return collect(session.template add(models)...); }
 		template<typename... models_t> bool update(const models_t &...models) noexcept { return collect(session.template update(models)...); }
 		template<typename... models_t> bool del(const models_t &...models) noexcept { return collect(session.template del(models)...); }

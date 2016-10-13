@@ -162,22 +162,28 @@ namespace tmplORM
 				return database.query(create::value);
 			}
 
-			template<typename T, typename tableName, typename... fields_t> T select(const model_t<tableName, fields_t...> &) noexcept
+			template<typename T, typename tableName, typename... fields_t> fixedVector_t<T> select(const model_t<tableName, fields_t...> &) noexcept
 			{
 				using select = select_<tableName, fields_t...>;
 				if (database.query(select::value))
 				{
 					mySQLResult_t result = database.queryResult();
-					// result.numRows() == number of rows in this result set..
+					fixedVector_t<T> values(result.numRows());
 					mySQLRow_t row = result.resultRows();
-					do
+					for (size_t i = 0; i < values.length(); ++i)
 					{
 						T value;
+						if (!row.valid())
+							return {}; // TODO: Better sanity check here..
 						bindSelect<fields_t...>::bind(value.fields(), row);
+						values[i] = std::move(value);
+						row.next();
 					}
-					while (row.next());
+					if (row.valid())
+						return {}; // TODO: Better sanity check here..
+					return values;
 				}
-				return T();
+				return {};
 			}
 
 			template<typename tableName, typename... fields_t> bool add(const model_t<tableName, fields_t...> &model) noexcept
