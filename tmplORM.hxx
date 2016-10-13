@@ -6,6 +6,7 @@
 #include <chrono>
 #include <type_traits>
 #include "typestring/typestring.hh"
+#include "fixedVector.hxx"
 
 #define ts(x) typestring_is(x)
 #define ts_(x) ts(x)()
