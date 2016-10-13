@@ -92,6 +92,9 @@ namespace tmplORM
 		// Tag type to mark the primary key field with
 		template<typename T> struct primary_t : public T { typedef typename T::type type; };
 
+		// Tag type to give a field a program name different to the field name in the database
+		template<typename, typename T> struct alias_t : public T { typedef typename T::type type; };
+
 		// Tag type to mark nullable fields with
 		template<typename T> struct nullable_t : public T
 		{
@@ -146,6 +149,7 @@ namespace tmplORM
 		using tmplORM::types::type_t;
 		using tmplORM::types::autoInc_t;
 		using tmplORM::types::primary_t;
+		using tmplORM::types::alias_t;
 
 		template<typename> struct toString { };
 		template<char... C> struct toString<typestring<C...>>
@@ -230,6 +234,8 @@ namespace tmplORM
 
 		template<bool, typename fieldName, typename... fields> struct fieldIndex__t;
 		template<typename name, typename fieldName, typename T> constexpr bool isFieldsName(const type_t<fieldName, T> &) noexcept
+			{ return typestrcmp<name, fieldName>(); }
+		template<typename name, typename fieldName, typename T> constexpr bool isFieldsName(const alias_t<fieldName, T> &) noexcept
 			{ return typestrcmp<name, fieldName>(); }
 		template<typename fieldName, typename field, typename... fields>
 			using fieldIndex_ = fieldIndex__t<isFieldsName<fieldName>(field()), fieldName, fields...>;
