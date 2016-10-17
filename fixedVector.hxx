@@ -70,8 +70,8 @@ public:
 		throw std::out_of_range("index out of range");
 	}
 
-	iterator begin() noexcept { return iterator(_data, _length); }
-	const_iterator begin() const noexcept { return const_iterator(_data, _length); }
+	iterator begin() noexcept { return iterator(_data.get(), _length); }
+	const_iterator begin() const noexcept { return const_iterator(_data.get(), _length); }
 	iterator end() noexcept { return begin() + _length; }
 	const_iterator end() const noexcept { return begin() + _length; }
 
