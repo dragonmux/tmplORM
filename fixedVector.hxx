@@ -39,21 +39,41 @@ private:
 	size_t _length;
 
 public:
+	using value_type = T;
+	using reference = T &;
+	using const_reference = const T &;
+	using pointer = T *;
+	using const_pointer = const T *const;
+	using iterator = boundedIterator_t<T>;
+	using const_iterator = boundedIterator_t<const T>;
+
 	fixedVector_t() noexcept : _data(), _length(0) { }
 	fixedVector_t(size_t length) noexcept : _data(new T[length]()), _length(length) { }
 	fixedVector_t(fixedVector_t &&vec) noexcept : fixedVector_t() { swap(vec); }
 	~fixedVector_t() noexcept { }
 	fixedVector_t &operator =(fixedVector_t &&vec) noexcept { swap(vec); return *this; }
 
-	T &operator [](const size_t index)
+	size_t length() const noexcept { return _length; }
+	size_t size() const noexcept { return _length; }
+
+	reference operator [](const size_t index)
 	{
 		if (index < _length)
 			return _data[index];
-		throw std::out_of_range();
+		throw std::out_of_range("index out of range");
 	}
 
-	size_t length() const noexcept { _length; }
-	size_t size() const noexcept { _length; }
+	const_reference operator [](const size_t index) const
+	{
+		if (index < _length)
+			return _data[index];
+		throw std::out_of_range("index out of range");
+	}
+
+	iterator begin() noexcept { return iterator(_data, _length); }
+	const_iterator begin() const noexcept { return const_iterator(_data, _length); }
+	iterator end() noexcept { return begin() + _length; }
+	const_iterator end() const noexcept { return begin() + _length; }
 
 	void swap(fixedVector_t &vec) noexcept
 	{
