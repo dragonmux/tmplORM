@@ -98,21 +98,21 @@ namespace tmplORM
 		// Alias to make otuputInsert_t easier to use
 		template<typename... fields> using outputInsert = typename outputInsert_t<hasAutoInc<fields...>(), fields...>::value;
 
-		template<typename tableName, typename... fields> using createTable__ = toString<
+		template<typename tableName, typename... fields> using createTable_ = toString<
 			tycat<ts("CREATE TABLE "), bracket<tableName>, ts(" ("), createList<fields...>, ts(");")>
 		>;
-		template<typename tableName, typename... fields> using select__ = toString<
+		template<typename tableName, typename... fields> using select_ = toString<
 			tycat<ts("SELECT "), selectList<fields...>, ts(" FROM "), bracket<tableName>, ts(";")>
 		>;
-		template<typename tableName, typename... fields> using add__ = toString<
+		template<typename tableName, typename... fields> using add_ = toString<
 			tycat<ts("INSERT INTO "), bracket<tableName>, ts(" ("), insertList<fields...>, ts(")"), outputInsert<fields...>, ts(" VALUES ("), placeholder<countInsert_t<fields...>::count>, ts(");")>
 		>;
 		template<typename tableName, typename... fields> struct update_t<false, tableName, fields...>
 			{ using value = tycat<ts("UPDATE "), bracket<tableName>, ts(" SET "), updateList<fields...>, updateWhere<fields...>, ts(";")>; };
-		template<typename tableName, typename... fields> using del__ = toString<
+		template<typename tableName, typename... fields> using del_ = toString<
 			tycat<ts("DELETE FROM "), bracket<tableName>, updateWhere<fields...>, ts(";")>
 		>;
-		template<typename tableName> using deleteTable__ = toString<
+		template<typename tableName> using deleteTable_ = toString<
 			tycat<ts("DROP TABLE "), bracket<tableName>, ts(";")>
 		>;
 
@@ -127,20 +127,20 @@ namespace tmplORM
 
 			template<typename tableName, typename... fields> bool createTable(const model_t<tableName, fields...> &) noexcept
 			{
-				using create = createTable__<tableName, fields...>;
+				using create = createTable_<tableName, fields...>;
 				return database.query(create::value).valid();
 			}
 
 			template<typename T, typename tableName, typename... fields_t> T select(const model_t<tableName, fields_t...> &) noexcept
 			{
-				using select = select__<tableName, fields_t...>;
+				using select = select_<tableName, fields_t...>;
 				select::value;
 				return T();
 			}
 
 			template<typename tableName, typename... fields_t> bool add(const model_t<tableName, fields_t...> &model) noexcept
 			{
-				using insert = add__<tableName, fields_t...>;
+				using insert = add_<tableName, fields_t...>;
 				tSQLQuery_t query(database.prepare(insert::value, countInsert_t<fields_t...>::count));
 				bindInsert<fields_t...>::bind(model.fields(), query);
 				tSQLResult_t result(query.execute());
@@ -165,7 +165,7 @@ namespace tmplORM
 
 			template<typename tableName, typename... fields_t> bool del(const model_t<tableName, fields_t...> &model) noexcept
 			{
-				using del = del__<tableName, fields_t...>;
+				using del = del_<tableName, fields_t...>;
 				tSQLQuery_t query(database.prepare(del::value, countPrimary<fields_t...>::count));
 				bindDelete<fields_t...>::bind(model.fields(), query);
 				return query.execute().valid();
@@ -173,7 +173,7 @@ namespace tmplORM
 
 			template<typename tableName, typename... fields> bool deleteTable(const model_t<tableName, fields...> &) noexcept
 			{
-				using deleteTable = deleteTable__<tableName>;
+				using deleteTable = deleteTable_<tableName>;
 				return database.query(deleteTable::value).valid();
 			}
 		};
