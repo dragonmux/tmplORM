@@ -115,7 +115,7 @@ inline namespace common
 			static void bind(const field_t &field, query_t &query) noexcept
 		{
 			if (field.isNull())
-				query.bind<typename decltype(field)::type>(bindIndex, nullptr);
+				query.template bind<typename decltype(field)::type>(bindIndex, nullptr);
 			else
 				query.bind(bindIndex, field.value());
 		}
