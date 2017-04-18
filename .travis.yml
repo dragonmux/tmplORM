@@ -1,4 +1,5 @@
 language: cpp
+sudo: required
 
 before_install:
   - export GCC="$GCC -m64 -fPIC -DPIC" GXX="$GXX -m64 -fPIC -DPIC"
