@@ -51,3 +51,8 @@ matrix:
           packages:
             - gcc-6
             - g++-6
+
+addons:
+  apt:
+    packages:
+      - unixodbc-dev
