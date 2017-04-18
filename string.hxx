@@ -22,7 +22,8 @@ public:
 	utf16_t(std::unique_ptr<char16_t []> &&_str) noexcept : str(std::move(_str)) { }
 	utf16_t(utf16_t &&_str) noexcept : str(std::move(_str.str)) { }
 	utf16_t &operator =(utf16_t &&_str) noexcept { str = std::move(_str.str); return *this; }
-	operator const std::unique_ptr<char16_t[]> &() const noexcept { return str; }
+	operator const std::unique_ptr<char16_t []> &() const noexcept { return str; }
+	operator std::unique_ptr<char16_t []>() noexcept { return std::move(str); }
 	operator const char16_t *() const noexcept { return str.get(); }
 	operator char16_t *() const noexcept { return str.get(); }
 	operator const uint16_t *() const noexcept { return reinterpret_cast<uint16_t *const>(str.get()); }
@@ -45,6 +46,7 @@ public:
 	utf8_t(utf8_t &&_str) noexcept : str(std::move(_str.str)) { }
 	utf8_t &operator =(utf8_t &&_str) noexcept { str = std::move(_str.str); return *this; }
 	operator const std::unique_ptr<char []> &() const noexcept { return str; }
+	operator std::unique_ptr<char []>() noexcept { return std::move(str); }
 	operator const char *() const noexcept { return str.get(); }
 	operator char *() const noexcept { return str.get(); }
 	operator const uint8_t *() const noexcept { return reinterpret_cast<uint8_t *const>(str.get()); }
