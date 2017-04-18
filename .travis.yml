@@ -2,6 +2,7 @@ language: cpp
 
 before_install:
   - export GCC="$GCC -m64 -fPIC -DPIC" GXX="$GXX -m64 -fPIC -DPIC"
+  - sudo -E apt-get -yq install unixodbc-dev
 install:
   - make
 script:
@@ -51,8 +52,3 @@ matrix:
           packages:
             - gcc-6
             - g++-6
-
-addons:
-  apt:
-    packages:
-      - unixodbc-dev
