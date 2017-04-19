@@ -40,9 +40,33 @@ public:
 
 class testValid final : public testsuit
 {
+private:
+	void assertInvalid(const utf16_t &val)
+	{
+		const char16_t *const value = val;
+		assertNull(value);
+		assertTrue(!val);
+	}
+
 public:
+	void testBadUTF8()
+	{
+		assertInvalid(utf16::convert("\x80"));
+		assertInvalid(utf16::convert("\xC0"));
+		assertInvalid(utf16::convert("\xC0\x0A"));
+		assertInvalid(utf16::convert("\xE0\x0A"));
+		assertInvalid(utf16::convert("\xE0\x8A\x0A"));
+		// This encodes part of a surrogate pair character - which is invalid in UTF-8.
+		assertInvalid(utf16::convert("\xED\xAA\x8A"));
+		assertInvalid(utf16::convert("\xF0\x0A"));
+		assertInvalid(utf16::convert("\xF0\x8A\x0A"));
+		assertInvalid(utf16::convert("\xF0\x8A\x8A\x0A"));
+		// TODO: need to test full surrogate-pair value is not present as this is also invalid.
+	}
+
 	void registerTests() final override
 	{
+		CXX_TEST(testBadUTF8)
 	}
 };
 
