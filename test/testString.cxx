@@ -18,6 +18,10 @@ public:
 
 	void testUTF16to8()
 	{
+		utf8_t utf8Data = utf16::convert(utf16Ref);
+		assertTrue(bool(utf8Data));
+		const char *const utf8Res = utf8Data;
+		assertEqual(utf8Res, utf8Ref, utf16::length(utf8Ref));
 	}
 
 	void registerTests() final override
