@@ -8,6 +8,9 @@ CRUNCHMAKE = crunchMake -I..
 ifeq ($(BUILD_VERBOSE), 0)
 	CRUNCHMAKE += -q
 endif
+ifeq ($(strip $(COVERAGE)), 1)
+	CRUNCHMAKE += -lgcov
+endif
 CRUNCH = crunch++
 
 TESTS = testMSSQLMapper.so testMySQLMapper.so
