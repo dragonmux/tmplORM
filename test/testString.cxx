@@ -48,6 +48,13 @@ private:
 		assertTrue(!val);
 	}
 
+	void assertInvalid(const utf8_t &val)
+	{
+		const char *const value = val;
+		assertNull(value);
+		assertTrue(!val);
+	}
+
 public:
 	void testBadUTF8()
 	{
@@ -64,9 +71,17 @@ public:
 		// TODO: need to test full surrogate-pair value is not present as this is also invalid.
 	}
 
+	void testBadUTF16()
+	{
+		assertInvalid(utf16::convert(u"\xDC00"));
+		assertInvalid(utf16::convert(u"\xD800"));
+		assertInvalid(utf16::convert(u"\xD800\x08A0"));
+	}
+
 	void registerTests() final override
 	{
 		CXX_TEST(testBadUTF8)
+		CXX_TEST(testBadUTF16)
 	}
 };
 
