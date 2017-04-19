@@ -95,9 +95,17 @@ public:
 		assertEqual(str.get(), "This is only a test");
 	}
 
+	void testFormatString()
+	{
+		auto str = formatString("Formatting test %u\n", 1);
+		assertNotNull(str.get());
+		assertEqual(str.get(), "Formatting test 1\n");
+	}
+
 	void registerTests() final override
 	{
 		CXX_TEST(testDup)
+		CXX_TEST(testFormatString)
 	}
 };
 
