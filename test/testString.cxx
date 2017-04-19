@@ -8,6 +8,12 @@ private:
 	const char16_t *const utf16Ref = u"\u005B\u00D8\u04D5\u16A0\u2026\uFFFD\U00010117";
 
 public:
+	void testValidity()
+	{
+		assertTrue(!utf8_t(nullptr));
+		assertTrue(!utf16_t(nullptr));
+	}
+
 	void testUTF8to16()
 	{
 		utf16_t utf16Data = utf16::convert(utf8Ref);
@@ -26,6 +32,7 @@ public:
 
 	void registerTests() final override
 	{
+		CXX_TEST(testValidity)
 		CXX_TEST(testUTF8to16)
 		CXX_TEST(testUTF16to8)
 	}
