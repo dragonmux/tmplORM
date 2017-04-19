@@ -88,8 +88,16 @@ public:
 class testFormat final : public testsuit
 {
 public:
+	void testDup()
+	{
+		auto str = strNewDup("This is only a test");
+		assertNotNull(str.get());
+		assertEqual(str.get(), "This is only a test");
+	}
+
 	void registerTests() final override
 	{
+		CXX_TEST(testDup)
 	}
 };
 
