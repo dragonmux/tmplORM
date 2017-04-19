@@ -14,10 +14,10 @@ struct utf16_t final
 {
 private:
 	std::unique_ptr<char16_t []> str;
-	constexpr utf16_t() noexcept : str() { }
+	utf16_t() noexcept : str() { }
 
 public:
-	constexpr utf16_t(const std::nullptr_t) noexcept : str() { }
+	utf16_t(const std::nullptr_t) noexcept : str() { }
 	utf16_t(std::unique_ptr<char16_t []> &_str) noexcept : str(std::move(_str)) { }
 	utf16_t(std::unique_ptr<char16_t []> &&_str) noexcept : str(std::move(_str)) { }
 	utf16_t(utf16_t &&_str) noexcept : str(std::move(_str.str)) { }
@@ -35,12 +35,12 @@ struct utf8_t final
 {
 private:
 	std::unique_ptr<char []> str;
-	constexpr utf8_t() noexcept : str() { }
+	utf8_t() noexcept : str() { }
 	utf8_t(const utf8_t &) = delete;
 	utf8_t &operator =(const utf8_t &) = delete;
 
 public:
-	constexpr utf8_t(const std::nullptr_t) noexcept : str() { }
+	utf8_t(const std::nullptr_t) noexcept : str() { }
 	utf8_t(std::unique_ptr<char []> &_str) noexcept : str(std::move(_str)) { }
 	utf8_t(std::unique_ptr<char []> &&_str) noexcept : str(std::move(_str)) { }
 	utf8_t(utf8_t &&_str) noexcept : str(std::move(_str.str)) { }
