@@ -13,7 +13,10 @@ std::unique_ptr<const char []> formatString(const char *format, ...) noexcept
 
 std::unique_ptr<const char []> vaFormatString(const char *format, va_list args) noexcept
 {
-	const size_t len = vsnprintf(NULL, 0, format, args) + 1;
+	va_list lenArgs;
+	va_copy(lenArgs, args);
+	const size_t len = vsnprintf(NULL, 0, format, lenArgs) + 1;
+	va_end(lenArgs);
 	auto ret = makeUnique<char []>(len);
 	if (!ret)
 		return nullptr;
