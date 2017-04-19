@@ -42,6 +42,15 @@ matrix:
             - g++-4.9
             - clang-3.9
     - compiler: gcc-5
+      env: GCC=gcc-5 GXX=g++-5 COVERAGE=0
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-5
+            - g++-5
+    - compiler: gcc-5
       env: GCC=gcc-5 GXX=g++-5 GCOV=gcov-5
       addons:
         apt:
@@ -59,3 +68,7 @@ matrix:
           packages:
             - gcc-6
             - g++-6
+
+env:
+  global:
+    - COVERAGE=1
