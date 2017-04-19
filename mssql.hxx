@@ -119,7 +119,7 @@ protected:
 public:
 	tSQLResult_t() noexcept : client(nullptr), queryHandle(nullptr), _hasData(false), _freeHandle(true), fields(0), fieldInfo() { }
 	tSQLResult_t(tSQLResult_t &&row) noexcept : tSQLResult_t() { *this = std::move(row); }
-	~tSQLResult_t();
+	~tSQLResult_t() noexcept;
 	tSQLResult_t &operator =(tSQLResult_t &&row) noexcept;
 	bool valid() const noexcept { return client && queryHandle && (fields == 0 || (fieldInfo && _hasData)); }
 	bool hasData() const noexcept { return _hasData; }
@@ -149,7 +149,7 @@ protected:
 public:
 	tSQLQuery_t() noexcept : client(nullptr), queryHandle(nullptr), numParams(0), dataLengths(), executed(true) { }
 	tSQLQuery_t(tSQLQuery_t &&qry) noexcept : tSQLQuery_t() { *this = std::move(qry); }
-	~tSQLQuery_t();
+	~tSQLQuery_t() noexcept;
 	tSQLQuery_t &operator =(tSQLQuery_t &&qry) noexcept;
 	bool valid() const noexcept { return queryHandle; }
 	tSQLResult_t execute() const noexcept;
