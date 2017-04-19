@@ -54,7 +54,7 @@ namespace tmplORM
 
 		namespace driver
 		{
-			static const bool isNotNull = false;
+			static const my_bool isNotNull = false;
 			static const bool isNull = true;
 
 			template<typename T> typename std::enable_if<!isNumeric<T>::value>::type
