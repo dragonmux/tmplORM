@@ -38,9 +38,25 @@ public:
 	}
 };
 
+class testValid final : public testsuit
+{
+public:
+	void registerTests() final override
+	{
+	}
+};
+
+class testFormat final : public testsuit
+{
+public:
+	void registerTests() final override
+	{
+	}
+};
+
 CRUNCH_API void registerCXXTests() noexcept;
 void registerCXXTests() noexcept
 {
-	registerTestClasses<testConvert>();
+	registerTestClasses<testConvert, testValid, testFormat>();
 }
 
