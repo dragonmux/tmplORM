@@ -4,8 +4,8 @@
 class testConvert final : public testsuit
 {
 private:
-	const char *const utf8Ref = u8"\u005B\u00D8\u04D5";
-	const char16_t *const utf16Ref = u"\u005B\u00D8\u04D5";
+	const char *const utf8Ref = u8"\u005B\u00D8\u04D5\u16A0\u2026\uFFFD\U00010117";
+	const char16_t *const utf16Ref = u"\u005B\u00D8\u04D5\u16A0\u2026\uFFFD\U00010117";
 
 public:
 	void testUTF8to16()
