@@ -76,3 +76,5 @@ matrix:
 env:
   global:
     - COVERAGE=1
+services:
+  - mysql
