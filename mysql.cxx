@@ -204,7 +204,8 @@ bool mySQLValue_t::isNull() const noexcept { return !data || type == MYSQL_TYPE_
 
 std::unique_ptr<char []> mySQLValue_t::asString() const
 {
-	//if (type != MYSQL_TYPE_
+	if (isNull())
+		return nullptr;
 	const size_t strLen = data[len - 1] == 0 ? len : len + 1;
 	std::unique_ptr<char []> ret(new char[strLen]());
 	memcpy(ret.get(), data, len);
