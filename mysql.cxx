@@ -231,7 +231,7 @@ template<typename T, mySQLErrorType_t errorType> valueOrError_t<T, mySQLValueErr
 	{
 		if (sign && i == 0)
 			continue;
-		if (!isNumber(data[i]))
+		else if (!isNumber(data[i]))
 			return mySQLValueError_t(errorType);
 		num *= 10;
 		if ((num / 10) < preNum)
@@ -241,7 +241,7 @@ template<typename T, mySQLErrorType_t errorType> valueOrError_t<T, mySQLValueErr
 	}
 	if (num < preNum)
 		return mySQLValueError_t(errorType);
-	if (sign)
+	else if (sign)
 		return T(-num);
 	return T(num);
 }
