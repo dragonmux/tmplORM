@@ -94,7 +94,7 @@ public:
 		tryShouldFail([]() { mySQLValue_t("256", 4, MYSQL_TYPE_TINY).asInt8(); });
 		//tryShouldFail([]() { mySQLValue_t("-129", 5, MYSQL_TYPE_TINY).asInt8(); });
 		tryShouldFail([]() { mySQLValue_t("1023", 5, MYSQL_TYPE_TINY).asInt8(); });
-		//tryShouldFail([]() { mySQLValue_t("1-27", 5, MYSQL_TYPE_TINY).asInt8(); });
+		tryShouldFail([]() { mySQLValue_t("1-27", 5, MYSQL_TYPE_TINY).asInt8(); });
 	}
 
 	void registerTests() final override
