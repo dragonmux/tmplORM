@@ -97,11 +97,65 @@ public:
 		tryShouldFail([]() { mySQLValue_t("1-27", 5, MYSQL_TYPE_TINY).asInt8(); });
 	}
 
+	void testUint16()
+	{
+		tryShouldFail([]() { mySQLValue_t(nullptr, 0, MYSQL_TYPE_SHORT).asUint16(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_NULL).asUint16(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR).asUint16(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_TINY).asUint16(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONG).asUint16(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG).asUint16(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_BLOB).asUint16(); });
+
+		tryOk([this]()
+		{
+			assertEqual(mySQLValue_t("128", 4, MYSQL_TYPE_SHORT).asUint16(), 128);
+			assertEqual(mySQLValue_t("255", 4, MYSQL_TYPE_SHORT).asUint16(), 255);
+			assertEqual(mySQLValue_t("32768", 6, MYSQL_TYPE_SHORT).asUint16(), 32768);
+			assertEqual(mySQLValue_t("65535", 6, MYSQL_TYPE_SHORT).asUint16(), 65535);
+			assertEqual(mySQLValue_t("", 1, MYSQL_TYPE_SHORT).asUint16(), 0);
+			assertEqual(mySQLValue_t("", 0, MYSQL_TYPE_SHORT).asUint16(), 0);
+		});
+		tryShouldFail([]() { mySQLValue_t("-1", 3, MYSQL_TYPE_SHORT).asUint16(); });
+		tryShouldFail([]() { mySQLValue_t("a", 2, MYSQL_TYPE_SHORT).asUint16(); });
+		tryShouldFail([]() { mySQLValue_t("65536", 6, MYSQL_TYPE_SHORT).asUint16(); });
+		tryShouldFail([]() { mySQLValue_t("262144", 7, MYSQL_TYPE_SHORT).asUint16(); });
+	}
+
+	void testInt16()
+	{
+		tryShouldFail([]() { mySQLValue_t(nullptr, 0, MYSQL_TYPE_SHORT).asInt16(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_NULL).asInt16(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR).asInt16(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_TINY).asInt16(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONG).asInt16(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG).asInt16(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_BLOB).asInt16(); });
+
+		tryOk([this]()
+		{
+			assertEqual(mySQLValue_t("127", 4, MYSQL_TYPE_SHORT).asInt16(), 127);
+			assertEqual(mySQLValue_t("32767", 6, MYSQL_TYPE_SHORT).asInt16(), 32767);
+			assertEqual(mySQLValue_t("", 1, MYSQL_TYPE_SHORT).asInt16(), 0);
+			assertEqual(mySQLValue_t("", 0, MYSQL_TYPE_SHORT).asInt16(), 0);
+			assertEqual(mySQLValue_t("-1", 3, MYSQL_TYPE_SHORT).asInt16(), -1);
+			assertEqual(mySQLValue_t("-32767", 7, MYSQL_TYPE_SHORT).asInt16(), -32767);
+			assertEqual(mySQLValue_t("-32768", 7, MYSQL_TYPE_SHORT).asInt16(), -32768);
+		});
+		tryShouldFail([]() { mySQLValue_t("a", 2, MYSQL_TYPE_SHORT).asInt16(); });
+		tryShouldFail([]() { mySQLValue_t("65536", 6, MYSQL_TYPE_SHORT).asInt16(); });
+		//tryShouldFail([]() { mySQLValue_t("-129", 5, MYSQL_TYPE_SHORT).asInt16(); });
+		tryShouldFail([]() { mySQLValue_t("262144", 7, MYSQL_TYPE_SHORT).asInt16(); });
+		tryShouldFail([]() { mySQLValue_t("1-27", 5, MYSQL_TYPE_SHORT).asInt16(); });
+	}
+
 	void registerTests() final override
 	{
 		CXX_TEST(testString)
 		CXX_TEST(testUint8)
 		CXX_TEST(testInt8)
+		CXX_TEST(testUint16)
+		CXX_TEST(testInt16)
 	}
 };
 
