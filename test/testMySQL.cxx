@@ -5,10 +5,21 @@ using namespace tmplORM::mysql::driver;
 
 class testMySQLValue final : public testsuit
 {
+private:
 	template<typename T> void assertUNull(std::unique_ptr<T> &value)
 		{ assertNull(value.get()); }
 	template<typename T> void assertUNotNull(std::unique_ptr<T> &value)
 		{ assertNotNull(value.get()); }
+
+	void tryShouldFail(void tests())
+	{
+		try
+		{
+			tests();
+			fail("mySQLValueError_t not thrown when expected");
+		}
+		catch (mySQLValueError_t &) { }
+	}
 
 public:
 	void testString()
@@ -28,9 +39,16 @@ public:
 		assertEqual(testStr.get(), testData.data(), testData.size());
 	}
 
+	void testUint8()
+	{
+		tryShouldFail([]() { auto value = mySQLValue_t(nullptr, 0, MYSQL_TYPE_TINY).asUint8(); });
+		//assertUNull(nullValue);
+	}
+
 	void registerTests() final override
 	{
 		CXX_TEST(testString)
+		CXX_TEST(testUint8)
 	}
 };
 
