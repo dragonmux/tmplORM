@@ -41,8 +41,14 @@ public:
 
 	void testUint8()
 	{
-		tryShouldFail([]() { auto value = mySQLValue_t(nullptr, 0, MYSQL_TYPE_TINY).asUint8(); });
-		//assertUNull(nullValue);
+		const char *const value128 = "128";
+		tryShouldFail([]() { mySQLValue_t(nullptr, 0, MYSQL_TYPE_TINY).asUint8(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_NULL).asUint8(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR).asUint8(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_SHORT).asUint8(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONG).asUint8(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG).asUint8(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_BLOB).asUint8(); });
 	}
 
 	void registerTests() final override
