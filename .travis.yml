@@ -78,3 +78,5 @@ env:
     - COVERAGE=1
 services:
   - mysql
+addons:
+  mariadb: '10.1'
