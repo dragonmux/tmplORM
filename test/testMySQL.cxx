@@ -30,9 +30,9 @@ public:
 			'\x00', '\xFF', ' ', 'o', 'n', 'l', 'y', ' ',
 			'a', ' ', 't', 'e', 's', 't', '\0'
 		};
-		auto nullStr = mySQLValue_t(nullptr, 0, MYSQL_TYPE_VARCHAR).asString();
-		assertUNull(nullStr);
-		auto nullValue = mySQLValue_t(testData.data(), 0, MYSQL_TYPE_NULL).asString();
+		auto nullValue = mySQLValue_t(nullptr, 0, MYSQL_TYPE_VARCHAR).asString();
+		assertUNull(nullValue);
+		nullValue = mySQLValue_t(testData.data(), 0, MYSQL_TYPE_NULL).asString();
 		assertUNull(nullValue);
 		auto testStr = mySQLValue_t(testData.data(), testData.size(), MYSQL_TYPE_VARCHAR).asString();
 		assertUNotNull(testStr);
