@@ -62,6 +62,7 @@ public:
 		{
 			assertEqual(mySQLValue_t("128", 4, MYSQL_TYPE_TINY).asUint8(), 128);
 			assertEqual(mySQLValue_t("", 1, MYSQL_TYPE_TINY).asUint8(), 0);
+			assertEqual(mySQLValue_t("", 0, MYSQL_TYPE_TINY).asUint8(), 0);
 		});
 		tryShouldFail([]() { mySQLValue_t("-1", 3, MYSQL_TYPE_TINY).asUint8(); });
 		tryShouldFail([]() { mySQLValue_t("a", 2, MYSQL_TYPE_TINY).asUint8(); });
@@ -83,6 +84,7 @@ public:
 		{
 			assertEqual(mySQLValue_t("127", 4, MYSQL_TYPE_TINY).asInt8(), 127);
 			assertEqual(mySQLValue_t("", 1, MYSQL_TYPE_TINY).asInt8(), 0);
+			assertEqual(mySQLValue_t("", 0, MYSQL_TYPE_TINY).asInt8(), 0);
 			assertEqual(mySQLValue_t("-1", 3, MYSQL_TYPE_TINY).asInt8(), -1);
 			//assertEqual(mySQLValue_t("-128", 3, MYSQL_TYPE_TINY).asInt8(), -128);
 		});
