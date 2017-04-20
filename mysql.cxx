@@ -198,6 +198,8 @@ mySQLValue_t mySQLRow_t::operator [](const uint32_t idx) const noexcept
 inline bool isNumber(const char x) noexcept { return x >= '0' && x <= '9'; }
 inline bool isMinus(const char x) noexcept { return x == '-'; }
 
+mySQLValue_t::mySQLValue_t(const char *const _data, const uint64_t _len, const mySQLFieldType_t _type) noexcept :
+	data(_data), len(_len), type(_type) { }
 bool mySQLValue_t::isNull() const noexcept { return !data || type == MYSQL_TYPE_NULL; }
 
 std::unique_ptr<char []> mySQLValue_t::asString() const
