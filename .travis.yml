@@ -22,7 +22,7 @@ after_success:
 matrix:
   include:
     - compiler: clang-3.8
-      env: GCC=clang-3.8 GXX=clang++-3.8
+      env: GCC=clang-3.8 GXX=clang++-3.8 COVERAGE=0
       addons:
         apt:
           sources:
@@ -35,7 +35,7 @@ matrix:
             - clang-3.8
         mariadb: '10.1'
     - compiler: clang-3.9
-      env: GCC=clang-3.9 GXX=clang++-3.9
+      env: GCC=clang-3.9 GXX=clang++-3.9 COVERAGE=0
       addons:
         apt:
           sources:
