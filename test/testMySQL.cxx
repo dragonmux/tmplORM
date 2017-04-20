@@ -60,6 +60,9 @@ public:
 
 		tryOk([this]() { assertEqual(mySQLValue_t("128", 4, MYSQL_TYPE_TINY).asUint8(), 128); });
 		tryShouldFail([]() { mySQLValue_t("-1", 3, MYSQL_TYPE_TINY).asUint8(); });
+		tryShouldFail([]() { mySQLValue_t("a", 2, MYSQL_TYPE_TINY).asUint8(); });
+		tryShouldFail([]() { mySQLValue_t("256", 4, MYSQL_TYPE_TINY).asUint8(); });
+		tryShouldFail([]() { mySQLValue_t("1023", 5, MYSQL_TYPE_TINY).asUint8(); });
 	}
 
 	void registerTests() final override
