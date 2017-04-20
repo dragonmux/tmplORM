@@ -325,3 +325,14 @@ int64_t mySQLValue_t::asInt64() const
 		throw num.error();
 	return num;
 }
+
+const char *mySQLValueError_t::error() const noexcept
+{
+	switch (errorType)
+	{
+		case mySQLErrorType_t::noError:
+			return "No error";
+		default:
+			return "Unknown error";
+	}
+}
