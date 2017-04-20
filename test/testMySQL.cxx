@@ -69,10 +69,34 @@ public:
 		tryShouldFail([]() { mySQLValue_t("1023", 5, MYSQL_TYPE_TINY).asUint8(); });
 	}
 
+	void testInt8()
+	{
+		tryShouldFail([]() { mySQLValue_t(nullptr, 0, MYSQL_TYPE_TINY).asInt8(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_NULL).asInt8(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR).asInt8(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_SHORT).asInt8(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONG).asInt8(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG).asInt8(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_BLOB).asInt8(); });
+
+		tryOk([this]()
+		{
+			assertEqual(mySQLValue_t("127", 4, MYSQL_TYPE_TINY).asInt8(), 127);
+			assertEqual(mySQLValue_t("", 1, MYSQL_TYPE_TINY).asInt8(), 0);
+			assertEqual(mySQLValue_t("-1", 3, MYSQL_TYPE_TINY).asInt8(), -1);
+			//assertEqual(mySQLValue_t("-128", 3, MYSQL_TYPE_TINY).asInt8(), -128);
+		});
+		tryShouldFail([]() { mySQLValue_t("a", 2, MYSQL_TYPE_TINY).asInt8(); });
+		tryShouldFail([]() { mySQLValue_t("256", 4, MYSQL_TYPE_TINY).asInt8(); });
+		tryShouldFail([]() { mySQLValue_t("-129", 5, MYSQL_TYPE_TINY).asInt8(); });
+		tryShouldFail([]() { mySQLValue_t("1023", 5, MYSQL_TYPE_TINY).asInt8(); });
+	}
+
 	void registerTests() final override
 	{
 		CXX_TEST(testString)
 		CXX_TEST(testUint8)
+		CXX_TEST(testInt8)
 	}
 };
 
