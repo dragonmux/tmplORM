@@ -224,8 +224,10 @@ bool mySQLValue_t::asBool(const uint8_t bit) const
 template<typename T, mySQLErrorType_t errorType> valueOrError_t<T, mySQLValueError_t> checkedConvertInt(const char *const data, const uint64_t len) noexcept
 {
 	typedef typename make_unsigned<T>::type U;
+	if (!len)
+		return 0;
 	const bool sign = is_signed<T>::value && isMinus(data[0]);
-	const uint64_t numLen = data[len - 1] != 0 ? len : len - 1;
+	const uint64_t numLen = data[len - 1] ? len : len - 1;
 	U preNum = 0, num = 0;
 	for (uint64_t i = 0; i < numLen; ++i)
 	{
@@ -242,7 +244,7 @@ template<typename T, mySQLErrorType_t errorType> valueOrError_t<T, mySQLValueErr
 	if (num < preNum)
 		return mySQLValueError_t(errorType);
 	else if (sign)
-		return T(-num);
+		return -T(num);
 	return T(num);
 }
 
