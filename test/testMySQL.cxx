@@ -1,3 +1,4 @@
+#include <functional>
 #include <crunch++.h>
 #include <mysql.hxx>
 
@@ -11,7 +12,15 @@ private:
 	template<typename T> void assertUNotNull(std::unique_ptr<T> &value)
 		{ assertNotNull(value.get()); }
 
-	void tryShouldFail(void tests())
+	void tryOk(const std::function<void()> tests)
+	{
+		try
+			{ tests(); }
+		catch (mySQLValueError_t &err)
+			{ fail(err.error()); }
+	}
+
+	void tryShouldFail(const std::function<void()> tests)
 	{
 		try
 		{
