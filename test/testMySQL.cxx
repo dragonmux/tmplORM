@@ -194,8 +194,8 @@ public:
 			assertEqual(mySQLValue_t("", 1, MYSQL_TYPE_LONG).asInt32(), 0);
 			assertEqual(mySQLValue_t("", 0, MYSQL_TYPE_LONG).asInt32(), 0);
 			assertEqual(mySQLValue_t("-1", 3, MYSQL_TYPE_LONG).asInt32(), -1);
-			assertEqual(mySQLValue_t("-32767", 7, MYSQL_TYPE_LONG).asInt32(), -32767);
-			assertEqual(mySQLValue_t("-32768", 7, MYSQL_TYPE_LONG).asInt32(), -32768);
+			assertEqual(mySQLValue_t("-2147483647", 12, MYSQL_TYPE_LONG).asInt32(), -2147483647);
+			assertEqual(mySQLValue_t("-2147483648", 12, MYSQL_TYPE_LONG).asInt32(), -2147483648);
 		});
 		tryShouldFail([]() { mySQLValue_t("a", 2, MYSQL_TYPE_LONG).asInt32(); });
 		tryShouldFail([]() { mySQLValue_t("4294967296", 11, MYSQL_TYPE_LONG).asInt32(); });
@@ -233,6 +233,35 @@ public:
 		tryShouldFail([]() { mySQLValue_t("73786976294838206464", 21, MYSQL_TYPE_LONGLONG).asUint64(); });
 	}
 
+	void testInt64()
+	{
+		tryShouldFail([]() { mySQLValue_t(nullptr, 0, MYSQL_TYPE_LONGLONG).asInt64(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_NULL).asInt64(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR).asInt64(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_TINY).asInt64(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_SHORT).asInt64(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONG).asInt64(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_BLOB).asInt64(); });
+
+		tryOk([this]()
+		{
+			assertEqual(mySQLValue_t("127", 4, MYSQL_TYPE_LONGLONG).asInt64(), 127);
+			assertEqual(mySQLValue_t("32767", 6, MYSQL_TYPE_LONGLONG).asInt64(), 32767);
+			assertEqual(mySQLValue_t("2147483647", 11, MYSQL_TYPE_LONGLONG).asInt64(), 2147483647);
+			assertEqual(mySQLValue_t("9223372036854775807", 20, MYSQL_TYPE_LONGLONG).asInt64(), 9223372036854775807U);
+			assertEqual(mySQLValue_t("", 1, MYSQL_TYPE_LONGLONG).asInt64(), 0);
+			assertEqual(mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG).asInt64(), 0);
+			assertEqual(mySQLValue_t("-1", 3, MYSQL_TYPE_LONGLONG).asInt64(), -1);
+			assertEqual(mySQLValue_t("-9223372036854775807", 21, MYSQL_TYPE_LONGLONG).asInt64(), -9223372036854775807);
+			assertEqual(mySQLValue_t("-9223372036854775808", 21, MYSQL_TYPE_LONGLONG).asInt64(), -9223372036854775808);
+		});
+		tryShouldFail([]() { mySQLValue_t("a", 2, MYSQL_TYPE_LONGLONG).asInt64(); });
+		tryShouldFail([]() { mySQLValue_t("18446744073709551616", 21, MYSQL_TYPE_LONGLONG).asInt64(); });
+		//tryShouldFail([]() { mySQLValue_t("-129", 5, MYSQL_TYPE_LONGLONG).asInt64(); });
+		tryShouldFail([]() { mySQLValue_t("73786976294838206464", 21, MYSQL_TYPE_LONGLONG).asInt64(); });
+		tryShouldFail([]() { mySQLValue_t("1-27", 5, MYSQL_TYPE_LONGLONG).asInt64(); });
+	}
+
 	void registerTests() final override
 	{
 		CXX_TEST(testString)
@@ -243,6 +272,7 @@ public:
 		CXX_TEST(testUint32)
 		CXX_TEST(testInt32)
 		CXX_TEST(testUint64)
+		CXX_TEST(testInt64)
 	}
 };
 
