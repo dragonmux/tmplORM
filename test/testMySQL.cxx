@@ -278,9 +278,26 @@ public:
 
 class testMySQL final : public testsuit
 {
+	void testInvalid()
+	{
+		mySQLClient_t testClient;
+		assertFalse(testClient.valid());
+		assertFalse(testClient.queryResult().valid());
+		//mySQLResult_t testResult;
+		//assertFalse(testResult.valid());
+		//assertEqual(testResult.numRows(), 0);
+		//assertFalse(testResult.resultRows().valid());
+		mySQLRow_t testRow;
+		assertFalse(testRow.valid());
+		assertEqual(testRow.numFields(), 0);
+		assertFalse(testRow.next());
+		assertTrue(testRow[0].isNull());
+	}
+
 public:
 	void registerTests() final override
 	{
+		CXX_TEST(testInvalid)
 	}
 };
 
