@@ -143,8 +143,9 @@ mySQLResult_t::mySQLResult_t(mySQLResult_t &&res) noexcept : mySQLResult_t() { s
 mySQLResult_t::~mySQLResult_t() noexcept { if (valid()) mysql_free_result(result); }
 mySQLResult_t &mySQLResult_t::operator =(mySQLResult_t &&res) noexcept { std::swap(result, res.result); return *this; }
 uint64_t mySQLResult_t::numRows() const noexcept { return valid() ? mysql_num_rows(result) : 0; }
-mySQLRow_t mySQLResult_t::resultRows() const noexcept { return mySQLRow_t(result); }
+mySQLRow_t mySQLResult_t::resultRows() const noexcept { return valid() ? mySQLRow_t(result) : mySQLRow_t(); }
 
+// TODO: This is actually somewhat wrong as a nullptr result should (but doesn't) construct an invalid mySQLRow_t.
 mySQLRow_t::mySQLRow_t(MYSQL_RES *const res) noexcept : result(res), fields(res ? mysql_num_fields(res) : 0),
 	fieldTypes(new (std::nothrow) mySQLFieldType_t[fields]())
 {
