@@ -204,6 +204,35 @@ public:
 		tryShouldFail([]() { mySQLValue_t("1-27", 5, MYSQL_TYPE_LONG).asInt32(); });
 	}
 
+	void testUint64()
+	{
+		tryShouldFail([]() { mySQLValue_t(nullptr, 0, MYSQL_TYPE_LONGLONG).asUint64(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_NULL).asUint64(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR).asUint64(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_TINY).asUint64(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_SHORT).asUint64(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONG).asUint64(); });
+		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_BLOB).asUint64(); });
+
+		tryOk([this]()
+		{
+			assertEqual(mySQLValue_t("128", 4, MYSQL_TYPE_LONGLONG).asUint64(), 128);
+			assertEqual(mySQLValue_t("255", 4, MYSQL_TYPE_LONGLONG).asUint64(), 255);
+			assertEqual(mySQLValue_t("32768", 6, MYSQL_TYPE_LONGLONG).asUint64(), 32768);
+			assertEqual(mySQLValue_t("65535", 6, MYSQL_TYPE_LONGLONG).asUint64(), 65535);
+			assertEqual(mySQLValue_t("2147483648", 11, MYSQL_TYPE_LONGLONG).asUint64(), 2147483648);
+			assertEqual(mySQLValue_t("4294967295", 11, MYSQL_TYPE_LONGLONG).asUint64(), 4294967295);
+			assertEqual(mySQLValue_t("9223372036854775808", 20, MYSQL_TYPE_LONGLONG).asUint64(), 9223372036854775808U);
+			assertEqual(mySQLValue_t("18446744073709551615", 21, MYSQL_TYPE_LONGLONG).asUint64(), 18446744073709551615U);
+			assertEqual(mySQLValue_t("", 1, MYSQL_TYPE_LONGLONG).asUint64(), 0);
+			assertEqual(mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG).asUint64(), 0);
+		});
+		tryShouldFail([]() { mySQLValue_t("-1", 3, MYSQL_TYPE_LONGLONG).asUint64(); });
+		tryShouldFail([]() { mySQLValue_t("a", 2, MYSQL_TYPE_LONGLONG).asUint64(); });
+		tryShouldFail([]() { mySQLValue_t("18446744073709551616", 21, MYSQL_TYPE_LONGLONG).asUint64(); });
+		tryShouldFail([]() { mySQLValue_t("73786976294838206464", 21, MYSQL_TYPE_LONGLONG).asUint64(); });
+	}
+
 	void registerTests() final override
 	{
 		CXX_TEST(testString)
@@ -213,6 +242,7 @@ public:
 		CXX_TEST(testInt16)
 		CXX_TEST(testUint32)
 		CXX_TEST(testInt32)
+		CXX_TEST(testUint64)
 	}
 };
 
