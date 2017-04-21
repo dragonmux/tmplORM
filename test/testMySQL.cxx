@@ -290,7 +290,7 @@ class testMySQL final : public testsuit
 		mySQLResult_t testResult;
 		assertFalse(testResult.valid());
 		assertEqual(testResult.numRows(), 0);
-		//assertFalse(testResult.resultRows().valid());
+		assertFalse(testResult.resultRows().valid());
 		mySQLRow_t testRow;
 		assertFalse(testRow.valid());
 		assertEqual(testRow.numFields(), 0);
