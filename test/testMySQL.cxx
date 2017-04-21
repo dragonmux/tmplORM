@@ -283,6 +283,10 @@ class testMySQL final : public testsuit
 		mySQLClient_t testClient;
 		assertFalse(testClient.valid());
 		assertFalse(testClient.queryResult().valid());
+		mySQLPreparedQuery_t testQuery = testClient.prepare("", 0);
+		assertFalse(testQuery.valid());
+		assertFalse(testQuery.execute());
+		assertEqual(testQuery.rowID(), 0);
 		mySQLResult_t testResult;
 		assertFalse(testResult.valid());
 		assertEqual(testResult.numRows(), 0);
