@@ -212,9 +212,9 @@ std::unique_ptr<char []> mySQLValue_t::asString() const
 {
 	if (isNull())
 		return nullptr;
-	// Not sure if I want this check.. but I'm putting it in for the moment.
-	else if (type != MYSQL_TYPE_STRING && type != MYSQL_TYPE_VAR_STRING)
-		throw mySQLValueError_t(mySQLErrorType_t::stringError);
+	// Not sure if I want this check..
+	//else if (type != MYSQL_TYPE_STRING && type != MYSQL_TYPE_VAR_STRING)
+	//	throw mySQLValueError_t(mySQLErrorType_t::stringError);
 	const size_t dataLen = data[len - 1] ? len + 1 : len;
 	auto str = makeUnique<char []>(dataLen);
 	if (!str)
