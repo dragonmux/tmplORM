@@ -13,18 +13,17 @@ namespace tmplORM
 		namespace driver
 		{
 using std::nullptr_t;
-
 typedef unsigned long sql_ulong_t;
 #define MySQL_FORMAT_ARGS(n, m) __attribute__((format(printf, n, m)))
-
 using mySQLFieldType_t = enum enum_field_types;
+//using tmplORM::common::fieldLength_t;
 
 struct mySQLValue_t final
 {
 private:
-	const char *const data;
-	const uint64_t len;
-	const mySQLFieldType_t type;
+	char *const data;
+	uint64_t len;
+	mySQLFieldType_t type;
 
 public:
 	constexpr mySQLValue_t() noexcept : data(nullptr), len(0), type(MYSQL_TYPE_NULL) { }
