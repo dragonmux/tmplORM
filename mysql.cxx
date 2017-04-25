@@ -212,11 +212,16 @@ std::unique_ptr<char []> mySQLValue_t::asString() const
 {
 	if (isNull())
 		return nullptr;
-	const size_t strLen = data[len - 1] == 0 ? len : len + 1;
-	std::unique_ptr<char []> ret(new char[strLen]());
-	memcpy(ret.get(), data, len);
-	ret[strLen - 1] = 0;
-	return ret;
+	// Not sure if I want this check.. but I'm putting it in for the moment.
+	else if (type != MYSQL_TYPE_STRING && type != MYSQL_TYPE_VAR_STRING)
+		throw mySQLValueError_t(mySQLErrorType_t::stringError);
+	const size_t dataLen = data[len - 1] ? len + 1 : len;
+	auto str = makeUnique<char []>(dataLen);
+	if (!str)
+		return nullptr;
+	memcpy(str.get(), data, len);
+	str[dataLen - 1] = 0;
+	return str;
 }
 
 bool mySQLValue_t::asBool(const uint8_t bit) const
