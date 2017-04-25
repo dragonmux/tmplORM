@@ -262,6 +262,24 @@ public:
 		tryShouldFail([]() { mySQLValue_t("1-27", 5, MYSQL_TYPE_LONGLONG).asInt64(); });
 	}
 
+	void testError()
+	{
+		const char *const unknownError = "An unknown error occured";
+		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::noError).error(), unknownError);
+		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::queryError).error(), unknownError);
+		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::stringError).error(), unknownError);
+		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::boolError).error(), unknownError);
+		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::uint8Error).error(), unknownError);
+		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::int8Error).error(), unknownError);
+		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::uint16Error).error(), unknownError);
+		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::int16Error).error(), unknownError);
+		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::uint32Error).error(), unknownError);
+		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::int32Error).error(), unknownError);
+		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::uint64Error).error(), unknownError);
+		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::int64Error).error(), unknownError);
+		assertEqual(mySQLValueError_t((mySQLErrorType_t)-1).error(), unknownError);
+	}
+
 	void registerTests() final override
 	{
 		CXX_TEST(testString)
@@ -273,6 +291,7 @@ public:
 		CXX_TEST(testInt32)
 		CXX_TEST(testUint64)
 		CXX_TEST(testInt64)
+		CXX_TEST(testError)
 	}
 };
 
