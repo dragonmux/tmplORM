@@ -344,8 +344,29 @@ const char *mySQLValueError_t::error() const noexcept
 	switch (errorType)
 	{
 		case mySQLErrorType_t::noError:
-			return "No error";
-		default:
-			return "Unknown error";
+			return "No error occured";
+		case mySQLErrorType_t::queryError:
+			return "Query failed";
+		case mySQLErrorType_t::stringError:
+			return "Error converting value to a string";
+		case mySQLErrorType_t::boolError:
+			return "Error converting value to a boolean";
+		case mySQLErrorType_t::uint8Error:
+			return "Error converting value to a unsigned 8-bit integer";
+		case mySQLErrorType_t::int8Error:
+			return "Error converting value to a signed 8-bit integer";
+		case mySQLErrorType_t::uint16Error:
+			return "Error converting value to a unsigned 16-bit integer";
+		case mySQLErrorType_t::int16Error:
+			return "Error converting value to a signed 16-bit integer";
+		case mySQLErrorType_t::uint32Error:
+			return "Error converting value to a unsigned 32-bit integer";
+		case mySQLErrorType_t::int32Error:
+			return "Error converting value to a signed 32-bit integer";
+		case mySQLErrorType_t::uint64Error:
+			return "Error converting value to a unsigned 64-bit integer";
+		case mySQLErrorType_t::int64Error:
+			return "Error converting value to a signed 64-bit integer";
 	}
+	return "An unknown error occured";
 }
