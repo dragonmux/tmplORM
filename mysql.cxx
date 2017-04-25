@@ -6,8 +6,6 @@
 using namespace std;
 using namespace tmplORM::mysql::driver;
 
-mySQLClient_t database;
-
 MYSQL *mySQLClient_t::con = nullptr;
 uint32_t mySQLClient_t::handles = 0;
 bool mySQLClient_t::haveConnection = false;

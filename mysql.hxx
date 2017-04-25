@@ -21,7 +21,7 @@ using mySQLFieldType_t = enum enum_field_types;
 struct mySQLValue_t final
 {
 private:
-	char *const data;
+	const char *data;
 	uint64_t len;
 	mySQLFieldType_t type;
 
