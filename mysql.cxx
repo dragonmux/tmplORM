@@ -229,7 +229,7 @@ bool mySQLValue_t::asBool(const uint8_t bit) const
 	if (isNull() || type != MYSQL_TYPE_BIT || bit >= 64)
 		throw mySQLValueError_t(mySQLErrorType_t::boolError);
 	const char byte = data[bit >> 3];
-	return byte & (bit & 7);
+	return byte & (1 << (bit & 7));
 }
 
 template<typename T, mySQLErrorType_t errorType> valueOrError_t<T, mySQLValueError_t> checkedConvertInt(const char *const data, const uint64_t len) noexcept
@@ -292,7 +292,7 @@ uint16_t mySQLValue_t::asUint16() const
 int16_t mySQLValue_t::asInt16() const
 {
 	if (isNull() || type != MYSQL_TYPE_SHORT)
-		throw mySQLValueError_t(mySQLErrorType_t::uint16Error);
+		throw mySQLValueError_t(mySQLErrorType_t::int16Error);
 	auto num = checkedConvertInt<int16_t, mySQLErrorType_t::int16Error>(data, len);
 	if (num.isError())
 		throw num.error();
