@@ -28,8 +28,10 @@ private:
 public:
 	constexpr mySQLValue_t() noexcept : data(nullptr), len(0), type(MYSQL_TYPE_NULL) { }
 	mySQLValue_t(const char *const data, const uint64_t len, const mySQLFieldType_t type) noexcept;
-	mySQLValue_t(mySQLValue_t &&value) noexcept;
-	mySQLValue_t &operator =(mySQLValue_t &&value) noexcept;
+	mySQLValue_t(mySQLValue_t &&value) noexcept : mySQLValue_t() { swap(value); }
+	~mySQLValue_t() noexcept { }
+	void operator =(mySQLValue_t &&value) noexcept { swap(value); }
+	void swap(mySQLValue_t &value) noexcept;
 
 	bool isNull() const noexcept;
 	std::unique_ptr<char []> asString() const;
@@ -58,6 +60,8 @@ public:
 	mySQLValue_t(const mySQLValue_t &) = delete;
 	mySQLValue_t &operator =(const mySQLValue_t &) = delete;
 };
+
+inline void swap(mySQLValue_t &x, mySQLValue_t &y) noexcept { x.swap(y); }
 
 struct mySQLRow_t final
 {

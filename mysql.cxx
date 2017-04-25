@@ -201,6 +201,13 @@ mySQLValue_t::mySQLValue_t(const char *const _data, const uint64_t _len, const m
 	data(_data), len(_len), type(_type) { }
 bool mySQLValue_t::isNull() const noexcept { return !data || type == MYSQL_TYPE_NULL; }
 
+void mySQLValue_t::swap(mySQLValue_t &value) noexcept
+{
+	std::swap(data, value.data);
+	std::swap(len, value.len);
+	std::swap(type, value.type);
+}
+
 std::unique_ptr<char []> mySQLValue_t::asString() const
 {
 	if (isNull())
