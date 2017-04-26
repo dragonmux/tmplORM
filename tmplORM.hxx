@@ -249,6 +249,8 @@ namespace tmplORM
 		template<size_t N, typename field, typename... fields> struct fieldType_t
 			{ using type = typename fieldType_t<N - 1, fields...>::type; };
 		template<typename field, typename... fields> struct fieldType_t<0, field, fields...> { typedef field type; };
+		// .first is the valueLength, and .second is the declLength.
+		using fieldLength_t = std::pair<const size_t, const size_t>;
 
 		template<typename T> struct isBoolean : std::false_type { };
 		template<> struct isBoolean<bool> : std::true_type { };
