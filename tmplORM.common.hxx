@@ -1,49 +1,55 @@
 inline namespace common
 {
+	// Intermediary container type for handling conversion of a field into a form suitable for a SELECT query
 	template<size_t N> struct selectList__t
 	{
 		template<typename fieldName, typename T> static auto value(const type_t<fieldName, T> &) ->
 			typename fieldName_t<N, type_t<fieldName, T>>::value;
 	};
+	// Alias for the above to make it easier to use.
 	template<size_t N, typename T> using selectList__ = decltype(selectList__t<N>::value(T()));
 
 	// Constructs a list of fields suitable for use in a SELECT query
 	template<size_t, typename...> struct selectList_t;
-	// Alias to make selectList_t easier to use
+	// Alias for selectList_t to make it easier to use.
 	template<typename... fields> using selectList = typename selectList_t<sizeof...(fields), fields...>::value;
 	// Primary specialisation generates the list
 	template<size_t N, typename field, typename... fields> struct selectList_t<N, field, fields...>
 		{ using value = tycat<selectList__<N, field>, selectList<fields...>>; };
 	template<> struct selectList_t<0> { using value = typestring<>; };
 
+	// Intermediary container type for handling conversion of a field into a form suitable for an INSERT query
 	template<size_t N> struct insertList__t
 	{
 		template<typename fieldName, typename T> static auto value(const type_t<fieldName, T> &) ->
 			typename fieldName_t<N, type_t<fieldName, T>>::value;
 		template<typename T> static auto value(const autoInc_t<T> &) -> typestring<>;
 	};
+	// Alias for the above to make it easier to use.
 	template<size_t N, typename T> using insertList__ = decltype(insertList__t<N>::value(T()));
 
 	// Constructs a list of fields suitable for use in an INSERT query
 	template<size_t, typename...> struct insertList_t;
-	// Alias to make insertList_t easier to use
+	// Alias for the above to make it easier to use.
 	template<typename... fields> using insertList = typename insertList_t<sizeof...(fields), fields...>::value;
 	// Primary specialisation generates the list
 	template<size_t N, typename field, typename... fields> struct insertList_t<N, field, fields...>
 		{ using value = tycat<insertList__<N, field>, insertList<fields...>>; };
 	template<> struct insertList_t<0> { using value = typestring<>; };
 
+	// Intermediary container type for handling conversion of a field into a form suitable for an UPDATE query
 	template<size_t N> struct updateList__t
 	{
 		template<typename fieldName, typename T> static auto value(const type_t<fieldName, T> &) ->
 			tycat<typename fieldName_t<1, type_t<fieldName, T>>::value, ts(" = "), placeholder<1>, comma<N>>;
 		template<typename T> static auto value(const primary_t<T> &) -> typestring<>;
 	};
+	// Alias for the above to make it easier to use.
 	template<size_t N, typename T> using updateList__ = decltype(updateList__t<N>::value(T()));
 
 	// Constructs a list of fields suitable for use in an UPDATE query
 	template<size_t, typename...> struct updateList_t;
-	// Alias to make updateList_t easier to use
+	// Alias for updateList_t to make it easier to use.
 	template<typename... fields> using updateList = typename updateList_t<sizeof...(fields), fields...>::value;
 	// Primary specialisation generates the list
 	template<size_t N, typename field, typename... fields> struct updateList_t<N, field, fields...>
@@ -68,7 +74,8 @@ inline namespace common
 	template<> struct idFields_t<0> { using value = typestring<>; };
 	template<typename... fields> using idFields = idFields_<countPrimary<fields...>::count, fields...>;
 
-	template<bool, typename... fields> struct updateWhere_t { };
+	// This intentionally constructs an empty struct to make using fail if there is no suitable primary field.
+	template<bool, typename...> struct updateWhere_t { };
 	template<typename... fields> struct updateWhere_t<true, fields...>
 		{ using value = tycat<ts(" WHERE "), idFields<fields...>>; };
 	template<typename... fields> using updateWhere = typename updateWhere_t<hasPrimaryKey<fields...>(), fields...>::value;
