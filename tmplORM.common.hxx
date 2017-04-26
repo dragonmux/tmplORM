@@ -33,13 +33,6 @@ inline namespace common
 		{ using value = tycat<insertList__<N, field>, insertList<fields...>>; };
 	template<> struct insertList_t<0> { using value = typestring<>; };
 
-	template<typename fieldName, typename T> constexpr size_t countInsert_(const type_t<fieldName, T> &) noexcept { return 1; }
-	template<typename T> constexpr size_t countInsert_(const autoInc_t<T> &) noexcept { return 0; }
-	template<typename...> struct countInsert_t;
-	template<typename field, typename... fields> struct countInsert_t<field, fields...>
-		{ constexpr static size_t count = countInsert_(field()) + countInsert_t<fields...>::count; };
-	template<> struct countInsert_t<> { constexpr static size_t count = 0; };
-
 	template<size_t N> struct updateList__t
 	{
 		template<typename fieldName, typename T> static auto value(const type_t<fieldName, T> &) ->
@@ -56,13 +49,6 @@ inline namespace common
 	template<size_t N, typename field, typename... fields> struct updateList_t<N, field, fields...>
 		{ using value = tycat<updateList__<N, field>, updateList<fields...>>; };
 	template<> struct updateList_t<0> { using value = typestring<>; };
-
-	template<typename fieldName, typename T> constexpr size_t countUpdate_(const type_t<fieldName, T> &) noexcept { return 1; }
-	template<typename T> constexpr size_t countUpdate_(const primary_t<T> &) noexcept { return 0; }
-	template<typename...> struct countUpdate_t;
-	template<typename field, typename... fields> struct countUpdate_t<field, fields...>
-		{ constexpr static size_t count = countUpdate_(field()) + countUpdate_t<fields...>::count; };
-	template<> struct countUpdate_t<> { constexpr static size_t count = 0; };
 
 	template<size_t N, typename field, typename... fields> struct idField_t
 		{ using value = typename idField_t<N - 1, fields...>::type; };

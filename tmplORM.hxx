@@ -227,6 +227,20 @@ namespace tmplORM
 		template<> struct countPrimary_t<0> { constexpr static size_t count = 0; };
 		template<typename... fields> using countPrimary = countPrimary_t<sizeof...(fields), fields...>;
 
+		template<typename fieldName, typename T> constexpr size_t countInsert_(const type_t<fieldName, T> &) noexcept { return 1; }
+		template<typename T> constexpr size_t countInsert_(const autoInc_t<T> &) noexcept { return 0; }
+		template<typename...> struct countInsert_t;
+		template<typename field, typename... fields> struct countInsert_t<field, fields...>
+			{ constexpr static size_t count = countInsert_(field()) + countInsert_t<fields...>::count; };
+		template<> struct countInsert_t<> { constexpr static size_t count = 0; };
+
+		template<typename fieldName, typename T> constexpr size_t countUpdate_(const type_t<fieldName, T> &) noexcept { return 1; }
+		template<typename T> constexpr size_t countUpdate_(const primary_t<T> &) noexcept { return 0; }
+		template<typename...> struct countUpdate_t;
+		template<typename field, typename... fields> struct countUpdate_t<field, fields...>
+			{ constexpr static const size_t count = countUpdate_(field()) + countUpdate_t<fields...>::count; };
+		template<> struct countUpdate_t<> { constexpr static const size_t count = 0; };
+
 		template<typename fieldName, typename T> auto toType_(const type_t<fieldName, T> &) -> type_t<fieldName, T>;
 		template<typename field> using toType = decltype(toType_(field()));
 
