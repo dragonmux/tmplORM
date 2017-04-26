@@ -5,6 +5,7 @@
 #include <mysql.h>
 #include <utility>
 #include <memory>
+#include "tmplORM.hxx"
 
 namespace tmplORM
 {
@@ -16,7 +17,7 @@ using std::nullptr_t;
 typedef unsigned long sql_ulong_t;
 #define MySQL_FORMAT_ARGS(n, m) __attribute__((format(printf, n, m)))
 using mySQLFieldType_t = enum enum_field_types;
-//using tmplORM::common::fieldLength_t;
+using tmplORM::common::fieldLength_t;
 
 struct mySQLValue_t final
 {
@@ -136,8 +137,8 @@ public:
 	bool valid() const noexcept { return query; }
 	bool execute() noexcept;
 	uint64_t rowID() const noexcept;
-	template<typename T> void bind(const size_t index, const T &value) noexcept;
-	template<typename T> void bind(const size_t index, const nullptr_t) noexcept;
+	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept;
+	template<typename T> void bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept;
 
 	mySQLPreparedQuery_t(const mySQLPreparedQuery_t &) = delete;
 	mySQLPreparedQuery_t &operator =(const mySQLPreparedQuery_t &) = delete;
@@ -157,7 +158,7 @@ public:
 	mySQLClient_t &operator =(const mySQLClient_t &) noexcept;
 
 	bool valid() const noexcept { return con && haveConnection; }
-	bool connect(const char *const host, uint32_t port, const char *const user, const char *const passwd) const noexcept;
+	bool connect(const char *const host, const uint32_t port, const char *const user, const char *const passwd) const noexcept;
 	bool connect(const char *const unixSocket, const char *const user, const char *const passwd) const noexcept;
 	void disconnect() noexcept;
 	bool selectDB(const char *const db) const noexcept;
@@ -194,7 +195,6 @@ public:
 	bool operator ==(const mySQLValueError_t &error) const noexcept { return errorType == error.errorType; }
 	bool operator !=(const mySQLValueError_t &error) const noexcept { return errorType != error.errorType; }
 };
-
 #undef MySQL_FORMAT_ARGS
 		}
 	}

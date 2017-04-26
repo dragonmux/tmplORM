@@ -14,6 +14,7 @@ namespace tmplORM
 
 		using tmplORM::types::type_t;
 		using tmplORM::types::unicode_t;
+		using tmplORM::types::unicodeText_t;
 		using tmplORM::types::_dateTime_t;
 
 		using tmplORM::types::autoInc_t;
@@ -71,7 +72,7 @@ namespace tmplORM
 				param.is_unsigned = std::is_unsigned<T>::value;
 			}
 
-			template<typename T> void mySQLPreparedQuery_t::bind(const size_t index, const T &value) noexcept
+			template<typename T> void mySQLPreparedQuery_t::bind(const size_t index, const T &value, const fieldLength_t length) noexcept
 			{
 				if (index >= numParams)
 					return;
@@ -82,7 +83,7 @@ namespace tmplORM
 			}
 
 			/* special handling for nullable_t<>.. 'cause that's a fun special-case */
-			template<typename T> void mySQLPreparedQuery_t::bind(const size_t index, const nullptr_t) noexcept
+			template<typename T> void mySQLPreparedQuery_t::bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept
 			{
 				if (index >= numParams)
 					return;
