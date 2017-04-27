@@ -101,13 +101,26 @@ namespace tmplORM
 		};
 
 		// Tag type to mark auto increment fields with
-		template<typename T> struct autoInc_t : public T { typedef typename T::type type; };
+		template<typename T> struct autoInc_t : public T
+		{
+			using type = typename T::type;
+			static_assert(isNumeric<type>::value, "Cannot create automatically incrementing field from non-numeric base type");
+			void operator =(const type &value) noexcept { static_cast<T &>(*this) = value; }
+		};
 
 		// Tag type to mark the primary key field with
-		template<typename T> struct primary_t : public T { typedef typename T::type type; };
+		template<typename T> struct primary_t : public T
+		{
+			using type = typename T::type;
+			void operator =(const type &value) noexcept { static_cast<T &>(*this) = value; }
+		};
 
 		// Tag type to give a field a program name different to the field name in the database
-		template<typename, typename T> struct alias_t : public T { typedef typename T::type type; };
+		template<typename, typename T> struct alias_t : public T
+		{
+			using type = typename T::type;
+			void operator =(const type &value) noexcept { static_cast<T &>(*this) = value; }
+		};
 
 		// Tag type to mark nullable fields with
 		template<typename T> struct nullable_t : public T
@@ -116,13 +129,12 @@ namespace tmplORM
 			bool _null;
 
 		public:
-			typedef typename T::type type;
+			using type = typename T::type;
 			constexpr static bool nullable = true;
 
 			constexpr nullable_t() noexcept : T(), _null(true) { }
-			constexpr nullable_t(const nullptr_t) noexcept : T(), _null(true) { }
+			constexpr nullable_t(const nullptr_t) noexcept : nullable_t() { }
 			constexpr nullable_t(const type &value) noexcept : T(value), _null(false) { }
-
 			bool isNull() const noexcept { return _null; }
 
 			void value(const nullptr_t) noexcept
@@ -156,6 +168,7 @@ namespace tmplORM
 		template<typename fieldName> using int_t = int32_t<fieldName>;
 		template<typename fieldName> using short_t = int16_t<fieldName>;
 		template<typename fieldName> using tinyInt_t = int8_t<fieldName>;
+		template<typename fieldName> using bit_t = bool_t<fieldName>;
 	}
 
 	namespace common
