@@ -279,21 +279,25 @@ namespace tmplORM
 		template<typename field, typename... fields> struct fieldType_t<0, field, fields...> { typedef field type; };
 		// .first is the valueLength, and .second is the declLength.
 		using fieldLength_t = std::pair<const size_t, const size_t>;
+
+		template<typename api_t> struct session_t final
+		{
+		private:
+			api_t session;
+
+		public:
+			session_t() noexcept : session() { }
+			~session_t() noexcept { }
+
+			template<typename... models> bool createTable() { return collect(session.template createTable(models())...); }
+			template<typename model> fixedVector_t<model> select() { return session.template select<model>(model()); }
+			template<typename... models_t> bool add(const models_t &...models) { return collect(session.template add(models)...); }
+			template<typename... models_t> bool update(const models_t &...models) { return collect(session.template update(models)...); }
+			template<typename... models_t> bool del(const models_t &...models) { return collect(session.template del(models)...); }
+			template<typename... models> bool deleteTable() { return collect(session.template deleteTable(models())...); }
+		};
 	}
-
-	template<typename api_t> struct session_t final
-	{
-	private:
-		api_t session;
-
-	public:
-		template<typename... models> bool createTable() noexcept { return collect(session.template createTable(models())...); }
-		template<typename model> fixedVector_t<model> select() noexcept { return session.template select<model>(model()); }
-		template<typename... models_t> bool add(const models_t &...models) noexcept { return collect(session.template add(models)...); }
-		template<typename... models_t> bool update(const models_t &...models) noexcept { return collect(session.template update(models)...); }
-		template<typename... models_t> bool del(const models_t &...models) noexcept { return collect(session.template del(models)...); }
-		template<typename... models> bool deleteTable() noexcept { return collect(session.template deleteTable(models())...); }
-	};
+	using common::session_t;
 }
 
 #endif /*tmplORM__HXX*/
