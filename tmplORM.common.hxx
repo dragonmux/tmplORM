@@ -150,9 +150,9 @@ inline namespace common
 
 	template<size_t idx, size_t bindIdx, size_t keyBindIdx, typename... fields_t> struct bindUpdate_t
 	{
-		constexpr static size_t index = idx - 1;
-		constexpr static size_t bindIndex = bindIdx - 1;
-		constexpr static size_t keyBindIndex = keyBindIdx - 1;
+		constexpr static const size_t index = idx - 1;
+		constexpr static const size_t bindIndex = bindIdx - 1;
+		constexpr static const size_t keyBindIndex = keyBindIdx - 1;
 
 		template<typename fieldName, typename T, typename field_t, typename query_t>
 			static void bindField(const type_t<fieldName, T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
@@ -202,7 +202,7 @@ inline namespace common
 		}
 	};
 
-	template<size_t index, typename... fields_t> struct bindDelete_t<index, 0, fields_t...>
-		{ template<typename query_t> static void bind(const std::tuple<fields_t...> &, query_t &) { } };
+	template<size_t index, typename... fields> struct bindDelete_t<index, 0, fields...>
+		{ template<typename query_t> static void bind(const std::tuple<fields...> &, query_t &) noexcept { } };
 	template<typename... fields> using bindDelete = bindDelete_t<sizeof...(fields), countPrimary<fields...>::count, fields...>;
 }
