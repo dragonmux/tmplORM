@@ -24,6 +24,11 @@ namespace tmplORM
 
 		template<typename fieldName, typename... fields> using fieldIndex = fieldIndex_t<fieldName, fields...>;
 		template<typename fieldName, typename... fields> using fieldType = typename fieldType_t<fieldIndex<fieldName, fields...>::index, fields...>::type;
+
+		template<typename T> struct isBoolean : std::false_type { };
+		template<> struct isBoolean<bool> : std::true_type { };
+
+		template<typename T> struct isNumeric : std::integral_constant<bool, std::is_integral<T>::value && !isBoolean<T>::value> { };
 	}
 	using tmplORM::common::fieldIndex;
 	using tmplORM::common::fieldType;
@@ -61,6 +66,8 @@ namespace tmplORM
 
 	namespace types
 	{
+		using common::isNumeric;
+
 		template<typename _fieldName, typename T> struct type_t
 		{
 			T _value;
@@ -265,11 +272,6 @@ namespace tmplORM
 		template<typename field, typename... fields> struct fieldType_t<0, field, fields...> { typedef field type; };
 		// .first is the valueLength, and .second is the declLength.
 		using fieldLength_t = std::pair<const size_t, const size_t>;
-
-		template<typename T> struct isBoolean : std::false_type { };
-		template<> struct isBoolean<bool> : std::true_type { };
-
-		template<typename T> struct isNumeric : std::integral_constant<bool, std::is_integral<T>::value && !isBoolean<T>::value> { };
 	}
 
 	template<typename api_t> struct session_t final
