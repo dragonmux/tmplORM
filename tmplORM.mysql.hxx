@@ -15,7 +15,7 @@ namespace tmplORM
 		using tmplORM::types::type_t;
 		using tmplORM::types::unicode_t;
 		using tmplORM::types::unicodeText_t;
-		using tmplORM::types::_dateTime_t;
+		using tmplORM::types::dateTimeTypes::_dateTime_t;
 
 		using tmplORM::types::autoInc_t;
 		using tmplORM::types::primary_t;

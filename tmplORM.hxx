@@ -155,7 +155,7 @@ namespace tmplORM
 			void operator =(const nullptr_t) noexcept { value(nullptr); }
 			void operator =(const type &value) noexcept { static_cast<T &>(*this) = value; }
 			const type value() const noexcept { return T::value(); }
-			void value(const type &val) noexcept { T::value(val); }
+			//void value(const type &val) noexcept { T::value(val); }
 		};
 
 		// Encodes as a VARCHAR type field (NVARCHAR for MSSQL)
@@ -173,8 +173,75 @@ namespace tmplORM
 		template<typename _fieldName> struct bool_t : public type_t<_fieldName, bool> { };
 		template<typename _fieldName> struct float_t : public type_t<_fieldName, float> { };
 		template<typename _fieldName> struct double_t : public type_t<_fieldName, double> { };
-		using _dateTime_t = std::chrono::time_point<std::chrono::system_clock>;
-		template<typename _fieldName> struct dateTime_t : public type_t<_fieldName, _dateTime_t> { };
+
+		namespace dateTimeTypes
+		{
+			using std::ratio;
+			using namespace std::chrono;
+
+			struct _dateTime_t
+			{
+			public:
+				using timePoint_t = time_point<system_clock>;
+				using duration_t = typename timePoint_t::duration;
+
+			private:
+				uint16_t _year;
+				uint16_t _month;
+				uint16_t _day;
+				timePoint_t _time;
+
+			public:
+				constexpr _dateTime_t() noexcept : _year(0), _month(0), _day(0), _time() { }
+				_dateTime_t(const uint16_t year, const uint16_t month, const uint16_t day, const duration_t &time) noexcept :
+					_year(year), _month(month), _day(day), _time(timePoint_t(time)) { }
+				constexpr uint16_t year() const noexcept { return _year; }
+				constexpr uint16_t month() const noexcept { return _month; }
+				constexpr uint16_t day() const noexcept { return _day; }
+				constexpr timePoint_t time() const noexcept { return _time; }
+			};
+
+			template<typename _fieldName> struct dateTime_t : public type_t<_fieldName, _dateTime_t>
+			{
+			private:
+				using parentType_t = type_t<_fieldName, _dateTime_t>;
+
+			public:
+				using type = ormDateTime_t;
+				operator ormDateTime_t() const noexcept { return dateTime(); }
+				void operator =(const char *const _value) noexcept { value(ormDateTime_t(_value)); }
+				void operator =(const ormDateTime_t &_value) noexcept { value(_value); }
+				void operator =(ormDateTime_t &&_value) noexcept { value(_value); }
+				void dateTime(const ormDateTime_t &_value) noexcept { value(_value); }
+				ormDateTime_t dateTime() const noexcept { return value(); }
+				void value(const char *const _value) noexcept { value(ormDateTime_t(_value)); }
+
+				ormDateTime_t value() const noexcept
+				{
+					const _dateTime_t _value = parentType_t::value();
+					nanoseconds time(_value.time().time_since_epoch());
+					const auto hour = duration_cast<hours>(time);
+					time -= hour;
+					const auto minute = duration_cast<minutes>(time);
+					time -= minute;
+					const auto second = duration_cast<seconds>(time);
+					time -= second;
+					return ormDateTime_t(_value.year(), _value.month(), _value.day(),
+						hour.count(), minute.count(), second.count(), time.count());
+				}
+
+				void value(const ormDateTime_t &_value) noexcept
+				{
+					nanoseconds time(_value.nanoSecond());
+					time += seconds(_value.second());
+					time += minutes(_value.minute());
+					time += hours(_value.hour());
+					parentType_t::value(_dateTime_t(_value.year(), _value.month(), _value.day(),
+						duration_cast<typename _dateTime_t::duration_t>(time)));
+				}
+			};
+		}
+		using dateTimeTypes::dateTime_t;
 
 		// Convinience just in case you don't like using the stdint.h like types above.
 		template<typename fieldName> using bigInt_t = int64_t<fieldName>;
