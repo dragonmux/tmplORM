@@ -70,17 +70,21 @@ namespace tmplORM
 
 		template<typename _fieldName, typename T> struct type_t
 		{
+		protected:
 			T _value;
-			bool _modified;
-			typedef T type;
 
+		private:
+			bool _modified;
+
+		public:
 			constexpr type_t() noexcept : _value(), _modified(false) { }
 			constexpr type_t(const T &value) noexcept : _value(value), _modified(false) { }
 
 			constexpr const char *fieldName() const noexcept { return _fieldName::data(); }
 			const T value() const noexcept { return _value; }
-			// Make the type behave like it's contained type..
+			// Make the type behave like its' contained type..
 			operator T() const noexcept { return _value; }
+			void operator =(const T &_value) noexcept { value(_value); }
 			bool modified() const noexcept { return _modified; }
 			constexpr static bool nullable = false;
 
@@ -90,7 +94,10 @@ namespace tmplORM
 				_modified = true;
 			}
 
-			// create(); - CREATE TABLE definiton of the field
+			bool operator ==(const type_t<_fieldName, T> &value) const noexcept { return _value == value._value; }
+			bool operator !=(const type_t<_fieldName, T> &value) const noexcept { return _value != value._value; }
+
+			using type = T;
 		};
 
 		// Tag type to mark auto increment fields with
