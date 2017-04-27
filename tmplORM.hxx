@@ -235,7 +235,7 @@ namespace tmplORM
 		/*template<typename tableName, typename... fields_t> auto getPrimaryKey(const model_t<tableName, fields_t...> &model) noexcept ->
 			decltype(std::get<primaryIndex_t<fields_t...>::index>()) { return std::get<primaryIndex_t<fields_t...>::index>(model.fields()); }*/
 
-		template<size_t N, typename... fields> struct countPrimary_t { };
+		template<size_t N, typename... fields> struct countPrimary_t;
 		template<size_t N, typename field, typename... fields> struct countPrimary_t<N, field, fields...>
 			{ constexpr static size_t count = (isPrimaryKey(field()) ? 1 : 0) + countPrimary_t<N - 1, fields...>::count; };
 		template<> struct countPrimary_t<0> { constexpr static size_t count = 0; };
@@ -245,8 +245,8 @@ namespace tmplORM
 		template<typename T> constexpr size_t countInsert_(const autoInc_t<T> &) noexcept { return 0; }
 		template<typename...> struct countInsert_t;
 		template<typename field, typename... fields> struct countInsert_t<field, fields...>
-			{ constexpr static size_t count = countInsert_(field()) + countInsert_t<fields...>::count; };
-		template<> struct countInsert_t<> { constexpr static size_t count = 0; };
+			{ constexpr static const size_t count = countInsert_(field()) + countInsert_t<fields...>::count; };
+		template<> struct countInsert_t<> { constexpr static const size_t count = 0; };
 
 		template<typename fieldName, typename T> constexpr size_t countUpdate_(const type_t<fieldName, T> &) noexcept { return 1; }
 		template<typename T> constexpr size_t countUpdate_(const primary_t<T> &) noexcept { return 0; }
@@ -268,11 +268,11 @@ namespace tmplORM
 		template<typename fieldName, typename field, typename... fields>
 			using fieldIndex_ = fieldIndex__t<isFieldsName<fieldName>(field()), fieldName, fields...>;
 		template<typename fieldName, typename field, typename... fields> struct fieldIndex__t<false, fieldName, field, fields...>
-			{ constexpr static size_t index = fieldIndex_<fieldName, field, fields...>::index + 1; };
+			{ constexpr static const size_t index = fieldIndex_<fieldName, field, fields...>::index + 1; };
 		template<typename fieldName, typename... fields> struct fieldIndex__t<true, fieldName, fields...>
-			{ constexpr static size_t index = 0; };
+			{ constexpr static const size_t index = 0; };
 		template<typename fieldName, typename field, typename... fields> struct fieldIndex_t
-			{ constexpr static size_t index = fieldIndex_<fieldName, field, fields...>::index; };
+			{ constexpr static const size_t index = fieldIndex_<fieldName, field, fields...>::index; };
 
 		template<size_t N, typename field, typename... fields> struct fieldType_t
 			{ using type = typename fieldType_t<N - 1, fields...>::type; };
