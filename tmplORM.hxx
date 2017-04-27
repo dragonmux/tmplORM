@@ -140,8 +140,21 @@ namespace tmplORM
 			void value(const nullptr_t) noexcept
 			{
 				_null = true;
-				this->_modified = true;
+				T::value(type());
 			}
+
+			void value(const type &_value) noexcept
+			{
+				if (_value.isNull())
+					value(nullptr);
+				else
+					T::value(_value);
+			}
+
+			void operator =(const nullptr_t) noexcept { value(nullptr); }
+			void operator =(const type &value) noexcept { static_cast<T &>(*this) = value; }
+			const type value() const noexcept { return T::value(); }
+			void value(const type &val) noexcept { T::value(val); }
 		};
 
 		// Encodes as a VARCHAR type field (NVARCHAR for MSSQL)
