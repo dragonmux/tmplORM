@@ -6,7 +6,7 @@ inline namespace common
 		template<typename fieldName, typename T> static auto value(const type_t<fieldName, T> &) ->
 			typename fieldName_t<N, type_t<fieldName, T>>::value;
 	};
-	// Alias for the above to make it easier to use.
+	// Alias for the above container type to make it easier to use.
 	template<size_t N, typename T> using selectList__ = decltype(selectList__t<N>::value(T()));
 
 	// Constructs a list of fields suitable for use in a SELECT query
@@ -25,7 +25,7 @@ inline namespace common
 			typename fieldName_t<N, type_t<fieldName, T>>::value;
 		template<typename T> static auto value(const autoInc_t<T> &) -> typestring<>;
 	};
-	// Alias for the above to make it easier to use.
+	// Alias for the above container type to make it easier to use.
 	template<size_t N, typename T> using insertList__ = decltype(insertList__t<N>::value(T()));
 
 	// Constructs a list of fields suitable for use in an INSERT query
@@ -44,7 +44,7 @@ inline namespace common
 			tycat<typename fieldName_t<1, type_t<fieldName, T>>::value, ts(" = "), placeholder<1>, comma<N>>;
 		template<typename T> static auto value(const primary_t<T> &) -> typestring<>;
 	};
-	// Alias for the above to make it easier to use.
+	// Alias for the above container type to make it easier to use.
 	template<size_t N, typename T> using updateList__ = decltype(updateList__t<N>::value(T()));
 
 	// Constructs a list of fields suitable for use in an UPDATE query
@@ -57,7 +57,7 @@ inline namespace common
 	template<> struct updateList_t<0> { using value = typestring<>; };
 
 	template<size_t N, typename field, typename... fields> struct idField_t
-		{ using value = typename idField_t<N - 1, fields...>::type; };
+		{ using value = typename idField_t<N - 1, fields...>::value; };
 	template<typename field, typename... fields> struct idField_t<0, field, fields...>
 		{ using value = updateList<toType<field>>; };
 	template<typename... fields> using idField = typename idField_t<primaryIndex_t<fields...>::index, fields...>::value;
@@ -74,7 +74,7 @@ inline namespace common
 	template<> struct idFields_t<0> { using value = typestring<>; };
 	template<typename... fields> using idFields = idFields_<countPrimary<fields...>::count, fields...>;
 
-	// This intentionally constructs an empty struct to make using fail if there is no suitable primary field.
+	// This intentionally constructs an empty struct to make the using fail if there is no suitable primary field.
 	template<bool, typename...> struct updateWhere_t { };
 	template<typename... fields> struct updateWhere_t<true, fields...>
 		{ using value = tycat<ts(" WHERE "), idFields<fields...>>; };
@@ -95,7 +95,7 @@ inline namespace common
 	};
 
 	template<typename... fields> struct bindSelect_t<0, fields...>
-		{ template<typename result_t> static void bind(std::tuple<fields...> &, const result_t &) { } };
+		{ template<typename result_t> static void bind(std::tuple<fields...> &, const result_t &) noexcept { } };
 	template<typename... fields> using bindSelect = bindSelect_t<sizeof...(fields), fields...>;
 
 	template<typename field_t> constexpr fieldLength_t fieldLength(const field_t &) noexcept { return {0, 0}; }
