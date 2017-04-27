@@ -219,11 +219,26 @@ namespace tmplORM
 		template<typename T> constexpr bool isAutoInc(const autoInc_t<T> &) noexcept { return true; }
 		template<typename... fields> constexpr bool hasAutoInc() noexcept { return bundle(isAutoInc(fields())...); }
 
-		template<typename field, typename... fields> struct autoIncIndex_t
-			{ constexpr static size_t index = isAutoInc(field()) ? 0 : 1 + autoIncIndex_t<fields...>::index; };
-		template<typename field> struct autoIncIndex_t<field> { constexpr static size_t index = isAutoInc(field()) ? 0 : 1; };
-		template<typename tableName, typename... fields_t> auto getAutoInc(const model_t<tableName, fields_t...> &model) noexcept ->
-			decltype(std::get<autoIncIndex_t<fields_t...>::index>()) { return std::get<autoIncIndex_t<fields_t...>::index>(model.fields()); }
+		template<typename...> struct autoIncIndex_t;
+		template<typename field, typename... fields> struct autoIncIndex_t<field, fields...>
+			{ constexpr static const size_t index = isAutoInc(field()) ? 0 : 1 + autoIncIndex_t<fields...>::index; };
+		template<> struct autoIncIndex_t<> { constexpr static  const size_t index = 0; };
+		template<typename... fields> using autoIncType = typename fieldType_t<autoIncIndex_t<fields...>::index, fields...>::type &;
+		template<typename tableName, typename... fields_t> auto autoInc(model_t<tableName, fields_t...> &model) noexcept ->
+			autoIncType<fields_t...> { return std::get<autoIncIndex_t<fields_t...>::index>(model.fields()); }
+
+		template<bool> struct setAutoInc_t
+		{
+			template<typename model_t> static void set(model_t &model, const uint64_t rowID) noexcept
+				{ autoInc(model) = rowID; }
+		};
+		template<> struct setAutoInc_t<false> { template<typename model_t> static void set(model_t &, const uint64_t) noexcept { } };
+
+		template<size_t N, typename... fields> struct countAutoInc_t;
+		template<size_t N, typename field, typename... fields> struct countAutoInc_t<N, field, fields...>
+			{ constexpr static size_t count = (isAutoInc(field()) ? 1 : 0) + countAutoInc_t<N - 1, fields...>::count; };
+		template<> struct countAutoInc_t<0> { constexpr static size_t count = 0; };
+		template<typename... fields> using countAutoInc = countAutoInc_t<sizeof...(fields), fields...>;
 
 		template<typename fieldName, typename T> constexpr bool isPrimaryKey(const type_t<fieldName, T> &) noexcept { return false; }
 		template<typename T> constexpr bool isPrimaryKey(const primary_t<T> &) noexcept { return true; }
