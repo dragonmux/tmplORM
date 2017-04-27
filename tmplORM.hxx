@@ -229,11 +229,10 @@ namespace tmplORM
 		template<typename T> constexpr bool isPrimaryKey(const primary_t<T> &) noexcept { return true; }
 		template<typename... fields> constexpr bool hasPrimaryKey() noexcept { return bundle(isPrimaryKey(fields())...); }
 
-		template<typename field, typename... fields> struct primaryIndex_t
-			{ constexpr static size_t index = isPrimaryKey(field()) ? 0 : 1 + primaryIndex_t<fields...>::index; };
-		template<typename field> struct primaryIndex_t<field> { constexpr static size_t index = isPrimaryKey(field()) ? 0 : 1; };
-		/*template<typename tableName, typename... fields_t> auto getPrimaryKey(const model_t<tableName, fields_t...> &model) noexcept ->
-			decltype(std::get<primaryIndex_t<fields_t...>::index>()) { return std::get<primaryIndex_t<fields_t...>::index>(model.fields()); }*/
+		template<typename...> struct primaryIndex_t;
+		template<typename field, typename... fields> struct primaryIndex_t<field, fields...>
+			{ constexpr static const size_t index = isPrimaryKey(field()) ? 0 : 1 + primaryIndex_t<fields...>::index; };
+		template<> struct primaryIndex_t<> { constexpr static const size_t index = 0; };
 
 		template<size_t N, typename... fields> struct countPrimary_t;
 		template<size_t N, typename field, typename... fields> struct countPrimary_t<N, field, fields...>
