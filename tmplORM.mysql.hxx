@@ -125,19 +125,18 @@ namespace tmplORM
 
 		template<typename name> using backtick = tycat<ts("`"), name, ts("`")>;
 
+		// Formatting type for handling field names (to make lists from them)
 		template<size_t, typename> struct fieldName_t { };
 		template<size_t N, typename fieldName, typename T> struct fieldName_t<N, type_t<fieldName, T>>
 			{ using value = tycat<backtick<fieldName>, comma<N>>; };
 
-		//template<typename fieldName, typename T> auto toFieldName(const type_t<fieldName, T> &) -> fieldName;
+#include "tmplORM.common.hxx"
 
 		template<typename> struct createName_t { };
 		template<typename fieldName, typename T> struct createName_t<type_t<fieldName, T>>
 			{ using value = tycat<backtick<fieldName>, ts(" "), stringType<T>>; };
 		template<typename fieldName, uint32_t length> struct createName_t<unicode_t<fieldName, length>>
 			{ using value = tycat<backtick<fieldName>, ts(" VARCHAR("), toTypestring<length>, ts(")")>; };
-
-#include "tmplORM.common.hxx"
 
 		template<size_t N, typename field> struct createList__t
 		{
