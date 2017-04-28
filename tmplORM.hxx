@@ -31,18 +31,18 @@ namespace tmplORM
 		template<typename fieldName, typename... fields> using fieldIndex = fieldIndex_t<fieldName, fields...>;
 		template<typename fieldName, typename... fields> using fieldType = typename fieldType_t<fieldIndex<fieldName, fields...>::index, fields...>::type;
 
-		template<typename T> struct isBoolean : std::false_type { };
+		template<typename> struct isBoolean : std::false_type { };
 		template<> struct isBoolean<bool> : std::true_type { };
 
 		template<typename T> struct isNumeric : std::integral_constant<bool, std::is_integral<T>::value && !isBoolean<T>::value> { };
 	}
-	using tmplORM::common::fieldIndex;
-	using tmplORM::common::fieldType;
+	using common::fieldIndex;
+	using common::fieldType;
 
 	template<typename... Fields> struct fields_t
 	{
 	protected:
-		constexpr static size_t N = sizeof...(Fields);
+		constexpr static const size_t N = sizeof...(Fields);
 		std::tuple<Fields...> _fields;
 
 		constexpr fields_t() noexcept : _fields{} { }
