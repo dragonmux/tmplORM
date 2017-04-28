@@ -191,28 +191,27 @@ namespace tmplORM
 				return database.query(create::value);
 			}
 
-			template<typename T, typename tableName, typename... fields_t> fixedVector_t<T> select(const model_t<tableName, fields_t...> &) noexcept
+			template<typename T, typename tableName, typename... fields_t> fixedVector_t<T> select(const model_t<tableName, fields_t...> &)
 			{
+				fixedVector_t<T> data;
 				using select = select_<tableName, fields_t...>;
-				if (database.query(select::value))
+				if (!database.query(select::data))
+					throw mySQLValueError_t(mySQLErrorType_t::queryError);
+				mySQLResult_t result = database.queryResult();
+				if (!result.valid())
+					throw mySQLValueError_t(mySQLErrorType_t::queryError);
+				mySQLRow_t row = result.resultRows();
+				for (size_t i = 0; i < result.numRows(); ++i, row.next())
 				{
-					mySQLResult_t result = database.queryResult();
-					fixedVector_t<T> values(result.numRows());
-					mySQLRow_t row = result.resultRows();
-					for (size_t i = 0; i < values.length(); ++i)
-					{
-						T value;
-						if (!row.valid())
-							return {}; // TODO: Better sanity check here..
-						bindSelect<fields_t...>::bind(value.fields(), row);
-						values[i] = std::move(value);
-						row.next();
-					}
-					if (row.valid())
-						return {}; // TODO: Better sanity check here..
-					return values;
+					T value;
+					if (!row.valid())
+						return {};
+					bindSelect<fields_t...>::bind(value.fields(), row);
+					data[i] = std::move(value);
 				}
-				return {};
+				if (row.valid())
+					return {};
+				return data;
 			}
 
 			template<typename tableName, typename... fields_t> bool add(const model_t<tableName, fields_t...> &model) noexcept
