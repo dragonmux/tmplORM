@@ -253,6 +253,13 @@ namespace tmplORM
 				using deleteTable = deleteTable_<tableName>;
 				return database.query(deleteTable::value);
 			}
+
+			bool connect(const char *const host, const uint32_t port, const char *const user, const char *const passwd) const noexcept
+				{ return database.connect(host, port, user, passwd); }
+			bool connect(const char *const unixSocket, const char *const user, const char *const passwd) const noexcept
+				{ return database.connect(unixSocket, user, passwd); }
+			void disconnect() noexcept { database.disconnect(); }
+			bool selectDB(const char *const db) const noexcept { return database.selectDB(db); }
 		};
 	}
 	using mysql_t = mysql::session_t;
