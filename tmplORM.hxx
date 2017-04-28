@@ -50,6 +50,7 @@ namespace tmplORM
 
 	public:
 		const std::tuple<Fields...> &fields() const noexcept { return _fields; }
+		std::tuple<Fields...> &fields() noexcept { return _fields; }
 		template<char... C> auto operator [](const typestring<C...> &) noexcept -> fieldType<typestring<C...>, Fields...> &
 			{ return std::get<fieldIndex<typestring<C...>, Fields...>::index>(_fields); }
 	};
@@ -58,16 +59,11 @@ namespace tmplORM
 	{
 	public:
 		constexpr model_t() noexcept : fields_t<Fields...>{} {}
-		constexpr model_t(Fields... fields) noexcept : fields_t<Fields...>{fields...} { }
+		constexpr model_t(Fields... fields) noexcept : fields_t<Fields...>{&fields...} { }
 
-		static_assert(tmplORM::common::hasPrimaryKey<Fields...>(), "Model must have a primary key!");
-		const char *tableName() const noexcept { return _tableName::data(); }
-		constexpr static size_t N = fields_t<Fields...>::N;
-
-		// create(); - Creates the table
-		// add(); - CRUD Create
-		// update(); - CRUD Update
-		// delete(); - CRUD Delete
+		static_assert(common::hasPrimaryKey<Fields...>(), "Model must have a primary key!");
+		constexpr const char *tableName() const noexcept { return _tableName::data(); }
+		constexpr static const size_t N = fields_t<Fields...>::N;
 	};
 
 	namespace types
