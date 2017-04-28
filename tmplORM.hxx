@@ -107,21 +107,30 @@ namespace tmplORM
 		{
 			using type = typename T::type;
 			static_assert(isNumeric<type>::value, "Cannot create automatically incrementing field from non-numeric base type");
-			void operator =(const type &value) noexcept { static_cast<T &>(*this) = value; }
+			using T::operator =;
+			using T::value;
+			using T::operator ==;
+			using T::operator !=;
 		};
 
 		// Tag type to mark the primary key field with
 		template<typename T> struct primary_t : public T
 		{
 			using type = typename T::type;
-			void operator =(const type &value) noexcept { static_cast<T &>(*this) = value; }
+			using T::operator =;
+			using T::value;
+			using T::operator ==;
+			using T::operator !=;
 		};
 
 		// Tag type to give a field a program name different to the field name in the database
 		template<typename, typename T> struct alias_t : public T
 		{
 			using type = typename T::type;
-			void operator =(const type &value) noexcept { static_cast<T &>(*this) = value; }
+			using T::operator =;
+			using T::value;
+			using T::operator ==;
+			using T::operator !=;
 		};
 
 		// Tag type to mark nullable fields with
@@ -145,18 +154,10 @@ namespace tmplORM
 				T::value(type());
 			}
 
-			void value(const type &_value) noexcept
-			{
-				if (_value.isNull())
-					value(nullptr);
-				else
-					T::value(_value);
-			}
-
 			void operator =(const nullptr_t) noexcept { value(nullptr); }
-			void operator =(const type &value) noexcept { static_cast<T &>(*this) = value; }
+			void operator =(const type &_value) noexcept { value(_value); }
 			const type value() const noexcept { return T::value(); }
-			//void value(const type &val) noexcept { T::value(val); }
+			void value(const type &_value) noexcept { _null = false; T::value(_value); }
 		};
 
 		// Encodes as a VARCHAR type field (NVARCHAR for MSSQL)
