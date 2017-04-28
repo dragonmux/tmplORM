@@ -61,22 +61,44 @@ namespace tmplORM
 
 		namespace driver
 		{
-			static const my_bool isNotNull = false;
-			static const bool isNull = true;
+			using namespace tmplORM::types::baseTypes;
+
+			static const char nullParam = char(true);
+			constexpr static char *const notNullParam = nullptr;
 
 			template<typename T> typename std::enable_if<!isNumeric<T>::value>::type
-				bindValue(MYSQL_BIND &param, const T &) noexcept
-			{
-				param.is_null = &isNotNull;
-				param.is_unsigned = false;
-			}
-
+				bindT(MYSQL_BIND &param) noexcept { param.is_unsigned = false; }
 			template<typename T> typename std::enable_if<isNumeric<T>::value>::type
-				bindValue(MYSQL_BIND &param, const T &) noexcept
+				bindT(MYSQL_BIND &param) noexcept { param.is_unsigned = std::is_unsigned<T>::value; }
+
+			template<bool> struct bindValue_t
 			{
-				param.is_null = &isNotNull;
-				param.is_unsigned = std::is_unsigned<T>::value;
-			}
+				using nanoseconds_t = std::chrono::nanoseconds;
+
+				template<typename T> void operator ()(MYSQL_BIND &param, T &value, managedPtr_t<void> &) noexcept
+					{ param.buffer = const_cast<T *>(&value); }
+
+				void operator ()(MYSQL_BIND &param, ormDateTime_t &value, managedPtr_t<void> &paramStorage) noexcept
+				{
+					MYSQL_TIME dateTime;
+					dateTime.year = value.year();
+					dateTime.month = value.month();
+					dateTime.day = value.day();
+					dateTime.hour = value.hour();
+					dateTime.minute = value.minute();
+					dateTime.second = value.second();
+					dateTime.second_part = value.nanoSecond() / std::chrono::duration_cast<nanoseconds_t>(1_us).count();
+					dateTime.time_type = MYSQL_TIMESTAMP_DATETIME;
+
+					// TODO: Replace me with makeManaged<>!
+					paramStorage = managedPtr_t<MYSQL_TIME>(new MYSQL_TIME(dateTime));
+					param.buffer = paramStorage;
+					param.buffer_length = sizeof(dateTime);
+				}
+			};
+
+			template<> struct bindValue_t<true>
+				{ template<typename T> void operator ()(MYSQL_BIND &param, T *value, managedPtr_t<void> &) noexcept { param.buffer = value; } };
 
 			template<typename T> void mySQLPreparedQuery_t::bind(const size_t index, const T &value, const fieldLength_t length) noexcept
 			{
@@ -84,19 +106,20 @@ namespace tmplORM
 					return;
 				MYSQL_BIND &param = params[index];
 				param.buffer_type = bindType_t<T>::value;
-				param.buffer = &value;
-				bindValue(param, value);
+				param.buffer_length = length.first;
+				bindValue_t<std::is_pointer<T>::value>()(param, const_cast<T &>(value), paramStorage[index]);
+				param.length = &param.buffer_length;
+				param.is_null = notNullParam;
+				bindT<T>(param);
 			}
 
-			/* special handling for nullable_t<>.. 'cause that's a fun special-case */
 			template<typename T> void mySQLPreparedQuery_t::bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept
 			{
 				if (index >= numParams)
 					return;
 				MYSQL_BIND &param = params[index];
-				// T can be nullptr_t, in which case this becomes MYSQL_TYPE_NULL anyway.. so.. we don't end up caring about what we put in any other field nominally..
 				param.buffer_type = bindType_t<T>::value;
-				param.is_null = &isNull;
+				param.is_null = const_cast<char *>(&nullParam);
 			}
 		}
 
