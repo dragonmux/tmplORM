@@ -214,28 +214,28 @@ namespace tmplORM
 				return data;
 			}
 
-			template<typename tableName, typename... fields_t> bool add(const model_t<tableName, fields_t...> &model) noexcept
+			template<typename tableName, typename... fields_t> bool add(model_t<tableName, fields_t...> &model)
 			{
-				using insert = add_<tableName, fields_t...>;
-				mySQLPreparedQuery_t query = database.prepare(insert::value, countInsert_t<fields_t...>::count);
+				using add = add_<tableName, fields_t...>;
+				mySQLPreparedQuery_t query(database.prepare(add::value, countInsert_t<fields_t...>::count));
 				bindInsert<fields_t...>::bind(model.fields(), query);
 				if (query.execute())
 				{
-					if (hasAutoInc<fields_t...>())
-						getAutoInc(model) = query.rowID();
+					setAutoInc_t<hasAutoInc<fields_t...>()>::set(model, query.rowID());
 					return true;
 				}
 				return false;
 			}
 
-			template<typename tableName, typename... fields_t> bool update(const model_t<tableName, fields_t...> &model) noexcept
+			template<typename tableName, typename... fields_t> bool update(model_t<tableName, fields_t...> &model)
 			{
 				using update = update_<tableName, fields_t...>;
 				if (std::is_same<update, toString<typestring<>>>::value)
 					return false;
 				mySQLPreparedQuery_t query(database.prepare(update::value, sizeof...(fields_t)));
-				// This binds the fields, primary key last so it tags to the WHERE clause for this query.
+				// This binds the fields, primary key last so it tags to the WHERE clause for the query.
 				bindUpdate<fields_t...>::bind(model.fields(), query);
+				// This either works or doesn't.. thankfully.. so, we can just execute-and-quit.
 				return query.execute();
 			}
 
