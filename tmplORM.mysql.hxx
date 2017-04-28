@@ -24,6 +24,7 @@ namespace tmplORM
 		using tmplORM::types::autoInc_t;
 		using tmplORM::types::nullable_t;
 
+		// If we don't know how to translate the type, don't.
 		template<typename> struct stringType_t { using value = typestring<>; };
 		template<> struct stringType_t<int8_t> { using value = ts("TINYINT"); };
 		template<> struct stringType_t<uint8_t> { using value = ts("TINYINT UNSIGNED"); };
@@ -38,23 +39,25 @@ namespace tmplORM
 		template<> struct stringType_t<double> { using value = ts("DOUBLE"); };
 		template<> struct stringType_t<char *> { using value = ts("TEXT"); };
 		template<> struct stringType_t<void *> { using value = ts("BLOB"); };
-		template<> struct stringType_t<_dateTime_t> { using value = ts("DATETIME"); };
+		template<> struct stringType_t<ormDateTime_t> { using value = ts("DATETIME"); };
+//		template<> struct stringType_t<ormUUID_t> { using value = ts("VARCHAR(36)"); };
 		template<typename T> using stringType = typename stringType_t<T>::value;
 
-		template<typename> struct bind_t { /*constexpr static mySQLFieldType_t value = MYSQL_TYPE_NULL;*/ };
-		template<> struct bind_t<int8_t> { constexpr static mySQLFieldType_t value = MYSQL_TYPE_TINY; };
-		template<> struct bind_t<int16_t> { constexpr static mySQLFieldType_t value = MYSQL_TYPE_SHORT; };
-		template<> struct bind_t<int32_t> { constexpr static mySQLFieldType_t value = MYSQL_TYPE_LONG; };
-		template<> struct bind_t<int64_t> { constexpr static mySQLFieldType_t value = MYSQL_TYPE_LONGLONG; };
-		//template<> struct bind_t<bool> { constexpr static mySQLFieldType_t value = MYSQL_TYPE_
-		template<> struct bind_t<float> { constexpr static mySQLFieldType_t value = MYSQL_TYPE_FLOAT; };
-		template<> struct bind_t<double> { constexpr static mySQLFieldType_t value = MYSQL_TYPE_DOUBLE; };
-		template<> struct bind_t<char *> { constexpr static mySQLFieldType_t value = MYSQL_TYPE_STRING; };
-		template<> struct bind_t<void *> { constexpr static mySQLFieldType_t value = MYSQL_TYPE_BLOB; };
-		template<> struct bind_t<_dateTime_t> { constexpr static mySQLFieldType_t value = MYSQL_TYPE_DATETIME; };
-		template<> struct bind_t<nullptr_t> { constexpr static mySQLFieldType_t value = MYSQL_TYPE_NULL; };
-		template<typename T, bool = isNumeric<T>::value> struct bindType_t { constexpr static mySQLFieldType_t value = bind_t<T>::value; };
-		template<typename T> struct bindType_t<T, true> { constexpr static mySQLFieldType_t value = bind_t<typename std::make_signed<T>::type>::value; };
+		template<typename> struct bind_t { };
+		template<> struct bind_t<int8_t> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_TINY; };
+		template<> struct bind_t<int16_t> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_SHORT; };
+		template<> struct bind_t<int32_t> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_LONG; };
+		template<> struct bind_t<int64_t> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_LONGLONG; };
+		//
+		template<> struct bind_t<bool> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_BIT; };
+		template<> struct bind_t<float> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_FLOAT; };
+		template<> struct bind_t<double> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_DOUBLE; };
+		template<> struct bind_t<char *> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_STRING; };
+		template<> struct bind_t<void *> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_BLOB; };
+		template<> struct bind_t<_dateTime_t> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_DATETIME; };
+		template<> struct bind_t<nullptr_t> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_NULL; };
+		template<typename T, bool = isNumeric<T>::value> struct bindType_t : public bind_t<T> { };
+		template<typename T> struct bindType_t<T, true> : public bind_t<typename std::make_signed<T>::type> { };
 
 		namespace driver
 		{
