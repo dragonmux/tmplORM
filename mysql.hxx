@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <mysql.h>
 #include <utility>
-#include <memory>
+#include "fixedVector.hxx"
 #include "tmplORM.hxx"
 
 namespace tmplORM

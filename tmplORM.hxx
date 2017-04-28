@@ -2,7 +2,10 @@
 #define tmplORM__HXX
 
 #include <cstdint>
+#include <string>
 #include <tuple>
+#include <memory>
+#include <new>
 #include <chrono>
 #include <type_traits>
 #include "typestring/typestring.hh"
