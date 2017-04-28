@@ -161,20 +161,52 @@ namespace tmplORM
 		};
 
 		// Encodes as a VARCHAR type field (NVARCHAR for MSSQL)
-		template<typename _fieldName, uint32_t _length> struct unicode_t : public type_t<_fieldName, char *>
+		template<typename _fieldName, size_t _length> struct unicode_t : public type_t<_fieldName, const char *>
 		{
-			constexpr uint32_t length() const noexcept { return _length; }
+		/*private:
+			using parentType_t = type_t<_fieldName, const char *>;
+
+		public:
+			using type = char *;
+			using parentType_t::operator const char *const;
+			using parentType_t::operator =;
+			using parentType_t::value;
+			using parentType_t::operator ==;
+			using parentType_t::operator !=;
+
+			operator char *() noexcept { return const_cast<char *>(parentType_t::_value); }
+			void operator =(char *const value) noexcept { *this = const_cast<const char *const>(value); }
+			char *value() noexcept { return *this; }
+			size_t length() const noexcept { return value() ? std::char_traits<char>::length(value()) : 0; }*/
 		};
 
 		// Encodes as a TEXT type field (NTEXT for MSSQL)
-		template<typename _fieldName> struct unicodeText_t : public type_t<_fieldName, char *> { };
-		template<typename _fieldName> struct int64_t : public type_t<_fieldName, std::int64_t> { };
-		template<typename _fieldName> struct int32_t : public type_t<_fieldName, std::int32_t> { };
-		template<typename _fieldName> struct int16_t : public type_t<_fieldName, std::int16_t> { };
-		template<typename _fieldName> struct int8_t : public type_t<_fieldName, std::int8_t> { };
-		template<typename _fieldName> struct bool_t : public type_t<_fieldName, bool> { };
-		template<typename _fieldName> struct float_t : public type_t<_fieldName, float> { };
-		template<typename _fieldName> struct double_t : public type_t<_fieldName, double> { };
+		template<typename _fieldName> struct unicodeText_t : public type_t<_fieldName, const char *>
+		{
+		/*private:
+			using parentType_t = type_t<_fieldName, const char *>;
+
+		public:
+			using type = char *;
+			using parentType_t::operator const char *const;
+			using parentType_t::operator =;
+			using parentType_t::value;
+			using parentType_t::operator ==;
+			using parentType_t::operator !=;
+
+			operator char *() noexcept { return const_cast<char *const>(parentType_t::_value); }
+			void operator =(char *const value) noexcept { *this = const_cast<const char *const>(value); }
+			char *value() noexcept { return *this; }
+			size_t length() const noexcept { return value() ? std::char_traits<char>::length(value()) : 0; }*/
+		};
+
+		template<typename _fieldName> using int64_t = type_t<_fieldName, std::int64_t>;
+		template<typename _fieldName> using int32_t = type_t<_fieldName, std::int32_t>;
+		template<typename _fieldName> using int16_t = type_t<_fieldName, std::int16_t>;
+		template<typename _fieldName> using int8_t = type_t<_fieldName, std::int8_t>;
+		template<typename _fieldName> using bool_t = type_t<_fieldName, bool>;
+		template<typename _fieldName> using float_t = type_t<_fieldName, float>;
+		template<typename _fieldName> using double_t = type_t<_fieldName, double>;
 
 		namespace dateTimeTypes
 		{
