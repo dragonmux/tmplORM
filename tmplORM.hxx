@@ -15,6 +15,8 @@
 #define ts(x) typestring_is(x)
 #define ts_(x) ts(x)()
 
+constexpr std::chrono::microseconds operator ""_us(const unsigned long long usecs) { return std::chrono::microseconds{usecs}; }
+
 namespace tmplORM
 {
 	using namespace irqus;
