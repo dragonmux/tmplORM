@@ -131,4 +131,22 @@ namespace managedPtr
 
 template<typename T> using managedPtr_t = managedPtr::managedPtr_t<T>;
 
+template<typename T> struct makeManaged_ { using uniqueType = managedPtr_t<T>; };
+template<typename T> struct makeManaged_<T []> { using arrayType = managedPtr_t<T []>; };
+template<typename T, size_t N> struct makeManaged_<T [N]> { struct invalidType { }; };
+
+template<typename T, typename... Args> inline typename makeManaged_<T>::uniqueType makeManaged(Args &&...args) noexcept
+{
+	using consT = typename std::remove_const<T>::type;
+	return managedPtr_t<T>(new (std::nothrow) consT(std::forward<Args>(args)...));
+}
+
+template<typename T> inline typename makeManaged_<T>::arrayType makeManaged(const size_t num) noexcept
+{
+	using consT = typename std::remove_const<typename std::remove_extent<T>::type>::type;
+	return managedPtr_t<T>(new (std::nothrow) consT[num]());
+}
+
+template<typename T, typename... Args> inline typename makeManaged_<T>::invalidType makeManaged(Args &&...) noexcept = delete;
+
 #endif /*MANAGED_PTR__HXX*/

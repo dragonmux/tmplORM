@@ -2,8 +2,10 @@
 #define tmplORM_MYSQL__HXX
 
 #include "tmplORM.hxx"
-#include "mysql.hxx"
 #include <type_traits>
+#include <memory>
+#include "mysql.hxx"
+#include "managedPtr.hxx"
 
 namespace tmplORM
 {
@@ -11,14 +13,15 @@ namespace tmplORM
 	{
 		using namespace tmplORM::common;
 		using namespace tmplORM::mysql::driver;
+		using namespace tmplORM::types::baseTypes;
 
 		using tmplORM::types::type_t;
 		using tmplORM::types::unicode_t;
 		using tmplORM::types::unicodeText_t;
 		using tmplORM::types::dateTimeTypes::_dateTime_t;
 
-		using tmplORM::types::autoInc_t;
 		using tmplORM::types::primary_t;
+		using tmplORM::types::autoInc_t;
 		using tmplORM::types::nullable_t;
 
 		template<typename> struct stringType_t { using value = typestring<>; };
