@@ -232,7 +232,7 @@ namespace tmplORM
 				constexpr uint16_t year() const noexcept { return _year; }
 				constexpr uint16_t month() const noexcept { return _month; }
 				constexpr uint16_t day() const noexcept { return _day; }
-				constexpr timePoint_t time() const noexcept { return _time; }
+				constexpr const timePoint_t &time() const noexcept { return _time; }
 			};
 
 			template<typename _fieldName> struct dateTime_t : public type_t<_fieldName, _dateTime_t>
@@ -293,9 +293,9 @@ namespace tmplORM
 		using tmplORM::types::primary_t;
 		using tmplORM::types::alias_t;
 
+		// This is strictly only required to work around a bug in MSVC++, however it turns out to be useful when writing the generator aliases per-engine.
 		template<typename> struct toString { };
-		template<char... C> struct toString<typestring<C...>>
-			{ static const char value[sizeof...(C) + 1]; };
+		template<char... C> struct toString<typestring<C...>> { static const char value[sizeof...(C) + 1]; };
 		template<char... C> const char toString<typestring<C...>>::value[sizeof...(C) + 1] = {C..., '\0'};
 
 		namespace intConversion
