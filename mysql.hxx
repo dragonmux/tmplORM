@@ -5,6 +5,7 @@
 #include <mysql.h>
 #include <utility>
 #include "fixedVector.hxx"
+#include "managedPtr.hxx"
 #include "tmplORM.hxx"
 
 namespace tmplORM
@@ -118,7 +119,8 @@ struct mySQLPreparedQuery_t final
 {
 private:
 	MYSQL_STMT *query;
-	std::unique_ptr<MYSQL_BIND []> params;
+	fixedVector_t<MYSQL_BIND> params;
+	fixedVector_t<managedPtr_t<void>> paramStorage;
 	size_t numParams;
 	bool executed;
 

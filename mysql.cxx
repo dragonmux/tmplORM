@@ -87,9 +87,9 @@ uint32_t mySQLClient_t::errorNum() const noexcept { return valid() ? mysql_errno
 const char *mySQLClient_t::error() const noexcept { return valid() ? mysql_error(con) : nullptr; }
 
 mySQLPreparedQuery_t::mySQLPreparedQuery_t(MYSQL *const con, const char *const queryStmt, const size_t paramsCount) noexcept :
-	query(mysql_stmt_init(con)), params(paramsCount ? new (std::nothrow) MYSQL_BIND[paramsCount]() : nullptr), numParams(paramsCount), executed(false)
+	query(mysql_stmt_init(con)), params(paramsCount), paramStorage(paramsCount), numParams(paramsCount), executed(false)
 {
-	if (!query || (numParams && !params))
+	if (!query || (numParams && params.valid()))
 		return;
 	else if (numParams)
 	{
@@ -127,8 +127,8 @@ bool mySQLPreparedQuery_t::execute() noexcept
 {
 	if (valid())
 	{
-		if (params)
-			mysql_stmt_bind_param(query, params.get());
+		if (params.valid())
+			mysql_stmt_bind_param(query, params.data());
 		executed = mysql_stmt_execute(query) == 0;
 	}
 	return executed;
