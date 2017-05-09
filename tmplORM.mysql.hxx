@@ -187,21 +187,23 @@ namespace tmplORM
 		template<typename... fields> using createList = typename createList_t<sizeof...(fields), fields...>::value;
 
 		template<typename tableName, typename... fields> using createTable_ = toString<
-			tycat<ts("CREATE TABLE "), backtick<tableName>, ts(" ("), createList<fields...>, ts(");")>
+			tycat<ts("CREATE TABLE IF NOT EXISTS "), backtick<tableName>, ts(" ("), createList<fields...>, ts(");")>
 		>;
 		template<typename tableName, typename... fields> using select_ = toString<
 			tycat<ts("SELECT "), selectList<fields...>, ts(" FROM "), backtick<tableName>, ts(";")>
 		>;
+		// tycat<> builds up the query string for inserting the data
 		template<typename tableName, typename... fields> using add_ = toString<
 			tycat<ts("INSERT INTO "), backtick<tableName>, ts(" ("), insertList<fields...>, ts(") VALUES ("), placeholder<countInsert_t<fields...>::count>, ts(");")>
 		>;
+		// This constructs invalid if there is no field marked primary_t<>! This is quite intentional.
 		template<typename tableName, typename... fields> struct update_t<false, tableName, fields...>
 			{ using value = tycat<ts("UPDATE "), backtick<tableName>, ts(" SET "), updateList<fields...>, updateWhere<fields...>, ts(";")>; };
 		template<typename tableName, typename... fields> using del_ = toString<
 			tycat<ts("DELETE FROM "), backtick<tableName>, updateWhere<fields...>, ts(";")>
 		>;
 		template<typename tableName> using deleteTable_ = toString<
-			tycat<ts("DROP TABLE "), backtick<tableName>, ts(";")>
+			tycat<ts("DROP TABLE IF NOT EXISTS "), backtick<tableName>, ts(";")>
 		>;
 
 		struct session_t final
