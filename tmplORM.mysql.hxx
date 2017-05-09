@@ -78,10 +78,10 @@ namespace tmplORM
 			{
 				using nanoseconds_t = std::chrono::nanoseconds;
 
-				template<typename T> bool operator ()(MYSQL_BIND &param, T &value, managedPtr_t<void> &) noexcept
+				template<typename T> bool operator ()(MYSQL_BIND &param, const T &value, managedPtr_t<void> &) noexcept
 					{ param.buffer = const_cast<T *>(&value); return true; }
 
-				bool operator ()(MYSQL_BIND &param, ormDateTime_t &value, managedPtr_t<void> &paramStorage) noexcept
+				bool operator ()(MYSQL_BIND &param, const ormDateTime_t &value, managedPtr_t<void> &paramStorage) noexcept
 				{
 					MYSQL_TIME dateTime;
 					dateTime.year = value.year();
@@ -103,7 +103,10 @@ namespace tmplORM
 			};
 
 			template<> struct bindValue_t<true>
-				{ template<typename T> bool operator ()(MYSQL_BIND &param, T *value, managedPtr_t<void> &) noexcept { param.buffer = value; return true; } };
+			{
+				template<typename T> bool operator ()(MYSQL_BIND &param, const T *const value, managedPtr_t<void> &) noexcept
+					{ param.buffer = const_cast<T *>(value); return true; }
+			};
 
 			template<typename T> void mySQLPreparedQuery_t::bind(const size_t index, const T &value, const fieldLength_t length) noexcept
 			{
@@ -112,7 +115,7 @@ namespace tmplORM
 				MYSQL_BIND &param = params[index];
 				param.buffer_type = bindType_t<T>::value;
 				param.buffer_length = length.first;
-				if (!bindValue_t<std::is_pointer<T>::value>()(param, const_cast<T &>(value), paramStorage[index]))
+				if (!bindValue_t<std::is_pointer<T>::value>()(param, value, paramStorage[index]))
 					return;
 				param.length = &param.buffer_length;
 				param.is_null = notNullParam;
