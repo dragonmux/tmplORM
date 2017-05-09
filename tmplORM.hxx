@@ -285,8 +285,36 @@ namespace tmplORM
 						duration_cast<typename _dateTime_t::duration_t>(time)));
 				}
 			};
+
+			template<typename _fieldName> struct date_t : public type_t<_fieldName, _dateTime_t>
+			{
+			private:
+				using parentType_t = type_t<_fieldName, _dateTime_t>;
+
+			public:
+				using type = ormDate_t;
+				operator ormDate_t() const noexcept { return date(); }
+				void operator =(const char *const _value) noexcept { value(ormDate_t(_value)); }
+				void operator =(const ormDate_t &_value) noexcept { value(_value); }
+				void operator =(ormDate_t &&_value) noexcept { value(_value); }
+				void date(const ormDate_t &_value) noexcept { value(_value); }
+				ormDate_t date() const noexcept { return value(); }
+				void value(const char *const _value) noexcept { value(ormDate_t(_value)); }
+
+				ormDate_t value() const noexcept
+				{
+					const _dateTime_t _value = parentType_t::value();
+					return ormDate_t(_value.year(), _value.month(), _value.day());
+				}
+
+				void value(const ormDate_t &_value) noexcept
+				{
+					parentType_t::value(_dateTime_t(_value.year(), _value.month(), _value.day()));
+				}
+			};
 		}
 		using dateTimeTypes::dateTime_t;
+		using dateTimeTypes::date_t;
 
 		// Convinience just in case you don't like using the stdint.h like types above.
 		template<typename fieldName> using bigInt_t = int64_t<fieldName>;
