@@ -215,7 +215,7 @@ namespace tmplORM
 			session_t() noexcept : database() { }
 			~session_t() noexcept { }
 
-			template<typename tableName, typename... fields> bool createTable(const model_t<tableName, fields...> &) noexcept
+			template<typename tableName, typename... fields> bool createTable(const model_t<tableName, fields...> &)
 			{
 				using create = createTable_<tableName, fields...>;
 				return database.query(create::value);
@@ -244,6 +244,7 @@ namespace tmplORM
 				return data;
 			}
 
+			// Unpacks a model_t into its name and fields
 			template<typename tableName, typename... fields_t> bool add(model_t<tableName, fields_t...> &model)
 			{
 				using add = add_<tableName, fields_t...>;
@@ -269,19 +270,21 @@ namespace tmplORM
 				return query.execute();
 			}
 
-			template<typename tableName, typename... fields_t> bool del(const model_t<tableName, fields_t...> &model) noexcept
+			template<typename tableName, typename... fields_t> bool del(const model_t<tableName, fields_t...> &model)
 			{
 				using del = del_<tableName, fields_t...>;
 				mySQLPreparedQuery_t query(database.prepare(del::value, countPrimary<fields_t...>::count));
 				// This binds just the primary keys of the model so it tags in-order to the WHERE clause for this query.
 				bindDelete<fields_t...>::bind(model.fields(), query);
+				// This either works or doesn't.. thankfully.. so, we can just execute-and-quit.
 				return query.execute();
 			}
 
-			template<typename tableName, typename... fields> bool deleteTable(const model_t<tableName, fields...> &) noexcept
+			template<typename tableName, typename... fields> bool deleteTable(const model_t<tableName, fields...> &)
 			{
-				using deleteTable = deleteTable_<tableName>;
-				return database.query(deleteTable::value);
+				using drop = deleteTable_<tableName>;
+				// tycat<> builds up the query for dropping (deleting) the table
+				return database.query(drop::value);
 			}
 
 			bool connect(const char *const host, const uint32_t port, const char *const user, const char *const passwd) const noexcept
