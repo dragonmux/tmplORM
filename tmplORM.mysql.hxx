@@ -140,7 +140,7 @@ namespace tmplORM
 				bindT<T>(param);
 			}
 
-			template<typename T> void mySQLPreparedQuery_t::bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept
+			template<typename T> void mySQLPreparedQuery_t::bind(const size_t index, const nullptr_t, const fieldLength_t) noexcept
 			{
 				if (index >= numParams)
 					return;
@@ -162,21 +162,22 @@ namespace tmplORM
 		template<typename> struct createName_t { };
 		template<typename fieldName, typename T> struct createName_t<type_t<fieldName, T>>
 			{ using value = tycat<backtick<fieldName>, ts(" "), stringType<T>>; };
-		template<typename fieldName, uint32_t length> struct createName_t<unicode_t<fieldName, length>>
+		template<typename fieldName, size_t length> struct createName_t<unicode_t<fieldName, length>>
 			{ using value = tycat<backtick<fieldName>, ts(" VARCHAR("), toTypestring<length>, ts(")")>; };
 
 		template<size_t N, typename field> struct createList__t
 		{
-			template<typename fieldName, typename T> static auto _name(const type_t<fieldName, T> &) ->
+			template<typename fieldName, typename T> constexpr static auto _name(const type_t<fieldName, T> &) ->
 				typename createName_t<type_t<fieldName, T>>::value;
-			template<typename fieldName, uint32_t length> static auto _name(const unicode_t<fieldName, length> &) ->
+			template<typename fieldName, size_t length> constexpr static auto _name(const unicode_t<fieldName, length> &) ->
 				typename createName_t<unicode_t<fieldName, length>>::value;
-			template<typename T> static auto _name(const primary_t<T> &) -> tycat<decltype(_name(T())), ts(" PRIMARY KEY")>;
-			template<typename T> static auto _name(const autoInc_t<T> &) -> tycat<decltype(_name(T())), ts(" AUTO_INCREMENT")>;
+			template<typename T> constexpr static auto _name(const autoInc_t<T> &) -> tycat<decltype(_name(T())), ts(" AUTO_INCREMENT")>;
+			template<typename T> constexpr static auto _name(const primary_t<T> &) -> tycat<decltype(_name(T())), ts(" PRIMARY KEY")>;
 			using name = decltype(_name(field()));
 
-			static auto value() -> tycat<name, nullable<field::nullable>, comma<N>>;
+			constexpr static auto value() -> tycat<name, nullable<field::nullable>, comma<N>>;
 		};
+		// Alias for the above container type to make it easier to use
 		template<size_t N, typename T> using createList__ = decltype(createList__t<N, T>::value());
 
 		template<size_t N, typename field, typename... fields> struct createList_t
