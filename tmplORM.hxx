@@ -9,8 +9,8 @@
 #include <chrono>
 #include <type_traits>
 #include "typestring/typestring.hh"
-#include "fixedVector.hxx"
 #include "tmplORM.types.hxx"
+#include "fixedVector.hxx"
 
 #define ts(x) typestring_is(x)
 #define ts_(x) ts(x)()
@@ -62,7 +62,7 @@ namespace tmplORM
 		constexpr model_t(Fields... fields) noexcept : fields_t<Fields...>{&fields...} { }
 
 		static_assert(common::hasPrimaryKey<Fields...>(), "Model must have a primary key!");
-		constexpr const char *tableName() const noexcept { return _tableName::data(); }
+		constexpr static const char *tableName() noexcept { return _tableName::data(); }
 		constexpr static const size_t N = fields_t<Fields...>::N;
 	};
 
@@ -139,6 +139,11 @@ namespace tmplORM
 		private:
 			bool _null;
 
+			template<typename value_t = typename T::type> typename std::enable_if<std::is_same<value_t, typename T::type>::value && !std::is_pointer<value_t>::value, const value_t>::type
+				_value() const noexcept { return T::value(); }
+			template<typename value_t = typename T::type> typename std::enable_if<std::is_same<value_t, typename T::type>::value && std::is_pointer<value_t>::value, const value_t>::type
+				_value() const noexcept { return const_cast<value_t>(T::value()); }
+
 		public:
 			using type = typename T::type;
 			constexpr static bool nullable = true;
@@ -156,7 +161,8 @@ namespace tmplORM
 
 			void operator =(const nullptr_t) noexcept { value(nullptr); }
 			void operator =(const type &_value) noexcept { value(_value); }
-			const type value() const noexcept { return T::value(); }
+			const type value() const noexcept { return _value(); }
+			type value() noexcept { return T::value(); }
 			void value(const type &_value) noexcept { _null = false; T::value(_value); }
 		};
 
