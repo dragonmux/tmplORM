@@ -238,6 +238,8 @@ namespace tmplORM
 
 			public:
 				constexpr _dateTime_t() noexcept : _year(0), _month(0), _day(0), _time() { }
+				_dateTime_t(const uint16_t year, const uint16_t month, const uint16_t day) noexcept :
+					_year(year), _month(month), _day(day), _time() { }
 				_dateTime_t(const uint16_t year, const uint16_t month, const uint16_t day, const duration_t &time) noexcept :
 					_year(year), _month(month), _day(day), _time(timePoint_t(time)) { }
 				constexpr uint16_t year() const noexcept { return _year; }
