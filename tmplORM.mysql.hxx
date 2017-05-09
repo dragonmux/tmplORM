@@ -81,6 +81,22 @@ namespace tmplORM
 				template<typename T> bool operator ()(MYSQL_BIND &param, const T &value, managedPtr_t<void> &) noexcept
 					{ param.buffer = const_cast<T *>(&value); return true; }
 
+				bool operator ()(MYSQL_BIND &param, const ormDate_t &value, managedPtr_t<void> &paramStorage) noexcept
+				{
+					MYSQL_TIME date;
+					date.year = value.year();
+					date.month = value.month();
+					date.day = value.day();
+					date.time_type = MYSQL_TIMESTAMP_DATE;
+
+					paramStorage = makeManaged<MYSQL_TIME>(date);
+					if (!paramStorage)
+						return false;
+					param.buffer = paramStorage;
+					param.buffer_length = sizeof(date);
+					return true;
+				}
+
 				bool operator ()(MYSQL_BIND &param, const ormDateTime_t &value, managedPtr_t<void> &paramStorage) noexcept
 				{
 					MYSQL_TIME dateTime;
