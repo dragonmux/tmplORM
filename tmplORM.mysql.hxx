@@ -124,6 +124,8 @@ namespace tmplORM
 					{ param.buffer = const_cast<T *>(value); return true; }
 			};
 
+			template<typename T> using bindValue_ = bindValue_t<std::is_pointer<T>::value>;
+
 			template<typename T> void mySQLPreparedQuery_t::bind(const size_t index, const T &value, const fieldLength_t length) noexcept
 			{
 				if (index >= numParams)
@@ -131,7 +133,7 @@ namespace tmplORM
 				MYSQL_BIND &param = params[index];
 				param.buffer_type = bindType_t<T>::value;
 				param.buffer_length = length.first;
-				if (!bindValue_t<std::is_pointer<T>::value>()(param, value, paramStorage[index]))
+				if (!bindValue_<T>()(param, value, paramStorage[index]))
 					return;
 				param.length = &param.buffer_length;
 				param.is_null = notNullParam;
