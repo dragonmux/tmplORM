@@ -109,6 +109,7 @@ namespace tmplORM
 			static_assert(isNumeric<type>::value, "Cannot create automatically incrementing field from non-numeric base type");
 			using T::operator =;
 			using T::value;
+			using T::operator type;
 			using T::operator ==;
 			using T::operator !=;
 		};
@@ -119,6 +120,7 @@ namespace tmplORM
 			using type = typename T::type;
 			using T::operator =;
 			using T::value;
+			using T::operator type;
 			using T::operator ==;
 			using T::operator !=;
 		};
@@ -129,6 +131,7 @@ namespace tmplORM
 			using type = typename T::type;
 			using T::operator =;
 			using T::value;
+			using T::operator type;
 			using T::operator ==;
 			using T::operator !=;
 		};
@@ -177,6 +180,7 @@ namespace tmplORM
 			using parentType_t::operator const char *const;
 			using parentType_t::operator =;
 			using parentType_t::value;
+			using parentType_t::operator type;
 			using parentType_t::operator ==;
 			using parentType_t::operator !=;
 
@@ -197,6 +201,7 @@ namespace tmplORM
 			using parentType_t::operator const char *const;
 			using parentType_t::operator =;
 			using parentType_t::value;
+			using parentType_t::operator type;
 			using parentType_t::operator ==;
 			using parentType_t::operator !=;
 
@@ -439,7 +444,7 @@ namespace tmplORM
 
 			template<typename... models> bool createTable() { return collect(session.template createTable(models())...); }
 			template<typename model> fixedVector_t<model> select() { return session.template select<model>(model()); }
-			template<typename... models_t> bool add(const models_t &...models) { return collect(session.template add(models)...); }
+			template<typename... models_t> bool add(models_t &...models) { return collect(session.template add(models)...); }
 			template<typename... models_t> bool update(const models_t &...models) { return collect(session.template update(models)...); }
 			template<typename... models_t> bool del(const models_t &...models) { return collect(session.template del(models)...); }
 			template<typename... models> bool deleteTable() { return collect(session.template deleteTable(models())...); }
