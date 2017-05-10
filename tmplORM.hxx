@@ -179,10 +179,9 @@ namespace tmplORM
 
 		public:
 			using type = char *;
-			using parentType_t::operator const char *const;
 			using parentType_t::operator =;
 			using parentType_t::value;
-			using parentType_t::operator type;
+			using parentType_t::operator const char *const;
 			using parentType_t::operator ==;
 			using parentType_t::operator !=;
 
@@ -195,22 +194,21 @@ namespace tmplORM
 		// Encodes as a TEXT type field (NTEXT for MSSQL)
 		template<typename _fieldName> struct unicodeText_t : public type_t<_fieldName, const char *>
 		{
-		/*private:
+		private:
 			using parentType_t = type_t<_fieldName, const char *>;
 
 		public:
 			using type = char *;
-			using parentType_t::operator const char *const;
 			using parentType_t::operator =;
 			using parentType_t::value;
-			using parentType_t::operator type;
+			using parentType_t::operator const char *const;
 			using parentType_t::operator ==;
 			using parentType_t::operator !=;
 
-			operator char *() noexcept { return const_cast<char *const>(parentType_t::_value); }
-			void operator =(char *const value) noexcept { *this = const_cast<const char *const>(value); }
-			char *value() noexcept { return *this; }
-			size_t length() const noexcept { return value() ? std::char_traits<char>::length(value()) : 0; }*/
+			operator type() noexcept { return const_cast<const type>(parentType_t::_value); }
+			void operator =(const type value) noexcept { *this = const_cast<const char *const>(value); }
+			type value() noexcept { return *this; }
+			size_t length() const noexcept { return value() ? std::char_traits<char>::length(value()) : 0; }
 		};
 
 		template<typename _fieldName> using int64_t = type_t<_fieldName, std::int64_t>;
