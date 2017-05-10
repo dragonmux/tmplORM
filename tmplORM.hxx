@@ -310,13 +310,32 @@ namespace tmplORM
 				}
 
 				void value(const ormDate_t &_value) noexcept
-				{
-					parentType_t::value(_dateTime_t(_value.year(), _value.month(), _value.day()));
-				}
+					{ parentType_t::value(_dateTime_t(_value.year(), _value.month(), _value.day())); }
 			};
 		}
 		using dateTimeTypes::dateTime_t;
 		using dateTimeTypes::date_t;
+
+		template<typename _fieldName> struct uuid_t : public type_t<_fieldName, ormUUID_t>
+		{
+		private:
+			using parentType_t = type_t<_fieldName, ormUUID_t>;
+
+		public:
+			using type = typename parentType_t::type;
+			using parentType_t::operator =;
+			using parentType_t::value;
+			using parentType_t::operator const type;
+			using parentType_t::operator ==;
+			using parentType_t::operator !=;
+
+			void operator =(const char *const _value) noexcept { value(ormUUID_t(_value)); }
+			void guid(const ormUUID_t &_value) noexcept { value(_value); }
+			ormUUID_t guid() const noexcept { return value(); }
+			void uuid(const ormUUID_t &_value) noexcept { value(_value); }
+			ormUUID_t uuid() const noexcept { return value(); }
+			void value(const char *const _value) noexcept { value(ormUUID_t(_value)); }
+		};
 
 		// Convinience just in case you don't like using the stdint.h like types above.
 		template<typename fieldName> using bigInt_t = int64_t<fieldName>;
@@ -478,6 +497,8 @@ namespace tmplORM
 			template<typename... models_t> bool update(const models_t &...models) { return collect(session.template update(models)...); }
 			template<typename... models_t> bool del(const models_t &...models) { return collect(session.template del(models)...); }
 			template<typename... models> bool deleteTable() { return collect(session.template deleteTable(models())...); }
+
+			api_t &inner() noexcept { return session; }
 		};
 	}
 	using common::session_t;
