@@ -377,7 +377,7 @@ bool mySQLValue_t::asBool(const uint8_t bit) const
 
 template<typename T, mySQLErrorType_t errorType> valueOrError_t<T, mySQLValueError_t> checkedConvertInt(const char *const data, const uint64_t len) noexcept
 {
-	using U = typename make_unsigned<T>::type;
+	using U = typename std::make_unsigned<T>::type;
 	if (!len)
 		return 0;
 	const bool sign = is_signed<T>::value && isMinus(data[0]);
