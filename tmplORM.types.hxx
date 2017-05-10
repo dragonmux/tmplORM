@@ -3,6 +3,13 @@
 
 #include "conversions.hxx"
 
+/*!
+ * @file
+ * @author Rachel Mant
+ * @date 2017
+ * @brief Defines core base types for the ORM
+ */
+
 namespace tmplORM
 {
 	namespace types
@@ -43,6 +50,10 @@ namespace tmplORM
 				uint16_t _second;
 				uint32_t _nanoSecond;
 
+				/*!
+				 * @brief Raise 10 to the power of power.
+				 * @note This is intentionally limited to positive natural numbers.
+				 */
 				size_t power10(const size_t power) const noexcept
 				{
 					size_t ret = 1;
@@ -54,7 +65,7 @@ namespace tmplORM
 			public:
 				constexpr ormDateTime_t() noexcept : ormDate_t(), _hour(0), _minute(0), _second(0), _nanoSecond(0) { }
 				constexpr ormDateTime_t(const uint16_t year, const uint16_t month, const uint16_t day,
-					const uint16_t hour, const uint16_t minute, const uint16_t second, const uint32_t nanoSecond) :
+					const uint16_t hour, const uint16_t minute, const uint16_t second, const uint32_t nanoSecond) noexcept :
 					ormDate_t(year, month, day), _hour(hour), _minute(minute), _second(second), _nanoSecond(nanoSecond) { }
 
 				constexpr uint16_t hour() const noexcept { return _hour; }
