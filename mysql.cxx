@@ -146,14 +146,6 @@ uint64_t mySQLResult_t::numRows() const noexcept { return valid() ? mysql_num_ro
 mySQLRow_t mySQLResult_t::resultRows() const noexcept { return valid() ? mySQLRow_t(result) : mySQLRow_t(); }
 mySQLRow_t::mySQLRow_t(MYSQL_RES *res) noexcept : result(res), row(nullptr), fields(0), rowLengths(nullptr) { fetch(); }
 
-// TODO: This is actually somewhat wrong as a nullptr result should (but doesn't) construct an invalid mySQLRow_t.
-/*mySQLRow_t::mySQLRow_t(MYSQL_RES *const res) noexcept : result(res), fields(res ? mysql_num_fields(res) : 0),
-	fieldTypes(new (std::nothrow) mySQLFieldType_t[fields]())
-{
-	if (result)
-		fetch();
-}*/
-
 mySQLRow_t::mySQLRow_t(mySQLRow_t &&r) noexcept : result(r.result), row(nullptr), fields(r.fields), rowLengths(nullptr), fieldTypes(std::move(r.fieldTypes))
 {
 	std::swap(row, r.row);
@@ -165,16 +157,20 @@ mySQLRow_t::~mySQLRow_t() noexcept { while (row) fetch(); }
 
 void mySQLRow_t::fetch() noexcept
 {
-	if (result && fieldTypes)
+	if (result)
 	{
+		if (!fieldTypes)
+		{
+			const_cast<uint32_t &>(fields) = mysql_num_fields(result);
+			if (fields)
+				fieldTypes = makeUnique<mySQLFieldType_t []>(fields);
+			if (!fieldTypes)
+				return;
+			for (uint32_t i = 0; i < fields; ++i)
+				fieldTypes[i] = mysql_fetch_field(result)->type;
+		}
 		row = mysql_fetch_row(result);
 		rowLengths = mysql_fetch_lengths(result);
-		if (valid())
-		{
-			MYSQL_FIELD *field = mysql_fetch_fields(result);
-			for (uint32_t i = 0; i < fields; ++i)
-				fieldTypes[i] = row[i] ? field[i].type : MYSQL_TYPE_NULL;
-		}
 	}
 }
 
@@ -184,7 +180,7 @@ bool mySQLRow_t::next() noexcept
 {
 	if (valid())
 		fetch();
-	return valid();
+	return row;
 }
 
 mySQLValue_t mySQLRow_t::operator [](const uint32_t idx) const noexcept

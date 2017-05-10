@@ -72,6 +72,7 @@ private:
 	MYSQL_ROW row;
 	const uint32_t fields;
 	sql_ulong_t *rowLengths;
+	// fixedVector_t?
 	std::unique_ptr<mySQLFieldType_t []> fieldTypes;
 
 	mySQLRow_t(MYSQL_RES *const result) noexcept;
