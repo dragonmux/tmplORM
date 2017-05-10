@@ -52,7 +52,34 @@ namespace tmplORM
 		template<> struct stringType_t<ormUUID_t> { using value = ts("UNIQUEIDENTIFIER"); };
 		template<typename T> using stringType = typename stringType_t<T>::value;
 
-		// bindType_t<>
+		template<typename> struct bind_t { };
+		template<> struct bind_t<int8_t>
+			{ constexpr static const uint16_t typeC = SQL_C_STINYINT; constexpr static const int64_t typeODBC = SQL_TINYINT; };
+		template<> struct bind_t<int16_t>
+			{ constexpr static const uint16_t typeC = SQL_C_SSHORT; constexpr static const int64_t typeODBC = SQL_SMALLINT; };
+		template<> struct bind_t<int32_t>
+			{ constexpr static const uint16_t typeC = SQL_C_SLONG; constexpr static const int64_t typeODBC = SQL_INTEGER; };
+		template<> struct bind_t<int64_t>
+			{ constexpr static const uint16_t typeC = SQL_C_SBIGINT; constexpr static const int64_t typeODBC = SQL_BIGINT; };
+		//
+		template<> struct bind_t<bool>
+			{ constexpr static const uint16_t typeC = SQL_C_BIT; constexpr static const int64_t typeODBC = SQL_BIT; };
+		template<> struct bind_t<float>
+			{ constexpr static const uint16_t typeC = SQL_C_FLOAT; constexpr static const int64_t typeODBC = SQL_REAL; };
+		template<> struct bind_t<double>
+			{ constexpr static const uint16_t typeC = SQL_C_DOUBLE; constexpr static const int64_t typeODBC = SQL_FLOAT; };
+		template<> struct bind_t<char *>
+			{ constexpr static const uint16_t typeC = SQL_C_CHAR; constexpr static const int64_t typeODBC = SQL_VARCHAR; };
+		template<> struct bind_t<const char *>
+			{ constexpr static const uint16_t typeC = SQL_C_CHAR; constexpr static const int64_t typeODBC = SQL_VARCHAR; };
+		template<> struct bind_t<ormDate_t>
+			{ constexpr static const uint16_t typeC = SQL_C_DATE; constexpr static const int64_t typeODBC = SQL_DATE; };
+		template<> struct bind_t<ormDateTime_t>
+			{ constexpr static const uint16_t typeC = SQL_C_TIMESTAMP; constexpr static const int64_t typeODBC = SQL_DATETIME; };
+		template<> struct bind_t<ormUUID_t>
+			{ constexpr static const uint16_t typeC = SQL_C_GUID; constexpr static const int64_t typeODBC = SQL_GUID; };
+		/*template<> struct bind_t<nullptr_t>
+			{ constexpr static const uint16_t typeC = SQL_C_DEFAULT; constexpr static const int64_t typeODBC = SQL_TYPE_NULL; };*/
 
 		namespace driver
 		{
