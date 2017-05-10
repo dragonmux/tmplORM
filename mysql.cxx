@@ -115,8 +115,10 @@ void mySQLClient_t::disconnect() noexcept
 	if (valid())
 	{
 		mysql_close(con);
-		con = nullptr;
 		haveConnection = false;
+		con = mysql_init(nullptr);
+		if (con)
+			mysql_options(con, MYSQL_OPT_RECONNECT, &autoReconnect);
 	}
 }
 
@@ -139,9 +141,9 @@ bool mySQLClient_t::query(const char *const queryStmt, ...) const noexcept
 	va_list args;
 	va_start(args, queryStmt);
 	const auto query = vaFormatString(queryStmt, args);
+	va_end(args);
 	if (!query)
 		return false;
-	va_end(args);
 	return mysql_query(con, query.get()) == 0;
 }
 
