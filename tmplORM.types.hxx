@@ -78,6 +78,54 @@ namespace tmplORM
 						_nanoSecond = nanoSeconds / power10(nanoSeconds.length() - 9);
 				}
 			};
+
+			struct guid_t final
+			{
+				uint32_t data1;
+				uint16_t data2;
+				uint16_t data3;
+				uint64_t data4;
+			};
+
+			struct ormUUID_t final
+			{
+			private:
+				/*! @brief union for storing UUIDs - all data must be kept in Big Endian form. */
+				guid_t _uuid;
+
+			public:
+				constexpr ormUUID_t() noexcept : _uuid() { }
+				ormUUID_t(const guid_t &guid, const bool needsSwap = false) noexcept : _uuid()
+				{
+					_uuid = guid;
+					if (needsSwap)
+					{
+						swapBytes(_uuid.data1);
+						swapBytes(_uuid.data2);
+						swapBytes(_uuid.data3);
+					}
+				}
+
+				constexpr const uint8_t *asBuffer() const noexcept { return reinterpret_cast<const uint8_t *>(&_uuid); }
+				constexpr uint32_t data1() const noexcept { return _uuid.data1; }
+				constexpr uint32_t data2() const noexcept { return _uuid.data1; }
+				constexpr uint32_t data3() const noexcept { return _uuid.data1; }
+				constexpr const uint8_t *data4() const noexcept { return reinterpret_cast<const uint8_t *const>(_uuid.data4); }
+
+				ormUUID_t(const char *uuid) noexcept : ormUUID_t()
+				{
+					_uuid.data1 = toInt_t<uint32_t>(uuid, 8).fromHex();
+					uuid += 9;
+					_uuid.data2 = toInt_t<uint16_t>(uuid, 4).fromHex();
+					uuid += 5;
+					_uuid.data3 = toInt_t<uint16_t>(uuid, 4).fromHex();
+					uuid += 5;
+					_uuid.data4 = uint64_t(toInt_t<uint16_t>(uuid, 4).fromHex()) << 48;
+					uuid += 5;
+					_uuid.data4 |= uint64_t(toInt_t<uint16_t>(uuid, 4).fromHex()) << 32;
+					_uuid.data4 |= toInt_t<uint32_t>(uuid + 4, 8).fromHex();
+				}
+			};
 		}
 	}
 }
