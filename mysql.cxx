@@ -3,15 +3,49 @@
 #include "value.hxx"
 #include "string.hxx"
 
+/*!
+ * @internal
+ * @file
+ * @author Rachel Mant
+ * @date 2016-2017
+ * @brief C++ MySQL driver abstraction layer for handling client connections and query datasets
+ */
+
 using namespace std;
 using namespace tmplORM::mysql::driver;
 
+// General documentation block (used to document mysql.hxx stuff cleanly
+/*!
+ * @internal
+ * @typedef mySQLFieldType_t
+ * @brief Type representing MySQL field types
+ * @enum mySQLErrorType_t
+ * @brief Defines the possible error types that can occur in mySQLValue_t convesions
+ * @var mySQLErrorType_t::stringError
+ * @brief Error converting a value to a string
+ * @var mySQLErrorType_t::boolError
+ * @brief Error converting a value to a boolean
+ * @var mySQLErrorType_t::uint32Error
+ * @brief Error converting a value to a 32-bit unsigned integer
+ * @var mySQLErrorType_t::int32Error
+ * @brief Error converting a value to a 32-bit signed integer
+ * @var mySQLErrorType_t::uint64Error
+ * @brief Error converting a value to a 64-bit unsigned integer
+ * @var mySQLErrorType_t::int64Error
+ * @brief Error converting a value to a 64-bit signed integer
+ */
+
+/*! @brief Global MySQL connection handle */
 MYSQL *mySQLClient_t::con = nullptr;
+/*! @brief Counter for the number of handles in existance to the master container */
 uint32_t mySQLClient_t::handles = 0;
+/*! @brief Variable that defines if MySQLClient_t::con actually refers to a valid, connected, connection */
 bool mySQLClient_t::haveConnection = false;
 
+/*! @brief Constant used for telling MySQL Client that we really want it to auto-reconnect */
 static const bool autoReconnect = true;
 
+/*! @brief Constructs a fresh MySQL client connection container */
 mySQLClient_t::mySQLClient_t() noexcept
 {
 	++handles;
@@ -23,8 +57,10 @@ mySQLClient_t::mySQLClient_t() noexcept
 	}
 }
 
+/*! @brief Constructs a MySQL client connection container reference */
 mySQLClient_t::mySQLClient_t(const mySQLClient_t &) noexcept { ++handles; }
 
+/*! @brief Destructor for MySQL client connection container references */
 mySQLClient_t::~mySQLClient_t() noexcept
 {
 	--handles;
@@ -35,8 +71,17 @@ mySQLClient_t::~mySQLClient_t() noexcept
 	}
 }
 
+/*! @brief "Copies" a MySQL client connection container reference over another */
 mySQLClient_t &mySQLClient_t::operator =(const mySQLClient_t &) noexcept { return *this; }
 
+/*!
+ * @brief Creates a client connection based on a TCP/IP connection
+ * @param host The host string of the server housing the MySQL instance to connect to
+ * @param port The port number of the desired MySQL instance on the server to connect to
+ * @param user The user to connect in with
+ * @param passwd The password for the user to connect in with
+ * @returns true if the connection was successful (or pre-existing), false otherwise
+ */
 bool mySQLClient_t::connect(const char *const host, const uint32_t port, const char *const user, const char *const passwd) const noexcept
 {
 	if (haveConnection)
@@ -47,6 +92,13 @@ bool mySQLClient_t::connect(const char *const host, const uint32_t port, const c
 	return haveConnection;
 }
 
+/*!
+ * @brief Creates a connection based on a Unix Socket
+ * @param unixSocket The path to the Unix Socket of the MySQL instance to connect to
+ * @param user The user to connect in with
+ * @param passwd The password for the user to connect in with
+ * @returns true if the connection was successful (or pre-existing), false otherwise
+ */
 bool mySQLClient_t::connect(const char *const unixSocket, const char *const user, const char *const passwd) const noexcept
 {
 	if (haveConnection)
@@ -57,6 +109,7 @@ bool mySQLClient_t::connect(const char *const unixSocket, const char *const user
 	return haveConnection;
 }
 
+/*! @brief Disconnects from the current MySQL server and prepares us to connect to a new one */
 void mySQLClient_t::disconnect() noexcept
 {
 	if (valid())
@@ -67,8 +120,18 @@ void mySQLClient_t::disconnect() noexcept
 	}
 }
 
+/*!
+ * @brief Select a database on the current MySQL server
+ * @param db The database to select
+ */
 bool mySQLClient_t::selectDB(const char *const db) const noexcept { return valid() && mysql_select_db(con, db) == 0; }
 
+/*!
+ * @brief Construct a query to run, and execute it
+ * @param queryStmt The printf() style query statement to run
+ * @param ... The parameters (if any) for the query statement
+ * @returns true if the query was successful, false otherwise
+ */
 bool mySQLClient_t::query(const char *const queryStmt, ...) const noexcept
 {
 	if (mysql_ping(con))
@@ -82,12 +145,35 @@ bool mySQLClient_t::query(const char *const queryStmt, ...) const noexcept
 	return mysql_query(con, query.get()) == 0;
 }
 
+/*!
+ * @brief Gets the mySQLResult_t for any active query
+ * @returns a mySQLResult_t that represents the result of the most recent query on the connection (if there is one)
+ */
 mySQLResult_t mySQLClient_t::queryResult() const noexcept { return valid() ? mySQLResult_t(con) : mySQLResult_t(); }
+/*!
+ * @brief Construct a prepared query to run and return that
+ * @returns a mySQLPreparedQuery_t that represents the query to run for further prep and execution
+ */
 mySQLPreparedQuery_t mySQLClient_t::prepare(const char *const queryStmt, const size_t paramsCount) const noexcept
 	{ return valid() ? mySQLPreparedQuery_t(con, queryStmt, paramsCount) : mySQLPreparedQuery_t(); }
+/*!
+ * @brief MySQL calls can result in an error outside this driver layer, this allows you to know what that error is if something fails
+ * @returns The current MySQL errno error number code
+ */
 uint32_t mySQLClient_t::errorNum() const noexcept { return valid() ? mysql_errno(con) : 0; }
+/*!
+ * @brief MySQL calls can result in an error outside this driver layer, this allows you to know the human readable error string
+ * @returns The current MySQL error string
+ */
 const char *mySQLClient_t::error() const noexcept { return valid() ? mysql_error(con) : nullptr; }
 
+/*!
+ * @internal
+ * @brief Constructor for prepared queries from MySQL query statements
+ * @param con The connection for which to prepare the query against
+ * @param queryStmt The query statement to prepare
+ * @param paramsCount The count of the number of parameters that the query statement contains
+ */
 mySQLPreparedQuery_t::mySQLPreparedQuery_t(MYSQL *const con, const char *const queryStmt, const size_t paramsCount) noexcept :
 	query(mysql_stmt_init(con)), params(paramsCount), paramStorage(paramsCount), numParams(paramsCount), executed(false)
 {
@@ -102,20 +188,37 @@ mySQLPreparedQuery_t::mySQLPreparedQuery_t(MYSQL *const con, const char *const q
 		dtor();
 }
 
+// General documentation block for mySQLPreparedQuery_t
+/*!
+ * @internal
+ * @var mySQLPreparedQuery_t::query
+ * @brief The MYSQL_STMT statement pointer for this prepared query object (or nullptr if invalid)
+ */
+
+/*!
+ * @brief Move constructor for the context of a MySQL prepared query
+ * @param qry The original prepared who's context we will make our own in trade
+ */
 mySQLPreparedQuery_t::mySQLPreparedQuery_t(mySQLPreparedQuery_t &&qry) noexcept : mySQLPreparedQuery_t() { *this = std::move(qry); }
 
+/*! @brief Destructor for MySQL result objects */
 mySQLPreparedQuery_t::~mySQLPreparedQuery_t() noexcept
 {
 	if (valid())
 		dtor();
 }
 
+/*! @internal @brief The real function for destroying the context we encapsulate */
 void mySQLPreparedQuery_t::dtor() noexcept
 {
 	mysql_stmt_close(query);
 	query = nullptr;
 }
 
+/*!
+ * @brief Move assignment operator for the context of a MySQL prepared query
+ * @param qry The original prepared query who's context we will make our own in trade
+ */
 mySQLPreparedQuery_t &mySQLPreparedQuery_t::operator =(mySQLPreparedQuery_t &&qry) noexcept
 {
 	std::swap(query, qry.query);
@@ -125,6 +228,7 @@ mySQLPreparedQuery_t &mySQLPreparedQuery_t::operator =(mySQLPreparedQuery_t &&qr
 	return *this;
 }
 
+/*! @brief Executes the prepared query */
 bool mySQLPreparedQuery_t::execute() noexcept
 {
 	if (!executed && valid())
@@ -136,16 +240,49 @@ bool mySQLPreparedQuery_t::execute() noexcept
 	return executed;
 }
 
+/*! @brief Returns the ID of a freshly inserted row for this prepared query, or 0 otherwise */
 uint64_t mySQLPreparedQuery_t::rowID() const noexcept { return executed ? mysql_stmt_insert_id(query) : 0; }
-
+/*!
+ * @internal
+ * @brief Constructor for results from MySQL queries
+ * @param con The connection for which to retrieve results from
+ */
 mySQLResult_t::mySQLResult_t(MYSQL *const con) noexcept : result(mysql_store_result(con)) { }
+/*!
+ * @brief Move constructor for the results of a MySQL query
+ * @param res The original result object who's results we will make our own in trade
+ */
 mySQLResult_t::mySQLResult_t(mySQLResult_t &&res) noexcept : mySQLResult_t() { std::swap(result, res.result); }
+
+// General documentation block for mySQLResult_t
+/*!
+ * @internal
+ * @var mySQLResult_t::result
+ * @brief The MYSQL_RES result pointer for this object (or nullptr if invalid)
+ */
+
+/*! @brief Destructor for MySQL result objects */
 mySQLResult_t::~mySQLResult_t() noexcept { if (valid()) mysql_free_result(result); }
+/*!
+ * @brief Move assignment operator for the results of a MySQL query
+ * @param res The original result who's results we will make our own in trade
+ */
 mySQLResult_t &mySQLResult_t::operator =(mySQLResult_t &&res) noexcept { std::swap(result, res.result); return *this; }
+/*! @brief Returns the number of rows this result object represents, or 0 if this is an invalid result object */
 uint64_t mySQLResult_t::numRows() const noexcept { return valid() ? mysql_num_rows(result) : 0; }
+/*! @brief Creates a row object representing result rows for this result object */
 mySQLRow_t mySQLResult_t::resultRows() const noexcept { return valid() ? mySQLRow_t(result) : mySQLRow_t(); }
+/*!
+ * @internal
+ * @brief Constructor for the result rows from a MySQL query
+ * @param result The result from which to fetch the result rows from
+ */
 mySQLRow_t::mySQLRow_t(MYSQL_RES *res) noexcept : result(res), row(nullptr), fields(0), rowLengths(nullptr) { fetch(); }
 
+/*!
+ * @brief Destroys a result rows object, ensuring that no rows are left to fetch
+ * @note This may not actually be required - maybe we can get away with invalidating the result set rather than expensively processing our way through any remaining rows?
+ */
 mySQLRow_t::mySQLRow_t(mySQLRow_t &&r) noexcept : result(r.result), row(nullptr), fields(r.fields), rowLengths(nullptr), fieldTypes(std::move(r.fieldTypes))
 {
 	std::swap(row, r.row);
@@ -153,8 +290,16 @@ mySQLRow_t::mySQLRow_t(mySQLRow_t &&r) noexcept : result(r.result), row(nullptr)
 	std::swap(rowLengths, r.rowLengths);
 }
 
+/*!
+ * @brief Destroys a result rows object, ensuring that no rows are left to fetch
+ * @note This may not actually be required - maybe we can get away with invalidating the result set rather than expensively processing our way through any remaining rows?
+ */
 mySQLRow_t::~mySQLRow_t() noexcept { while (row) fetch(); }
 
+/*!
+ * @internal
+ * @brief Fetches the next result row for this result set, or sets row to nullptr if there are no results left
+ */
 void mySQLRow_t::fetch() noexcept
 {
 	if (result)
