@@ -9,6 +9,13 @@
 #include "tmplORM.hxx"
 #include "mssql.hxx"
 
+/*!
+ * @file
+ * @author Rachel Mant
+ * @date 2016-2017
+ * @brief Defines the MSSQL mapper for the ORM
+ */
+
 namespace tmplORM
 {
 	namespace mssql
