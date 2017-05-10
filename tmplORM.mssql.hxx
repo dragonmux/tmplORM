@@ -22,16 +22,17 @@ namespace tmplORM
 	{
 		using namespace tmplORM::common;
 		using namespace tmplORM::mssql::driver;
+		using namespace tmplORM::types::baseTypes;
 
 		using tmplORM::types::type_t;
 		using tmplORM::types::unicode_t;
 		using tmplORM::types::unicodeText_t;
-		using tmplORM::types::dateTimeTypes::_dateTime_t;
 
-		using tmplORM::types::autoInc_t;
 		using tmplORM::types::primary_t;
 		using tmplORM::types::nullable_t;
+		using tmplORM::types::autoInc_t;
 
+		// If we don't know how to translate the type, don't.
 		template<typename> struct stringType_t { using value = typestring<>; };
 		template<> struct stringType_t<int8_t> { using value = ts("TINYINT"); };
 		template<> struct stringType_t<uint8_t> { using value = ts("TINYINT UNSIGNED"); };
@@ -43,10 +44,12 @@ namespace tmplORM
 		template<> struct stringType_t<uint64_t> { using value = ts("BIGINT UNSIGNED"); };
 		template<> struct stringType_t<bool> { using value = ts("BIT"); };
 		template<> struct stringType_t<float> { using value = ts("REAL"); };
-		// Yes really.. this represents a full double (8-bit float) when given no parameters..
+		// Yes really.. this represents a full double (8-byte float) when given no parameters..
 		template<> struct stringType_t<double> { using value = ts("FLOAT"); };
 		template<> struct stringType_t<char *> { using value = ts("NTEXT"); };
-		template<> struct stringType_t<_dateTime_t> { using value = ts("DATETIME"); };
+		template<> struct stringType_t<ormDate_t> { using value = ts("DATE"); };
+		template<> struct stringType_t<ormDateTime_t> { using value = ts("DATETIME"); };
+		template<> struct stringType_t<ormUUID_t> { using value = ts("UNIQUEIDENTIFIER"); };
 		template<typename T> using stringType = typename stringType_t<T>::value;
 
 		// bindType_t<>
