@@ -214,7 +214,24 @@ namespace tmplORM
 		template<typename _fieldName> using int64_t = type_t<_fieldName, std::int64_t>;
 		template<typename _fieldName> using int32_t = type_t<_fieldName, std::int32_t>;
 		template<typename _fieldName> using int16_t = type_t<_fieldName, std::int16_t>;
-		template<typename _fieldName> using int8_t = type_t<_fieldName, std::int8_t>;
+
+		template<typename _fieldName> struct int8_t : public type_t<_fieldName, std::int8_t>
+		{
+		private:
+			using parentType_t = type_t<_fieldName, std::int8_t>;
+
+		public:
+			using type = typename parentType_t::type;
+			using parentType_t::operator const type;
+			using parentType_t::operator ==;
+			using parentType_t::operator !=;
+
+			void operator =(const std::int64_t &value) noexcept { parentType_t::value(std::int8_t(value)); }
+			void value(const std::int64_t &value) noexcept { parentType_t::value(std::int8_t(value)); }
+			type value() noexcept { return *this; }
+			const type value() const noexcept { return *this; }
+		};
+
 		template<typename _fieldName> using bool_t = type_t<_fieldName, bool>;
 		template<typename _fieldName> using float_t = type_t<_fieldName, float>;
 		template<typename _fieldName> using double_t = type_t<_fieldName, double>;
