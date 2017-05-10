@@ -1,6 +1,11 @@
 #ifndef tmplORM_MSSQL__HXX
 #define tmplORM_MSSQL__HXX
 
+#ifndef UNICODE
+#define UNICODE
+#include <sql.h>
+#include <sqlext.h>
+#endif
 #include "tmplORM.hxx"
 #include "mssql.hxx"
 
