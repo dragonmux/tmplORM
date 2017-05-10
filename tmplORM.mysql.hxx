@@ -115,6 +115,32 @@ namespace tmplORM
 					param.buffer_length = sizeof(dateTime);
 					return true;
 				}
+
+				bool operator ()(MYSQL_BIND &param, const ormUUID_t &_value, managedPtr_t<void> &paramStorage) noexcept
+				{
+					const uint8_t *const value = _value.asBuffer();
+					std::array<char, 32> uuid;
+					for (uint8_t i = 0; i < uuid.size(); ++i)
+					{
+						// Computes a shift of 4 for the first nibble, and 0 for the second
+						const uint8_t shift = 4 >> ((i & 1) << 2);
+						// This then extracts the correct nibble of the current byte to convert. It acomplishes
+						// this by performing a shift to get the correct nibble into the bottom nibble of the byte
+						// and then masking off that nibble
+						char hex = (value[i >> 1] >> shift) & 0x0F;
+						if (hex > 9)
+							hex += 0x07;
+						uuid[i] = hex + 0x30;
+					}
+
+					auto storage = makeManaged<decltype(uuid)>(uuid);
+					if (!storage)
+						return false;
+					param.buffer = storage->data();
+					param.buffer_length = storage->size();
+					paramStorage = std::move(storage);
+					return true;
+				}
 			};
 
 			template<> struct bindValue_t<true>
