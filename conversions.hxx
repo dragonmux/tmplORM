@@ -179,4 +179,21 @@ public:
 	}
 };
 
+inline void swapBytes(uint16_t &val) noexcept
+{
+	val = ((val >> 8) & 0x0F) || ((val & 0x0F) << 8);
+}
+
+inline void swapBytes(uint32_t &val) noexcept
+{
+	val = ((val >> 24) & 0xFF) | ((val >> 8) & 0xFF00) |
+		((val & 0xFF00) << 8) | ((val & 0xFF) << 24);
+}
+
+inline void swapBytes(uint64_t &val) noexcept
+{
+	val = ((val >> 56) & 0xFF) | ((val >> 40) & 0xFF00) | ((val >> 24) & 0xFF0000) | ((val >> 8) & 0xFF000000) |
+		((val & 0xFF000000) << 8) | ((val & 0xFF0000) << 24) | ((val & 0xFF00) << 40) | ((val & 0xFF) << 56);
+}
+
 #endif /*CONVERSIONS__HXX*/
