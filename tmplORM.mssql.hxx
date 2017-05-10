@@ -169,26 +169,27 @@ namespace tmplORM
 		template<size_t N, typename fieldName, typename T> struct fieldName_t<N, type_t<fieldName, T>>
 			{ using value = tycat<bracket<fieldName>, comma<N>>; };
 
+#include "tmplORM.common.hxx"
+
 		template<typename> struct createName_t { };
 		template<typename fieldName, typename T> struct createName_t<type_t<fieldName, T>>
 			{ using value = tycat<bracket<fieldName>, ts(" "), stringType<T>>; };
-		template<typename fieldName, uint32_t length> struct createName_t<unicode_t<fieldName, length>>
+		template<typename fieldName, size_t length> struct createName_t<unicode_t<fieldName, length>>
 			{ using value = tycat<bracket<fieldName>, ts(" NVARCHAR("), toTypestring<length>, ts(")")>; };
-
-#include "tmplORM.common.hxx"
 
 		template<size_t N, typename field> struct createList__t
 		{
-			template<typename fieldName, typename T> static auto _name(const type_t<fieldName, T> &) ->
+			template<typename fieldName, typename T> constexpr static auto _name(const type_t<fieldName, T> &) ->
 				typename createName_t<type_t<fieldName, T>>::value;
-			template<typename fieldName, uint32_t length> static auto _name(const unicode_t<fieldName, length> &) ->
+			template<typename fieldName, size_t length> constexpr static auto _name(const unicode_t<fieldName, length> &) ->
 				typename createName_t<unicode_t<fieldName, length>>::value;
-			template<typename T> static auto _name(const primary_t<T> &) -> tycat<decltype(_name(T())), ts(" PRIMARY KEY")>;
-			template<typename T> static auto _name(const autoInc_t<T> &) -> tycat<decltype(_name(T())), ts(" IDENTITY")>;
+			template<typename T> constexpr static auto _name(const autoInc_t<T> &) -> tycat<decltype(_name(T())), ts(" IDENTITY")>;
+			template<typename T> constexpr static auto _name(const primary_t<T> &) -> tycat<decltype(_name(T())), ts(" PRIMARY KEY")>;
 			using name = decltype(_name(field()));
 
-			static auto value() -> tycat<name, nullable<field::nullable>, comma<N>>;
+			constexpr static auto value() -> tycat<name, nullable<field::nullable>, comma<N>>;
 		};
+		// Alias for the above container type to make it easier to use
 		template<size_t N, typename T> using createList__ = decltype(createList__t<N, T>::value());
 
 		// Constructs a list of fields suitable for use in a CREATE query
