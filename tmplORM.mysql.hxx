@@ -187,7 +187,7 @@ namespace tmplORM
 		template<typename... fields> using createList = typename createList_t<sizeof...(fields), fields...>::value;
 
 		template<typename tableName, typename... fields> using createTable_ = toString<
-			tycat<ts("CREATE TABLE IF NOT EXISTS "), backtick<tableName>, ts(" ("), createList<fields...>, ts(");")>
+			tycat<ts("CREATE TABLE IF NOT EXISTS "), backtick<tableName>, ts(" ("), createList<fields...>, ts(") CHARACTER SET utf8;")>
 		>;
 		template<typename tableName, typename... fields> using select_ = toString<
 			tycat<ts("SELECT "), selectList<fields...>, ts(" FROM "), backtick<tableName>, ts(";")>
