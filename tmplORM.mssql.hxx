@@ -83,8 +83,84 @@ namespace tmplORM
 
 		namespace driver
 		{
-			// bindValue()
-			// tSQLQuery_t::bind() * 2
+			template<typename T> struct bindLength_t { constexpr static const uint32_t length = sizeof(T); };
+			template<> struct bindLength_t<ormDate_t> { constexpr static const uint32_t length = SQL_DATE_LEN; };
+			template<> struct bindLength_t<ormDateTime_t> { constexpr static const uint32_t length = SQL_TIMESTAMP_LEN; };
+			template<> struct bindLength_t<ormUUID_t> { constexpr static const uint32_t length = sizeof(SQLGUID); };
+
+			template<bool> struct bindValue_t
+			{
+				template<typename T> auto operator ()(const T &val, managedPtr_t<void> &) noexcept -> void *const
+					{ return reinterpret_cast<void *const>(const_cast<T *const>(&val)); }
+
+				auto operator ()(const ormDate_t &value, managedPtr_t<void> &paramStorage) noexcept -> void *const
+				{
+					SQL_DATE_STRUCT date;
+					date.year = value.year();
+					date.month = value.month();
+					date.day = value.day();
+					paramStorage = makeManaged<SQL_DATE_STRUCT>(date);
+					return paramStorage.get();
+				}
+
+				auto operator ()(const ormDateTime_t &value, managedPtr_t<void> &paramStorage) noexcept -> void *const
+				{
+					SQL_TIMESTAMP_STRUCT dateTime;
+					dateTime.year = value.year();
+					dateTime.month = value.month();
+					dateTime.day = value.day();
+					dateTime.hour = value.hour();
+					dateTime.minute = value.minute();
+					dateTime.second = value.second();
+					//dateTime.fraction = value.nanoSeconds() / std::chrono::duration_cast<nanoseconds_t>(1_us).count();
+
+					paramStorage = makeManaged<SQL_TIMESTAMP_STRUCT>(dateTime);
+					return paramStorage.get();
+				}
+
+				auto operator ()(const ormUUID_t &value, managedPtr_t<void> &paramStorage) noexcept -> void *const
+				{
+					SQLGUID guid;
+					guid.Data1 = value.data1();
+					guid.Data2 = value.data2();
+					guid.Data3 = value.data3();
+					// std::copy uses (from_begin, from_end, to) syntax.
+					std::copy(value.data4(), value.data4() + 8, guid.Data4);
+					paramStorage = makeManaged<SQLGUID>(guid);
+					return paramStorage.get();
+				}
+			};
+
+			template<> struct bindValue_t<true>
+			{
+				template<typename T> auto operator ()(const T *const val, managedPtr_t<void> &) noexcept -> void *const
+					{ return reinterpret_cast<void *const>(const_cast<T *const>(val)); }
+			};
+
+			template<typename T> using bindValue_ = bindValue_t<std::is_pointer<T>::value>;
+
+			template<typename T> void tSQLQuery_t::bind(const size_t index, const T &value, const fieldLength_t length) noexcept
+			{
+				const int16_t dataType = bind_t<T>::typeC;
+				const int16_t odbcDataType = bind_t<T>::typeODBC;
+				const uint32_t dataLen = length.first ? length.first : bindLength_t<T>::length;
+
+				long *lenPtr = dataType == SQL_C_BINARY ? &dataLengths[index] : nullptr;
+				if (dataType == SQL_C_BINARY)
+					dataLengths[index] = dataLen;
+
+				error(SQLBindParameter(queryHandle, index + 1, SQL_PARAM_INPUT, dataType, odbcDataType, length.second,
+					0, bindValue_<T>()(value, paramStorage[index]), dataLen, lenPtr));
+			}
+
+			template<typename T> void tSQLQuery_t::bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept
+			{
+				const int16_t dataType = bind_t<T>::typeC;
+				const int16_t odbcDataType = bind_t<T>::typeODBC;
+				dataLengths[index] = SQL_NULL_DATA;
+				error(SQLBindParameter(queryHandle, index + 1, SQL_PARAM_INPUT, dataType, odbcDataType, length.second,
+					0, nullptr, 0, &dataLengths[index]));
+			}
 		}
 
 		template<typename name> using bracket = tycat<ts("["), name, ts("]")>;
