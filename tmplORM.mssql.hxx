@@ -194,12 +194,12 @@ namespace tmplORM
 
 		// Constructs a list of fields suitable for use in a CREATE query
 		template<size_t, typename...> struct createList_t;
-		// Alias to make createList_t easier to use
-		template<typename... fields> using createList = typename createList_t<sizeof...(fields), fields...>::value;
 		// Primary specialisation generates the list
 		template<size_t N, typename field, typename... fields> struct createList_t<N, field, fields...>
 			{ using value = tycat<createList__<N, field>, typename createList_t<N - 1, fields...>::value>; };
 		template<> struct createList_t<0> { using value = typestring<>; };
+		// Alias to make createList_t easier to use
+		template<typename... fields> using createList = typename createList_t<sizeof...(fields), fields...>::value;
 
 		template<size_t N, typename field, typename... fields> struct outputField_t
 			{ using value = typename outputField_t<N - 1, fields...>::value; };
@@ -215,11 +215,11 @@ namespace tmplORM
 		template<bool, typename... fields> struct outputInsert_t { using value = typestring<>; };
 		template<typename... fields> struct outputInsert_t<true, fields...>
 			{ using value = tycat<ts(" OUTPUT "), outputField<fields...>>; };
-		// Alias to make otuputInsert_t easier to use
+		// Alias to make outputInsert_t easier to use
 		template<typename... fields> using outputInsert = typename outputInsert_t<hasAutoInc<fields...>(), fields...>::value;
 
 		template<typename tableName, typename... fields> using createTable_ = toString<
-			tycat<ts("CREATE TABLE "), bracket<tableName>, ts(" ("), createList<fields...>, ts(");")>
+			tycat<ts("CREATE TABLE "), bracket<tableName>, ts(" ("), createList<fields...>, ts(") COLATE latin1_general_100_CI_AI_SC;")>
 		>;
 		template<typename tableName, typename... fields> using select_ = toString<
 			tycat<ts("SELECT "), selectList<fields...>, ts(" FROM "), bracket<tableName>, ts(";")>
@@ -227,6 +227,7 @@ namespace tmplORM
 		template<typename tableName, typename... fields> using add_ = toString<
 			tycat<ts("INSERT INTO "), bracket<tableName>, ts(" ("), insertList<fields...>, ts(")"), outputInsert<fields...>, ts(" VALUES ("), placeholder<countInsert_t<fields...>::count>, ts(");")>
 		>;
+		// This constructs invalid if there is no field marked primary_t<>! Tihs is quite intentional.
 		template<typename tableName, typename... fields> struct update_t<false, tableName, fields...>
 			{ using value = tycat<ts("UPDATE "), bracket<tableName>, ts(" SET "), updateList<fields...>, updateWhere<fields...>, ts(";")>; };
 		template<typename tableName, typename... fields> using del_ = toString<
@@ -236,7 +237,7 @@ namespace tmplORM
 			tycat<ts("DROP TABLE "), bracket<tableName>, ts(";")>
 		>;
 
-		struct session_t
+		struct session_t final
 		{
 		private:
 			driver::tSQLClient_t database;
@@ -245,20 +246,31 @@ namespace tmplORM
 			session_t() noexcept : database() { }
 			~session_t() noexcept { }
 
-			template<typename tableName, typename... fields> bool createTable(const model_t<tableName, fields...> &) noexcept
+			template<typename tableName, typename... fields> bool createTable(const model_t<tableName, fields...> &)
 			{
 				using create = createTable_<tableName, fields...>;
 				return database.query(create::value).valid();
 			}
 
-			template<typename T, typename tableName, typename... fields_t> T select(const model_t<tableName, fields_t...> &) noexcept
+			template<typename T, typename tableName, typename... fields_t> fixedVector_t<T> select(const model_t<tableName, fields_t...> &) noexcept
 			{
+				fixedVector_t<T> data;
 				using select = select_<tableName, fields_t...>;
-				select::value;
-				return T();
+				tSQLResult_t result(database.query(select::value));
+				for (size_t i = 0; i < result.numRows(); ++i, result.next())
+				{
+					T value;
+					if (!result.valid())
+						return {};
+					bindSelect<fields_t...>::bind(value.fields(), result);
+					data[i] = std::move(value);
+				}
+				if (result.valid())
+					return {};
+				return data;
 			}
 
-			template<typename tableName, typename... fields_t> bool add(const model_t<tableName, fields_t...> &model) noexcept
+			template<typename tableName, typename... fields_t> bool add(model_t<tableName, fields_t...> &model) noexcept
 			{
 				using insert = add_<tableName, fields_t...>;
 				tSQLQuery_t query(database.prepare(insert::value, countInsert_t<fields_t...>::count));
@@ -266,8 +278,7 @@ namespace tmplORM
 				tSQLResult_t result(query.execute());
 				if (result.valid())
 				{
-					if (hasAutoInc<fields_t...>())
-						getAutoInc(model) = result[0];
+					setAutoInc_t<hasAutoInc<fields_t...>()>::set(model, result[0]);
 					return true;
 				}
 				return false;
@@ -279,7 +290,9 @@ namespace tmplORM
 				if (std::is_same<update, toString<typestring<>>>::value)
 					return false;
 				tSQLQuery_t query(database.prepare(update::value, sizeof...(fields_t)));
+				// This binds the fields, primary key last so it tags to the WHERE clause for this query.
 				bindUpdate<fields_t...>::bind(model.fields(), query);
+				// This either works or doesn't.. thankfully.. so, we can just execute-and-quit.
 				return query.execute().valid();
 			}
 
@@ -288,14 +301,22 @@ namespace tmplORM
 				using del = del_<tableName, fields_t...>;
 				tSQLQuery_t query(database.prepare(del::value, countPrimary<fields_t...>::count));
 				bindDelete<fields_t...>::bind(model.fields(), query);
+				// This either works or doesn't.. thankfully.. so, we can just execute-and-quit.
 				return query.execute().valid();
 			}
 
-			template<typename tableName, typename... fields> bool deleteTable(const model_t<tableName, fields...> &) noexcept
+			template<typename tableName, typename... fields> bool deleteTable(const model_t<tableName, fields...> &)
 			{
-				using deleteTable = deleteTable_<tableName>;
-				return database.query(deleteTable::value).valid();
+				// tycat<> builds up the query for dropping (deleting) the table
+				using drop = deleteTable_<tableName>;
+				return database.query(drop::value).valid();
 			}
+
+			bool connect(const char *const driver, const char *const host, const uint32_t port, const char *const user, const char *const passwd) const noexcept
+				{ return database.connect(driver, host, port, user, passwd); }
+			void disconnect() noexcept { database.disconnect(); }
+			bool selectDB(const char *const db) const noexcept { return database.selectDB(db); }
+			const tSQLExecError_t &error() const noexcept { return database.error(); }
 		};
 	}
 	using mssql_t = mssql::session_t;
