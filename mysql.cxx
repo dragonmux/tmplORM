@@ -71,11 +71,13 @@ bool mySQLClient_t::selectDB(const char *const db) const noexcept { return valid
 
 bool mySQLClient_t::query(const char *const queryStmt, ...) const noexcept
 {
-	if (mysql_ping(con) != 0)
+	if (mysql_ping(con))
 		return false;
 	va_list args;
 	va_start(args, queryStmt);
-	auto query = vaFormatString(queryStmt, args);
+	const auto query = vaFormatString(queryStmt, args);
+	if (!query)
+		return false;
 	va_end(args);
 	return mysql_query(con, query.get()) == 0;
 }
@@ -89,7 +91,7 @@ const char *mySQLClient_t::error() const noexcept { return valid() ? mysql_error
 mySQLPreparedQuery_t::mySQLPreparedQuery_t(MYSQL *const con, const char *const queryStmt, const size_t paramsCount) noexcept :
 	query(mysql_stmt_init(con)), params(paramsCount), paramStorage(paramsCount), numParams(paramsCount), executed(false)
 {
-	if (!query || (numParams && params.valid()))
+	if (!query || (numParams && !params))
 		return;
 	else if (numParams)
 	{
@@ -108,6 +110,12 @@ mySQLPreparedQuery_t::~mySQLPreparedQuery_t() noexcept
 		dtor();
 }
 
+void mySQLPreparedQuery_t::dtor() noexcept
+{
+	mysql_stmt_close(query);
+	query = nullptr;
+}
+
 mySQLPreparedQuery_t &mySQLPreparedQuery_t::operator =(mySQLPreparedQuery_t &&qry) noexcept
 {
 	std::swap(query, qry.query);
@@ -117,17 +125,11 @@ mySQLPreparedQuery_t &mySQLPreparedQuery_t::operator =(mySQLPreparedQuery_t &&qr
 	return *this;
 }
 
-void mySQLPreparedQuery_t::dtor() noexcept
-{
-	mysql_stmt_close(query);
-	query = nullptr;
-}
-
 bool mySQLPreparedQuery_t::execute() noexcept
 {
-	if (valid())
+	if (!executed && valid())
 	{
-		if (params.valid())
+		if (params)
 			mysql_stmt_bind_param(query, params.data());
 		executed = mysql_stmt_execute(query) == 0;
 	}
@@ -142,26 +144,24 @@ mySQLResult_t::~mySQLResult_t() noexcept { if (valid()) mysql_free_result(result
 mySQLResult_t &mySQLResult_t::operator =(mySQLResult_t &&res) noexcept { std::swap(result, res.result); return *this; }
 uint64_t mySQLResult_t::numRows() const noexcept { return valid() ? mysql_num_rows(result) : 0; }
 mySQLRow_t mySQLResult_t::resultRows() const noexcept { return valid() ? mySQLRow_t(result) : mySQLRow_t(); }
+mySQLRow_t::mySQLRow_t(MYSQL_RES *res) noexcept : result(res), row(nullptr), fields(0), rowLengths(nullptr) { fetch(); }
 
 // TODO: This is actually somewhat wrong as a nullptr result should (but doesn't) construct an invalid mySQLRow_t.
-mySQLRow_t::mySQLRow_t(MYSQL_RES *const res) noexcept : result(res), fields(res ? mysql_num_fields(res) : 0),
+/*mySQLRow_t::mySQLRow_t(MYSQL_RES *const res) noexcept : result(res), fields(res ? mysql_num_fields(res) : 0),
 	fieldTypes(new (std::nothrow) mySQLFieldType_t[fields]())
 {
 	if (result)
 		fetch();
-}
+}*/
 
-mySQLRow_t::mySQLRow_t(mySQLRow_t &&r) noexcept : result(r.result), fields(r.fields), fieldTypes(std::move(r.fieldTypes))
+mySQLRow_t::mySQLRow_t(mySQLRow_t &&r) noexcept : result(r.result), row(nullptr), fields(r.fields), rowLengths(nullptr), fieldTypes(std::move(r.fieldTypes))
 {
 	std::swap(row, r.row);
+	// set r.fields = 0?
 	std::swap(rowLengths, r.rowLengths);
 }
 
-mySQLRow_t::~mySQLRow_t() noexcept
-{
-	while (valid())
-		fetch();
-}
+mySQLRow_t::~mySQLRow_t() noexcept { while (row) fetch(); }
 
 void mySQLRow_t::fetch() noexcept
 {
