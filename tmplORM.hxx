@@ -80,12 +80,12 @@ namespace tmplORM
 
 		public:
 			constexpr type_t() noexcept : _value(), _modified(false) { }
-			constexpr type_t(const T &value) noexcept : _value(value), _modified(false) { }
+			constexpr type_t(const T value) noexcept : _value(value), _modified(false) { }
 
 			constexpr const char *fieldName() const noexcept { return _fieldName::data(); }
 			const T value() const noexcept { return _value; }
 			// Make the type behave like its' contained type..
-			operator T() const noexcept { return _value; }
+			operator const T() const noexcept { return _value; }
 			void operator =(const T &_value) noexcept { value(_value); }
 			bool modified() const noexcept { return _modified; }
 			constexpr static bool nullable = false;
@@ -109,7 +109,7 @@ namespace tmplORM
 			static_assert(isNumeric<type>::value, "Cannot create automatically incrementing field from non-numeric base type");
 			using T::operator =;
 			using T::value;
-			using T::operator type;
+			using T::operator const type;
 			using T::operator ==;
 			using T::operator !=;
 		};
@@ -120,7 +120,7 @@ namespace tmplORM
 			using type = typename T::type;
 			using T::operator =;
 			using T::value;
-			using T::operator type;
+			using T::operator const type;
 			using T::operator ==;
 			using T::operator !=;
 		};
@@ -131,7 +131,7 @@ namespace tmplORM
 			using type = typename T::type;
 			using T::operator =;
 			using T::value;
-			using T::operator type;
+			using T::operator const type;
 			using T::operator ==;
 			using T::operator !=;
 		};
@@ -149,6 +149,8 @@ namespace tmplORM
 
 		public:
 			using type = typename T::type;
+			using T::operator ==;
+			using T::operator !=;
 			constexpr static bool nullable = true;
 
 			constexpr nullable_t() noexcept : T(), _null(true) { }
