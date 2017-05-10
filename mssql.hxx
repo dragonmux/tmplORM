@@ -5,6 +5,9 @@
 #include <array>
 #include <memory>
 #include <utility>
+#include "fixedVector.hxx"
+#include "managedPtr.hxx"
+#include "tmplORM.hxx"
 
 namespace tmplORM
 {
@@ -15,6 +18,7 @@ namespace tmplORM
 using std::nullptr_t;
 using stringPtr_t = std::unique_ptr<const char []>;
 struct tSQLClient_t;
+using tmplORM::common::fieldLength_t;
 
 enum class tSQLExecErrorType_t : uint8_t
 {
@@ -138,7 +142,8 @@ private:
 	const tSQLClient_t *const client;
 	void *const queryHandle;
 	size_t numParams;
-	std::unique_ptr<long []> dataLengths;
+	fixedVector_t<managedPtr_t<void>> paramStorage;
+	fixedVector_t<long> dataLengths;
 	mutable bool executed;
 
 protected:
@@ -153,8 +158,8 @@ public:
 	tSQLQuery_t &operator =(tSQLQuery_t &&qry) noexcept;
 	bool valid() const noexcept { return queryHandle; }
 	tSQLResult_t execute() const noexcept;
-	template<typename T> void bind(const size_t index, const T &value) noexcept;
-	template<typename T> void bind(const size_t index, const nullptr_t) noexcept;
+	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept;
+	template<typename T> void bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept;
 
 	tSQLQuery_t(const tSQLQuery_t &) = delete;
 	tSQLQuery_t &operator =(const tSQLQuery_t &) = delete;

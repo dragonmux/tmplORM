@@ -167,7 +167,7 @@ bool tSQLClient_t::error(const tSQLExecErrorType_t err, const int16_t handleType
 }
 
 tSQLQuery_t::tSQLQuery_t(const tSQLClient_t *const parent, void *const handle, const char *const queryStmt, const size_t paramsCount) noexcept :
-	client(parent), queryHandle(handle), numParams(paramsCount), dataLengths(numParams ? makeUnique<long []>(numParams) : nullptr), executed(false)
+	client(parent), queryHandle(handle), numParams(paramsCount), paramStorage(paramsCount), dataLengths(paramsCount), executed(false)
 {
 	if (!queryHandle || (numParams && !dataLengths) || !client)
 		return;
@@ -186,6 +186,7 @@ tSQLQuery_t &tSQLQuery_t::operator =(tSQLQuery_t &&qry) noexcept
 	swap(client, qry.client);
 	swap(queryHandle, qry.queryHandle);
 	std::swap(numParams, qry.numParams);
+	std::swap(paramStorage, qry.paramStorage);
 	std::swap(dataLengths, qry.dataLengths);
 	std::swap(executed, qry.executed);
 	return *this;
