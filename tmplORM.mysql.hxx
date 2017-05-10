@@ -5,7 +5,6 @@
 #include <type_traits>
 #include <memory>
 #include "mysql.hxx"
-#include "managedPtr.hxx"
 
 namespace tmplORM
 {
@@ -150,6 +149,7 @@ namespace tmplORM
 			}
 		}
 
+		/*! @brief Adds backticks around a field or table name */
 		template<typename name> using backtick = tycat<ts("`"), name, ts("`")>;
 
 		// Formatting type for handling field names (to make lists from them)
@@ -203,7 +203,7 @@ namespace tmplORM
 			tycat<ts("DELETE FROM "), backtick<tableName>, updateWhere<fields...>, ts(";")>
 		>;
 		template<typename tableName> using deleteTable_ = toString<
-			tycat<ts("DROP TABLE IF NOT EXISTS "), backtick<tableName>, ts(";")>
+			tycat<ts("DROP TABLE IF EXISTS "), backtick<tableName>, ts(";")>
 		>;
 
 		struct session_t final
@@ -258,7 +258,7 @@ namespace tmplORM
 				return false;
 			}
 
-			template<typename tableName, typename... fields_t> bool update(model_t<tableName, fields_t...> &model)
+			template<typename tableName, typename... fields_t> bool update(const model_t<tableName, fields_t...> &model)
 			{
 				using update = update_<tableName, fields_t...>;
 				if (std::is_same<update, toString<typestring<>>>::value)
