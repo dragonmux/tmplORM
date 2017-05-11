@@ -406,6 +406,7 @@ namespace tmplORM
 			{ return value || bundle(values...); }
 
 		template<size_t N> struct comma_t { using value = ts(", "); };
+		/*! @brief Generates a comma (as necessary) to put after a field in a statement */
 		template<> struct comma_t<1> { using value = typestring<>; };
 		template<size_t N> using comma = typename comma_t<N>::value;
 
@@ -414,7 +415,9 @@ namespace tmplORM
 		template<bool isNull> using nullable = typename nullable__t<isNull>::value;
 
 		template<size_t N> struct placeholder_t { using value = tycat<typestring<'?'>, comma<N>, typename placeholder_t<N - 1>::value>; };
+		// Termination here is for 0 rather than 1 to protect us when there are no placeholders to generate
 		template<> struct placeholder_t<0> { using value = typestring<>; };
+		/*! @brief Generates a list of N prepared execution placeholders for a query statement */
 		template<size_t N> using placeholder = typename placeholder_t<N>::value;
 
 		template<size_t> struct and_t { using value = ts(" AND "); };
@@ -463,6 +466,7 @@ namespace tmplORM
 
 		template<typename fieldName, typename T> constexpr size_t countInsert_(const type_t<fieldName, T> &) noexcept { return 1; }
 		template<typename T> constexpr size_t countInsert_(const autoInc_t<T> &) noexcept { return 0; }
+		/*! @brief Counts how many fields are insertable for an INSERT query */
 		template<typename...> struct countInsert_t;
 		template<typename field, typename... fields> struct countInsert_t<field, fields...>
 			{ constexpr static const size_t count = countInsert_(field()) + countInsert_t<fields...>::count; };
@@ -470,6 +474,7 @@ namespace tmplORM
 
 		template<typename fieldName, typename T> constexpr size_t countUpdate_(const type_t<fieldName, T> &) noexcept { return 1; }
 		template<typename T> constexpr size_t countUpdate_(const primary_t<T> &) noexcept { return 0; }
+		/*! @brief Counts how many fields are updateable for an UPDATE query */
 		template<typename...> struct countUpdate_t;
 		template<typename field, typename... fields> struct countUpdate_t<field, fields...>
 			{ constexpr static const size_t count = countUpdate_(field()) + countUpdate_t<fields...>::count; };
@@ -512,6 +517,10 @@ namespace tmplORM
 			template<typename... models> bool createTable() { return collect(session.template createTable(models())...); }
 			template<typename model> fixedVector_t<model> select() { return session.template select<model>(model()); }
 			template<typename... models_t> bool add(models_t &...models) { return collect(session.template add(models)...); }
+			/*!
+			 * @brief Add model instances to the database
+			 * @param models The model instances to add
+			 */
 			template<typename... models_t> bool update(const models_t &...models) { return collect(session.template update(models)...); }
 			template<typename... models_t> bool del(const models_t &...models) { return collect(session.template del(models)...); }
 			template<typename... models> bool deleteTable() { return collect(session.template deleteTable(models())...); }

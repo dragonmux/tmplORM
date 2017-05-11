@@ -39,7 +39,7 @@ namespace tmplORM
 		template<> struct stringType_t<void *> { using value = ts("BLOB"); };
 		template<> struct stringType_t<ormDate_t> { using value = ts("DATE"); };
 		template<> struct stringType_t<ormDateTime_t> { using value = ts("DATETIME"); };
-		//template<> struct stringType_t<ormUUID_t> { using value = ts("VARCHAR(36)"); };
+		template<> struct stringType_t<ormUUID_t> { using value = ts("CHAR(32)"); };
 		template<typename T> using stringType = typename stringType_t<T>::value;
 
 		template<typename> struct bind_t { };
@@ -51,12 +51,12 @@ namespace tmplORM
 		template<> struct bind_t<bool> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_BIT; };
 		template<> struct bind_t<float> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_FLOAT; };
 		template<> struct bind_t<double> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_DOUBLE; };
-		template<> struct bind_t<char *> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_STRING; };
-		template<> struct bind_t<const char *> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_STRING; };
+		template<> struct bind_t<char *> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_VAR_STRING; };
+		template<> struct bind_t<const char *> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_VAR_STRING; };
 		template<> struct bind_t<void *> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_BLOB; };
 		template<> struct bind_t<ormDate_t> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_DATE; };
 		template<> struct bind_t<ormDateTime_t> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_DATETIME; };
-		//template<> struct bind_t<ormUUID_t> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_VARCHAR; };
+		template<> struct bind_t<ormUUID_t> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_STRING; };
 		template<> struct bind_t<nullptr_t> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_NULL; };
 		template<typename T, bool = isNumeric<T>::value> struct bindType_t : public bind_t<T> { };
 		template<typename T> struct bindType_t<T, true> : public bind_t<typename std::make_signed<T>::type> { };
