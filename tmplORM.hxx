@@ -84,6 +84,7 @@ namespace tmplORM
 
 			constexpr const char *fieldName() const noexcept { return _fieldName::data(); }
 			const T value() const noexcept { return _value; }
+ 			T value() noexcept { return _value; }
 			// Make the type behave like its' contained type..
 			operator const T() const noexcept { return _value; }
 			void operator =(const T &_value) noexcept { value(_value); }
@@ -131,7 +132,7 @@ namespace tmplORM
 			using type = typename T::type;
 			using T::operator =;
 			using T::value;
-			using T::operator const type;
+			operator const type() const noexcept { return value(); }
 			using T::operator ==;
 			using T::operator !=;
 		};
@@ -205,8 +206,8 @@ namespace tmplORM
 			using parentType_t::operator ==;
 			using parentType_t::operator !=;
 
-			operator type() noexcept { return const_cast<const type>(parentType_t::_value); }
-			void operator =(const type value) noexcept { *this = const_cast<const char *const>(value); }
+			operator type() const noexcept { return const_cast<const type>(parentType_t::_value); }
+			void operator =(type const value) noexcept { *this = const_cast<const char *const>(value); }
 			type value() noexcept { return *this; }
 			size_t length() const noexcept { return value() ? std::char_traits<char>::length(value()) : 0; }
 		};
@@ -227,7 +228,7 @@ namespace tmplORM
 			using parentType_t::operator !=;
 
 			void operator =(const std::int64_t &value) noexcept { parentType_t::value(std::int8_t(value)); }
-			void value(const std::int64_t &value) noexcept { parentType_t::value(std::int8_t(value)); }
+			void value(const std::int64_t &_value) noexcept { parentType_t::value(std::int8_t(_value)); }
 			type value() noexcept { return *this; }
 			const type value() const noexcept { return *this; }
 		};
@@ -255,10 +256,10 @@ namespace tmplORM
 
 			public:
 				constexpr _dateTime_t() noexcept : _year(0), _month(0), _day(0), _time() { }
-				_dateTime_t(const uint16_t year, const uint16_t month, const uint16_t day) noexcept :
-					_year(year), _month(month), _day(day), _time() { }
 				_dateTime_t(const uint16_t year, const uint16_t month, const uint16_t day, const duration_t &time) noexcept :
 					_year(year), _month(month), _day(day), _time(timePoint_t(time)) { }
+				_dateTime_t(const uint16_t year, const uint16_t month, const uint16_t day) noexcept :
+					_year(year), _month(month), _day(day), _time() { }
 				constexpr uint16_t year() const noexcept { return _year; }
 				constexpr uint16_t month() const noexcept { return _month; }
 				constexpr uint16_t day() const noexcept { return _day; }
