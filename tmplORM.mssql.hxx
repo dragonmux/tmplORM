@@ -29,8 +29,8 @@ namespace tmplORM
 		using tmplORM::types::unicodeText_t;
 
 		using tmplORM::types::primary_t;
-		using tmplORM::types::nullable_t;
 		using tmplORM::types::autoInc_t;
+		using tmplORM::types::nullable_t;
 
 		// If we don't know how to translate the type, don't.
 		template<typename> struct stringType_t { using value = typestring<>; };
@@ -54,32 +54,32 @@ namespace tmplORM
 
 		template<typename> struct bind_t { };
 		template<> struct bind_t<int8_t>
-			{ constexpr static const uint16_t typeC = SQL_C_STINYINT; constexpr static const int64_t typeODBC = SQL_TINYINT; };
+			{ constexpr static const int16_t typeC = SQL_C_STINYINT; constexpr static const int16_t typeODBC = SQL_TINYINT; };
 		template<> struct bind_t<int16_t>
-			{ constexpr static const uint16_t typeC = SQL_C_SSHORT; constexpr static const int64_t typeODBC = SQL_SMALLINT; };
+			{ constexpr static const int16_t typeC = SQL_C_SSHORT; constexpr static const int16_t typeODBC = SQL_SMALLINT; };
 		template<> struct bind_t<int32_t>
-			{ constexpr static const uint16_t typeC = SQL_C_SLONG; constexpr static const int64_t typeODBC = SQL_INTEGER; };
-		template<> struct bind_t<int64_t>
-			{ constexpr static const uint16_t typeC = SQL_C_SBIGINT; constexpr static const int64_t typeODBC = SQL_BIGINT; };
+			{ constexpr static const int16_t typeC = SQL_C_SLONG; constexpr static const int16_t typeODBC = SQL_INTEGER; };
+		template<> struct bind_t<int16_t>
+			{ constexpr static const int16_t typeC = SQL_C_SBIGINT; constexpr static const int16_t typeODBC = SQL_BIGINT; };
 		//
 		template<> struct bind_t<bool>
-			{ constexpr static const uint16_t typeC = SQL_C_BIT; constexpr static const int64_t typeODBC = SQL_BIT; };
+			{ constexpr static const int16_t typeC = SQL_C_BIT; constexpr static const int16_t typeODBC = SQL_BIT; };
 		template<> struct bind_t<float>
-			{ constexpr static const uint16_t typeC = SQL_C_FLOAT; constexpr static const int64_t typeODBC = SQL_REAL; };
+			{ constexpr static const int16_t typeC = SQL_C_FLOAT; constexpr static const int16_t typeODBC = SQL_REAL; };
 		template<> struct bind_t<double>
-			{ constexpr static const uint16_t typeC = SQL_C_DOUBLE; constexpr static const int64_t typeODBC = SQL_FLOAT; };
+			{ constexpr static const int16_t typeC = SQL_C_DOUBLE; constexpr static const int16_t typeODBC = SQL_FLOAT; };
 		template<> struct bind_t<char *>
-			{ constexpr static const uint16_t typeC = SQL_C_CHAR; constexpr static const int64_t typeODBC = SQL_VARCHAR; };
+			{ constexpr static const int16_t typeC = SQL_C_CHAR; constexpr static const int16_t typeODBC = SQL_VARCHAR; };
 		template<> struct bind_t<const char *>
-			{ constexpr static const uint16_t typeC = SQL_C_CHAR; constexpr static const int64_t typeODBC = SQL_VARCHAR; };
+			{ constexpr static const int16_t typeC = SQL_C_CHAR; constexpr static const int16_t typeODBC = SQL_VARCHAR; };
 		template<> struct bind_t<ormDate_t>
-			{ constexpr static const uint16_t typeC = SQL_C_DATE; constexpr static const int64_t typeODBC = SQL_DATE; };
+			{ constexpr static const int16_t typeC = SQL_C_DATE; constexpr static const int16_t typeODBC = SQL_DATE; };
 		template<> struct bind_t<ormDateTime_t>
-			{ constexpr static const uint16_t typeC = SQL_C_TIMESTAMP; constexpr static const int64_t typeODBC = SQL_DATETIME; };
+			{ constexpr static const int16_t typeC = SQL_C_TIMESTAMP; constexpr static const int16_t typeODBC = SQL_DATETIME; };
 		template<> struct bind_t<ormUUID_t>
-			{ constexpr static const uint16_t typeC = SQL_C_GUID; constexpr static const int64_t typeODBC = SQL_GUID; };
+			{ constexpr static const int16_t typeC = SQL_C_GUID; constexpr static const int16_t typeODBC = SQL_GUID; };
 		/*template<> struct bind_t<nullptr_t>
-			{ constexpr static const uint16_t typeC = SQL_C_DEFAULT; constexpr static const int64_t typeODBC = SQL_TYPE_NULL; };*/
+			{ constexpr static const uint16_t typeC = SQL_C_DEFAULT; constexpr static const int16_t typeODBC = SQL_TYPE_NULL; };*/
 
 		namespace driver
 		{
@@ -112,7 +112,7 @@ namespace tmplORM
 					dateTime.hour = value.hour();
 					dateTime.minute = value.minute();
 					dateTime.second = value.second();
-					//dateTime.fraction = value.nanoSeconds() / std::chrono::duration_cast<nanoseconds_t>(1_us).count();
+					//dateTime.fraction = value.nanoSecond() / std::chrono::duration_cast<nanoseconds_t>(1_us).count();
 
 					paramStorage = makeManaged<SQL_TIMESTAMP_STRUCT>(dateTime);
 					return paramStorage.get();
@@ -163,8 +163,10 @@ namespace tmplORM
 			}
 		}
 
+		/*! @brief Adds brackets around a field or table name */
 		template<typename name> using bracket = tycat<ts("["), name, ts("]")>;
 
+		// Formatting type for handling field names (to make lists from them)
 		template<size_t, typename> struct fieldName_t { };
 		template<size_t N, typename fieldName, typename T> struct fieldName_t<N, type_t<fieldName, T>>
 			{ using value = tycat<bracket<fieldName>, comma<N>>; };
@@ -219,7 +221,7 @@ namespace tmplORM
 		template<typename... fields> using outputInsert = typename outputInsert_t<hasAutoInc<fields...>(), fields...>::value;
 
 		template<typename tableName, typename... fields> using createTable_ = toString<
-			tycat<ts("CREATE TABLE "), bracket<tableName>, ts(" ("), createList<fields...>, ts(") COLATE latin1_general_100_CI_AI_SC;")>
++			tycat<ts("CREATE TABLE "), bracket<tableName>, ts(" ("), createList<fields...>, ts(") COLLATE latin1_general_100_CI_AI_SC;")>
 		>;
 		template<typename tableName, typename... fields> using select_ = toString<
 			tycat<ts("SELECT "), selectList<fields...>, ts(" FROM "), bracket<tableName>, ts(";")>
@@ -227,7 +229,7 @@ namespace tmplORM
 		template<typename tableName, typename... fields> using add_ = toString<
 			tycat<ts("INSERT INTO "), bracket<tableName>, ts(" ("), insertList<fields...>, ts(")"), outputInsert<fields...>, ts(" VALUES ("), placeholder<countInsert_t<fields...>::count>, ts(");")>
 		>;
-		// This constructs invalid if there is no field marked primary_t<>! Tihs is quite intentional.
+		// This constructs invalid if there is no field marked primary_t<>! This is quite intentional.
 		template<typename tableName, typename... fields> struct update_t<false, tableName, fields...>
 			{ using value = tycat<ts("UPDATE "), bracket<tableName>, ts(" SET "), updateList<fields...>, updateWhere<fields...>, ts(";")>; };
 		template<typename tableName, typename... fields> using del_ = toString<
@@ -300,6 +302,7 @@ namespace tmplORM
 			{
 				using del = del_<tableName, fields_t...>;
 				tSQLQuery_t query(database.prepare(del::value, countPrimary<fields_t...>::count));
+				// This binds the primary key fields only, in the order they're given in the WHERE clause for this query.
 				bindDelete<fields_t...>::bind(model.fields(), query);
 				// This either works or doesn't.. thankfully.. so, we can just execute-and-quit.
 				return query.execute().valid();
