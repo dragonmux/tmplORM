@@ -20,7 +20,7 @@ using namespace tmplORM::mysql::driver;
  * @typedef mySQLFieldType_t
  * @brief Type representing MySQL field types
  * @enum mySQLErrorType_t
- * @brief Defines the possible error types that can occur in mySQLValue_t convesions
+ * @brief Defines the possible error types that can occur in mySQLValue_t conversions
  * @var mySQLErrorType_t::stringError
  * @brief Error converting a value to a string
  * @var mySQLErrorType_t::boolError
@@ -39,7 +39,7 @@ using namespace tmplORM::mysql::driver;
 MYSQL *mySQLClient_t::con = nullptr;
 /*! @brief Counter for the number of handles in existance to the master container */
 uint32_t mySQLClient_t::handles = 0;
-/*! @brief Variable that defines if MySQLClient_t::con actually refers to a valid, connected, connection */
+/*! @brief Variable that defines if mySQLClient_t::con actually refers to a valid, connected, connection */
 bool mySQLClient_t::haveConnection = false;
 
 /*! @brief Constant used for telling MySQL Client that we really want it to auto-reconnect */
@@ -199,7 +199,7 @@ mySQLPreparedQuery_t::mySQLPreparedQuery_t(MYSQL *const con, const char *const q
 
 /*!
  * @brief Move constructor for the context of a MySQL prepared query
- * @param qry The original prepared who's context we will make our own in trade
+ * @param qry The original prepared query who's context we will make our own in trade
  */
 mySQLPreparedQuery_t::mySQLPreparedQuery_t(mySQLPreparedQuery_t &&qry) noexcept : mySQLPreparedQuery_t() { *this = std::move(qry); }
 
@@ -260,7 +260,7 @@ mySQLResult_t::mySQLResult_t(mySQLResult_t &&res) noexcept : mySQLResult_t() { s
 /*!
  * @internal
  * @var mySQLResult_t::result
- * @brief The MYSQL_RES result pointer for this object (or nullptr if invalid)
+ * @brief The MYSQL_RES result pointer for this result object (or nullptr if invalid)
  */
 
 /*! @brief Destructor for MySQL result objects */
@@ -281,10 +281,7 @@ mySQLRow_t mySQLResult_t::resultRows() const noexcept { return valid() ? mySQLRo
  */
 mySQLRow_t::mySQLRow_t(MYSQL_RES *res) noexcept : result(res), row(nullptr), fields(0), rowLengths(nullptr) { fetch(); }
 
-/*!
- * @brief Destroys a result rows object, ensuring that no rows are left to fetch
- * @note This may not actually be required - maybe we can get away with invalidating the result set rather than expensively processing our way through any remaining rows?
- */
+/*! @brief Move constructs a result rows object for a MySQL query */
 mySQLRow_t::mySQLRow_t(mySQLRow_t &&r) noexcept : result(r.result), row(nullptr), fields(r.fields), rowLengths(nullptr), fieldTypes(std::move(r.fieldTypes))
 {
 	std::swap(row, r.row);
@@ -321,8 +318,13 @@ void mySQLRow_t::fetch() noexcept
 	}
 }
 
+/*! @brief MySQL row objects can be any number of fields wide, so this allows you to know how many are represented in this result rows object */
 uint32_t mySQLRow_t::numFields() const noexcept { return valid() ? fields : 0; }
 
+/*!
+ * @brief Fetches the next row if possible
+ * @returns true if the next row was successfully fetched, false for all errors
+ */
 bool mySQLRow_t::next() noexcept
 {
 	if (valid())
@@ -330,6 +332,12 @@ bool mySQLRow_t::next() noexcept
 	return row;
 }
 
+/*!
+ * @brief Assuming a valid field index (0-based), returns the value of that field for the current row
+ * @param idx The desired row index
+ * @result a null mySQLValue_t if the index was out of range or row was invalid, else the value of the field for the current row
+ * @note Use numFields() to determine how many fields there are to ensure your indexing is correct
+ */
 mySQLValue_t mySQLRow_t::operator [](const uint32_t idx) const noexcept
 {
 	if (!valid() || idx >= fields)
@@ -337,11 +345,21 @@ mySQLValue_t mySQLRow_t::operator [](const uint32_t idx) const noexcept
 	return mySQLValue_t(row[idx], rowLengths[idx], fieldTypes[idx]);
 }
 
+/*! @internal @brief Returns a boolean indicating if the given character is a number of not */
 inline bool isNumber(const char x) noexcept { return x >= '0' && x <= '9'; }
+/*! @internal @brief Returns a boolean indicating if the given character is a '-' or not */
 inline bool isMinus(const char x) noexcept { return x == '-'; }
 
+/*!
+ * @internal
+ * @brief Constructor for representing the value of a field in a result row
+ * @param \_data The data to wrap for auto-conversion
+ * @param \_len The length of the data to wrap
+ * @param \_type The type of the data as a MYSQL_TYPE_* value
+ */
 mySQLValue_t::mySQLValue_t(const char *const _data, const uint64_t _len, const mySQLFieldType_t _type) noexcept :
 	data(_data), len(_len), type(_type) { }
+/*! @internal @brief Returns a boolean indicating if the value contained represents nullptr or not */
 bool mySQLValue_t::isNull() const noexcept { return !data || type == MYSQL_TYPE_NULL; }
 
 void mySQLValue_t::swap(mySQLValue_t &value) noexcept
@@ -351,6 +369,9 @@ void mySQLValue_t::swap(mySQLValue_t &value) noexcept
 	std::swap(type, value.type);
 }
 
+/*!
+ * @throws mySQLValueError_t
+ */
 std::unique_ptr<char []> mySQLValue_t::asString() const
 {
 	if (isNull())
@@ -367,6 +388,9 @@ std::unique_ptr<char []> mySQLValue_t::asString() const
 	return str;
 }
 
+/*!
+ * @throws mySQLValueError_t
+ */
 bool mySQLValue_t::asBool(const uint8_t bit) const
 {
 	if (isNull() || type != MYSQL_TYPE_BIT || bit >= 64)
@@ -402,6 +426,9 @@ template<typename T, mySQLErrorType_t errorType> valueOrError_t<T, mySQLValueErr
 	return T(num);
 }
 
+/*!
+ * @throws mySQLValueError_t
+ */
 uint8_t mySQLValue_t::asUint8() const
 {
 	if (isNull() || type != MYSQL_TYPE_TINY)
@@ -412,6 +439,9 @@ uint8_t mySQLValue_t::asUint8() const
 	return num;
 }
 
+/*!
+ * @throws mySQLValueError_t
+ */
 int8_t mySQLValue_t::asInt8() const
 {
 	if (isNull() || type != MYSQL_TYPE_TINY)
@@ -422,6 +452,9 @@ int8_t mySQLValue_t::asInt8() const
 	return num;
 }
 
+/*!
+ * @throws mySQLValueError_t
+ */
 uint16_t mySQLValue_t::asUint16() const
 {
 	if (isNull() || type != MYSQL_TYPE_SHORT)
@@ -432,6 +465,9 @@ uint16_t mySQLValue_t::asUint16() const
 	return num;
 }
 
+/*!
+ * @throws mySQLValueError_t
+ */
 int16_t mySQLValue_t::asInt16() const
 {
 	if (isNull() || type != MYSQL_TYPE_SHORT)
@@ -442,6 +478,9 @@ int16_t mySQLValue_t::asInt16() const
 	return num;
 }
 
+/*!
+ * @throws mySQLValueError_t
+ */
 uint32_t mySQLValue_t::asUint32() const
 {
 	if (isNull() || type != MYSQL_TYPE_LONG)
@@ -452,6 +491,9 @@ uint32_t mySQLValue_t::asUint32() const
 	return num;
 }
 
+/*!
+ * @throws mySQLValueError_t
+ */
 int32_t mySQLValue_t::asInt32() const
 {
 	if (isNull() || type != MYSQL_TYPE_LONG)
@@ -462,6 +504,9 @@ int32_t mySQLValue_t::asInt32() const
 	return num;
 }
 
+/*!
+ * @throws mySQLValueError_t
+ */
 uint64_t mySQLValue_t::asUint64() const
 {
 	if (isNull() || type != MYSQL_TYPE_LONGLONG)
@@ -472,6 +517,9 @@ uint64_t mySQLValue_t::asUint64() const
 	return num;
 }
 
+/*!
+ * @throws mySQLValueError_t
+ */
 int64_t mySQLValue_t::asInt64() const
 {
 	if (isNull() || type != MYSQL_TYPE_LONGLONG)
