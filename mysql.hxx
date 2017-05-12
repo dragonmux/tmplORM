@@ -8,6 +8,13 @@
 #include "managedPtr.hxx"
 #include "tmplORM.hxx"
 
+/*!
+ * @file
+ * @author Rachel Mant
+ * @date 2016-2017
+ * @brief Defines the interface to the MySQL abstraction layer
+ */
+
 namespace tmplORM
 {
 	namespace mysql
@@ -28,8 +35,9 @@ private:
 	mySQLFieldType_t type;
 
 public:
+	/*! @brief Default constructor for value objects, constructing the null value by default */
 	constexpr mySQLValue_t() noexcept : data(nullptr), len(0), type(MYSQL_TYPE_NULL) { }
-	mySQLValue_t(const char *const data, const uint64_t len, const mySQLFieldType_t type) noexcept;
+	mySQLValue_t(const char *const _data, const uint64_t _len, const mySQLFieldType_t _type) noexcept;
 	mySQLValue_t(mySQLValue_t &&value) noexcept : mySQLValue_t() { swap(value); }
 	~mySQLValue_t() noexcept { }
 	void operator =(mySQLValue_t &&value) noexcept { swap(value); }
@@ -47,19 +55,32 @@ public:
 	uint64_t asUint64() const;
 	int64_t asInt64() const;
 
+	/*! @brief Auto-converter for strings */
 	operator std::unique_ptr<char []>() const { return asString(); }
+	/*! @brief Auto-converter for raw strings */
 	operator const char *() const { return data; }
+	/*! @brief Auto-converter for booleans */
 	explicit operator bool() const { return asBool(0); }
+	/*! @brief Auto-converter for uint8_t's */
 	operator uint8_t() const { return asUint8(); }
+	/*! @brief Auto-converter for int8_t's */
 	operator int8_t() const { return asInt8(); }
+	/*! @brief Auto-converter for uint16_t's */
 	operator uint16_t() const { return asUint16(); }
+	/*! @brief Auto-converter for int16_t's */
 	operator int16_t() const { return asInt16(); }
+	/*! @brief Auto-converter for uint32_t's */
 	operator uint32_t() const { return asUint32(); }
+	/*! @brief Auto-converter for int32_t's */
 	operator int32_t() const { return asInt32(); }
+	/*! @brief Auto-converter for uint64_t's */
 	operator uint64_t() const { return asUint64(); }
+	/*! @brief Auto-converter for int64_t's */
 	operator int64_t() const { return asInt64(); }
 
+	/*! @brief Deleted copy constructor for mySQLValue_t as wrapped values are not copyable */
 	mySQLValue_t(const mySQLValue_t &) = delete;
+	/*! @brief Deleted copy assignment operator for mySQLValue_t as wrapped values are not copyable */
 	mySQLValue_t &operator =(const mySQLValue_t &) = delete;
 };
 
@@ -80,16 +101,22 @@ private:
 	friend struct mySQLResult_t;
 
 public:
+	/*! @brief Default constructor for row objects, constructing invalid row objects by default */
 	mySQLRow_t() noexcept : result(nullptr), row(nullptr), fields(0), rowLengths(nullptr), fieldTypes() { }
-	mySQLRow_t(mySQLRow_t &&r) noexcept;
+	mySQLRow_t(mySQLRow_t &&row) noexcept;
 	~mySQLRow_t() noexcept;
-
+	/*!
+	 * @brief Call to determine if this result object is valid
+	 * @returns true if the object is valid, false otherwise
+	 */
 	bool valid() const noexcept { return row && rowLengths && fieldTypes; }
 	uint32_t numFields() const noexcept;
 	bool next() noexcept;
 	mySQLValue_t operator [](const uint32_t idx) const noexcept;
 
+	/*! @brief Deleted copy constructor for mySQLRow_t as rows are not copyable */
 	mySQLRow_t(const mySQLRow_t &) = delete;
+	/*! @brief Deleted copy assignment operator for mySQLRow_t as rows are not copyable */
 	mySQLRow_t &operator =(const mySQLRow_t &) = delete;
 };
 
@@ -103,16 +130,22 @@ protected:
 	friend struct mySQLClient_t;
 
 public:
+	/*! @brief Default constructor for result objects, constructing invalid result objects by default */
 	constexpr mySQLResult_t() noexcept : result(nullptr) { }
 	mySQLResult_t(mySQLResult_t &&res) noexcept;
 	~mySQLResult_t() noexcept;
 	mySQLResult_t &operator =(mySQLResult_t &&res) noexcept;
-
+	/*!
+	 * @brief Call to determine if this prepared query object is valid
+	 * @returns true if the object is valid, false otherwise
+	 */
 	bool valid() const noexcept { return result; }
 	uint64_t numRows() const noexcept;
 	mySQLRow_t resultRows() const noexcept;
 
+	/*! @brief Deleted copy constructor for mySQLResult_t as results are not copyable */
 	mySQLResult_t(const mySQLResult_t &) = delete;
+	/*! @brief Deleted copy assignment operator for mySQLResult_t as results are not copyable */
 	mySQLResult_t &operator =(const mySQLResult_t &) = delete;
 };
 
@@ -132,18 +165,24 @@ protected:
 	friend struct mySQLClient_t;
 
 public:
-	mySQLPreparedQuery_t() noexcept : query(nullptr), params(), numParams(0), executed(false) { }
+	/*! @brief Default constructor for prepared query objects, constructing an invalid query by default */
+	mySQLPreparedQuery_t() noexcept : query(nullptr), params(), paramStorage(), numParams(0), executed(false) { }
 	mySQLPreparedQuery_t(mySQLPreparedQuery_t &&qry) noexcept;
 	~mySQLPreparedQuery_t() noexcept;
 	mySQLPreparedQuery_t &operator =(mySQLPreparedQuery_t &&qry) noexcept;
-
+	/*!
+	 * @brief Call to determine if this row object is valid
+	 * @returns true if the object is valid, false otherwise
+	 */
 	bool valid() const noexcept { return query; }
 	bool execute() noexcept;
 	uint64_t rowID() const noexcept;
 	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept;
 	template<typename T> void bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept;
 
+	/*! @brief Deleted copy constructor for mySQLPreparedQuery_t as prepared queries are not copyable */
 	mySQLPreparedQuery_t(const mySQLPreparedQuery_t &) = delete;
+	/*! @brief Deleted copy assignment operator for mySQLPreparedQuery_t as prepared queries are not copyable */
 	mySQLPreparedQuery_t &operator =(const mySQLPreparedQuery_t &) = delete;
 };
 
@@ -159,7 +198,10 @@ public:
 	mySQLClient_t(const mySQLClient_t &) noexcept;
 	~mySQLClient_t() noexcept;
 	mySQLClient_t &operator =(const mySQLClient_t &) noexcept;
-
+	/*!
+	 * @brief Call to determine if this client connection container is valid
+	 * @returns true if the object is valid, false otherwise
+	 */
 	bool valid() const noexcept { return con && haveConnection; }
 	bool connect(const char *const host, const uint32_t port, const char *const user, const char *const passwd) const noexcept;
 	bool connect(const char *const unixSocket, const char *const user, const char *const passwd) const noexcept;
@@ -171,7 +213,9 @@ public:
 	uint32_t errorNum() const noexcept;
 	const char *error() const noexcept;
 
+	/*! @brief Deleted move constructor for mySQLClient_t as client connections are not movable */
 	mySQLClient_t(mySQLClient_t &&) = delete;
+	/*! @brief Deleted move assignment operator for mySQLClient_t as client connections are not movable */
 	mySQLClient_t &operator =(mySQLClient_t &&) = delete;
 };
 
