@@ -16,8 +16,8 @@ struct utf16_t final
 private:
 	std::unique_ptr<char16_t []> str;
 	utf16_t() noexcept : str() { }
-	utf16_t(const utf16_t &) = delete;
-	utf16_t &operator =(const utf16_t &) = delete;
+	/*utf16_t(const utf16_t &) = delete;
+	utf16_t &operator =(const utf16_t &) = delete;*/
 
 public:
 	utf16_t(const std::nullptr_t) noexcept : str() { }
