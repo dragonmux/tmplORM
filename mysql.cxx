@@ -399,6 +399,13 @@ bool mySQLValue_t::asBool(const uint8_t bit) const
 	return byte & (1 << (bit & 7));
 }
 
+/*!
+ * @internal
+ * @brief Performs a checked string to integer conversion - that is, any issues are checked for and the errorType returned.
+ * @param data The string to convert
+ * @param len The length of the string to convert
+ * @returns The converted integer, or errorType on error.
+ */
 template<typename T, mySQLErrorType_t errorType> valueOrError_t<T, mySQLValueError_t> checkedConvertInt(const char *const data, const uint64_t len) noexcept
 {
 	using U = typename std::make_unsigned<T>::type;
@@ -543,19 +550,19 @@ const char *mySQLValueError_t::error() const noexcept
 		case mySQLErrorType_t::boolError:
 			return "Error converting value to a boolean";
 		case mySQLErrorType_t::uint8Error:
-			return "Error converting value to a unsigned 8-bit integer";
+			return "Error converting value to an unsigned 8-bit integer";
 		case mySQLErrorType_t::int8Error:
 			return "Error converting value to a signed 8-bit integer";
 		case mySQLErrorType_t::uint16Error:
-			return "Error converting value to a unsigned 16-bit integer";
+			return "Error converting value to an unsigned 16-bit integer";
 		case mySQLErrorType_t::int16Error:
 			return "Error converting value to a signed 16-bit integer";
 		case mySQLErrorType_t::uint32Error:
-			return "Error converting value to a unsigned 32-bit integer";
+			return "Error converting value to an unsigned 32-bit integer";
 		case mySQLErrorType_t::int32Error:
 			return "Error converting value to a signed 32-bit integer";
 		case mySQLErrorType_t::uint64Error:
-			return "Error converting value to a unsigned 64-bit integer";
+			return "Error converting value to an unsigned 64-bit integer";
 		case mySQLErrorType_t::int64Error:
 			return "Error converting value to a signed 64-bit integer";
 	}
