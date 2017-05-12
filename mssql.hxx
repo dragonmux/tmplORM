@@ -9,6 +9,13 @@
 #include "managedPtr.hxx"
 #include "tmplORM.hxx"
 
+/*!
+ * @file
+ * @author Rachel Mant
+ * @date 2016-2017
+ * @brief Defines the interface to the MSSQL (Transact-SQL) abstraction layer
+ */
+
 namespace tmplORM
 {
 	namespace mssql
@@ -42,7 +49,7 @@ public:
 	tSQLExecError_t() noexcept : _error(tSQLExecErrorType_t::ok), _state{{}}, _message() { }
 	tSQLExecError_t(const tSQLExecErrorType_t error, const int16_t handleType, void *const handle) noexcept;
 	tSQLExecError_t(tSQLExecError_t &&err) noexcept : tSQLExecError_t() { *this = std::move(err); }
-	~tSQLExecError_t() { }
+	~tSQLExecError_t() noexcept { }
 	tSQLExecError_t &operator =(tSQLExecError_t &&err) noexcept;
 
 	const char *error() const noexcept;
@@ -67,6 +74,7 @@ private:
 	const int16_t type;
 
 public:
+	/*! @brief Default constructor for value objects, constructing the null value by default */
 	tSQLValue_t() noexcept : data(), length(0), type(0) { }
 	tSQLValue_t(const void *const _data, const uint64_t _length, const int16_t _type) noexcept;
 	tSQLValue_t(tSQLValue_t &&value) noexcept : tSQLValue_t() { *this = std::move(value); }
@@ -75,6 +83,7 @@ public:
 
 	bool isNull() const noexcept { return !data; }
 	std::unique_ptr<char []> asString(const bool release = true) const;
+	/*! @brief Converter for arbitrary binary buffers */
 	const void *asBuffer(size_t &bufferLength, const bool release = false) const;
 	bool asBool() const;
 	uint8_t asUint8() const;
@@ -89,21 +98,38 @@ public:
 	ormDateTime_t asDateTime() const;
 	ormUUID_t asUUID() const;
 
+	/*! @brief Auto-converter for strings */
 	operator std::unique_ptr<char []>() const { return asString(); }
-	operator const char *() const { return data.get(); }
+	/*! @brief Auto-converter to raw buffer */
+	operator const char *() const noexcept { return data.get(); }
+	/*! @brief Auto-converter for booleans */
 	operator bool() const { return asBool(); }
-	operator int8_t() const { return asInt8(); }
+	/*! @brief Auto-converter for uint8_t's */
 	operator uint8_t() const { return asUint8(); }
-	operator int16_t() const { return asInt16(); }
+	/*! @brief Auto-converter for int8_t's */
+	operator int8_t() const { return asInt8(); }
+	/*! @brief Auto-converter for uint16_t's */
 	operator uint16_t() const { return asUint16(); }
-	operator int32_t() const { return asInt32(); }
+	/*! @brief Auto-converter for int16_t's */
+	operator int16_t() const { return asInt16(); }
+	/*! @brief Auto-converter for uint32_t's */
 	operator uint32_t() const { return asUint32(); }
-	operator int64_t() const { return asInt64(); }
+	/*! @brief Auto-converter for int32_t's */
+	operator int32_t() const { return asInt32(); }
+	/*! @brief Auto-converter for uint64_t's */
 	operator uint64_t() const { return asUint64(); }
-	// operator () const { return asDate(); }
-	// operator () const { return asDateTime(); }
+	/*! @brief Auto-converter for int64_t's */
+	operator int64_t() const { return asInt64(); }
+	/*! @brief Auto-converter for dates */
+	operator ormDate_t() const { return asDate(); }
+	/*! @brief Auto-converter for date-times */
+	operator ormDateTime_t() const { return asDateTime(); }
+	/*! @brief Auto-converter for UUIDs */
+	operator ormUUID_t() const { return asUUID(); }
 
+	/*! @brief Deleted copy constructor for tSQLValue_t as wrapped values are not copyable */
 	tSQLValue_t(const tSQLValue_t &) = delete;
+	/*! @brief Deleted copy assignment operator for tSQLValue_t as wrapped values are not copyable */
 	tSQLValue_t &operator =(const tSQLValue_t &) = delete;
 };
 
@@ -123,10 +149,15 @@ protected:
 	friend struct tSQLQuery_t;
 
 public:
+	/*! @brief Default constructor for result objects, constructing invalid result objects by default */
 	tSQLResult_t() noexcept : client(nullptr), queryHandle(nullptr), _hasData(false), _freeHandle(true), fields(0), fieldInfo() { }
-	tSQLResult_t(tSQLResult_t &&row) noexcept : tSQLResult_t() { *this = std::move(row); }
+	tSQLResult_t(tSQLResult_t &&res) noexcept : tSQLResult_t() { *this = std::move(res); }
 	~tSQLResult_t() noexcept;
-	tSQLResult_t &operator =(tSQLResult_t &&row) noexcept;
+	tSQLResult_t &operator =(tSQLResult_t &&res) noexcept;
+	/*!
+	 * @brief Call to determine if this result object is valid
+	 * @returns true if the object is valid, false otherwise
+	 */
 	bool valid() const noexcept { return client && queryHandle && (fields == 0 || (fieldInfo && _hasData)); }
 	bool hasData() const noexcept { return _hasData; }
 	uint64_t numRows() const noexcept;
@@ -134,7 +165,9 @@ public:
 	bool next() const noexcept;
 	tSQLValue_t operator [](const uint16_t idx) const noexcept;
 
+	/*! @brief Deleted copy constructor for tSQLResult_t as results are not copyable */
 	tSQLResult_t(const tSQLResult_t &) = delete;
+	/*! @brief Deleted copy assignment operator for tSQLResult_t as results are not copyable */
 	tSQLResult_t &operator =(const tSQLResult_t &) = delete;
 };
 
@@ -154,16 +187,23 @@ protected:
 	friend struct tSQLClient_t;
 
 public:
-	tSQLQuery_t() noexcept : client(nullptr), queryHandle(nullptr), numParams(0), dataLengths(), executed(true) { }
+	/*! @brief Default constructor for prepared query objects, constructing an invalid query by default */
+	tSQLQuery_t() noexcept : client(nullptr), queryHandle(nullptr), numParams(0), dataLengths(), executed(false) { }
 	tSQLQuery_t(tSQLQuery_t &&qry) noexcept : tSQLQuery_t() { *this = std::move(qry); }
 	~tSQLQuery_t() noexcept;
 	tSQLQuery_t &operator =(tSQLQuery_t &&qry) noexcept;
+	/*!
+	 * @brief Call to determine if this prepared query object is valid
+	 * @returns true if the object is valid, false otherwise
+	 */
 	bool valid() const noexcept { return queryHandle; }
 	tSQLResult_t execute() const noexcept;
 	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept;
 	template<typename T> void bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept;
 
+	/*! @brief Deleted copy constructor for tSQLQuery_t as prepared queries are not copyable */
 	tSQLQuery_t(const tSQLQuery_t &) = delete;
+	/*! @brief Deleted copy assignment operator for tSQLQuery_t as prepared queries are not copyable */
 	tSQLQuery_t &operator =(const tSQLQuery_t &) = delete;
 };
 
@@ -186,11 +226,13 @@ protected:
 
 public:
 	tSQLClient_t() noexcept;
-	tSQLClient_t(tSQLClient_t &&con) noexcept : dbHandle(nullptr), connection(nullptr), haveConnection(false), needsCommit(false), _error()
-		{ *this = std::move(con); }
+	tSQLClient_t(tSQLClient_t &&con) noexcept;
 	~tSQLClient_t() noexcept;
 	tSQLClient_t &operator =(tSQLClient_t &&con) noexcept;
-
+	/*!
+	 * @brief Call to determine if this client connection container is valid
+	 * @returns true if the object is valid, false otherwise
+	 */
 	bool valid() const noexcept { return dbHandle && connection && haveConnection; }
 	bool connect(const char *const driver, const char *const host, const uint32_t port, const char *const user, const char *const passwd) const noexcept;
 	void disconnect() const noexcept;
@@ -203,7 +245,9 @@ public:
 	tSQLQuery_t prepare(const char *const queryStmt, const size_t paramsCount) const noexcept;
 	const tSQLExecError_t &error() const noexcept { return _error; }
 
+	/*! @brief Deleted copy constructor for tSQLClient_t as client connections are not copyable */
 	tSQLClient_t(const tSQLClient_t &) = delete;
+	/*! @brief Deleted copy assignment operator for tSQLClient_t as client connections are not copyable */
 	tSQLClient_t &operator =(const tSQLClient_t &) = delete;
 };
 
@@ -227,10 +271,11 @@ private:
 public:
 	constexpr tSQLValueError_t() noexcept : errorType(tSQLErrorType_t::noError) { }
 	constexpr tSQLValueError_t(const tSQLErrorType_t type) noexcept : errorType(type) { }
-	//tSQLValueError_t(tSQLValueError_t &&err) noexcept : tSQLValueError_t() { *this = std::move(err); }
 	~tSQLValueError_t() noexcept { }
-	//tSQLValueError_t &operator =(tSQLValueError_t &&err) const noexcept;
 	const char *error() const noexcept;
+
+	bool operator ==(const tSQLValueError_t &error) const noexcept { return errorType == error.errorType; }
+	bool operator !=(const tSQLValueError_t &error) const noexcept { return errorType != error.errorType; }
 };
 		}
 	}
