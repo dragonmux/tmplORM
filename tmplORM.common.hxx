@@ -157,6 +157,26 @@ inline namespace common
 		{ template<typename query_t> static void bind(const std::tuple<fields...> &, query_t &) noexcept { } };
 	template<typename... fields> using bindInsert = bindInsert_t<sizeof...(fields) - 1, countInsert_t<fields...>::count, fields...>;
 
+	template<size_t index, typename... fields_t> struct bindInsertAll_t
+	{
+		template<typename fieldName, typename T, typename field_t, typename query_t>
+			static void bindField(const type_t<fieldName, T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
+		{
+			bindInsertAll_t<index - 1, fields_t...>::bind(fields, query);
+			bindField_t<index, field_t>::bind(field, query);
+		}
+
+		template<typename query_t> static void bind(const std::tuple<fields_t...> &fields, query_t &query) noexcept
+		{
+			const auto &field = std::get<index>(fields);
+			bindField(field, field, fields, query);
+		}
+	};
+
+	template<typename... fields> struct bindInsertAll_t<size_t(-1), fields...>
+		{ template<typename query_t> static void bind(const std::tuple<fields...> &, query_t &) noexcept { } };
+	template<typename... fields> using bindInsertAll = bindInsertAll_t<sizeof...(fields) - 1, fields...>;
+
 	template<size_t idx, size_t bindIdx, size_t keyBindIdx, typename... fields_t> struct bindUpdate_t
 	{
 		constexpr static const size_t index = idx - 1;
