@@ -1,6 +1,6 @@
 include Makefile.inc
 
-PKG_CONFIG_PKGS = 
+PKG_CONFIG_PKGS =
 CFLAGS_EXTRA = $(shell mysql_config --include)
 #$(shell pkg-config --cflags $(PKG_CONFIG_PKGS))
 DEFS = $(OPTIM_FLAGS) -Wall -Wextra -pedantic -std=c++11 $(CFLAGS_EXTRA)
@@ -14,7 +14,7 @@ PREFIX ?= /usr
 LIBDIR ?= $(PREFIX)/lib
 
 O = string.o mysql.o mssql.o
-GCH = tmplORM.gch
+GCH = tmplORM.gch tmplORM.mysql.gch tmplORM.mssql.gch
 SO = libtmplORM.so
 
 DEPS = .dep
@@ -37,11 +37,14 @@ $(SO): $(O)
 %.gch: %.hxx
 	$(call run-cmd,cxx,$(CFLAGS))
 
+buildCheck: buildCheck.o
+	$(call run-cmd,ccld,$(OPTIM_FLAGS) $(O) $(LIBS) -o $@ buildCheck.o)
+
 clean:
 	$(call run-cmd,rm,tmplORM,$(O) $(SO) $(GCH))
 	$(call run-cmd,rm,makedep,.dep/*.d)
 
 #mysql.o: CFLAGS_EXTRA += $(shell mysql_config --include)
-.PHONY: default all clean
+.PHONY: default all clean test
 .SUFIXES: .cxx .hxx
 -include .dep/*.d

@@ -186,8 +186,8 @@ namespace tmplORM
 			using parentType_t::operator ==;
 			using parentType_t::operator !=;
 
-			operator type() noexcept { return const_cast<const type>(parentType_t::_value); }
-			void operator =(const type value) noexcept { *this = const_cast<const char *const>(value); }
+			operator type() const noexcept { return const_cast<const type>(parentType_t::_value); }
+			void operator =(type const value) noexcept { *this = const_cast<const char *const>(value); }
 			type value() noexcept { return *this; }
 			size_t length() const noexcept { return value() ? std::char_traits<char>::length(value()) : 0; }*/
 		};
