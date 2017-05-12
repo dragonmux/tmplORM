@@ -307,7 +307,7 @@ tSQLValue_t::tSQLValue_t(const void *const _data, const uint64_t _length, const 
 	{
 		using mutStringPtr_t = std::unique_ptr<char []>;
 		mutStringPtr_t newData = utf16::convert(static_cast<const char16_t *const>(_data));
-		data.reset(newData.release());
+		data.reset(const_cast<const char *const>(newData.release()));
 	}
 }
 
