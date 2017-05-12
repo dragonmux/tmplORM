@@ -49,7 +49,7 @@ template<typename T> inline T safeIndex(const T *const str, const size_t index, 
 
 size_t countUnits(const char *const str) noexcept
 {
-	const size_t len = utf16::length(str) + 1;
+	const size_t len = utf16::length(str);
 	size_t count = 0;
 	for (size_t i = 0; i < len; ++i)
 	{
@@ -91,7 +91,7 @@ size_t countUnits(const char *const str) noexcept
 
 size_t countUnits(const char16_t *const str) noexcept
 {
-	const size_t len = utf16::length(str) + 1;
+	const size_t len = utf16::length(str);
 	size_t count = 0;
 	for (size_t i = 0; i < len; ++i)
 	{
