@@ -79,7 +79,7 @@ namespace tmplORM
 		template<> struct bind_t<ormUUID_t>
 			{ constexpr static const int16_t typeC = SQL_C_GUID; constexpr static const int16_t typeODBC = SQL_GUID; };
 		/*template<> struct bind_t<nullptr_t>
-			{ constexpr static const uint16_t typeC = SQL_C_DEFAULT; constexpr static const int16_t typeODBC = SQL_TYPE_NULL; };*/
+			{ constexpr static const int16_t typeC = SQL_C_DEFAULT; constexpr static const int16_t typeODBC = SQL_TYPE_NULL; };*/
 
 		namespace driver
 		{
