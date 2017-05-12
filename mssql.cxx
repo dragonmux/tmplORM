@@ -4,12 +4,8 @@
 #include "mssql.hxx"
 #include "string.hxx"
 
-namespace tmplORM
-{
-	namespace mssql
-	{
-		namespace driver
-		{
+using namespace tmplORM::mssql::driver;
+
 template<typename T> void swap(const T &a, const T &b) noexcept//(std::swap(const_cast<T &>(a), const_cast<T &>(b)))
 	{ std::swap(const_cast<T &>(a), const_cast<T &>(b)); }
 
@@ -414,8 +410,5 @@ const char *tSQLExecError_t::error() const noexcept
 			return "SQL server is claiming more data is available";
 		default:
 			return "Unknown error";
-	}
-}
-		}
 	}
 }
