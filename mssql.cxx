@@ -6,10 +6,10 @@
 
 using namespace tmplORM::mssql::driver;
 
-template<typename T> void swap(const T &a, const T &b) noexcept//(std::swap(const_cast<T &>(a), const_cast<T &>(b)))
+template<typename T> void swap(const T &a, const T &b) noexcept(noexcept(std::swap(const_cast<T &>(a), const_cast<T &>(b))))
 	{ std::swap(const_cast<T &>(a), const_cast<T &>(b)); }
 
-tSQLExecErrorType_t translateError(const int16_t result)
+inline tSQLExecErrorType_t translateError(const SQLRETURN result)
 {
 	if (result == SQL_NEED_DATA)
 		return tSQLExecErrorType_t::needData;
@@ -103,7 +103,7 @@ void tSQLClient_t::disconnect() const noexcept
 
 bool tSQLClient_t::connect(const stringPtr_t &connString) const noexcept
 {
-	if (!dbHandle || !connection || haveConnection)
+	if (!connString || !connection || haveConnection)
 		return !error(tSQLExecErrorType_t::connect);
 	auto odbcString = utf16::convert(connString.get());
 	int16_t resultLen = 0;
@@ -113,7 +113,7 @@ bool tSQLClient_t::connect(const stringPtr_t &connString) const noexcept
 
 bool tSQLClient_t::connect(const char *const driver, const char *const host, const uint32_t port, const char *const user, const char *const passwd) const noexcept
 {
-	return connect(formatString("DRIVER=%s;SERVER=tcp:%s,%u;UID=%s;PID=%s;TRUSTED_CONNECTION=no", driver, host, port ? port : 1433, user, passwd)) ||
+	return connect(formatString("DRIVER=%s;SERVER=tcp:%s,%u;UID=%s;PWD=%s;TRUSTED_CONNECTION=no", driver, host, port ? port : 1433, user, passwd)) ||
 		_error == tSQLExecErrorType_t::needData;
 }
 
@@ -130,7 +130,7 @@ tSQLQuery_t tSQLClient_t::prepare(const char *const queryStmt, const size_t para
 
 tSQLResult_t tSQLClient_t::query(const char *const queryStmt) const noexcept
 {
-	auto query = prepare(queryStmt, 0);
+	const auto query = prepare(queryStmt, 0);
 	if (query.valid())
 		return query.execute();
 	return tSQLResult_t();
@@ -159,7 +159,7 @@ bool tSQLClient_t::error(const tSQLExecErrorType_t err) const noexcept
 bool tSQLClient_t::error(const tSQLExecErrorType_t err, const int16_t handleType, void *const handle) const noexcept
 {
 	_error = tSQLExecError_t(err, handleType, handle);
-	return err != tSQLExecErrorType_t::ok;
+	return _error != tSQLExecErrorType_t::ok;
 }
 
 tSQLQuery_t::tSQLQuery_t(const tSQLClient_t *const parent, void *const handle, const char *const queryStmt, const size_t paramsCount) noexcept :
@@ -167,7 +167,7 @@ tSQLQuery_t::tSQLQuery_t(const tSQLClient_t *const parent, void *const handle, c
 {
 	if (!queryHandle || (numParams && !dataLengths) || !client)
 		return;
-	auto query = utf16::convert(queryStmt);
+	const auto query = utf16::convert(queryStmt);
 	error(SQLPrepare(queryHandle, query, utf16::length(query)));
 }
 
@@ -300,14 +300,14 @@ tSQLValue_t tSQLResult_t::operator [](const uint16_t idx) const noexcept
 bool tSQLResult_t::error(const int16_t err) const noexcept
 	{ return !client || client->error(err, SQL_HANDLE_STMT, queryHandle); }
 
-tSQLValue_t::tSQLValue_t(const void *const _data, const size_t _length, const int16_t _type) noexcept :
+tSQLValue_t::tSQLValue_t(const void *const _data, const uint64_t _length, const int16_t _type) noexcept :
 	data(static_cast<const char *const>(_data)), length(_length), type(_type)
 {
 	if (isWCharType(type))
 	{
 		using mutStringPtr_t = std::unique_ptr<char []>;
 		mutStringPtr_t newData = utf16::convert(static_cast<const char16_t *const>(_data));
-		data.reset(const_cast<const char *const>(newData.release()));
+		data.reset(newData.release());
 	}
 }
 
@@ -337,13 +337,13 @@ template<int16_t rawType, int16_t cType, tSQLErrorType_t error, typename T> T as
 }
 
 uint8_t tSQLValue_t::asUint8() const { return asInt<SQL_TINYINT, SQL_C_UTINYINT, tSQLErrorType_t::uint8Error, uint8_t>(*this, data, type); }
-int8_t tSQLValue_t::asInt8() const { return asInt<SQL_TINYINT, SQL_C_STINYINT, tSQLErrorType_t::int8Error, uint8_t>(*this, data, type); }
+int8_t tSQLValue_t::asInt8() const { return asInt<SQL_TINYINT, SQL_C_STINYINT, tSQLErrorType_t::int8Error, int8_t>(*this, data, type); }
 uint16_t tSQLValue_t::asUint16() const { return asInt<SQL_SMALLINT, SQL_C_USHORT, tSQLErrorType_t::uint16Error, uint16_t>(*this, data, type); }
-int16_t tSQLValue_t::asInt16() const { return asInt<SQL_SMALLINT, SQL_C_SSHORT, tSQLErrorType_t::int16Error, uint16_t>(*this, data, type); }
+int16_t tSQLValue_t::asInt16() const { return asInt<SQL_SMALLINT, SQL_C_SSHORT, tSQLErrorType_t::int16Error, int16_t>(*this, data, type); }
 uint32_t tSQLValue_t::asUint32() const { return asInt<SQL_INTEGER, SQL_C_ULONG, tSQLErrorType_t::uint32Error, uint32_t>(*this, data, type); }
-int32_t tSQLValue_t::asInt32() const { return asInt<SQL_INTEGER, SQL_C_SLONG, tSQLErrorType_t::int32Error, uint32_t>(*this, data, type); }
+int32_t tSQLValue_t::asInt32() const { return asInt<SQL_INTEGER, SQL_C_SLONG, tSQLErrorType_t::int32Error, int32_t>(*this, data, type); }
 uint64_t tSQLValue_t::asUint64() const { return asInt<SQL_BIGINT, SQL_C_UBIGINT, tSQLErrorType_t::uint64Error, uint64_t>(*this, data, type); }
-int64_t tSQLValue_t::asInt64() const { return asInt<SQL_BIGINT, SQL_C_SBIGINT, tSQLErrorType_t::int64Error, uint64_t>(*this, data, type); }
+int64_t tSQLValue_t::asInt64() const { return asInt<SQL_BIGINT, SQL_C_SBIGINT, tSQLErrorType_t::int64Error, int64_t>(*this, data, type); }
 
 bool tSQLValue_t::asBool() const
 {
