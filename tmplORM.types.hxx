@@ -119,8 +119,8 @@ namespace tmplORM
 
 				const uint8_t *asBuffer() const noexcept { return reinterpret_cast<const uint8_t *>(&_uuid); }
 				constexpr uint32_t data1() const noexcept { return _uuid.data1; }
-				constexpr uint32_t data2() const noexcept { return _uuid.data2; }
-				constexpr uint32_t data3() const noexcept { return _uuid.data3; }
+				constexpr uint16_t data2() const noexcept { return _uuid.data2; }
+				constexpr uint16_t data3() const noexcept { return _uuid.data3; }
 				const uint8_t *data4() const noexcept { return reinterpret_cast<const uint8_t *const>(_uuid.data4); }
 
 				ormUUID_t(const char *uuid) noexcept : ormUUID_t()
