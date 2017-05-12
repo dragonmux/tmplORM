@@ -16,6 +16,8 @@ struct utf16_t final
 private:
 	std::unique_ptr<char16_t []> str;
 	utf16_t() noexcept : str() { }
+	utf16_t(const utf16_t &) = delete;
+	utf16_t &operator =(const utf16_t &) = delete;
 
 public:
 	utf16_t(const std::nullptr_t) noexcept : str() { }
@@ -64,10 +66,11 @@ public:
 	static utf16_t convert(const char *const str) noexcept;
 	static utf8_t convert(const char16_t *const str) noexcept;
 
+	// We get to use the new std::char_traits<> from C++11 here - this works for char, char16_t, char32_t and wchar_t!
 	template<typename T> static size_t length(const T *const str) noexcept
-		{ return std::char_traits<T>::length(str); }
-	static size_t length(const utf16_t &str) noexcept { return str ? length<char16_t>(str) + 1 : 0; }
-	static size_t length(const utf8_t &str) noexcept { return str ? length<char>(str) + 1 : 0; }
+		{ return std::char_traits<T>::length(str) + 1; }
+	static size_t length(const utf16_t &str) noexcept { return str ? length<char16_t>(str) : 0; }
+	static size_t length(const utf8_t &str) noexcept { return str ? length<char>(str) : 0; }
 };
 
 template<typename T> struct makeUnique_ { using uniqueType = std::unique_ptr<T>; };
@@ -76,14 +79,14 @@ template<typename T, size_t N> struct makeUnique_<T [N]> { struct invalidType { 
 
 template<typename T, typename... Args> inline typename makeUnique_<T>::uniqueType makeUnique(Args &&...args) noexcept
 {
-	using consT = typename std::remove_const<T>::type;
-	return std::unique_ptr<T>(new (std::nothrow) consT(std::forward<Args>(args)...));
+	using ctorT = typename std::remove_const<T>::type;
+	return std::unique_ptr<T>(new (std::nothrow) ctorT(std::forward<Args>(args)...));
 }
 
 template<typename T> inline typename makeUnique_<T>::arrayType makeUnique(const size_t num) noexcept
 {
-	using consT = typename std::remove_const<typename std::remove_extent<T>::type>::type;
-	return std::unique_ptr<T>(new (std::nothrow) consT[num]());
+	using ctorT = typename std::remove_const<typename std::remove_extent<T>::type>::type;
+	return std::unique_ptr<T>(new (std::nothrow) ctorT[num]());
 }
 
 template<typename T, typename... Args> inline typename makeUnique_<T>::invalidType makeUnique(Args &&...) noexcept = delete;
