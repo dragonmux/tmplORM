@@ -59,7 +59,7 @@ namespace tmplORM
 			{ constexpr static const int16_t typeC = SQL_C_SSHORT; constexpr static const int16_t typeODBC = SQL_SMALLINT; };
 		template<> struct bind_t<int32_t>
 			{ constexpr static const int16_t typeC = SQL_C_SLONG; constexpr static const int16_t typeODBC = SQL_INTEGER; };
-		template<> struct bind_t<int16_t>
+		template<> struct bind_t<int64_t>
 			{ constexpr static const int16_t typeC = SQL_C_SBIGINT; constexpr static const int16_t typeODBC = SQL_BIGINT; };
 		//
 		template<> struct bind_t<bool>
@@ -221,7 +221,7 @@ namespace tmplORM
 		template<typename... fields> using outputInsert = typename outputInsert_t<hasAutoInc<fields...>(), fields...>::value;
 
 		template<typename tableName, typename... fields> using createTable_ = toString<
-+			tycat<ts("CREATE TABLE "), bracket<tableName>, ts(" ("), createList<fields...>, ts(") COLLATE latin1_general_100_CI_AI_SC;")>
+			tycat<ts("CREATE TABLE "), bracket<tableName>, ts(" ("), createList<fields...>, ts(") COLLATE latin1_general_100_CI_AI_SC;")>
 		>;
 		template<typename tableName, typename... fields> using select_ = toString<
 			tycat<ts("SELECT "), selectList<fields...>, ts(" FROM "), bracket<tableName>, ts(";")>
