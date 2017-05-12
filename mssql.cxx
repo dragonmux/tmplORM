@@ -412,3 +412,41 @@ const char *tSQLExecError_t::error() const noexcept
 			return "Unknown error";
 	}
 }
+
+const char *tSQLValueError_t::error() const noexcept
+{
+	switch (errorType)
+	{
+		case tSQLErrorType_t::noError:
+			return "No error occured";
+		case tSQLErrorType_t::stringError:
+			return "Error converting value to a string";
+		case tSQLErrorType_t::boolError:
+			return "Error converting value to a boolean";
+		case tSQLErrorType_t::uint8Error:
+			return "Error converting value to an unsigned 8-bit integer";
+		case tSQLErrorType_t::int8Error:
+			return "Error converting value to a signed 8-bit integer";
+		case tSQLErrorType_t::uint16Error:
+			return "Error converting value to an unsigned 16-bit integer";
+		case tSQLErrorType_t::int16Error:
+			return "Error converting value to a signed 16-bit integer";
+		case tSQLErrorType_t::uint32Error:
+			return "Error converting value to an unsigned 32-bit integer";
+		case tSQLErrorType_t::int32Error:
+			return "Error converting value to a signed 32-bit integer";
+		case tSQLErrorType_t::uint64Error:
+			return "Error converting value to an unsigned 64-bit integer";
+		case tSQLErrorType_t::int64Error:
+			return "Error converting value to a signed 64-bit integer";
+		case tSQLErrorType_t::binError:
+			return "Error converting value to binary buffer";
+		case tSQLErrorType_t::dateError:
+			return "Error converting value to a date quantity";
+		case tSQLErrorType_t::dateTimeError:
+			return "Error converting value to a date+time quantity";
+		case tSQLErrorType_t::uuidError:
+			return "Error converting value to a UUID";
+	}
+	return "An unknown error occured";
+}

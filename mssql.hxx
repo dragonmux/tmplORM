@@ -213,7 +213,8 @@ enum class tSQLErrorType_t : uint8_t
 	uint16Error, int16Error,
 	uint32Error, int32Error,
 	uint64Error, int64Error,
-	dateError, dateTimeError
+	dateError, dateTimeError,
+	uuidError
 };
 
 struct tSQLValueError_t final
