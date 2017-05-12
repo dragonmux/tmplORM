@@ -406,8 +406,8 @@ namespace tmplORM
 			{ return value || bundle(values...); }
 
 		template<size_t N> struct comma_t { using value = ts(", "); };
-		/*! @brief Generates a comma (as necessary) to put after a field in a statement */
 		template<> struct comma_t<1> { using value = typestring<>; };
+		/*! @brief Generates a comma (as necessary) to put after a field in a statement */
 		template<size_t N> using comma = typename comma_t<N>::value;
 
 		template<bool isNull> struct nullable__t { using value = ts(" NOT NULL"); };
@@ -516,11 +516,11 @@ namespace tmplORM
 
 			template<typename... models> bool createTable() { return collect(session.template createTable(models())...); }
 			template<typename model> fixedVector_t<model> select() { return session.template select<model>(model()); }
-			template<typename... models_t> bool add(models_t &...models) { return collect(session.template add(models)...); }
 			/*!
 			 * @brief Add model instances to the database
 			 * @param models The model instances to add
 			 */
+			template<typename... models_t> bool add(models_t &...models) { return collect(session.template add(models)...); }
 			template<typename... models_t> bool update(const models_t &...models) { return collect(session.template update(models)...); }
 			template<typename... models_t> bool del(const models_t &...models) { return collect(session.template del(models)...); }
 			template<typename... models> bool deleteTable() { return collect(session.template deleteTable(models())...); }
