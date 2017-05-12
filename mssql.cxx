@@ -360,6 +360,32 @@ const void *tSQLValue_t::asBuffer(size_t &bufferLength, const bool release) cons
 	return release ? data.release() : data.get();
 }
 
+ormDate_t tSQLValue_t::asDate() const
+{
+	if (isNull() || type != SQL_DATE)
+		throw tSQLValueError_t(tSQLErrorType_t::dateError);
+	auto date = reinterpret<SQL_DATE_STRUCT>(data);
+	return {uint16_t(date.year), date.month, date.day};
+}
+
+ormDateTime_t tSQLValue_t::asDateTime() const
+{
+	if (isNull() || type != SQL_TIMESTAMP)
+		throw tSQLValueError_t(tSQLErrorType_t::dateTimeError);
+	auto dateTime = reinterpret<SQL_TIMESTAMP_STRUCT>(data);
+	return {uint16_t(dateTime.year), dateTime.month, dateTime.day, dateTime.hour,
+		dateTime.minute, dateTime.second, dateTime.fraction};
+}
+
+ormUUID_t tSQLValue_t::asUUID() const
+{
+	if (isNull() || type != SQL_GUID)
+		throw tSQLValueError_t(tSQLErrorType_t::uuidError);
+	//auto guid = reinterpret<SQLGUID>(data);
+	auto guid = reinterpret<guid_t>(data);
+	return {guid, true};
+}
+
 tSQLExecError_t::tSQLExecError_t(const tSQLExecErrorType_t error, const int16_t handleType, void *const handle) noexcept : _error(error), _state{{}}, _message()
 {
 	if (handle)

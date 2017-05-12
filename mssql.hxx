@@ -18,6 +18,7 @@ namespace tmplORM
 using std::nullptr_t;
 using stringPtr_t = std::unique_ptr<const char []>;
 struct tSQLClient_t;
+using namespace tmplORM::types::baseTypes;
 using tmplORM::common::fieldLength_t;
 
 enum class tSQLExecErrorType_t : uint8_t
@@ -84,8 +85,9 @@ public:
 	int32_t asInt32() const;
 	uint64_t asUint64() const;
 	int64_t asInt64() const;
-	// asDate() const;
-	// asDateTime() const;
+	ormDate_t asDate() const;
+	ormDateTime_t asDateTime() const;
+	ormUUID_t asUUID() const;
 
 	operator std::unique_ptr<char []>() const { return asString(); }
 	operator const char *() const { return data.get(); }
