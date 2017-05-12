@@ -37,6 +37,15 @@ inline namespace common
 		{ using value = tycat<insertList__<N, field>, insertList<fields...>>; };
 	template<> struct insertList_t<0> { using value = typestring<>; };
 
+	// Constructs a list of fields suitable for use in an INSERT query
+	template<size_t, typename...> struct insertAllList_t;
+	// Alias for the above to make it easier to use.
+	template<typename... fields> using insertAllList = typename insertAllList_t<sizeof...(fields), fields...>::value;
+	// Primary specialisation generates the list
+	template<size_t N, typename field, typename... fields> struct insertAllList_t<N, field, fields...>
+		{ using value = tycat<typename fieldName_t<N, field>::value, insertAllList<fields...>>; };
+	template<> struct insertAllList_t<0> { using value = typestring<>; };
+
 	// Intermediary container type for handling conversion of a field into a form suitable for an UPDATE query
 	template<size_t N> struct updateList__t
 	{
