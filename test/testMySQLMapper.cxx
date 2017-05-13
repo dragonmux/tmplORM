@@ -10,6 +10,8 @@ using tmplORM::mysql::update_;
 using tmplORM::mysql::del_;
 using tmplORM::mysql::deleteTable_;
 
+template<typename tableName, typename... fields> const char *createTable(const model_t<tableName, fields...> &) noexcept
+	{ return createTable_<tableName, fields...>::value; }
 template<typename tableName, typename... fields> const char *add(const model_t<tableName, fields...> &) noexcept
 	{ return add_<tableName, fields...>::value; }
 template<typename tableName, typename... fields> const char *update(const model_t<tableName, fields...> &) noexcept
@@ -33,6 +35,42 @@ customerDemographic_t customerDemographic;
 class testMySQLMapper final : public testsuit
 {
 public:
+	void testCreateTableGen()
+	{
+		assertEqual(createTable(category), "CREATE TABLE IF NOT EXISTS `Categories` (`CategoryID` INT PRIMARY KEY AUTO_INCREMENT NOT NULL, "
+			"`CategoryName` VARCHAR(15) NOT NULL, `Description`  NULL) CHARACTER SET utf8;");
+		assertEqual(createTable(supplier), "CREATE TABLE IF NOT EXISTS `Suppliers` (`SupplierID` INT PRIMARY KEY AUTO_INCREMENT NOT NULL, "
+			"`CompanyName` VARCHAR(40) NOT NULL, `ContactName` VARCHAR(30) NULL, `ContactTitle` VARCHAR(30) NULL, `Address` VARCHAR(60) NULL, "
+			"`City` VARCHAR(15) NULL, `Region` VARCHAR(15) NULL, `PostalCode` VARCHAR(10) NULL, `Country` VARCHAR(15) NULL, "
+			"`Phone` VARCHAR(24) NULL, `Fax` VARCHAR(24) NULL, `HomePage`  NULL) CHARACTER SET utf8;");
+		assertEqual(createTable(product), "CREATE TABLE IF NOT EXISTS `Products` (`ProductID` INT PRIMARY KEY AUTO_INCREMENT NOT NULL, "
+			"`ProductName` VARCHAR(40) NOT NULL, `SupplierID` INT NULL, `CategoryID` INT NULL, `QuantityPerUnit` VARCHAR(20) NULL, "
+			"`UnitsInStock` SHORT NULL, `UnitsOnOrder` SHORT NULL, `ReorderLevel` SHORT NULL, `Discontinued` BIT(1) NOT NULL) CHARACTER SET utf8;");
+		assertEqual(createTable(customer), "CREATE TABLE IF NOT EXISTS `Customers` (`CustomerID` VARCHAR(5) PRIMARY KEY NOT NULL, "
+			"`CompanyName` VARCHAR(40) NOT NULL, `ContactName` VARCHAR(30) NULL, `ContactTitle` VARCHAR(30) NULL, `Address` VARCHAR(60) NULL, "
+			"`City` VARCHAR(15) NULL, `Region` VARCHAR(15) NULL, `PostalCode` VARCHAR(10) NULL, `Country` VARCHAR(15) NULL, "
+			"`Phone` VARCHAR(24) NULL, `Fax` VARCHAR(24) NULL) CHARACTER SET utf8;");
+		assertEqual(createTable(shipper), "CREATE TABLE IF NOT EXISTS `Shippers` (`ShipperID` INT PRIMARY KEY AUTO_INCREMENT NOT NULL, "
+			"`CompanyName` VARCHAR(40) NOT NULL, `Phone` VARCHAR(24) NULL) CHARACTER SET utf8;");
+		assertEqual(createTable(region), "CREATE TABLE IF NOT EXISTS `Regions` (`RegionID` INT PRIMARY KEY AUTO_INCREMENT NOT NULL, "
+			"`RegionDescription` VARCHAR(50) NOT NULL) CHARACTER SET utf8;");
+		assertEqual(createTable(territory), "CREATE TABLE IF NOT EXISTS `Territories` (`TerritoryID` VARCHAR(20) PRIMARY KEY NOT NULL, "
+			"`TerritoryDescription` VARCHAR(50) NOT NULL, `RegionID` INT NOT NULL) CHARACTER SET utf8;");
+		assertEqual(createTable(employee), "CREATE TABLE IF NOT EXISTS `Employees` (`EmployeeID` INT PRIMARY KEY AUTO_INCREMENT NOT NULL, "
+			"`LastName` VARCHAR(20) NOT NULL, `FirstName` VARCHAR(10) NOT NULL, `Title` VARCHAR(30) NULL, `TitleOfCourtesy` VARCHAR(25) NULL, "
+			"`BirthDate`  NULL, `HireDate`  NULL, `Address` VARCHAR(60) NULL, `City` VARCHAR(15) NULL, `Region` VARCHAR(15) NULL, "
+			"`PostalCode` VARCHAR(10) NULL, `Country` VARCHAR(15) NULL, `HomePhone` VARCHAR(24) NULL, `Extension` VARCHAR(4) NULL, "
+			"`Notes`  NULL, `ReportsTo` INT NULL, `PhotoPath` VARCHAR(255) NULL) CHARACTER SET utf8;");
+		assertEqual(createTable(order), "CREATE TABLE IF NOT EXISTS `Orders` (`OrderID` INT PRIMARY KEY AUTO_INCREMENT NOT NULL, "
+			"`CustomerID` VARCHAR(5) NULL, `EmployeeID` INT NULL, `OrderDate`  NULL, `RequiredDate`  NULL, `ShippedDate`  NULL, "
+			"`ShipVia` INT NULL, `ShipName` VARCHAR(40) NULL, `ShipAddress` VARCHAR(60) NULL, `ShipCity` VARCHAR(15) NULL, "
+			"`ShipRegion` VARCHAR(15) NULL, `ShipPostalCode` VARCHAR(10) NULL, `ShipCountry` VARCHAR(15) NULL) CHARACTER SET utf8;");
+		assertEqual(createTable(demographic), "CREATE TABLE IF NOT EXISTS `CustomerDemographics` (`CustomerTypeID` VARCHAR(10) PRIMARY KEY NOT NULL, "
+			"`CustomerDesc`  NULL) CHARACTER SET utf8;");
+		assertEqual(createTable(customerDemographic), "CREATE TABLE IF NOT EXISTS `CustomerCustDemographics` (`CustomerID` VARCHAR(5) "
+			"PRIMARY KEY NOT NULL, `CustomerTypeID` VARCHAR(10) PRIMARY KEY NOT NULL) CHARACTER SET utf8;");
+	}
+
 	void testInsertGen()
 	{
 		assertEqual(add(category), "INSERT INTO `Categories` (`CategoryName`, `Description`) VALUES (?, ?);");
@@ -95,6 +133,7 @@ public:
 
 	void registerTests() final override
 	{
+		CXX_TEST(testCreateTableGen)
 		CXX_TEST(testInsertGen)
 		CXX_TEST(testUpdateGen)
 		CXX_TEST(testDeleteGen)
