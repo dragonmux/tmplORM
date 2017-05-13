@@ -7,11 +7,6 @@ using namespace tmplORM::mysql::driver;
 class testMySQLValue final : public testsuit
 {
 private:
-	template<typename T> void assertUNull(std::unique_ptr<T> &value)
-		{ assertNull(value.get()); }
-	template<typename T> void assertUNotNull(std::unique_ptr<T> &value)
-		{ assertNotNull(value.get()); }
-
 	void tryOk(const std::function<void()> tests)
 	{
 		try
@@ -40,11 +35,11 @@ public:
 			'a', ' ', 't', 'e', 's', 't', '\0'
 		};
 		auto nullValue = mySQLValue_t(nullptr, 0, MYSQL_TYPE_VARCHAR).asString();
-		assertUNull(nullValue);
+		assertNull(nullValue);
 		nullValue = mySQLValue_t(testData.data(), 0, MYSQL_TYPE_NULL).asString();
-		assertUNull(nullValue);
+		assertNull(nullValue);
 		auto testStr = mySQLValue_t(testData.data(), testData.size(), MYSQL_TYPE_VARCHAR).asString();
-		assertUNotNull(testStr);
+		assertNotNull(testStr);
 		assertEqual(testStr.get(), testData.data(), testData.size());
 	}
 
