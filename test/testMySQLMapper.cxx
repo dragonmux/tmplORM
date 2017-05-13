@@ -19,6 +19,8 @@ template<typename tableName, typename... fields> const char *update(const model_
 
 template<typename tableName, typename... fields> const char *del(const model_t<tableName, fields...> &) noexcept
 	{ return del_<tableName, fields...>::value; }
+template<typename tableName, typename... fields> const char *deleteTable(const model_t<tableName, fields...> &) noexcept
+	{ return deleteTable_<tableName>::value; }
 
 category_t category;
 supplier_t supplier;
@@ -131,12 +133,28 @@ public:
 		assertEqual(del(customerDemographic), "DELETE FROM `CustomerCustDemographics` WHERE `CustomerID` = ? AND `CustomerTypeID` = ?;");
 	}
 
+	void testDropTableGen()
+	{
+		assertEqual(deleteTable(category), "DROP TABLE IF EXISTS `Categories`;");
+		assertEqual(deleteTable(supplier), "DROP TABLE IF EXISTS `Suppliers`;");
+		assertEqual(deleteTable(product), "DROP TABLE IF EXISTS `Products`;");
+		assertEqual(deleteTable(customer), "DROP TABLE IF EXISTS `Customers`;");
+		assertEqual(deleteTable(shipper), "DROP TABLE IF EXISTS `Shippers`;");
+		assertEqual(deleteTable(region), "DROP TABLE IF EXISTS `Regions`;");
+		assertEqual(deleteTable(territory), "DROP TABLE IF EXISTS `Territories`;");
+		assertEqual(deleteTable(employee), "DROP TABLE IF EXISTS `Employees`;");
+		assertEqual(deleteTable(order), "DROP TABLE IF EXISTS `Orders`;");
+		assertEqual(deleteTable(demographic), "DROP TABLE IF EXISTS `CustomerDemographics`;");
+		assertEqual(deleteTable(customerDemographic), "DROP TABLE IF EXISTS `CustomerCustDemographics`;");
+	}
+
 	void registerTests() final override
 	{
 		CXX_TEST(testCreateTableGen)
 		CXX_TEST(testInsertGen)
 		CXX_TEST(testUpdateGen)
 		CXX_TEST(testDeleteGen)
+		CXX_TEST(testDropTableGen)
 	}
 };
 
