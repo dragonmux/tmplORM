@@ -312,10 +312,23 @@ class testMySQL final : public testsuit
 		assertTrue(testRow[0].isNull());
 	}
 
+	void testClient()
+	{
+		mySQLClient_t client1;
+		assertFalse(client1.valid());
+		mySQLClient_t client2(client1);
+		assertFalse(client1.valid());
+		mySQLClient_t client3;
+		assertFalse(client3.valid());
+		client3 = client2;
+		assertFalse(client3.valid());
+	}
+
 public:
 	void registerTests() final override
 	{
 		CXX_TEST(testInvalid)
+		CXX_TEST(testClient)
 	}
 };
 

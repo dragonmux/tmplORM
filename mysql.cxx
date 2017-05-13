@@ -67,7 +67,10 @@ mySQLClient_t::~mySQLClient_t() noexcept
 	if (!handles)
 	{
 		if (con)
+		{
 			mysql_close(con);
+			con = nullptr;
+		}
 	}
 }
 
