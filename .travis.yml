@@ -47,6 +47,19 @@ matrix:
             - g++-4.9
             - clang-3.9
         mariadb: '10.1'
+    - compiler: clang-4.0
+      env: GCC=clang-4.0 GXX=clang++-4.0 COVERAGE=0
+      addons:
+        apt:
+          sources:
+            - sourceline: 'deb http://apt.llvm.org/precise/ llvm-toolchain-precise-4.0 main'
+              key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-4.9
+            - g++-4.9
+            - clang-4.0
+        mariadb: '10.1'
     - compiler: gcc-5
       env: GCC=gcc-5 GXX=g++-5 COVERAGE=0
       addons:
