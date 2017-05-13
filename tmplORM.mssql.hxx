@@ -229,6 +229,9 @@ namespace tmplORM
 		template<typename tableName, typename... fields> using add_ = toString<
 			tycat<ts("INSERT INTO "), bracket<tableName>, ts(" ("), insertList<fields...>, ts(")"), outputInsert<fields...>, ts(" VALUES ("), placeholder<countInsert_t<fields...>::count>, ts(");")>
 		>;
+		template<typename tableName, typename... fields> using addAll_ = toString<
+			tycat<ts("INSERT INTO "), bracket<tableName>, ts(" ("), insertAllList<fields...>, ts(") VALUES ("), placeholder<sizeof...(fields)>, ts(");")>
+		>;
 		// This constructs invalid if there is no field marked primary_t<>! This is quite intentional.
 		template<typename tableName, typename... fields> struct update_t<false, tableName, fields...>
 			{ using value = tycat<ts("UPDATE "), bracket<tableName>, ts(" SET "), updateList<fields...>, updateWhere<fields...>, ts(";")>; };
@@ -284,6 +287,16 @@ namespace tmplORM
 					return true;
 				}
 				return false;
+			}
+
+			template<typename tableName, typename... fields_t> bool add(const model_t<tableName, fields_t...> &model) noexcept
+			{
+				using insert = addAll_<tableName, fields_t...>;
+				tSQLQuery_t query(database.prepare(insert::value, sizeof...(fields_t)));
+				// This binds the fields in order so we insert a value for every column.
+				bindInsertAll<fields_t...>::bind(model.fields(), query);
+				// This either works or doesn't.. thankfully.. so, we can just execute-and-quit.
+				return query.execute().valid();
 			}
 
 			template<typename tableName, typename... fields_t> bool update(const model_t<tableName, fields_t...> &model) noexcept
