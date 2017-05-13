@@ -87,6 +87,16 @@ public:
 
 class testFormat final : public testsuit
 {
+private:
+	std::unique_ptr<const char []> _formatString(const char *format, ...) noexcept
+	{
+		va_list args;
+		va_start(args, format);
+		auto ret = vaFormatString(format, args);
+		va_end(args);
+		return ret;
+	}
+
 public:
 	void testDup()
 	{
@@ -102,10 +112,18 @@ public:
 		assertEqual(str.get(), "Formatting test 1\n");
 	}
 
+	void testVaFormatString()
+	{
+		auto str = _formatString("Formatting test %u\n", 1);
+		assertNotNull(str.get());
+		assertEqual(str.get(), "Formatting test 1\n");
+	}
+
 	void registerTests() final override
 	{
 		CXX_TEST(testDup)
 		CXX_TEST(testFormatString)
+		CXX_TEST(testVaFormatString)
 	}
 };
 
@@ -114,4 +132,3 @@ void registerCXXTests() noexcept
 {
 	registerTestClasses<testConvert, testValid, testFormat>();
 }
-
