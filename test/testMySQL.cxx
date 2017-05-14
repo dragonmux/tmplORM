@@ -2,6 +2,10 @@
 #include <crunch++.h>
 #include <mysql.hxx>
 
+#include <sys/types.h>
+#include <dirent.h>
+#include <unistd.h>
+
 using namespace tmplORM::mysql::driver;
 
 class testMySQLValue final : public testsuit
@@ -292,6 +296,35 @@ public:
 
 class testMySQL final : public testsuit
 {
+	const std::array<const char *const, 3> embeddedOptions =
+		{{"mysql_tests", "--defaults-file=test.ini", nullptr}};
+	const std::array<const char *const, 3> embeddedGroups =
+		{{"libmysqld_server", "libmysqld_client", nullptr}};
+
+	void deleteDir(const char *const dir)
+	{
+		DIR *dataDir = opendir(dir);
+		if (!dataDir)
+			return;
+		dirent *file;
+		do
+		{
+			file = readdir(dataDir);
+			if (!file)
+				break;
+			unlink(file->d_name);
+		}
+		while (file);
+		closedir(dataDir);
+		rmdir(dir);
+	}
+
+public:
+	void start()
+	{
+		mysql_server_init(embeddedOptions.size(), const_cast<char **>(embeddedOptions.data()), const_cast<char **>(embeddedGroups.data()));
+	}
+
 	void testInvalid()
 	{
 		mySQLClient_t testClient;
@@ -324,11 +357,19 @@ class testMySQL final : public testsuit
 		assertFalse(client3.valid());
 	}
 
-public:
+	void stop()
+	{
+		mysql_server_end();
+		deleteDir("data");
+		deleteDir("english");
+	}
+
 	void registerTests() final override
 	{
+		CXX_TEST(start)
 		CXX_TEST(testInvalid)
 		CXX_TEST(testClient)
+		CXX_TEST(stop)
 	}
 };
 
