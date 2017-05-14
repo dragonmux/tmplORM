@@ -322,7 +322,8 @@ class testMySQL final : public testsuit
 public:
 	void start()
 	{
-		mysql_server_init(embeddedOptions.size(), const_cast<char **>(embeddedOptions.data()), const_cast<char **>(embeddedGroups.data()));
+		assertFalse(mysql_server_init(embeddedOptions.size(), const_cast<char **>(embeddedOptions.data()),
+			const_cast<char **>(embeddedGroups.data())));
 	}
 
 	void testInvalid()
