@@ -3,7 +3,7 @@ sudo: required
 
 before_install:
   - export GCC="$GCC -m64 -fPIC -DPIC" GXX="$GXX -m64 -fPIC -DPIC"
-  - sudo -E apt-get -yq uninstall libmysql++-dev
+  - sudo -E apt-get -yq remove --purge libmysql++-dev
   - sudo -E apt-get -yq install unixodbc-dev libmariadbd-dev mariadb-client
 install:
   - pushd $HOME/build
