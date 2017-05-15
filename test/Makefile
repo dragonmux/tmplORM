@@ -31,7 +31,7 @@ all: $(GCH) $(TESTS)
 testString.so: O_FILE = ../string.o
 testMySQL.so: O_FILE = ../mysql.o
 #testMSSQL.so: O_FILE = ../mssql.o
-testMySQLMapper.so testMySQL.so: CRUNCHMAKE += $(shell mysql_config --cxxflags --libs)
+testMySQLMapper.so testMySQL.so: CRUNCHMAKE += $(shell mysql_config --include --libmysqld-libs)
 #$(TESTS): $(subst .so,.cxx,$@)
 %.so: %.cxx
 	$(call run-cmd,crunchMake,$(subst .so,.cxx,$@))
