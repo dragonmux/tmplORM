@@ -1,3 +1,9 @@
+/*!
+ * @file
+ * @author Rachel Mant
+ * @brief Defines types common to all database engine mappers in the ORM
+ */
+
 inline namespace common
 {
 	// Intermediary container type for handling conversion of a field into a form suitable for a SELECT query
@@ -97,6 +103,7 @@ inline namespace common
 	template<bool, typename tableName, typename... fields> struct update_t { using value = typestring<>; };
 	template<typename tableName, typename... fields> using update_ = toString<typename update_t<sizeof...(fields) == countPrimary<fields...>::count, tableName, fields...>::value>;
 
+	/*! @brief Binds a model's fields to a prepared query state for a SELECT query on that model, ensuring that auto-increment fields are not bound */
 	template<size_t idx, typename... fields_t> struct bindSelect_t
 	{
 		constexpr static size_t index = idx - 1;
