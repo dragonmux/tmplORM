@@ -289,6 +289,7 @@ mySQLRow_t::mySQLRow_t(mySQLRow_t &&r) noexcept : result(r.result), row(nullptr)
 {
 	std::swap(row, r.row);
 	// set r.fields = 0?
+	//const_cast<uint32_t &>(r.fields) = 0;
 	std::swap(rowLengths, r.rowLengths);
 }
 

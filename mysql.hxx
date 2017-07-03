@@ -27,7 +27,7 @@ typedef unsigned long sql_ulong_t;
 using mySQLFieldType_t = enum enum_field_types;
 using tmplORM::common::fieldLength_t;
 
-struct mySQLValue_t final
+struct tmplORM_API mySQLValue_t final
 {
 private:
 	const char *data;
@@ -86,7 +86,7 @@ public:
 
 inline void swap(mySQLValue_t &x, mySQLValue_t &y) noexcept { x.swap(y); }
 
-struct mySQLRow_t final
+struct tmplORM_API mySQLRow_t final
 {
 private:
 	MYSQL_RES *const result;
@@ -106,7 +106,7 @@ public:
 	mySQLRow_t(mySQLRow_t &&row) noexcept;
 	~mySQLRow_t() noexcept;
 	/*!
-	 * @brief Call to determine if this result object is valid
+	 * @brief Call to determine if this row object is valid
 	 * @returns true if the object is valid, false otherwise
 	 */
 	bool valid() const noexcept { return row && rowLengths && fieldTypes; }
@@ -120,7 +120,7 @@ public:
 	mySQLRow_t &operator =(const mySQLRow_t &) = delete;
 };
 
-struct mySQLResult_t final
+struct tmplORM_API mySQLResult_t final
 {
 private:
 	MYSQL_RES *result;
@@ -136,7 +136,7 @@ public:
 	~mySQLResult_t() noexcept;
 	mySQLResult_t &operator =(mySQLResult_t &&res) noexcept;
 	/*!
-	 * @brief Call to determine if this prepared query object is valid
+	 * @brief Call to determine if this result object is valid
 	 * @returns true if the object is valid, false otherwise
 	 */
 	bool valid() const noexcept { return result; }
@@ -149,7 +149,7 @@ public:
 	mySQLResult_t &operator =(const mySQLResult_t &) = delete;
 };
 
-struct mySQLPreparedQuery_t final
+struct tmplORM_API mySQLPreparedQuery_t final
 {
 private:
 	MYSQL_STMT *query;
@@ -171,7 +171,7 @@ public:
 	~mySQLPreparedQuery_t() noexcept;
 	mySQLPreparedQuery_t &operator =(mySQLPreparedQuery_t &&qry) noexcept;
 	/*!
-	 * @brief Call to determine if this row object is valid
+	 * @brief Call to determine if this prepared query object is valid
 	 * @returns true if the object is valid, false otherwise
 	 */
 	bool valid() const noexcept { return query; }
@@ -186,7 +186,7 @@ public:
 	mySQLPreparedQuery_t &operator =(const mySQLPreparedQuery_t &) = delete;
 };
 
-struct mySQLClient_t final
+struct tmplORM_API mySQLClient_t final
 {
 private:
 	static MYSQL *con;
@@ -229,7 +229,7 @@ enum class mySQLErrorType_t : uint8_t
 	uint64Error, int64Error
 };
 
-struct mySQLValueError_t final
+struct tmplORM_API mySQLValueError_t final
 {
 private:
 	mySQLErrorType_t errorType;
