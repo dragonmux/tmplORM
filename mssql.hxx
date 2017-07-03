@@ -37,7 +37,7 @@ enum class tSQLExecErrorType_t : uint8_t
 	unknown
 };
 
-struct tSQLExecError_t final
+struct tmplORM_API tSQLExecError_t final
 {
 private:
 	using sqlState_t = std::array<char, 6>;
@@ -66,7 +66,7 @@ public:
 	tSQLExecError_t &operator =(const tSQLExecError_t &) = delete;
 };
 
-struct tSQLValue_t final
+struct tmplORM_API tSQLValue_t final
 {
 private:
 	mutable stringPtr_t data;
@@ -103,7 +103,7 @@ public:
 	/*! @brief Auto-converter to raw buffer */
 	operator const char *() const noexcept { return data.get(); }
 	/*! @brief Auto-converter for booleans */
-	operator bool() const { return asBool(); }
+	explicit operator bool() const { return asBool(); }
 	/*! @brief Auto-converter for uint8_t's */
 	operator uint8_t() const { return asUint8(); }
 	/*! @brief Auto-converter for int8_t's */
@@ -133,7 +133,7 @@ public:
 	tSQLValue_t &operator =(const tSQLValue_t &) = delete;
 };
 
-struct tSQLResult_t final
+struct tmplORM_API tSQLResult_t final
 {
 private:
 	using fieldType_t = std::pair<int16_t, uint32_t>;
@@ -171,7 +171,8 @@ public:
 	tSQLResult_t &operator =(const tSQLResult_t &) = delete;
 };
 
-struct tSQLQuery_t final
+// TODO: Introduce multiQuery support in here.. we know which we are based on whether this has been created via query() or prepare() down below.
+struct tmplORM_API tSQLQuery_t final
 {
 private:
 	const tSQLClient_t *const client;
@@ -188,7 +189,7 @@ protected:
 
 public:
 	/*! @brief Default constructor for prepared query objects, constructing an invalid query by default */
-	tSQLQuery_t() noexcept : client(nullptr), queryHandle(nullptr), numParams(0), dataLengths(), executed(false) { }
+	tSQLQuery_t() noexcept : client(nullptr), queryHandle(nullptr), numParams(0), paramStorage(), dataLengths(), executed(false) { }
 	tSQLQuery_t(tSQLQuery_t &&qry) noexcept : tSQLQuery_t() { *this = std::move(qry); }
 	~tSQLQuery_t() noexcept;
 	tSQLQuery_t &operator =(tSQLQuery_t &&qry) noexcept;
@@ -196,7 +197,7 @@ public:
 	 * @brief Call to determine if this prepared query object is valid
 	 * @returns true if the object is valid, false otherwise
 	 */
-	bool valid() const noexcept { return queryHandle; }
+	bool valid() const noexcept { return client && queryHandle; }
 	tSQLResult_t execute() const noexcept;
 	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept;
 	template<typename T> void bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept;
@@ -207,7 +208,7 @@ public:
 	tSQLQuery_t &operator =(const tSQLQuery_t &) = delete;
 };
 
-struct tSQLClient_t final
+struct tmplORM_API tSQLClient_t final
 {
 private:
 	void *dbHandle;
@@ -263,7 +264,7 @@ enum class tSQLErrorType_t : uint8_t
 	uuidError
 };
 
-struct tSQLValueError_t final
+struct tmplORM_API tSQLValueError_t final
 {
 private:
 	const tSQLErrorType_t errorType;

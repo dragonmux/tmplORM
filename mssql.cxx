@@ -4,12 +4,18 @@
 #include "mssql.hxx"
 #include "string.hxx"
 
+// We'd use <locale> here with its std::codecvt/std::wstring_convert functionality, however
+// this cases many numerous reallocations (which can fail and throw), heap fragmentation,
+// and general slowness when we already know the bounds of our string.
+// Instead of this, we have our own recoder that performs a single allocation
+// and returns either the completely recoded string, or nullptr.
+
 using namespace tmplORM::mssql::driver;
 
 template<typename T> void swap(const T &a, const T &b) noexcept(noexcept(std::swap(const_cast<T &>(a), const_cast<T &>(b))))
 	{ std::swap(const_cast<T &>(a), const_cast<T &>(b)); }
 
-inline tSQLExecErrorType_t translateError(const SQLRETURN result)
+inline tSQLExecErrorType_t translateError(const SQLRETURN result) noexcept
 {
 	if (result == SQL_NEED_DATA)
 		return tSQLExecErrorType_t::needData;
@@ -326,7 +332,7 @@ std::unique_ptr<char []> tSQLValue_t::asString(const bool release) const
 {
 	if (isNull() || (!isCharType(type) && !isWCharType(type)))
 		throw tSQLValueError_t(tSQLErrorType_t::stringError);
-	return std::unique_ptr<char []>(const_cast<char *>(release ? data.release() : strNewDup(data.get()).release()));
+	return release ? std::unique_ptr<char []>(const_cast<char *>(data.release())) : stringDup(data.get());
 }
 
 template<int16_t rawType, int16_t cType, tSQLErrorType_t error, typename T> T asInt(const tSQLValue_t &val, const stringPtr_t &data, const int16_t type)
