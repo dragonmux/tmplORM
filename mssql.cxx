@@ -5,7 +5,7 @@
 #include "string.hxx"
 
 // We'd use <locale> here with its std::codecvt/std::wstring_convert functionality, however
-// this cases many numerous reallocations (which can fail and throw), heap fragmentation,
+// this causes many numerous reallocations (which can fail and throw), heap fragmentation,
 // and general slowness when we already know the bounds of our string.
 // Instead of this, we have our own recoder that performs a single allocation
 // and returns either the completely recoded string, or nullptr.

@@ -115,8 +115,10 @@ inline namespace common
 		}
 	};
 
+	/*! @brief End (base) case for bindSelect_t that terminates the recursion */
 	template<typename... fields> struct bindSelect_t<0, fields...>
 		{ template<typename result_t> static void bind(std::tuple<fields...> &, const result_t &) noexcept { } };
+	/*! @brief Helper type for bindSelect_t that makes the binding type easier to use */
 	template<typename... fields> using bindSelect = bindSelect_t<sizeof...(fields), fields...>;
 
 	template<typename field_t> constexpr fieldLength_t fieldLength(const field_t &) noexcept { return {0, 0}; }
@@ -143,9 +145,10 @@ inline namespace common
 		}
 	};
 
+	/*! @brief Binds a model's fields to a prepared query state for an INSERT query on that model, ensuring that auto-increment fields are not bound */
 	template<size_t index, size_t bindIdx, typename... fields_t> struct bindInsert_t
 	{
-		constexpr static const size_t bindIndex = bindIdx - 1;
+		constexpr static size_t bindIndex = bindIdx - 1;
 
 		template<typename fieldName, typename T, typename field_t, typename query_t>
 			static void bindField(const type_t<fieldName, T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
@@ -165,8 +168,10 @@ inline namespace common
 		}
 	};
 
+	/*! @brief End (base) case for bindInsert_t that terminates the recursion */
 	template<size_t index, typename... fields> struct bindInsert_t<index, 0, fields...>
 		{ template<typename query_t> static void bind(const std::tuple<fields...> &, query_t &) noexcept { } };
+	/*! @brief Helper type for bindInsert_t that makes the binding type easier to use */
 	template<typename... fields> using bindInsert = bindInsert_t<sizeof...(fields) - 1, countInsert_t<fields...>::count, fields...>;
 
 	template<size_t index, typename... fields_t> struct bindInsertAll_t
@@ -189,11 +194,12 @@ inline namespace common
 		{ template<typename query_t> static void bind(const std::tuple<fields...> &, query_t &) noexcept { } };
 	template<typename... fields> using bindInsertAll = bindInsertAll_t<sizeof...(fields) - 1, fields...>;
 
+	/*! @brief Binds a model's fields to a prepared query state for an UPDATE query on that model, ensuring that the key fields are bound last */
 	template<size_t idx, size_t bindIdx, size_t keyBindIdx, typename... fields_t> struct bindUpdate_t
 	{
-		constexpr static const size_t index = idx - 1;
-		constexpr static const size_t bindIndex = bindIdx - 1;
-		constexpr static const size_t keyBindIndex = keyBindIdx - 1;
+		constexpr static size_t index = idx - 1;
+		constexpr static size_t bindIndex = bindIdx - 1;
+		constexpr static size_t keyBindIndex = keyBindIdx - 1;
 
 		template<typename fieldName, typename T, typename field_t, typename query_t>
 			static void bindField(const type_t<fieldName, T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
@@ -216,10 +222,13 @@ inline namespace common
 		}
 	};
 
-	template<size_t keyBindIndex, typename... fields_t> struct bindUpdate_t<0, 0, keyBindIndex, fields_t...>
-		{ template<typename query_t> static void bind(const std::tuple<fields_t...> &, query_t &) { } };
+	/*! @brief End (base) case for bindUpdate_t that terminates the recursion */
+	template<size_t keyBindIndex, typename... fields> struct bindUpdate_t<0, 0, keyBindIndex, fields...>
+		{ template<typename query_t> static void bind(const std::tuple<fields...> &, query_t &) { } };
+	/*! @brief Helper type for bindUpdate_t that makes the binding type easier to use */
 	template<typename... fields> using bindUpdate = bindUpdate_t<sizeof...(fields), countUpdate_t<fields...>::count, sizeof...(fields), fields...>;
 
+	/*! @brief Binds key fields from a model to a prepared query state for a DELETE query on that model */
 	template<size_t idx, size_t bindIdx, typename... fields_t> struct bindDelete_t
 	{
 		constexpr static size_t index = idx - 1;
@@ -243,7 +252,9 @@ inline namespace common
 		}
 	};
 
+	/*! @brief End (base) case for bindDelete_t that terminates the recursion */
 	template<size_t index, typename... fields> struct bindDelete_t<index, 0, fields...>
 		{ template<typename query_t> static void bind(const std::tuple<fields...> &, query_t &) noexcept { } };
+	/*! @brief Helper type for bindDelete_t that makes the binding type easier to use */
 	template<typename... fields> using bindDelete = bindDelete_t<sizeof...(fields), countPrimary<fields...>::count, fields...>;
 }

@@ -8,7 +8,14 @@
 #include "tmplORM.extern.hxx"
 #define tmplORM_STRING_FORMAT_ARGS(n, m) __attribute__((format(printf, n, m)))
 
-tmplORM_FNAPI std::unique_ptr<const char []> formatString(const char *format, ...) noexcept;
+/*!
+ * @file
+ * @author Rachel Mant
+ * @date 2016-2017
+ * @brief Defines the interface to the string helpers we implement
+ */
+
+tmplORM_FNAPI std::unique_ptr<const char []> formatString(const char *format, ...) noexcept tmplORM_STRING_FORMAT_ARGS(1, 2);
 tmplORM_FNAPI std::unique_ptr<const char []> vaFormatString(const char *format, va_list args) noexcept;
 tmplORM_FNAPI std::unique_ptr<char []> stringDup(const char *const str) noexcept;
 tmplORM_FNAPI std::unique_ptr<const char []> strNewDup(const char *const str) noexcept;

@@ -6,6 +6,14 @@
 #include <dirent.h>
 #include <unistd.h>
 
+/*!
+ * @internal
+ * @file
+ * @author Rachel Mant
+ * @date 2016-2017
+ * @brief Unit tests for the MySQL driver abstraction layer
+ */
+
 using namespace tmplORM::mysql::driver;
 
 class testMySQLValue final : public testsuit
