@@ -5,11 +5,13 @@
 #include <memory>
 #include <new>
 #include <string>
+#include "tmplORM.extern.hxx"
+#define tmplORM_STRING_FORMAT_ARGS(n, m) __attribute__((format(printf, n, m)))
 
-std::unique_ptr<const char []> formatString(const char *format, ...) noexcept;
-std::unique_ptr<const char []> vaFormatString(const char *format, va_list args) noexcept;
-std::unique_ptr<char []> stringDup(const char *const str) noexcept;
-std::unique_ptr<const char []> strNewDup(const char *const str) noexcept;
+tmplORM_FNAPI std::unique_ptr<const char []> formatString(const char *format, ...) noexcept;
+tmplORM_FNAPI std::unique_ptr<const char []> vaFormatString(const char *format, va_list args) noexcept;
+tmplORM_FNAPI std::unique_ptr<char []> stringDup(const char *const str) noexcept;
+tmplORM_FNAPI std::unique_ptr<const char []> strNewDup(const char *const str) noexcept;
 
 struct utf16_t final
 {

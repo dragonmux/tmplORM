@@ -9,23 +9,12 @@
 #include <chrono>
 #include <type_traits>
 #include "typestring/typestring.hh"
+#include "tmplORM.extern.hxx"
 #include "tmplORM.types.hxx"
 #include "fixedVector.hxx"
 
 #define ts(x) typestring_is(x)
 #define ts_(x) ts(x)()
-
-#ifdef _MSC_VER
-	// TODO: Define me.
-#else
-	#if __GNUC__ >= 4
-		#define tmplORM_DEFAULT_VISIBILITY __attribute__ ((visibility("default")))
-	#else
-		#define tmplORM_DEFAULT_VISIBILITY
-	#endif
-	#define tmplORM_API tmplORM_DEFAULT_VISIBILITY
-	#define tmplORM_FNAPI extern tmplORM_API
-#endif
 
 constexpr std::chrono::microseconds operator ""_us(const unsigned long long usecs) { return std::chrono::microseconds{usecs}; }
 
