@@ -19,25 +19,44 @@ using namespace tmplORM::mysql::driver;
 class testMySQLValue_t final : public testsuit
 {
 private:
-	void tryOk(const std::function<void()> tests)
+	template<typename T> T tryOkConversion(const mySQLValue_t &value)
 	{
-		try
-			{ tests(); }
-		catch (mySQLValueError_t &err)
-			{ fail(err.error()); }
+		try { return value; }
+		catch (const mySQLValueError_t &error)
+			{ fail(error.error()); }
 	}
 
-	void tryShouldFail(const std::function<void()> tests)
+	template<typename T> void tryFailConversion(const mySQLValue_t &value)
 	{
 		try
 		{
-			tests();
-			fail("mySQLValueError_t not thrown when expected");
+			T v = value;
+			printf("Conversion for %s: ", typeid(T).name());
+			fail("Conversion succeeded (expected to fail)");
 		}
-		catch (mySQLValueError_t &) { }
+		catch (const mySQLValueError_t &) { }
+	}
+
+	template<typename T> T tryOk(const mySQLValue_t &value, const T expected)
+	{
+		assertFalse(value.isNull());
+		T var = tryOkConversion<T>(value);
+		assertEqual(var, expected);
+	}
+
+	template<typename T> void tryShouldFail(const mySQLValue_t &value)
+	{
+		assertFalse(value.isNull());
+		tryFailConversion<T>(value);
 	}
 
 public:
+	void testNull()
+	{
+		assertTrue(mySQLValue_t().isNull());
+		assertFalse(mySQLValue_t("", 1, MYSQL_TYPE_STRING).isNull());
+	}
+
 	void testString()
 	{
 		const std::array<char, 23> testData =
@@ -57,216 +76,184 @@ public:
 
 	void testUint8()
 	{
-		tryShouldFail([]() { mySQLValue_t(nullptr, 0, MYSQL_TYPE_TINY).asUint8(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_NULL).asUint8(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR).asUint8(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_SHORT).asUint8(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONG).asUint8(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG).asUint8(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_BLOB).asUint8(); });
-
-		tryOk([this]()
-		{
-			assertEqual(mySQLValue_t("128", 4, MYSQL_TYPE_TINY).asUint8(), 128);
-			assertEqual(mySQLValue_t("255", 4, MYSQL_TYPE_TINY).asUint8(), 255);
-			assertEqual(mySQLValue_t("", 1, MYSQL_TYPE_TINY).asUint8(), 0);
-			assertEqual(mySQLValue_t("", 0, MYSQL_TYPE_TINY).asUint8(), 0);
-		});
-		tryShouldFail([]() { mySQLValue_t("-1", 3, MYSQL_TYPE_TINY).asUint8(); });
-		tryShouldFail([]() { mySQLValue_t("a", 2, MYSQL_TYPE_TINY).asUint8(); });
-		tryShouldFail([]() { mySQLValue_t("256", 4, MYSQL_TYPE_TINY).asUint8(); });
-		tryShouldFail([]() { mySQLValue_t("1023", 5, MYSQL_TYPE_TINY).asUint8(); });
+		tryShouldFail<uint8_t>(mySQLValue_t(nullptr, 0, MYSQL_TYPE_TINY));
+		tryShouldFail<uint8_t>(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
+		tryShouldFail<uint8_t>(mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR));
+		tryShouldFail<uint8_t>(mySQLValue_t("", 0, MYSQL_TYPE_SHORT));
+		tryShouldFail<uint8_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONG));
+		tryShouldFail<uint8_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG));
+		tryShouldFail<uint8_t>(mySQLValue_t("", 0, MYSQL_TYPE_BLOB));
+		tryOk<uint8_t>(mySQLValue_t("128", 4, MYSQL_TYPE_TINY), 128);
+		tryOk<uint8_t>(mySQLValue_t("255", 4, MYSQL_TYPE_TINY), 255);
+		tryOk<uint8_t>(mySQLValue_t("", 1, MYSQL_TYPE_TINY), 0);
+		tryOk<uint8_t>(mySQLValue_t("", 0, MYSQL_TYPE_TINY), 0);
+		tryShouldFail<uint8_t>(mySQLValue_t("-1", 3, MYSQL_TYPE_TINY));
+		tryShouldFail<uint8_t>(mySQLValue_t("a", 2, MYSQL_TYPE_TINY));
+		tryShouldFail<uint8_t>(mySQLValue_t("256", 4, MYSQL_TYPE_TINY));
+		tryShouldFail<uint8_t>(mySQLValue_t("1023", 5, MYSQL_TYPE_TINY));
 	}
 
 	void testInt8()
 	{
-		tryShouldFail([]() { mySQLValue_t(nullptr, 0, MYSQL_TYPE_TINY).asInt8(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_NULL).asInt8(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR).asInt8(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_SHORT).asInt8(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONG).asInt8(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG).asInt8(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_BLOB).asInt8(); });
-
-		tryOk([this]()
-		{
-			assertEqual(mySQLValue_t("127", 4, MYSQL_TYPE_TINY).asInt8(), 127);
-			assertEqual(mySQLValue_t("", 1, MYSQL_TYPE_TINY).asInt8(), 0);
-			assertEqual(mySQLValue_t("", 0, MYSQL_TYPE_TINY).asInt8(), 0);
-			assertEqual(mySQLValue_t("-1", 3, MYSQL_TYPE_TINY).asInt8(), -1);
-			assertEqual(mySQLValue_t("-127", 5, MYSQL_TYPE_TINY).asInt8(), -127);
-			assertEqual(mySQLValue_t("-128", 5, MYSQL_TYPE_TINY).asInt8(), -128);
-		});
-		tryShouldFail([]() { mySQLValue_t("a", 2, MYSQL_TYPE_TINY).asInt8(); });
-		tryShouldFail([]() { mySQLValue_t("256", 4, MYSQL_TYPE_TINY).asInt8(); });
-		//tryShouldFail([]() { mySQLValue_t("-129", 5, MYSQL_TYPE_TINY).asInt8(); });
-		tryShouldFail([]() { mySQLValue_t("1023", 5, MYSQL_TYPE_TINY).asInt8(); });
-		tryShouldFail([]() { mySQLValue_t("1-27", 5, MYSQL_TYPE_TINY).asInt8(); });
+		tryShouldFail<int8_t>(mySQLValue_t(nullptr, 0, MYSQL_TYPE_TINY));
+		tryShouldFail<int8_t>(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
+		tryShouldFail<int8_t>(mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR));
+		tryShouldFail<int8_t>(mySQLValue_t("", 0, MYSQL_TYPE_SHORT));
+		tryShouldFail<int8_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONG));
+		tryShouldFail<int8_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG));
+		tryShouldFail<int8_t>(mySQLValue_t("", 0, MYSQL_TYPE_BLOB));
+		tryOk<int8_t>(mySQLValue_t("127", 4, MYSQL_TYPE_TINY), 127);
+		tryOk<int8_t>(mySQLValue_t("", 1, MYSQL_TYPE_TINY), 0);
+		tryOk<int8_t>(mySQLValue_t("", 0, MYSQL_TYPE_TINY), 0);
+		tryOk<int8_t>(mySQLValue_t("-1", 3, MYSQL_TYPE_TINY), -1);
+		tryOk<int8_t>(mySQLValue_t("-127", 5, MYSQL_TYPE_TINY), -127);
+		tryOk<int8_t>(mySQLValue_t("-128", 5, MYSQL_TYPE_TINY), -128);
+		tryShouldFail<int8_t>(mySQLValue_t("a", 2, MYSQL_TYPE_TINY));
+		tryShouldFail<int8_t>(mySQLValue_t("256", 4, MYSQL_TYPE_TINY));
+		//tryShouldFail<int8_t>(mySQLValue_t("-129", 5, MYSQL_TYPE_TINY));
+		tryShouldFail<int8_t>(mySQLValue_t("1023", 5, MYSQL_TYPE_TINY));
+		tryShouldFail<int8_t>(mySQLValue_t("1-27", 5, MYSQL_TYPE_TINY));
 	}
 
 	void testUint16()
 	{
-		tryShouldFail([]() { mySQLValue_t(nullptr, 0, MYSQL_TYPE_SHORT).asUint16(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_NULL).asUint16(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR).asUint16(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_TINY).asUint16(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONG).asUint16(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG).asUint16(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_BLOB).asUint16(); });
-
-		tryOk([this]()
-		{
-			assertEqual(mySQLValue_t("128", 4, MYSQL_TYPE_SHORT).asUint16(), 128);
-			assertEqual(mySQLValue_t("255", 4, MYSQL_TYPE_SHORT).asUint16(), 255);
-			assertEqual(mySQLValue_t("32768", 6, MYSQL_TYPE_SHORT).asUint16(), 32768);
-			assertEqual(mySQLValue_t("65535", 6, MYSQL_TYPE_SHORT).asUint16(), 65535);
-			assertEqual(mySQLValue_t("", 1, MYSQL_TYPE_SHORT).asUint16(), 0);
-			assertEqual(mySQLValue_t("", 0, MYSQL_TYPE_SHORT).asUint16(), 0);
-		});
-		tryShouldFail([]() { mySQLValue_t("-1", 3, MYSQL_TYPE_SHORT).asUint16(); });
-		tryShouldFail([]() { mySQLValue_t("a", 2, MYSQL_TYPE_SHORT).asUint16(); });
-		tryShouldFail([]() { mySQLValue_t("65536", 6, MYSQL_TYPE_SHORT).asUint16(); });
-		tryShouldFail([]() { mySQLValue_t("262144", 7, MYSQL_TYPE_SHORT).asUint16(); });
+		tryShouldFail<uint16_t>(mySQLValue_t(nullptr, 0, MYSQL_TYPE_SHORT));
+		tryShouldFail<uint16_t>(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
+		tryShouldFail<uint16_t>(mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR));
+		tryShouldFail<uint16_t>(mySQLValue_t("", 0, MYSQL_TYPE_TINY));
+		tryShouldFail<uint16_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONG));
+		tryShouldFail<uint16_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG));
+		tryShouldFail<uint16_t>(mySQLValue_t("", 0, MYSQL_TYPE_BLOB));
+		tryOk<uint16_t>(mySQLValue_t("128", 4, MYSQL_TYPE_SHORT), 128);
+		tryOk<uint16_t>(mySQLValue_t("255", 4, MYSQL_TYPE_SHORT), 255);
+		tryOk<uint16_t>(mySQLValue_t("32768", 6, MYSQL_TYPE_SHORT), 32768);
+		tryOk<uint16_t>(mySQLValue_t("65535", 6, MYSQL_TYPE_SHORT), 65535);
+		tryOk<uint16_t>(mySQLValue_t("", 1, MYSQL_TYPE_SHORT), 0);
+		tryOk<uint16_t>(mySQLValue_t("", 0, MYSQL_TYPE_SHORT), 0);
+		tryShouldFail<uint16_t>(mySQLValue_t("-1", 3, MYSQL_TYPE_SHORT));
+		tryShouldFail<uint16_t>(mySQLValue_t("a", 2, MYSQL_TYPE_SHORT));
+		tryShouldFail<uint16_t>(mySQLValue_t("65536", 6, MYSQL_TYPE_SHORT));
+		tryShouldFail<uint16_t>(mySQLValue_t("262144", 7, MYSQL_TYPE_SHORT));
 	}
 
 	void testInt16()
 	{
-		tryShouldFail([]() { mySQLValue_t(nullptr, 0, MYSQL_TYPE_SHORT).asInt16(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_NULL).asInt16(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR).asInt16(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_TINY).asInt16(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONG).asInt16(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG).asInt16(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_BLOB).asInt16(); });
-
-		tryOk([this]()
-		{
-			assertEqual(mySQLValue_t("127", 4, MYSQL_TYPE_SHORT).asInt16(), 127);
-			assertEqual(mySQLValue_t("32767", 6, MYSQL_TYPE_SHORT).asInt16(), 32767);
-			assertEqual(mySQLValue_t("", 1, MYSQL_TYPE_SHORT).asInt16(), 0);
-			assertEqual(mySQLValue_t("", 0, MYSQL_TYPE_SHORT).asInt16(), 0);
-			assertEqual(mySQLValue_t("-1", 3, MYSQL_TYPE_SHORT).asInt16(), -1);
-			assertEqual(mySQLValue_t("-32767", 7, MYSQL_TYPE_SHORT).asInt16(), -32767);
-			assertEqual(mySQLValue_t("-32768", 7, MYSQL_TYPE_SHORT).asInt16(), -32768);
-		});
-		tryShouldFail([]() { mySQLValue_t("a", 2, MYSQL_TYPE_SHORT).asInt16(); });
-		tryShouldFail([]() { mySQLValue_t("65536", 6, MYSQL_TYPE_SHORT).asInt16(); });
-		//tryShouldFail([]() { mySQLValue_t("-129", 5, MYSQL_TYPE_SHORT).asInt16(); });
-		tryShouldFail([]() { mySQLValue_t("262144", 7, MYSQL_TYPE_SHORT).asInt16(); });
-		tryShouldFail([]() { mySQLValue_t("1-27", 5, MYSQL_TYPE_SHORT).asInt16(); });
+		tryShouldFail<int16_t>(mySQLValue_t(nullptr, 0, MYSQL_TYPE_SHORT));
+		tryShouldFail<int16_t>(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
+		tryShouldFail<int16_t>(mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR));
+		tryShouldFail<int16_t>(mySQLValue_t("", 0, MYSQL_TYPE_TINY));
+		tryShouldFail<int16_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONG));
+		tryShouldFail<int16_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG));
+		tryShouldFail<int16_t>(mySQLValue_t("", 0, MYSQL_TYPE_BLOB));
+		tryOk<int16_t>(mySQLValue_t("127", 4, MYSQL_TYPE_SHORT), 127);
+		tryOk<int16_t>(mySQLValue_t("32767", 6, MYSQL_TYPE_SHORT), 32767);
+		tryOk<int16_t>(mySQLValue_t("", 1, MYSQL_TYPE_SHORT), 0);
+		tryOk<int16_t>(mySQLValue_t("", 0, MYSQL_TYPE_SHORT), 0);
+		tryOk<int16_t>(mySQLValue_t("-1", 3, MYSQL_TYPE_SHORT), -1);
+		tryOk<int16_t>(mySQLValue_t("-32767", 7, MYSQL_TYPE_SHORT), -32767);
+		tryOk<int16_t>(mySQLValue_t("-32768", 7, MYSQL_TYPE_SHORT), -32768);
+		tryShouldFail<int16_t>(mySQLValue_t("a", 2, MYSQL_TYPE_SHORT));
+		tryShouldFail<int16_t>(mySQLValue_t("65536", 6, MYSQL_TYPE_SHORT));
+		//tryShouldFail<int16_t>(mySQLValue_t("-129", 5, MYSQL_TYPE_SHORT));
+		tryShouldFail<int16_t>(mySQLValue_t("262144", 7, MYSQL_TYPE_SHORT));
+		tryShouldFail<int16_t>(mySQLValue_t("1-27", 5, MYSQL_TYPE_SHORT));
 	}
 
 	void testUint32()
 	{
-		tryShouldFail([]() { mySQLValue_t(nullptr, 0, MYSQL_TYPE_LONG).asUint32(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_NULL).asUint32(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR).asUint32(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_TINY).asUint32(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_SHORT).asUint32(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG).asUint32(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_BLOB).asUint32(); });
-
-		tryOk([this]()
-		{
-			assertEqual(mySQLValue_t("128", 4, MYSQL_TYPE_LONG).asUint32(), 128);
-			assertEqual(mySQLValue_t("255", 4, MYSQL_TYPE_LONG).asUint32(), 255);
-			assertEqual(mySQLValue_t("32768", 6, MYSQL_TYPE_LONG).asUint32(), 32768);
-			assertEqual(mySQLValue_t("65535", 6, MYSQL_TYPE_LONG).asUint32(), 65535);
-			assertEqual(mySQLValue_t("2147483648", 11, MYSQL_TYPE_LONG).asUint32(), 2147483648);
-			assertEqual(mySQLValue_t("4294967295", 11, MYSQL_TYPE_LONG).asUint32(), 4294967295);
-			assertEqual(mySQLValue_t("", 1, MYSQL_TYPE_LONG).asUint32(), 0);
-			assertEqual(mySQLValue_t("", 0, MYSQL_TYPE_LONG).asUint32(), 0);
-		});
-		tryShouldFail([]() { mySQLValue_t("-1", 3, MYSQL_TYPE_LONG).asUint32(); });
-		tryShouldFail([]() { mySQLValue_t("a", 2, MYSQL_TYPE_LONG).asUint32(); });
-		tryShouldFail([]() { mySQLValue_t("4294967296", 11, MYSQL_TYPE_LONG).asUint32(); });
-		tryShouldFail([]() { mySQLValue_t("17179869184", 12, MYSQL_TYPE_LONG).asUint32(); });
+		tryShouldFail<uint32_t>(mySQLValue_t(nullptr, 0, MYSQL_TYPE_LONG));
+		tryShouldFail<uint32_t>(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
+		tryShouldFail<uint32_t>(mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR));
+		tryShouldFail<uint32_t>(mySQLValue_t("", 0, MYSQL_TYPE_TINY));
+		tryShouldFail<uint32_t>(mySQLValue_t("", 0, MYSQL_TYPE_SHORT));
+		tryShouldFail<uint32_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG));
+		tryShouldFail<uint32_t>(mySQLValue_t("", 0, MYSQL_TYPE_BLOB));
+		tryOk<uint32_t>(mySQLValue_t("128", 4, MYSQL_TYPE_LONG), 128);
+		tryOk<uint32_t>(mySQLValue_t("255", 4, MYSQL_TYPE_LONG), 255);
+		tryOk<uint32_t>(mySQLValue_t("32768", 6, MYSQL_TYPE_LONG), 32768);
+		tryOk<uint32_t>(mySQLValue_t("65535", 6, MYSQL_TYPE_LONG), 65535);
+		tryOk<uint32_t>(mySQLValue_t("2147483648", 11, MYSQL_TYPE_LONG), 2147483648);
+		tryOk<uint32_t>(mySQLValue_t("4294967295", 11, MYSQL_TYPE_LONG), 4294967295);
+		tryOk<uint32_t>(mySQLValue_t("", 1, MYSQL_TYPE_LONG), 0);
+		tryOk<uint32_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONG), 0);
+		tryShouldFail<uint32_t>(mySQLValue_t("-1", 3, MYSQL_TYPE_LONG));
+		tryShouldFail<uint32_t>(mySQLValue_t("a", 2, MYSQL_TYPE_LONG));
+		tryShouldFail<uint32_t>(mySQLValue_t("4294967296", 11, MYSQL_TYPE_LONG));
+		tryShouldFail<uint32_t>(mySQLValue_t("17179869184", 12, MYSQL_TYPE_LONG));
 	}
 
 	void testInt32()
 	{
-		tryShouldFail([]() { mySQLValue_t(nullptr, 0, MYSQL_TYPE_LONG).asInt32(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_NULL).asInt32(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR).asInt32(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_TINY).asInt32(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_SHORT).asInt32(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG).asInt32(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_BLOB).asInt32(); });
-
-		tryOk([this]()
-		{
-			assertEqual(mySQLValue_t("127", 4, MYSQL_TYPE_LONG).asInt32(), 127);
-			assertEqual(mySQLValue_t("32767", 6, MYSQL_TYPE_LONG).asInt32(), 32767);
-			assertEqual(mySQLValue_t("2147483647", 11, MYSQL_TYPE_LONG).asInt32(), 2147483647);
-			assertEqual(mySQLValue_t("", 1, MYSQL_TYPE_LONG).asInt32(), 0);
-			assertEqual(mySQLValue_t("", 0, MYSQL_TYPE_LONG).asInt32(), 0);
-			assertEqual(mySQLValue_t("-1", 3, MYSQL_TYPE_LONG).asInt32(), -1);
-			assertEqual(mySQLValue_t("-2147483647", 12, MYSQL_TYPE_LONG).asInt32(), -2147483647);
-			assertEqual(mySQLValue_t("-2147483648", 12, MYSQL_TYPE_LONG).asInt32(), -2147483648);
-		});
-		tryShouldFail([]() { mySQLValue_t("a", 2, MYSQL_TYPE_LONG).asInt32(); });
-		tryShouldFail([]() { mySQLValue_t("4294967296", 11, MYSQL_TYPE_LONG).asInt32(); });
-		//tryShouldFail([]() { mySQLValue_t("-129", 5, MYSQL_TYPE_LONG).asInt32(); });
-		tryShouldFail([]() { mySQLValue_t("17179869184", 12, MYSQL_TYPE_LONG).asInt32(); });
-		tryShouldFail([]() { mySQLValue_t("1-27", 5, MYSQL_TYPE_LONG).asInt32(); });
+		tryShouldFail<int32_t>(mySQLValue_t(nullptr, 0, MYSQL_TYPE_LONG));
+		tryShouldFail<int32_t>(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
+		tryShouldFail<int32_t>(mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR));
+		tryShouldFail<int32_t>(mySQLValue_t("", 0, MYSQL_TYPE_TINY));
+		tryShouldFail<int32_t>(mySQLValue_t("", 0, MYSQL_TYPE_SHORT));
+		tryShouldFail<int32_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG));
+		tryShouldFail<int32_t>(mySQLValue_t("", 0, MYSQL_TYPE_BLOB));
+		tryOk<int32_t>(mySQLValue_t("127", 4, MYSQL_TYPE_LONG), 127);
+		tryOk<int32_t>(mySQLValue_t("32767", 6, MYSQL_TYPE_LONG), 32767);
+		tryOk<int32_t>(mySQLValue_t("2147483647", 11, MYSQL_TYPE_LONG), 2147483647);
+		tryOk<int32_t>(mySQLValue_t("", 1, MYSQL_TYPE_LONG), 0);
+		tryOk<int32_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONG), 0);
+		tryOk<int32_t>(mySQLValue_t("-1", 3, MYSQL_TYPE_LONG), -1);
+		tryOk<int32_t>(mySQLValue_t("-2147483647", 12, MYSQL_TYPE_LONG), -2147483647);
+		tryOk<int32_t>(mySQLValue_t("-2147483648", 12, MYSQL_TYPE_LONG), -2147483648);
+		tryShouldFail<int32_t>(mySQLValue_t("a", 2, MYSQL_TYPE_LONG));
+		tryShouldFail<int32_t>(mySQLValue_t("4294967296", 11, MYSQL_TYPE_LONG));
+		//tryShouldFail<int32_t>(mySQLValue_t("-129", 5, MYSQL_TYPE_LONG));
+		tryShouldFail<int32_t>(mySQLValue_t("17179869184", 12, MYSQL_TYPE_LONG));
+		tryShouldFail<int32_t>(mySQLValue_t("1-27", 5, MYSQL_TYPE_LONG));
 	}
 
 	void testUint64()
 	{
-		tryShouldFail([]() { mySQLValue_t(nullptr, 0, MYSQL_TYPE_LONGLONG).asUint64(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_NULL).asUint64(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR).asUint64(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_TINY).asUint64(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_SHORT).asUint64(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONG).asUint64(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_BLOB).asUint64(); });
-
-		tryOk([this]()
-		{
-			assertEqual(mySQLValue_t("128", 4, MYSQL_TYPE_LONGLONG).asUint64(), 128);
-			assertEqual(mySQLValue_t("255", 4, MYSQL_TYPE_LONGLONG).asUint64(), 255);
-			assertEqual(mySQLValue_t("32768", 6, MYSQL_TYPE_LONGLONG).asUint64(), 32768);
-			assertEqual(mySQLValue_t("65535", 6, MYSQL_TYPE_LONGLONG).asUint64(), 65535);
-			assertEqual(mySQLValue_t("2147483648", 11, MYSQL_TYPE_LONGLONG).asUint64(), 2147483648);
-			assertEqual(mySQLValue_t("4294967295", 11, MYSQL_TYPE_LONGLONG).asUint64(), 4294967295);
-			assertEqual(mySQLValue_t("9223372036854775808", 20, MYSQL_TYPE_LONGLONG).asUint64(), 9223372036854775808U);
-			assertEqual(mySQLValue_t("18446744073709551615", 21, MYSQL_TYPE_LONGLONG).asUint64(), 18446744073709551615U);
-			assertEqual(mySQLValue_t("", 1, MYSQL_TYPE_LONGLONG).asUint64(), 0);
-			assertEqual(mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG).asUint64(), 0);
-		});
-		tryShouldFail([]() { mySQLValue_t("-1", 3, MYSQL_TYPE_LONGLONG).asUint64(); });
-		tryShouldFail([]() { mySQLValue_t("a", 2, MYSQL_TYPE_LONGLONG).asUint64(); });
-		tryShouldFail([]() { mySQLValue_t("18446744073709551616", 21, MYSQL_TYPE_LONGLONG).asUint64(); });
-		tryShouldFail([]() { mySQLValue_t("73786976294838206464", 21, MYSQL_TYPE_LONGLONG).asUint64(); });
+		tryShouldFail<uint64_t>(mySQLValue_t(nullptr, 0, MYSQL_TYPE_LONGLONG));
+		tryShouldFail<uint64_t>(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
+		tryShouldFail<uint64_t>(mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR));
+		tryShouldFail<uint64_t>(mySQLValue_t("", 0, MYSQL_TYPE_TINY));
+		tryShouldFail<uint64_t>(mySQLValue_t("", 0, MYSQL_TYPE_SHORT));
+		tryShouldFail<uint64_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONG));
+		tryShouldFail<uint64_t>(mySQLValue_t("", 0, MYSQL_TYPE_BLOB));
+		tryOk<uint64_t>(mySQLValue_t("128", 4, MYSQL_TYPE_LONGLONG), 128);
+		tryOk<uint64_t>(mySQLValue_t("255", 4, MYSQL_TYPE_LONGLONG), 255);
+		tryOk<uint64_t>(mySQLValue_t("32768", 6, MYSQL_TYPE_LONGLONG), 32768);
+		tryOk<uint64_t>(mySQLValue_t("65535", 6, MYSQL_TYPE_LONGLONG), 65535);
+		tryOk<uint64_t>(mySQLValue_t("2147483648", 11, MYSQL_TYPE_LONGLONG), 2147483648);
+		tryOk<uint64_t>(mySQLValue_t("4294967295", 11, MYSQL_TYPE_LONGLONG), 4294967295);
+		tryOk<uint64_t>(mySQLValue_t("9223372036854775808", 20, MYSQL_TYPE_LONGLONG), 9223372036854775808U);
+		tryOk<uint64_t>(mySQLValue_t("18446744073709551615", 21, MYSQL_TYPE_LONGLONG), 18446744073709551615U);
+		tryOk<uint64_t>(mySQLValue_t("", 1, MYSQL_TYPE_LONGLONG), 0);
+		tryOk<uint64_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG), 0);
+		tryShouldFail<uint64_t>(mySQLValue_t("-1", 3, MYSQL_TYPE_LONGLONG));
+		tryShouldFail<uint64_t>(mySQLValue_t("a", 2, MYSQL_TYPE_LONGLONG));
+		tryShouldFail<uint64_t>(mySQLValue_t("18446744073709551616", 21, MYSQL_TYPE_LONGLONG));
+		tryShouldFail<uint64_t>(mySQLValue_t("73786976294838206464", 21, MYSQL_TYPE_LONGLONG));
 	}
 
 	void testInt64()
 	{
-		tryShouldFail([]() { mySQLValue_t(nullptr, 0, MYSQL_TYPE_LONGLONG).asInt64(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_NULL).asInt64(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR).asInt64(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_TINY).asInt64(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_SHORT).asInt64(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_LONG).asInt64(); });
-		tryShouldFail([]() { mySQLValue_t("", 0, MYSQL_TYPE_BLOB).asInt64(); });
-
-		tryOk([this]()
-		{
-			assertEqual(mySQLValue_t("127", 4, MYSQL_TYPE_LONGLONG).asInt64(), 127);
-			assertEqual(mySQLValue_t("32767", 6, MYSQL_TYPE_LONGLONG).asInt64(), 32767);
-			assertEqual(mySQLValue_t("2147483647", 11, MYSQL_TYPE_LONGLONG).asInt64(), 2147483647);
-			assertEqual(mySQLValue_t("9223372036854775807", 20, MYSQL_TYPE_LONGLONG).asInt64(), 9223372036854775807U);
-			assertEqual(mySQLValue_t("", 1, MYSQL_TYPE_LONGLONG).asInt64(), 0);
-			assertEqual(mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG).asInt64(), 0);
-			assertEqual(mySQLValue_t("-1", 3, MYSQL_TYPE_LONGLONG).asInt64(), -1);
-			assertEqual(mySQLValue_t("-9223372036854775807", 21, MYSQL_TYPE_LONGLONG).asInt64(), -9223372036854775807);
-			assertEqual(mySQLValue_t("-9223372036854775808", 21, MYSQL_TYPE_LONGLONG).asInt64(), -9223372036854775808);
-		});
-		tryShouldFail([]() { mySQLValue_t("a", 2, MYSQL_TYPE_LONGLONG).asInt64(); });
-		tryShouldFail([]() { mySQLValue_t("18446744073709551616", 21, MYSQL_TYPE_LONGLONG).asInt64(); });
-		//tryShouldFail([]() { mySQLValue_t("-129", 5, MYSQL_TYPE_LONGLONG).asInt64(); });
-		tryShouldFail([]() { mySQLValue_t("73786976294838206464", 21, MYSQL_TYPE_LONGLONG).asInt64(); });
-		tryShouldFail([]() { mySQLValue_t("1-27", 5, MYSQL_TYPE_LONGLONG).asInt64(); });
+		tryShouldFail<int64_t>(mySQLValue_t(nullptr, 0, MYSQL_TYPE_LONGLONG));
+		tryShouldFail<int64_t>(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
+		tryShouldFail<int64_t>(mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR));
+		tryShouldFail<int64_t>(mySQLValue_t("", 0, MYSQL_TYPE_TINY));
+		tryShouldFail<int64_t>(mySQLValue_t("", 0, MYSQL_TYPE_SHORT));
+		tryShouldFail<int64_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONG));
+		tryShouldFail<int64_t>(mySQLValue_t("", 0, MYSQL_TYPE_BLOB));
+		tryOk<int64_t>(mySQLValue_t("127", 4, MYSQL_TYPE_LONGLONG), 127);
+		tryOk<int64_t>(mySQLValue_t("32767", 6, MYSQL_TYPE_LONGLONG), 32767);
+		tryOk<int64_t>(mySQLValue_t("2147483647", 11, MYSQL_TYPE_LONGLONG), 2147483647);
+		tryOk<int64_t>(mySQLValue_t("9223372036854775807", 20, MYSQL_TYPE_LONGLONG), 9223372036854775807U);
+		tryOk<int64_t>(mySQLValue_t("", 1, MYSQL_TYPE_LONGLONG), 0);
+		tryOk<int64_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG), 0);
+		tryOk<int64_t>(mySQLValue_t("-1", 3, MYSQL_TYPE_LONGLONG), -1);
+		tryOk<int64_t>(mySQLValue_t("-9223372036854775807", 21, MYSQL_TYPE_LONGLONG), -9223372036854775807);
+		tryOk<int64_t>(mySQLValue_t("-9223372036854775808", 21, MYSQL_TYPE_LONGLONG), -9223372036854775808);
+		tryShouldFail<int64_t>(mySQLValue_t("a", 2, MYSQL_TYPE_LONGLONG));
+		tryShouldFail<int64_t>(mySQLValue_t("18446744073709551616", 21, MYSQL_TYPE_LONGLONG));
+		//tryShouldFail<int64_t>(mySQLValue_t("-129", 5, MYSQL_TYPE_LONGLONG));
+		tryShouldFail<int64_t>(mySQLValue_t("73786976294838206464", 21, MYSQL_TYPE_LONGLONG));
+		tryShouldFail<int64_t>(mySQLValue_t("1-27", 5, MYSQL_TYPE_LONGLONG));
 	}
 
 	void testError()
@@ -289,6 +276,7 @@ public:
 
 	void registerTests() final override
 	{
+		CXX_TEST(testNull)
 		CXX_TEST(testString)
 		CXX_TEST(testUint8)
 		CXX_TEST(testInt8)
