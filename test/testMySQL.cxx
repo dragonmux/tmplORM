@@ -16,7 +16,7 @@
 
 using namespace tmplORM::mysql::driver;
 
-class testMySQLValue final : public testsuit
+class testMySQLValue_t final : public testsuit
 {
 private:
 	void tryOk(const std::function<void()> tests)
@@ -302,7 +302,7 @@ public:
 	}
 };
 
-class testMySQL final : public testsuit
+class testMySQL_t final : public testsuit
 {
 	const std::array<const char *const, 3> embeddedOptions =
 		{{"mysql_tests", "--defaults-file=test.ini", nullptr}};
@@ -385,5 +385,5 @@ public:
 CRUNCH_API void registerCXXTests() noexcept;
 void registerCXXTests() noexcept
 {
-	registerTestClasses<testMySQLValue, testMySQL>();
+	registerTestClasses<testMySQLValue_t, testMySQL_t>();
 }
