@@ -2,6 +2,13 @@
 #include <cstring>
 #include <new>
 
+/*!
+ * @file
+ * @author Rachel Mant
+ * @date 2016-2017
+ * @brief Implementation of various string helpers which ideally would be in the STL
+ */
+
 std::unique_ptr<const char []> formatString(const char *format, ...) noexcept
 {
 	va_list args;
@@ -15,7 +22,7 @@ std::unique_ptr<const char []> vaFormatString(const char *format, va_list args) 
 {
 	va_list lenArgs;
 	va_copy(lenArgs, args);
-	const size_t len = vsnprintf(NULL, 0, format, lenArgs) + 1;
+	const size_t len = vsnprintf(nullptr, 0, format, lenArgs) + 1;
 	va_end(lenArgs);
 	auto ret = makeUnique<char []>(len);
 	if (!ret)
@@ -40,6 +47,11 @@ inline bool isMultiValid() noexcept { return true; }
 template<typename... values_t> inline bool isMultiValid(const char c, values_t ...values) noexcept
 	{ return (c & 0xC0) == 0x80 && isMultiValid(values...); }
 
+/*!
+ * @internal
+ * @brief Safe array indexing function
+ * @returns either the value at the given index, or -1 if outside the bounds of the array
+ */
 template<typename T> inline T safeIndex(const T *const str, const size_t index, const size_t len) noexcept
 {
 	if (index >= len)
@@ -47,6 +59,13 @@ template<typename T> inline T safeIndex(const T *const str, const size_t index, 
 	return str[index];
 }
 
+/*!
+ * @internal
+ * @brief Counts the number of code units needed to represent the input UTF-8 string as a UTF-16 string
+ * @param str The input UTF-8 encoded unicode string
+ * @returns the number of code units required, or 0 if there was an error in the input string
+ * @sa http://en.wikipedia.org/wiki/UTF-8
+ */
 size_t countUnits(const char *const str) noexcept
 {
 	const size_t len = utf16::length(str);
@@ -69,13 +88,13 @@ size_t countUnits(const char *const str) noexcept
 				// 3 code units.. check that the second and third units are valid and return 0 if not
 				if (!isMultiValid(byteB, safeIndex(str, ++i, len)))
 					return 0;
-				// (needs re-commenting)
+				// Also check that the code unit is valid (not D800-DF00)
 				else if ((byteA & 0x0F) == 0x0D && (byteB & 0x20))
 					return 0;
 			}
 			else if ((byteA & 0x78) == 0x70)
 			{
-				// 4 code units.. check that the second, third and fourth unit is valid
+				// 4 code units.. check that the second, third and fourth units are valid
 				if (!isMultiValid(byteB, safeIndex(str, i + 1, len), safeIndex(str, i + 2, len)))
 					return 0;
 				i += 2;
@@ -89,6 +108,13 @@ size_t countUnits(const char *const str) noexcept
 	return count;
 }
 
+/*!
+ * @internal
+ * @brief Counts the number of code units needed to represent the input UTF-16 string as a UTF-8 string
+ * @param str The input UTF-16 encoded unicode string
+ * @returns the number of code units required, or 0 if there was an error in the input string
+ * @sa http://en.wikipedia.org/wiki/UTF-16
+ */
 size_t countUnits(const char16_t *const str) noexcept
 {
 	const size_t len = utf16::length(str);
@@ -125,7 +151,7 @@ size_t countUnits(const char16_t *const str) noexcept
 
 utf16_t utf16::convert(const char *const str) noexcept
 {
-	const size_t lenUTF8 = utf16::length(str) + 1;
+	const size_t lenUTF8 = utf16::length(str);
 	const size_t lenUTF16 = countUnits(str);
 	auto result = makeUnique<char16_t []>(lenUTF16);
 	if (!result || !lenUTF16)
@@ -163,7 +189,7 @@ utf16_t utf16::convert(const char *const str) noexcept
 
 utf8_t utf16::convert(const char16_t *const str) noexcept
 {
-	const size_t lenUTF16 = utf16::length(str) + 1;
+	const size_t lenUTF16 = utf16::length(str);
 	const size_t lenUTF8 = countUnits(str);
 	auto result = makeUnique<char []>(lenUTF8);
 	if (!result || !lenUTF8)
@@ -174,9 +200,9 @@ utf8_t utf16::convert(const char16_t *const str) noexcept
 		// Surrogate pair?
 		if ((uintA & 0xFE00) == 0xD800)
 		{
-			// Recover the upper 10 (11) bits from the first surrogate pair.
+			// Recover the upper 10 (11) bits from the first surrogate of the pair.
 			const char16_t upper = (uintA & 0x03FF) + 0x0040;
-			// Recover the lower 10 bits from the second surrogate pair.
+			// Recover the lower 10 bits from the second surrogate of the pair.
 			const char16_t lower = safeIndex(str, ++i, lenUTF16) & 0x03FF;
 
 			result[j] = char(0xF0) | (char(upper >> 8) & 0x07);
