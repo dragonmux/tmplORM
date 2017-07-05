@@ -224,7 +224,7 @@ inline namespace common
 
 	/*! @brief End (base) case for bindUpdate_t that terminates the recursion */
 	template<size_t keyBindIndex, typename... fields> struct bindUpdate_t<0, 0, keyBindIndex, fields...>
-		{ template<typename query_t> static void bind(const std::tuple<fields...> &, query_t &) { } };
+		{ template<typename query_t> static void bind(const std::tuple<fields...> &, query_t &) noexcept { } };
 	/*! @brief Helper type for bindUpdate_t that makes the binding type easier to use */
 	template<typename... fields> using bindUpdate = bindUpdate_t<sizeof...(fields), countUpdate_t<fields...>::count, sizeof...(fields), fields...>;
 

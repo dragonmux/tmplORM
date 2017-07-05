@@ -37,7 +37,7 @@ private:
 		catch (const mySQLValueError_t &) { }
 	}
 
-	template<typename T> T tryOk(const mySQLValue_t &value, const T expected)
+	template<typename T> void tryOk(const mySQLValue_t &value, const T expected)
 	{
 		assertFalse(value.isNull());
 		T var = tryOkConversion<T>(value);
