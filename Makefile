@@ -14,10 +14,11 @@ SED = sed -e 's:@LIBDIR@:$(LIBDIR):g' -e 's:@PREFIX@:$(PREFIX):g' -e 's:@VERSION
 
 PREFIX ?= /usr
 LIBDIR ?= $(PREFIX)/lib
+PKGDIR = $(LIBDIR)/pkgconfig/
 INCDIR = $(PREFIX)/include/tmplORM
 
 O = string.o mysql.o mssql.o
-H = tmplORM.hxx tmplORM.mysql.hxx tmplORM.mssql.hxx
+H = mysql.hxx mssql.hxx tmplORM.hxx tmplORM.mysql.hxx tmplORM.mssql.hxx tmplORM.common.hxx tmplORM.extern.hxx
 GCH = tmplORM.gch tmplORM.mysql.gch tmplORM.mssql.gch
 VERMAJ = .0
 VERMIN = $(VERMAJ).0
