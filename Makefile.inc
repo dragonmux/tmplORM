@@ -53,6 +53,8 @@ quiet_cmd_install_file = " INSTALL $(2) => $(3)"
 cmd_install_file = $(INSTALL_FILE) $(2) $(3)
 quiet_cmd_install_bin = " INSTALL $(2) => $(3)"
 cmd_install_bin = $(INSTALL_BIN) $(2) $(3)
+quiet_cmd_sed = " GEN   $(3)"
+cmd_sed = $(SED) $(2) > $(3)
 quiet_cmd_ldconfig = " LDCONFIG"
 cmd_ldconfig = ldconfig
 

@@ -10,12 +10,22 @@ LIBS = $(shell mysql_config --libs) -lodbc
 #$(shell pkg-config --libs $(PKG_CONFIG_PKGS))
 LFLAGS = $(OPTIM_FLAGS) -shared $(O) $(LIBS) -o $@
 
+SED = sed -e 's:@LIBDIR@:$(LIBDIR):g' -e 's:@PREFIX@:$(PREFIX):g' -e 's:@VERSION@:$(VER):g'
+
 PREFIX ?= /usr
 LIBDIR ?= $(PREFIX)/lib
+INCDIR = $(PREFIX)/include/tmplORM
 
 O = string.o mysql.o mssql.o
+H = tmplORM.hxx tmplORM.mysql.hxx tmplORM.mssql.hxx
 GCH = tmplORM.gch tmplORM.mysql.gch tmplORM.mssql.gch
+VERMAJ = .0
+VERMIN = $(VERMAJ).0
+VERREV = $(VERMIN).1
+VER = $(VERREV)
 SO = libtmplORM.so
+PC = tmplORM.pc
+IN = tmplORM.pc.in
 
 DEPS = .dep
 
@@ -23,12 +33,25 @@ default: all
 
 all: $(DEPS) $(SO) $(GCH)
 
-$(DEPS):
+$(DEPS) $(LIBDIR) $(PKGDIR) $(INCDIR):
 	$(call run-cmd,install_dir,$@)
+
+install: all $(LIBDIR) $(PKGDIR) $(INCDIR) $(PC)
+	$(call run-cmd,install_file,$(addsuffix $(VER),$(SO)),$(LIBDIR))
+	$(call run-cmd,install_file,$(PC),$(PKGDIR))
+	$(call run-cmd,install_file,$(H),$(INCDIR))
+	$(call run-cmd,ln,$(LIBDIR)/$(SO)$(VERREV),$(LIBDIR)/$(SO)$(VERMIN))
+	$(call run-cmd,ln,$(LIBDIR)/$(SO)$(VERMIN),$(LIBDIR)/$(SO)$(VERMAJ))
+	$(call run-cmd,ln,$(LIBDIR)/$(SO)$(VERMAJ),$(LIBDIR)/$(SO))
+	$(call ldconfig)
 
 $(SO): $(O)
 	$(call run-cmd,ccld,$(LFLAGS))
-	$(call debug-strip,$(SO))
+	$(call debug-strip,$@)
+	$(call run-cmd,ln,$@,$@$(VER))
+
+%.pc: %.pc.in
+	$(call run-cmd,sed,$<,$@)
 
 %.o: %.cxx $(DEPS)
 	$(call makedep,$(CXX),$(DEPFLAGS))
@@ -45,6 +68,6 @@ clean:
 	$(call run-cmd,rm,makedep,.dep/*.d)
 
 #mysql.o: CFLAGS_EXTRA += $(shell mysql_config --include)
-.PHONY: default all clean test
-.SUFIXES: .cxx .hxx
+.PHONY: default all clean tests check
+.SUFIXES: .cxx .hxx .o .gch
 -include .dep/*.d
