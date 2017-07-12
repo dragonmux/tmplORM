@@ -18,7 +18,7 @@ PKGDIR = $(LIBDIR)/pkgconfig/
 INCDIR = $(PREFIX)/include/tmplORM
 
 O = string.o mysql.o mssql.o
-H = mysql.hxx mssql.hxx tmplORM.hxx tmplORM.mysql.hxx tmplORM.mssql.hxx tmplORM.common.hxx tmplORM.extern.hxx
+H = mysql.hxx mssql.hxx tmplORM.hxx tmplORM.mysql.hxx tmplORM.mssql.hxx tmplORM.common.hxx tmplORM.types.hxx tmplORM.extern.hxx
 GCH = tmplORM.gch tmplORM.mysql.gch tmplORM.mssql.gch
 VERMAJ = .0
 VERMIN = $(VERMAJ).0
@@ -54,7 +54,7 @@ $(SO): $(O)
 %.pc: %.pc.in
 	$(call run-cmd,sed,$<,$@)
 
-%.o: %.cxx $(DEPS)
+%.o: %.cxx | $(DEPS)
 	$(call makedep,$(CXX),$(DEPFLAGS))
 	$(call run-cmd,cxx,$(CFLAGS))
 

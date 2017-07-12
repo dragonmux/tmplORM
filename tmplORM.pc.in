@@ -19,7 +19,7 @@
 prefix=@PREFIX@
 exec_prefix=${prefix}
 libdir=@LIBDIR@
-includedir=${prefix}/include
+includedir=${prefix}/include/tmplORM
 
 Name: tmplORM
 Description: The tmplORM template meta-programming ORM's C++ runtime
