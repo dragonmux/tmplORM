@@ -65,8 +65,14 @@ buildCheck: buildCheck.o
 	$(call run-cmd,ccld,$(OPTIM_FLAGS) $(O) $(LIBS) -o $@ buildCheck.o)
 
 clean:
-	$(call run-cmd,rm,tmplORM,$(O) $(SO) $(GCH))
+	$(call run-cmd,rm,tmplORM,$(O) $(SO)* $(GCH) buildCheck.o)
 	$(call run-cmd,rm,makedep,.dep/*.d)
+
+tests: all test
+	@$(MAKE) -C test
+
+check: all test
+	@$(MAKE) -C test check
 
 #mysql.o: CFLAGS_EXTRA += $(shell mysql_config --include)
 .PHONY: default all clean tests check
