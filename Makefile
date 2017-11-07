@@ -6,7 +6,7 @@ CFLAGS_EXTRA = $(shell mysql_config --include)
 DEFS = $(OPTIM_FLAGS) -Wall -Wextra -pedantic -std=c++11 $(CFLAGS_EXTRA)
 CFLAGS = -c $(DEFS) -o $@ $<
 DEPFLAGS = -E -MM $(DEFS) -o .dep/$*.d $<
-LIBS = $(shell mysql_config --libs) -lodbc
+LIBS = $(shell mysql_config --libs) -lodbc -ldl -pthread
 #$(shell pkg-config --libs $(PKG_CONFIG_PKGS))
 LFLAGS = $(OPTIM_FLAGS) -shared $(O) $(LIBS) -o $@
 
@@ -14,7 +14,7 @@ SED = sed -e 's:@LIBDIR@:$(LIBDIR):g' -e 's:@PREFIX@:$(PREFIX):g' -e 's:@VERSION
 
 PREFIX ?= /usr
 LIBDIR ?= $(PREFIX)/lib
-PKGDIR = $(LIBDIR)/pkgconfig/
+PKGDIR = $(LIBDIR)/pkgconfig
 INCDIR = $(PREFIX)/include/tmplORM
 
 O = string.o mysql.o mssql.o
@@ -26,7 +26,6 @@ VERREV = $(VERMIN).1
 VER = $(VERREV)
 SO = libtmplORM.so
 PC = tmplORM.pc
-IN = tmplORM.pc.in
 
 DEPS = .dep
 
@@ -75,6 +74,6 @@ check: all test
 	@$(MAKE) -C test check
 
 #mysql.o: CFLAGS_EXTRA += $(shell mysql_config --include)
-.PHONY: default all clean tests check
+.PHONY: default all clean tests check install
 .SUFIXES: .cxx .hxx .o .gch
 -include .dep/*.d
