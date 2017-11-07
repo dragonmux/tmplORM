@@ -24,6 +24,7 @@ private:
 		try { return value; }
 		catch (const mySQLValueError_t &error)
 			{ fail(error.error()); }
+		return {};
 	}
 
 	template<typename T> void tryFailConversion(const mySQLValue_t &value)
