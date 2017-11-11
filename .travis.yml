@@ -1,10 +1,11 @@
 language: cpp
-sudo: false
+sudo: required
 
 before_install:
   - export GCC="$GCC -m64 -fPIC -DPIC" GXX="$GXX -m64 -fPIC -DPIC"
   - sudo -E apt-get -yq remove --purge libmysql++-dev
-  - sudo -E apt-get -yq install unixodbc-dev libmariadbd-dev mariadb-client
+  - sudo -E apt-get -yq install unixodbc-dev libmysqld-dev mysql-client
+# libmariadbd-dev mariadb-client
 install:
   - pushd $HOME/build
   - git clone https://github.com/DX-MON/crunch.git DX-MON/crunch
@@ -60,7 +61,7 @@ matrix:
             - gcc-4.9
             - g++-4.9
             - clang-4.0
-        mariadb: '10.1'
+#        mariadb: '10.1'
     - compiler: clang-5.0
       env: GCC=clang-5.0 GXX=clang++-5.0 COVERAGE=0
       addons:
@@ -73,7 +74,7 @@ matrix:
             - gcc-4.9
             - g++-4.9
             - clang-5.0
-        mariadb: '10.1'
+#        mariadb: '10.1'
     - compiler: gcc-5
       env: GCC=gcc-5 GXX=g++-5 COVERAGE=0
       addons:
@@ -83,7 +84,7 @@ matrix:
           packages:
             - gcc-5
             - g++-5
-        mariadb: '10.1'
+#        mariadb: '10.1'
     - compiler: gcc-5
       env: GCC=gcc-5 GXX=g++-5 GCOV=gcov-5
       addons:
@@ -93,7 +94,7 @@ matrix:
           packages:
             - gcc-5
             - g++-5
-        mariadb: '10.1'
+#        mariadb: '10.1'
     - compiler: gcc-6
       env: GCC=gcc-6 GXX=g++-6 GCOV=gcov-6
       addons:
@@ -103,7 +104,7 @@ matrix:
           packages:
             - gcc-6
             - g++-6
-        mariadb: '10.1'
+#        mariadb: '10.1'
     - compiler: gcc-7
       env: GCC=gcc-7 GXX=g++-7 GCOV=gcov-7
       addons:
@@ -113,7 +114,7 @@ matrix:
           packages:
             - gcc-7
             - g++-7
-        mariadb: '10.1'
+#        mariadb: '10.1'
 
 env:
   global:
