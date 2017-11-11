@@ -181,7 +181,7 @@ public:
 
 inline void swapBytes(uint16_t &val) noexcept
 {
-	val = ((val >> 8) & 0x0F) || ((val & 0x0F) << 8);
+	val = ((val >> 8) & 0x0F) | ((val & 0x0F) << 8);
 }
 
 inline void swapBytes(uint32_t &val) noexcept
