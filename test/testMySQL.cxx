@@ -45,9 +45,10 @@ private:
 		assertEqual(var, expected);
 	}
 
-	void tryIsNull(const mySQLValue_t &value)
+	template<typename T> void tryIsNull(const mySQLValue_t &value)
 	{
 		assertTrue(value.isNull());
+		tryFailConversion<T>(value);
 	}
 
 	template<typename T> void tryShouldFail(const mySQLValue_t &value)
@@ -61,14 +62,14 @@ public:
 	{
 		assertTrue(mySQLValue_t().isNull());
 		assertFalse(mySQLValue_t("", 1, MYSQL_TYPE_STRING).isNull());
-		tryShouldFail<uint8_t>(mySQLValue_t());
-		tryShouldFail<int8_t>(mySQLValue_t());
-		tryShouldFail<uint16_t>(mySQLValue_t());
-		tryShouldFail<int16_t>(mySQLValue_t());
-		tryShouldFail<uint32_t>(mySQLValue_t());
-		tryShouldFail<int32_t>(mySQLValue_t());
-		tryShouldFail<uint64_t>(mySQLValue_t());
-		tryShouldFail<int64_t>(mySQLValue_t());
+		tryIsNull<uint8_t>(mySQLValue_t());
+		tryIsNull<int8_t>(mySQLValue_t());
+		tryIsNull<uint16_t>(mySQLValue_t());
+		tryIsNull<int16_t>(mySQLValue_t());
+		tryIsNull<uint32_t>(mySQLValue_t());
+		tryIsNull<int32_t>(mySQLValue_t());
+		tryIsNull<uint64_t>(mySQLValue_t());
+		tryIsNull<int64_t>(mySQLValue_t());
 	}
 
 	void testString()
@@ -90,8 +91,8 @@ public:
 
 	void testUint8()
 	{
-		tryIsNull(mySQLValue_t(nullptr, 0, MYSQL_TYPE_TINY));
-		tryIsNull(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
+		tryIsNull<uint8_t>(mySQLValue_t(nullptr, 0, MYSQL_TYPE_TINY));
+		tryIsNull<uint8_t>(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
 		tryShouldFail<uint8_t>(mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR));
 		tryShouldFail<uint8_t>(mySQLValue_t("", 0, MYSQL_TYPE_SHORT));
 		tryShouldFail<uint8_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONG));
@@ -109,8 +110,8 @@ public:
 
 	void testInt8()
 	{
-		tryIsNull(mySQLValue_t(nullptr, 0, MYSQL_TYPE_TINY));
-		tryIsNull(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
+		tryIsNull<int8_t>(mySQLValue_t(nullptr, 0, MYSQL_TYPE_TINY));
+		tryIsNull<int8_t>(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
 		tryShouldFail<int8_t>(mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR));
 		tryShouldFail<int8_t>(mySQLValue_t("", 0, MYSQL_TYPE_SHORT));
 		tryShouldFail<int8_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONG));
@@ -131,8 +132,8 @@ public:
 
 	void testUint16()
 	{
-		tryIsNull(mySQLValue_t(nullptr, 0, MYSQL_TYPE_SHORT));
-		tryIsNull(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
+		tryIsNull<uint16_t>(mySQLValue_t(nullptr, 0, MYSQL_TYPE_SHORT));
+		tryIsNull<uint16_t>(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
 		tryShouldFail<uint16_t>(mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR));
 		tryShouldFail<uint16_t>(mySQLValue_t("", 0, MYSQL_TYPE_TINY));
 		tryShouldFail<uint16_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONG));
@@ -152,8 +153,8 @@ public:
 
 	void testInt16()
 	{
-		tryIsNull(mySQLValue_t(nullptr, 0, MYSQL_TYPE_SHORT));
-		tryIsNull(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
+		tryIsNull<int16_t>(mySQLValue_t(nullptr, 0, MYSQL_TYPE_SHORT));
+		tryIsNull<int16_t>(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
 		tryShouldFail<int16_t>(mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR));
 		tryShouldFail<int16_t>(mySQLValue_t("", 0, MYSQL_TYPE_TINY));
 		tryShouldFail<int16_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONG));
@@ -175,8 +176,8 @@ public:
 
 	void testUint32()
 	{
-		tryIsNull(mySQLValue_t(nullptr, 0, MYSQL_TYPE_LONG));
-		tryIsNull(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
+		tryIsNull<uint32_t>(mySQLValue_t(nullptr, 0, MYSQL_TYPE_LONG));
+		tryIsNull<uint32_t>(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
 		tryShouldFail<uint32_t>(mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR));
 		tryShouldFail<uint32_t>(mySQLValue_t("", 0, MYSQL_TYPE_TINY));
 		tryShouldFail<uint32_t>(mySQLValue_t("", 0, MYSQL_TYPE_SHORT));
@@ -198,8 +199,8 @@ public:
 
 	void testInt32()
 	{
-		tryIsNull(mySQLValue_t(nullptr, 0, MYSQL_TYPE_LONG));
-		tryIsNull(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
+		tryIsNull<int32_t>(mySQLValue_t(nullptr, 0, MYSQL_TYPE_LONG));
+		tryIsNull<int32_t>(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
 		tryShouldFail<int32_t>(mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR));
 		tryShouldFail<int32_t>(mySQLValue_t("", 0, MYSQL_TYPE_TINY));
 		tryShouldFail<int32_t>(mySQLValue_t("", 0, MYSQL_TYPE_SHORT));
@@ -222,8 +223,8 @@ public:
 
 	void testUint64()
 	{
-		tryIsNull(mySQLValue_t(nullptr, 0, MYSQL_TYPE_LONGLONG));
-		tryIsNull(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
+		tryIsNull<uint64_t>(mySQLValue_t(nullptr, 0, MYSQL_TYPE_LONGLONG));
+		tryIsNull<uint64_t>(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
 		tryShouldFail<uint64_t>(mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR));
 		tryShouldFail<uint64_t>(mySQLValue_t("", 0, MYSQL_TYPE_TINY));
 		tryShouldFail<uint64_t>(mySQLValue_t("", 0, MYSQL_TYPE_SHORT));
@@ -247,8 +248,8 @@ public:
 
 	void testInt64()
 	{
-		tryIsNull(mySQLValue_t(nullptr, 0, MYSQL_TYPE_LONGLONG));
-		tryIsNull(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
+		tryIsNull<int64_t>(mySQLValue_t(nullptr, 0, MYSQL_TYPE_LONGLONG));
+		tryIsNull<int64_t>(mySQLValue_t("", 0, MYSQL_TYPE_NULL));
 		tryShouldFail<int64_t>(mySQLValue_t("", 0, MYSQL_TYPE_VARCHAR));
 		tryShouldFail<int64_t>(mySQLValue_t("", 0, MYSQL_TYPE_TINY));
 		tryShouldFail<int64_t>(mySQLValue_t("", 0, MYSQL_TYPE_SHORT));
