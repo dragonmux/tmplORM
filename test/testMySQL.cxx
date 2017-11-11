@@ -61,6 +61,14 @@ public:
 	{
 		assertTrue(mySQLValue_t().isNull());
 		assertFalse(mySQLValue_t("", 1, MYSQL_TYPE_STRING).isNull());
+		tryShouldFail<uint8_t>(mySQLValue_t());
+		tryShouldFail<int8_t>(mySQLValue_t());
+		tryShouldFail<uint16_t>(mySQLValue_t());
+		tryShouldFail<int16_t>(mySQLValue_t());
+		tryShouldFail<uint32_t>(mySQLValue_t());
+		tryShouldFail<int32_t>(mySQLValue_t());
+		tryShouldFail<uint64_t>(mySQLValue_t());
+		tryShouldFail<int64_t>(mySQLValue_t());
 	}
 
 	void testString()
