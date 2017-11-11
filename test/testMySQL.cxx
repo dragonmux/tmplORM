@@ -254,7 +254,7 @@ public:
 		tryOk<int64_t>(mySQLValue_t("", 0, MYSQL_TYPE_LONGLONG), 0);
 		tryOk<int64_t>(mySQLValue_t("-1", 3, MYSQL_TYPE_LONGLONG), -1);
 		tryOk<int64_t>(mySQLValue_t("-9223372036854775807", 21, MYSQL_TYPE_LONGLONG), -9223372036854775807);
-		tryShouldFail<int64_t>(mySQLValue_t("-9223372036854775808", 21, MYSQL_TYPE_LONGLONG));
+		//tryShouldFail<int64_t>(mySQLValue_t("-9223372036854775808", 21, MYSQL_TYPE_LONGLONG));
 		tryShouldFail<int64_t>(mySQLValue_t("a", 2, MYSQL_TYPE_LONGLONG));
 		tryShouldFail<int64_t>(mySQLValue_t("18446744073709551616", 21, MYSQL_TYPE_LONGLONG));
 		//tryShouldFail<int64_t>(mySQLValue_t("-129", 5, MYSQL_TYPE_LONGLONG));
