@@ -145,8 +145,42 @@ public:
 	}
 };
 
+struct testSwapBytes_t final : testsuit
+{
+public:
+	void testSwapBytes16()
+	{
+		assertEqual(testSwapBytes(uint16_t(0x0FF0)), 0xF00F);
+		assertEqual(testSwapBytes(uint16_t(0x5AA5)), 0xA55A);
+		assertEqual(testSwapBytes(uint16_t(0x3EE3)), 0xE33E);
+	}
+
+	void testSwapBytes32()
+	{
+		assertEqual(testSwapBytes(uint32_t(0x0FF000FF)), 0xFF00F00F);
+		assertEqual(testSwapBytes(uint32_t(0x5AA555AA)), 0xAA55A55A);
+		assertEqual(testSwapBytes(uint32_t(0x3EE333EE)), 0xEE33E33E);
+		assertEqual(testSwapBytes(uint32_t(0x01234567)), 0x67452301);
+		assertEqual(testSwapBytes(uint32_t(0x76543210)), 0x10325476);
+	}
+
+	void testSwapBytes64()
+	{
+		//assertEqual(testSwapBytes(uint64_t(0x0FF0)), 0xF00F);
+		//assertEqual(testSwapBytes(uint64_t(0x5AA5)), 0xA55A);
+		//assertEqual(testSwapBytes(uint64_t(0x3EE3)), 0xE33E);
+	}
+
+	void registerTests() final override
+	{
+		CXX_TEST(testSwapBytes16)
+		CXX_TEST(testSwapBytes32)
+		CXX_TEST(testSwapBytes64)
+	}
+};
+
 CRUNCH_API void registerCXXTests() noexcept;
 void registerCXXTests() noexcept
 {
-	registerTestClasses<testFromInt_t>();
+	registerTestClasses<testFromInt_t, testSwapBytes_t>();
 }
