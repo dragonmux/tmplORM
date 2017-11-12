@@ -1,7 +1,7 @@
 #include <crunch++.h>
 #include "testConversions.hxx"
 
-struct testFromInt_t final : testsuit
+struct testFromInt_t final : public testsuit
 {
 public:
 	void testUint8_t()
@@ -199,7 +199,7 @@ public:
 	}
 };
 
-struct testDecToInt_t final : testsuit
+struct testDecToInt_t final : public testsuit
 {
 public:
 	void testUint8_t()
@@ -360,7 +360,7 @@ public:
 	}
 };
 
-struct testHexToInt_t final : testsuit
+struct testHexToInt_t final : public testsuit
 {
 public:
 	void testUint8_t()
@@ -522,7 +522,7 @@ public:
 	}
 };
 
-struct testSwapBytes_t final : testsuit
+struct testSwapBytes_t final : public testsuit
 {
 public:
 	void testSwapBytes16()
