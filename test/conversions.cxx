@@ -39,13 +39,16 @@ template<typename int_t> struct testToInt_t
 {
 private:
 	using toInt = toInt_t<int_t>;
+	using str_t = std::char_traits<char>;
 
 public:
 	void testIntConversions(testsuit &suite, const testOk_t<int_t> &tests)
 	{
 		for (const auto &test : tests)
 		{
-			int_t value = toInt{test.second};
+			auto value = toInt{test.second};
+			suite.assertTrue(value.isInt());
+			suite.assertEqual(value.length(), str_t::length(test.second));
 			suite.assertEqual(value, test.first);
 		}
 	}
