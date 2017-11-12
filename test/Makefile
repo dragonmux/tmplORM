@@ -13,8 +13,8 @@ ifeq ($(strip $(COVERAGE)), 1)
 endif
 CRUNCH = crunch++
 
-TESTS = testString.so testMySQL.so testMSSQLMapper.so testMySQLMapper.so testConversions.so
-O = conversions.o
+TESTS = testString.so testMySQL.so testMSSQLMapper.so testMySQLMapper.so testConversions.so testFixedVector.so
+O = conversions.o fixedVector.o
 GCH = models.gch
 DEPS = ../.dep/test
 
@@ -36,8 +36,10 @@ testString.so: O_FILE = ../string.o
 testMySQL.so: O_FILE = ../mysql.o
 #testMSSQL.so: O_FILE = ../mssql.o
 testMySQLMapper.so testMySQL.so: CRUNCHMAKE += $(shell mysql_config --include --libmysqld-libs)
-testConversions.so: conversions.o testConversions.cxx
 testConversions.so: O_FILE = conversions.o
+testFixedVector.so: O_FILE = fixedVector.o
+testConversions.so: conversions.o testConversions.cxx
+testFixedVector.so: fixedVector.o testFixedVector.cxx
 #$(TESTS): $(subst .so,.cxx,$@)
 %.so: %.cxx
 	$(call run-cmd,crunchMake,$(subst .so,.cxx,$@))
