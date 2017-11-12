@@ -30,12 +30,9 @@ public:
 	boundedIterator_t &operator --() noexcept { if (index > 0) --index; return *this; }
 	boundedIterator_t operator --(int) noexcept { if (index > 0) return boundedIterator_t(data, index--, max); return *this; }
 	reference operator [](const size_t n) const noexcept { return *(*this + n); }
-	// I think the > max case must also be addressed..
-	boundedIterator_t &operator +=(const size_t n) noexcept { if ((index + n) <= max) index += n; else index = max; return *this; }
+	boundedIterator_t &operator +=(const size_t n) noexcept { (index + n) < max && (index + n) >= index ? index += n : index = max; return *this; }
 	boundedIterator_t operator +(const size_t n) const noexcept { return boundedIterator_t(*this) += n; }
-	// The supper complicated looking condition here checkes that the subtraction won't underflow and go super-large, in a way where we don't have to care what size_t really means
-	// I think the < 0 case must also be addressed..
-	boundedIterator_t &operator -=(const size_t n) noexcept { if (!((index - n) & (1 << ((sizeof(size_t) * 8) - 1)))) index -= n; else index = 0; return *this; }
+	boundedIterator_t &operator -=(const size_t n) noexcept { n < index ? index -= n : index = 0; return *this; }
 	boundedIterator_t operator -(const size_t n) const noexcept { return boundedIterator_t(*this) -= n; }
 
 	bool operator ==(const boundedIterator_t &b) const noexcept { return data == b.data && index == b.index && max == b.max; }
