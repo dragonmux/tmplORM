@@ -334,6 +334,17 @@ public:
 		);
 	}
 
+	void testShouldFail()
+	{
+		testDecShouldFail(*this,
+			{
+				"-",
+				"a",
+				"A"
+			}
+		);
+	}
+
 	void registerTests() final override
 	{
 		CXX_TEST(testUint8_t)
@@ -344,6 +355,7 @@ public:
 		CXX_TEST(testInt32_t)
 		CXX_TEST(testUint64_t)
 		CXX_TEST(testInt64_t)
+		CXX_TEST(testShouldFail)
 	}
 };
 
