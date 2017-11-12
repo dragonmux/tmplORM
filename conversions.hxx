@@ -54,8 +54,8 @@ private:
 		return number;
 	}
 
-	void process(const uint_t number, char *const buffer, const size_t index = 0) const noexcept
-		{ process(number, buffer, digits(_value) - 1, index); }
+	void process(const uint_t number, char *const buffer) const noexcept
+		{ process(number, buffer, digits(_value) - 1, 0); }
 	template<typename T = int_t> enableIf<isSame<T, int_t>::value && isIntegral<T>::value && !isBoolean<T>::value && isUnsigned<T>::value>
 		format(char *const buffer) const noexcept { process(_value, buffer); }
 	template<typename T = int_t> [[gnu::noinline]] enableIf<isSame<T, int_t>::value && isIntegral<T>::value && !isBoolean<T>::value && isSigned<T>::value>
@@ -65,7 +65,7 @@ private:
 		if (number < 0)
 		{
 			buffer[0] = '-';
-			process(uint_t(-number), buffer, 1);
+			process(uint_t(-number), buffer);
 		}
 		else
 			process(uint_t(number), buffer);
