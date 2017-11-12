@@ -166,9 +166,11 @@ public:
 
 	void testSwapBytes64()
 	{
-		//assertEqual(testSwapBytes(uint64_t(0x0FF0)), 0xF00F);
-		//assertEqual(testSwapBytes(uint64_t(0x5AA5)), 0xA55A);
-		//assertEqual(testSwapBytes(uint64_t(0x3EE3)), 0xE33E);
+		assertEqual(testSwapBytes(uint64_t(0x00FF0FF0FF00F00F)), 0x0FF000FFF00FFF00);
+		assertEqual(testSwapBytes(uint64_t(0x55AA5AA5AA55A55A)), 0x5AA555AAA55AAA55);
+		assertEqual(testSwapBytes(uint64_t(0x33EE3EE3EE33E33E)), 0x3EE333EEE33EEE33);
+		assertEqual(testSwapBytes(uint64_t(0x0123456789ABCDEF)), 0xEFCDAB8967452301);
+		assertEqual(testSwapBytes(uint64_t(0xFEDCBA9876543210)), 0x1032547698BADCFE);
 	}
 
 	void registerTests() final override
