@@ -43,7 +43,7 @@ testConversions.so: O_FILE = conversions.o
 %.so: %.cxx
 	$(call run-cmd,crunchMake,$(subst .so,.cxx,$@))
 
-$(O): $(patsubst %.o,%.cxx,$@) | $(DEPS)
+$(O): $(subst .o,.cxx,$@) | $(DEPS)
 	$(Q)$(MAKE) FOR_TESTS=1 -C .. test/$@
 
 check: all

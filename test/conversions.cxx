@@ -18,7 +18,7 @@ public:
 	}
 };
 
-void testUint8(testsuit &suite, const testOk_t<uint8_t> &okTests)
-	{ testFromInt_t<uint8_t> tests; tests.testConversions(suite, okTests); }
-void testInt8(testsuit &suite, const testOk_t<int8_t> &okTests)
-	{ testFromInt_t<int8_t> tests; tests.testConversions(suite, okTests); }
+void testUint8(testsuit &suite, const testOk_t<uint8_t> tests)
+	{ testFromInt_t<uint8_t> tester; tester.testConversions(suite, tests); }
+void testInt8(testsuit &suite, const testOk_t<int8_t> tests)
+	{ testFromInt_t<int8_t> tester; tester.testConversions(suite, tests); }

@@ -73,6 +73,7 @@ private:
 
 public:
 	constexpr fromInt_t(const valueType_t &value) noexcept : _value(value) { }
+
 	operator std::unique_ptr<char []>() const noexcept
 	{
 		auto number = makeUnique<char []>(digits(_value) + 1);
