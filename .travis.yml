@@ -111,6 +111,20 @@ matrix:
             - libwrap0-dev
 #        mariadb: '10.1'
     - compiler: gcc-6
+      env: GCC=gcc-6 GXX=g++-6 COVERAGE=0
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-6
+            - g++-6
+            - unixodbc-dev
+            - libmysqld-dev
+            - libaio-dev
+            - libwrap0-dev
+#        mariadb: '10.1'
+    - compiler: gcc-6
       env: GCC=gcc-6 GXX=g++-6 GCOV=gcov-6
       addons:
         apt:
@@ -119,6 +133,20 @@ matrix:
           packages:
             - gcc-6
             - g++-6
+            - unixodbc-dev
+            - libmysqld-dev
+            - libaio-dev
+            - libwrap0-dev
+#        mariadb: '10.1'
+    - compiler: gcc-7
+      env: GCC=gcc-7 GXX=g++-7 COVERAGE=0
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-7
+            - g++-7
             - unixodbc-dev
             - libmysqld-dev
             - libaio-dev
