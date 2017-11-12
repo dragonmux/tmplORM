@@ -34,3 +34,14 @@ void testUint64(testsuit &suite, const testOk_t<uint64_t> tests)
 	{ testFromInt_t<uint64_t> tester; tester.testConversions(suite, tests); }
 void testInt64(testsuit &suite, const testOk_t<int64_t> tests)
 	{ testFromInt_t<int64_t> tester; tester.testConversions(suite, tests); }
+
+template<typename int_t> int_t swapBytes_(const int_t val) noexcept
+{
+	auto result(val);
+	swapBytes(result);
+	return result;
+}
+
+uint16_t testSwapBytes(const uint16_t val) noexcept { return swapBytes_(val); }
+uint32_t testSwapBytes(const uint32_t val) noexcept { return swapBytes_(val); }
+uint64_t testSwapBytes(const uint64_t val) noexcept { return swapBytes_(val); }

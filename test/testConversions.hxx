@@ -19,4 +19,8 @@ extern void testInt32(testsuit &suit, const testOk_t<int32_t> tests);
 extern void testUint64(testsuit &suit, const testOk_t<uint64_t> tests);
 extern void testInt64(testsuit &suit, const testOk_t<int64_t> tests);
 
+extern uint16_t testSwapBytes(const uint16_t val) noexcept;
+extern uint32_t testSwapBytes(const uint32_t val) noexcept;
+extern uint64_t testSwapBytes(const uint64_t val) noexcept;
+
 #endif /*TEST_CONVERSIONS__HXX*/
