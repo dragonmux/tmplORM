@@ -26,14 +26,14 @@ public:
 	reference operator *() const noexcept { return data[index]; }
 	pointer operator ->() const noexcept { return data + index; }
 	boundedIterator_t &operator ++() noexcept { if (index < max) ++index; return *this; }
-	boundedIterator_t operator ++(int) noexcept { if (index < max) return boundedIterator_t(data, index++, max); return *this; }
+	boundedIterator_t operator ++(int) noexcept { if (index < max) return {data, index++, max}; return *this; }
 	boundedIterator_t &operator --() noexcept { if (index > 0) --index; return *this; }
-	boundedIterator_t operator --(int) noexcept { if (index > 0) return boundedIterator_t(data, index--, max); return *this; }
+	boundedIterator_t operator --(int) noexcept { if (index > 0) return {data, index--, max}; return *this; }
 	reference operator [](const size_t n) const noexcept { return *(*this + n); }
 	boundedIterator_t &operator +=(const size_t n) noexcept { (index + n) < max && (index + n) >= index ? index += n : index = max; return *this; }
-	boundedIterator_t operator +(const size_t n) const noexcept { return boundedIterator_t(*this) += n; }
+	boundedIterator_t operator +(const size_t n) const noexcept { return boundedIterator_t{*this} += n; }
 	boundedIterator_t &operator -=(const size_t n) noexcept { n < index ? index -= n : index = 0; return *this; }
-	boundedIterator_t operator -(const size_t n) const noexcept { return boundedIterator_t(*this) -= n; }
+	boundedIterator_t operator -(const size_t n) const noexcept { return boundedIterator_t{*this} -= n; }
 
 	bool operator ==(const boundedIterator_t &b) const noexcept { return data == b.data && index == b.index && max == b.max; }
 	bool operator !=(const boundedIterator_t &b) const noexcept { return !(*this == b); }
