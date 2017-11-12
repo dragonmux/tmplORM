@@ -2,6 +2,8 @@
 #include <conversions.hxx>
 #include <testConversions.hxx>
 
+using str_t = std::char_traits<char>;
+
 template<typename int_t> struct testFromInt_t
 {
 private:
@@ -39,7 +41,6 @@ template<typename int_t> struct testToInt_t
 {
 private:
 	using toInt = toInt_t<int_t>;
-	using str_t = std::char_traits<char>;
 
 public:
 	void testIntConversions(testsuit &suite, const testOk_t<int_t> &tests)
