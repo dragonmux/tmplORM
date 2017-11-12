@@ -6,7 +6,7 @@ struct testFromInt_t final : testsuit
 public:
 	void testUint8_t()
 	{
-		testUint8(*this,
+		testFromUint8(*this,
 			{
 				{0, "0"},
 				{127, "127"},
@@ -18,7 +18,7 @@ public:
 
 	void testInt8_t()
 	{
-		testInt8(*this,
+		testFromInt8(*this,
 			{
 				{0, "0"},
 				{127, "127"},
@@ -31,7 +31,7 @@ public:
 
 	void testUint16_t()
 	{
-		testUint16(*this,
+		testFromUint16(*this,
 			{
 				{0, "0"},
 				{127, "127"},
@@ -47,7 +47,7 @@ public:
 
 	void testInt16_t()
 	{
-		testInt16(*this,
+		testFromInt16(*this,
 			{
 				{0, "0"},
 				{127, "127"},
@@ -68,7 +68,7 @@ public:
 
 	void testUint32_t()
 	{
-		testUint32(*this,
+		testFromUint32(*this,
 			{
 				{0, "0"},
 				{127, "127"},
@@ -88,7 +88,7 @@ public:
 
 	void testInt32_t()
 	{
-		testInt32(*this,
+		testFromInt32(*this,
 			{
 				{0, "0"},
 				{127, "127"},
@@ -119,7 +119,7 @@ public:
 
 	void testUint64_t()
 	{
-		testUint64(*this,
+		testFromUint64(*this,
 			{
 				{0, "0"},
 				{127, "127"},
@@ -145,7 +145,7 @@ public:
 
 	void testInt64_t()
 	{
-		testInt64(*this,
+		testFromInt64(*this,
 			{
 				{0, "0"},
 				{127, "127"},
