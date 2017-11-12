@@ -119,6 +119,8 @@ public:
 
 	bool isInt() const noexcept
 	{
+		if (_isSigned && _value[0] == '-' && length() == 1)
+			return false;
 		for (size_t i = 0; i < _length; ++i)
 		{
 			if (_isSigned && i == 0 && _value[i] == '-')
