@@ -13,8 +13,10 @@ ifeq ($(strip $(COVERAGE)), 1)
 endif
 CRUNCH = crunch++
 
-TESTS = testString.so testMySQL.so testMSSQLMapper.so testMySQLMapper.so
+TESTS = testString.so testMySQL.so testMSSQLMapper.so testMySQLMapper.so testConversions.so
+O = conversions.o
 GCH = models.gch
+DEPS = ../.dep/test
 
 quiet_cmd_crunchMake = -n
 cmd_crunchMake = $(CRUNCHMAKE) $(addprefix -o,$(O_FILE)) $(2)
@@ -25,6 +27,9 @@ default: all
 
 all: $(GCH) $(TESTS)
 
+$(DEPS):
+	$(call run-cmd,install_dir,$@)
+
 %.gch: %.hxx
 	$(call run-cmd,cxx,$(CFLAGS))
 
@@ -32,9 +37,14 @@ testString.so: O_FILE = ../string.o
 testMySQL.so: O_FILE = ../mysql.o
 #testMSSQL.so: O_FILE = ../mssql.o
 testMySQLMapper.so testMySQL.so: CRUNCHMAKE += $(shell mysql_config --include --libmysqld-libs)
+testConversions.so: conversions.o
+testConversions.so: O_FILE = conversions.o
 #$(TESTS): $(subst .so,.cxx,$@)
 %.so: %.cxx
 	$(call run-cmd,crunchMake,$(subst .so,.cxx,$@))
+
+$(O): $(patsubst %.o,%.cxx,$@) | $(DEPS)
+	$(Q)$(MAKE) FOR_TESTS=1 -C .. test/$@
 
 check: all
 	$(call run-cmd,crunch,$(subst .so,,$(TESTS)))
