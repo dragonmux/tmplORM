@@ -37,7 +37,7 @@ testString.so: O_FILE = ../string.o
 testMySQL.so: O_FILE = ../mysql.o
 #testMSSQL.so: O_FILE = ../mssql.o
 testMySQLMapper.so testMySQL.so: CRUNCHMAKE += $(shell mysql_config --include --libmysqld-libs)
-testConversions.so: conversions.o
+testConversions.so: conversions.o testConversions.cxx
 testConversions.so: O_FILE = conversions.o
 #$(TESTS): $(subst .so,.cxx,$@)
 %.so: %.cxx

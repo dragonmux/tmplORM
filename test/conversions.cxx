@@ -8,11 +8,12 @@ private:
 	using fromInt = fromInt_t<int_t, int_t>;
 
 public:
-	void testConversions(testsuit &suit, const testOk_t<int_t> &okTests, const testFailInt_t<int_t> &failTests)
+	void testConversions(testsuit &suite, const testOk_t<int_t> &okTests, const testFailInt_t<int_t> &failTests)
 	{
 		for (const auto &test : okTests)
 		{
-			fromInt conv(test.first);
+			std::unique_ptr<char []> value = fromInt{test.first};
+			suite.assertEqual(value.get(), test.second);
 		}
 
 		for (const auto &test : failTests)
@@ -22,7 +23,7 @@ public:
 	}
 };
 
-void testUint8(testsuit &suit, const testOk_t<uint8_t> &okTests, const testFailInt_t<uint8_t> &failTests)
-	{ testFromInt_t<uint8_t> tests; tests.testConversions(suit, okTests, failTests); }
-void testInt8(testsuit &suit, const testOk_t<int8_t> &okTests, const testFailInt_t<int8_t> &failTests)
-	{ testFromInt_t<int8_t> tests; tests.testConversions(suit, okTests, failTests); }
+void testUint8(testsuit &suite, const testOk_t<uint8_t> &okTests, const testFailInt_t<uint8_t> &failTests)
+	{ testFromInt_t<uint8_t> tests; tests.testConversions(suite, okTests, failTests); }
+void testInt8(testsuit &suite, const testOk_t<int8_t> &okTests, const testFailInt_t<int8_t> &failTests)
+	{ testFromInt_t<int8_t> tests; tests.testConversions(suite, okTests, failTests); }

@@ -9,18 +9,12 @@ public:
 		testUint8(*this,
 			{
 				//
-			},
-			{
-				//
 			});
 	}
 
 	void testInt8_t()
 	{
 		testInt8(*this,
-			{
-				//
-			},
 			{
 				//
 			});
