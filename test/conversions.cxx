@@ -54,21 +54,21 @@ public:
 	}
 };
 
-void testToUint8(testsuit &suite, const testOk_t<uint8_t> tests)
+void testDecToUint8(testsuit &suite, const testOk_t<uint8_t> tests)
 	{ testToInt_t<uint8_t> tester; tester.testIntConversions(suite, tests); }
-void testToInt8(testsuit &suite, const testOk_t<int8_t> tests)
+void testDecToInt8(testsuit &suite, const testOk_t<int8_t> tests)
 	{ testToInt_t<int8_t> tester; tester.testIntConversions(suite, tests); }
-void testToUint16(testsuit &suite, const testOk_t<uint16_t> tests)
+void testDecToUint16(testsuit &suite, const testOk_t<uint16_t> tests)
 	{ testToInt_t<uint16_t> tester; tester.testIntConversions(suite, tests); }
-void testToInt16(testsuit &suite, const testOk_t<int16_t> tests)
+void testDecToInt16(testsuit &suite, const testOk_t<int16_t> tests)
 	{ testToInt_t<int16_t> tester; tester.testIntConversions(suite, tests); }
-void testToUint32(testsuit &suite, const testOk_t<uint32_t> tests)
+void testDecToUint32(testsuit &suite, const testOk_t<uint32_t> tests)
 	{ testToInt_t<uint32_t> tester; tester.testIntConversions(suite, tests); }
-void testToInt32(testsuit &suite, const testOk_t<int32_t> tests)
+void testDecToInt32(testsuit &suite, const testOk_t<int32_t> tests)
 	{ testToInt_t<int32_t> tester; tester.testIntConversions(suite, tests); }
-void testToUint64(testsuit &suite, const testOk_t<uint64_t> tests)
+void testDecToUint64(testsuit &suite, const testOk_t<uint64_t> tests)
 	{ testToInt_t<uint64_t> tester; tester.testIntConversions(suite, tests); }
-void testToInt64(testsuit &suite, const testOk_t<int64_t> tests)
+void testDecToInt64(testsuit &suite, const testOk_t<int64_t> tests)
 	{ testToInt_t<int64_t> tester; tester.testIntConversions(suite, tests); }
 
 template<typename int_t> int_t swapBytes_(const int_t val) noexcept
