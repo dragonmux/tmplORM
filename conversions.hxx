@@ -78,7 +78,7 @@ public:
 		auto number = makeUnique<char []>(digits(_value) + 1);
 		if (!number)
 			return nullptr;
-		format(number);
+		format(number.get());
 		return number;
 	}
 
