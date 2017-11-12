@@ -24,8 +24,7 @@ quiet_cmd_crunch = -n
 cmd_crunch = $(CRUNCH) $(2)
 
 default: all
-
-all: $(GCH) $(TESTS)
+all: $(GCH) $(DEPS) $(TESTS)
 
 $(DEPS):
 	$(call run-cmd,install_dir,$@)
@@ -55,4 +54,4 @@ clean:
 
 .PHONY: default all check clean
 .SUFIXES: .cxx .hxx .so .o
-#-include .dep/*.d
+-include .dep/test/*.d
