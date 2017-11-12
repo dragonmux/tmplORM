@@ -55,23 +55,6 @@ public:
 	}
 };
 
-void testDecToUint8(testsuit &suite, const testOk_t<uint8_t> tests)
-	{ testToInt_t<uint8_t> tester; tester.testIntConversions(suite, tests); }
-void testDecToInt8(testsuit &suite, const testOk_t<int8_t> tests)
-	{ testToInt_t<int8_t> tester; tester.testIntConversions(suite, tests); }
-void testDecToUint16(testsuit &suite, const testOk_t<uint16_t> tests)
-	{ testToInt_t<uint16_t> tester; tester.testIntConversions(suite, tests); }
-void testDecToInt16(testsuit &suite, const testOk_t<int16_t> tests)
-	{ testToInt_t<int16_t> tester; tester.testIntConversions(suite, tests); }
-void testDecToUint32(testsuit &suite, const testOk_t<uint32_t> tests)
-	{ testToInt_t<uint32_t> tester; tester.testIntConversions(suite, tests); }
-void testDecToInt32(testsuit &suite, const testOk_t<int32_t> tests)
-	{ testToInt_t<int32_t> tester; tester.testIntConversions(suite, tests); }
-void testDecToUint64(testsuit &suite, const testOk_t<uint64_t> tests)
-	{ testToInt_t<uint64_t> tester; tester.testIntConversions(suite, tests); }
-void testDecToInt64(testsuit &suite, const testOk_t<int64_t> tests)
-	{ testToInt_t<int64_t> tester; tester.testIntConversions(suite, tests); }
-
 template<typename int_t> struct toIntType_t
 {
 private:
@@ -107,6 +90,23 @@ template<> struct toIntTypes_t<>
 	toIntTypes_t(const char *const) noexcept { }
 	template<template<typename> class test_t> void test(testsuit &, const char *const) { }
 };
+
+void testDecToUint8(testsuit &suite, const testOk_t<uint8_t> tests)
+	{ testToInt_t<uint8_t> tester; tester.testIntConversions(suite, tests); }
+void testDecToInt8(testsuit &suite, const testOk_t<int8_t> tests)
+	{ testToInt_t<int8_t> tester; tester.testIntConversions(suite, tests); }
+void testDecToUint16(testsuit &suite, const testOk_t<uint16_t> tests)
+	{ testToInt_t<uint16_t> tester; tester.testIntConversions(suite, tests); }
+void testDecToInt16(testsuit &suite, const testOk_t<int16_t> tests)
+	{ testToInt_t<int16_t> tester; tester.testIntConversions(suite, tests); }
+void testDecToUint32(testsuit &suite, const testOk_t<uint32_t> tests)
+	{ testToInt_t<uint32_t> tester; tester.testIntConversions(suite, tests); }
+void testDecToInt32(testsuit &suite, const testOk_t<int32_t> tests)
+	{ testToInt_t<int32_t> tester; tester.testIntConversions(suite, tests); }
+void testDecToUint64(testsuit &suite, const testOk_t<uint64_t> tests)
+	{ testToInt_t<uint64_t> tester; tester.testIntConversions(suite, tests); }
+void testDecToInt64(testsuit &suite, const testOk_t<int64_t> tests)
+	{ testToInt_t<int64_t> tester; tester.testIntConversions(suite, tests); }
 
 template<typename toInt_t> struct testDecShouldFail_t
 {
