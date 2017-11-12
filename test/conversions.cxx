@@ -53,6 +53,17 @@ public:
 			suite.assertEqual(value, test.first);
 		}
 	}
+
+	void testHexConversions(testsuit &suite, const testOk_t<int_t> &tests)
+	{
+		for (const auto &test : tests)
+		{
+			auto value = toInt{test.second};
+			suite.assertTrue(value.isHex());
+			suite.assertEqual(value.length(), str_t::length(test.second));
+			suite.assertEqual(value.fromHex(), test.first);
+		}
+	}
 };
 
 template<typename int_t> struct toIntType_t
@@ -130,6 +141,48 @@ void testDecShouldFail(testsuit &suite, const testFailStr_t tests)
 	{
 		toIntTypes_t<uint8_t, int8_t, uint16_t, int16_t, uint32_t, int32_t, uint64_t, int64_t> types{test};
 		types.template test<testDecShouldFail_t>(suite, test);
+	}
+}
+
+extern void testHexToUint8(testsuit &suite, const testOk_t<uint8_t> tests)
+	{ testToInt_t<uint8_t> tester; tester.testHexConversions(suite, tests); }
+extern void testHexToInt8(testsuit &suite, const testOk_t<int8_t> tests)
+	{ testToInt_t<int8_t> tester; tester.testHexConversions(suite, tests); }
+extern void testHexToUint16(testsuit &suite, const testOk_t<uint16_t> tests)
+	{ testToInt_t<uint16_t> tester; tester.testHexConversions(suite, tests); }
+extern void testHexToInt16(testsuit &suite, const testOk_t<int16_t> tests)
+	{ testToInt_t<int16_t> tester; tester.testHexConversions(suite, tests); }
+extern void testHexToUint32(testsuit &suite, const testOk_t<uint32_t> tests)
+	{ testToInt_t<uint32_t> tester; tester.testHexConversions(suite, tests); }
+extern void testHexToInt32(testsuit &suite, const testOk_t<int32_t> tests)
+	{ testToInt_t<int32_t> tester; tester.testHexConversions(suite, tests); }
+extern void testHexToUint64(testsuit &suite, const testOk_t<uint64_t> tests)
+	{ testToInt_t<uint64_t> tester; tester.testHexConversions(suite, tests); }
+extern void testHexToInt64(testsuit &suite, const testOk_t<int64_t> tests)
+	{ testToInt_t<int64_t> tester; tester.testHexConversions(suite, tests); }
+
+template<typename toInt_t> struct testHexShouldFail_t
+{
+private:
+	testsuit &suite;
+	const char *const test;
+
+public:
+	testHexShouldFail_t(testsuit &suite_, const char *const test_) noexcept : suite(suite_), test(test_) { }
+
+	void operator ()(toInt_t &value)
+	{
+		suite.assertFalse(value.isHex());
+		suite.assertEqual(value.length(), str_t::length(test));
+	}
+};
+
+extern void testHexShouldFail(testsuit &suite, const testFailStr_t tests)
+{
+	for (const char *const test : tests)
+	{
+		toIntTypes_t<uint8_t, int8_t, uint16_t, int16_t, uint32_t, int32_t, uint64_t, int64_t> types{test};
+		types.template test<testHexShouldFail_t>(suite, test);
 	}
 }
 
