@@ -10,7 +10,7 @@ LIBS = $(shell mysql_config --libs) -lodbc -ldl -pthread
 #$(shell pkg-config --libs $(PKG_CONFIG_PKGS))
 LFLAGS = $(OPTIM_FLAGS) -shared $(O) $(LIBS) -o $@
 ifeq ($(strip $(FOR_TESTS)), 1)
-	CFLAGS += -I. -Itest
+	DEFS += -I. -Itest
 endif
 
 SED = sed -e 's:@LIBDIR@:$(LIBDIR):g' -e 's:@PREFIX@:$(PREFIX):g' -e 's:@VERSION@:$(VER):g'
