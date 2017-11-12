@@ -87,7 +87,7 @@ GXX ?= g++
 ifeq ($(strip $(DEBUG)), 1)
 	OPTIM_FLAGS = -ggdb
 	ifeq ($(strip $(COVERAGE)), 1)
-		OPTIM_FLAGS += -O0 -g --coverage
+		OPTIM_FLAGS += -O0 -g --coverage -fno-elide-constructors -fno-default-inline
 	endif
 	GCC_FLAGS = 
 else
@@ -99,10 +99,6 @@ else
 	endif
 	OPTIM_FLAGS = -O2
 	DEBUG = 0
-endif
-
-ifeq ($(strip $(TEST)), 1)
-	OPTIM_FLAGS += -fprofile-arcs -ftest-coverage
 endif
 
 CC = $(GCC) $(GCC_FLAGS)
