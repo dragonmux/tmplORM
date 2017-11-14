@@ -67,6 +67,7 @@ public:
 
 	size_t length() const noexcept { return _length; }
 	size_t size() const noexcept { return _length; }
+	size_t count() const noexcept { return _length; }
 	bool valid() const noexcept { return bool(_data); }
 	T *data() const noexcept { return _data.get(); }
 	explicit operator bool() const noexcept { return valid(); }

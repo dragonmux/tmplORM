@@ -58,3 +58,31 @@ namespace boundedIterator
 		suite.assertTrue(iter == iter - SIZE_MAX);
 	}
 }
+
+namespace fixedVector
+{
+	template<typename T, typename E> void testThrowsExcept(testsuit &suite, T &vec, const char *const errorText)
+	{
+		try
+		{
+			int value = vec[0];
+			(void)value;
+			suite.fail("fixedVector_t<> failed to throw exception when expected");
+		}
+		catch (const E &except)
+			{ suite.assertEqual(except.what(), errorText); }
+	}
+
+	void testInvalid(testsuit &suite)
+	{
+		fixedVector_t<int> vec;
+		suite.assertFalse(vec.valid());
+		suite.assertFalse(bool(vec));
+		suite.assertNull(vec.data());
+		suite.assertEqual(vec.length(), 0);
+		suite.assertEqual(vec.size(), 0);
+		suite.assertEqual(vec.count(), 0);
+		testThrowsExcept<fixedVector_t<int>, vectorStateException_t>(suite, vec, "fixedVector_t in invalid state");
+		testThrowsExcept<const fixedVector_t<int>, vectorStateException_t>(suite, vec, "fixedVector_t in invalid state");
+	}
+}
