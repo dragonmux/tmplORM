@@ -378,15 +378,15 @@ public:
 
 	void registerTests() final override
 	{
-		CXX_TEST(start)
+		//CXX_TEST(start)
 		CXX_TEST(testInvalid)
-		CXX_TEST(testClient)
-		CXX_TEST(stop)
+		//CXX_TEST(testClient)
+		//CXX_TEST(stop)
 	}
 };
 
 CRUNCH_API void registerCXXTests() noexcept;
 void registerCXXTests() noexcept
 {
-	registerTestClasses<testMySQLValue_t/*, testMySQL_t*/>();
+	registerTestClasses<testMySQLValue_t, testMySQL_t>();
 }
