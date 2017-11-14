@@ -12,6 +12,7 @@ namespace boundedIterator
 namespace fixedVector
 {
 	void testInvalid(testsuit &suite);
+	void testSwap(testsuit &suite);
 }
 
 #endif /*TEST_FIXED_VECTOR__HXX*/

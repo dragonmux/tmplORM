@@ -105,4 +105,7 @@ public:
 	fixedVector_t &operator =(const fixedVector_t &) = delete;
 };
 
+template<typename T> inline void swap(fixedVector_t<T> &a, fixedVector_t<T> &b) noexcept
+	{ a.swap(b); }
+
 #endif /*FIXED_VECTOR__HXX*/

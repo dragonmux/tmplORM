@@ -85,4 +85,23 @@ namespace fixedVector
 		testThrowsExcept<fixedVector_t<int>, vectorStateException_t>(suite, vec, "fixedVector_t in invalid state");
 		testThrowsExcept<const fixedVector_t<int>, vectorStateException_t>(suite, vec, "fixedVector_t in invalid state");
 	}
+
+	void testSwap(testsuit &suite)
+	{
+		fixedVector_t<int> vecA(2), vecB(3);
+		suite.assertTrue(vecA.valid());
+		suite.assertTrue(vecB.valid());
+		suite.assertEqual(vecA.length(), 2);
+		suite.assertEqual(vecB.length(), 3);
+
+		const auto dataA = vecA.data(), dataB = vecB.data();
+		swap(vecA, vecB);
+
+		suite.assertNotEqual(vecA.data(), dataA);
+		suite.assertEqual(vecA.data(), dataB);
+		suite.assertNotEqual(vecB.data(), dataB);
+		suite.assertEqual(vecB.data(), dataA);
+		suite.assertEqual(vecA.length(), 3);
+		suite.assertEqual(vecB.length(), 2);
+	}
 }
