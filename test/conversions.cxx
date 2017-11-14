@@ -143,6 +143,7 @@ public:
 	{
 		suite.assertFalse(value.isOct());
 		suite.assertEqual(value.length(), str_t::length(test));
+		suite.assertEqual(value.fromOct(), 0);
 	}
 };
 
@@ -227,6 +228,7 @@ public:
 	{
 		suite.assertFalse(value.isHex());
 		suite.assertEqual(value.length(), str_t::length(test));
+		suite.assertEqual(value.fromHex(), 0);
 	}
 };
 
