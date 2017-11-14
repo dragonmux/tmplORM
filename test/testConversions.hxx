@@ -19,6 +19,16 @@ extern void testFromInt32(testsuit &suite, const testOk_t<int32_t> tests);
 extern void testFromUint64(testsuit &suite, const testOk_t<uint64_t> tests);
 extern void testFromInt64(testsuit &suite, const testOk_t<int64_t> tests);
 
+extern void testOctToUint8(testsuit &suite, const testOk_t<uint8_t> tests);
+extern void testOctToInt8(testsuit &suite, const testOk_t<int8_t> tests);
+extern void testOctToUint16(testsuit &suite, const testOk_t<uint16_t> tests);
+extern void testOctToInt16(testsuit &suite, const testOk_t<int16_t> tests);
+extern void testOctToUint32(testsuit &suite, const testOk_t<uint32_t> tests);
+extern void testOctToInt32(testsuit &suite, const testOk_t<int32_t> tests);
+extern void testOctToUint64(testsuit &suite, const testOk_t<uint64_t> tests);
+extern void testOctToInt64(testsuit &suite, const testOk_t<int64_t> tests);
+extern void testOctShouldFail(testsuit &suite, const testFailStr_t tests);
+
 extern void testDecToUint8(testsuit &suite, const testOk_t<uint8_t> tests);
 extern void testDecToInt8(testsuit &suite, const testOk_t<int8_t> tests);
 extern void testDecToUint16(testsuit &suite, const testOk_t<uint16_t> tests);

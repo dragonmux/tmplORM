@@ -43,6 +43,17 @@ private:
 	using toInt = toInt_t<int_t>;
 
 public:
+	void testOctConversions(testsuit &suite, const testOk_t<int_t> &tests)
+	{
+		for (const auto &test : tests)
+		{
+			auto value = toInt{test.second};
+			suite.assertTrue(value.isOct());
+			suite.assertEqual(value.length(), str_t::length(test.second));
+			suite.assertEqual(value.fromOct(), test.first);
+		}
+	}
+
 	void testIntConversions(testsuit &suite, const testOk_t<int_t> &tests)
 	{
 		for (const auto &test : tests)
@@ -101,6 +112,48 @@ template<> struct toIntTypes_t<>
 	toIntTypes_t(const char *const) noexcept { }
 	template<template<typename> class test_t> void test(testsuit &, const char *const) { }
 };
+
+extern void testOctToUint8(testsuit &suite, const testOk_t<uint8_t> tests)
+	{ testToInt_t<uint8_t> tester; tester.testOctConversions(suite, tests); }
+extern void testOctToInt8(testsuit &suite, const testOk_t<int8_t> tests)
+	{ testToInt_t<int8_t> tester; tester.testOctConversions(suite, tests); }
+extern void testOctToUint16(testsuit &suite, const testOk_t<uint16_t> tests)
+	{ testToInt_t<uint16_t> tester; tester.testOctConversions(suite, tests); }
+extern void testOctToInt16(testsuit &suite, const testOk_t<int16_t> tests)
+	{ testToInt_t<int16_t> tester; tester.testOctConversions(suite, tests); }
+extern void testOctToUint32(testsuit &suite, const testOk_t<uint32_t> tests)
+	{ testToInt_t<uint32_t> tester; tester.testOctConversions(suite, tests); }
+extern void testOctToInt32(testsuit &suite, const testOk_t<int32_t> tests)
+	{ testToInt_t<int32_t> tester; tester.testOctConversions(suite, tests); }
+extern void testOctToUint64(testsuit &suite, const testOk_t<uint64_t> tests)
+	{ testToInt_t<uint64_t> tester; tester.testOctConversions(suite, tests); }
+extern void testOctToInt64(testsuit &suite, const testOk_t<int64_t> tests)
+	{ testToInt_t<int64_t> tester; tester.testOctConversions(suite, tests); }
+
+template<typename toInt_t> struct testOctShouldFail_t
+{
+private:
+	testsuit &suite;
+	const char *const test;
+
+public:
+	testOctShouldFail_t(testsuit &suite_, const char *const test_) noexcept : suite(suite_), test(test_) { }
+
+	void operator ()(toInt_t &value)
+	{
+		suite.assertFalse(value.isHex());
+		suite.assertEqual(value.length(), str_t::length(test));
+	}
+};
+
+extern void testOctShouldFail(testsuit &suite, const testFailStr_t tests)
+{
+	for (const char *const test : tests)
+	{
+		toIntTypes_t<uint8_t, int8_t, uint16_t, int16_t, uint32_t, int32_t, uint64_t, int64_t> types{test};
+		types.template test<testOctShouldFail_t>(suite, test);
+	}
+}
 
 void testDecToUint8(testsuit &suite, const testOk_t<uint8_t> tests)
 	{ testToInt_t<uint8_t> tester; tester.testIntConversions(suite, tests); }
