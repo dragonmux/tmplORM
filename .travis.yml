@@ -7,10 +7,18 @@ before_install:
 #  - sudo -E apt-get -yq install unixodbc-dev libmariadbd-dev mariadb-client
 install:
   - pushd $HOME/build
+  - if [ $COVERAGE -eq 1 ]; then
+      export _COV=$COVERAGE;
+      unset COVERAGE;
+    fi
   - git clone https://github.com/DX-MON/crunch.git DX-MON/crunch
   - cd DX-MON/crunch
   - sudo make install
   - popd
+  - if [ -n "${_COV}" ]; then
+      export COVERAGE=$_COV;
+      unset _COV;
+    fi
   - make
 script:
   - make -C test
