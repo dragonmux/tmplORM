@@ -141,7 +141,7 @@ public:
 
 	void operator ()(toInt_t &value)
 	{
-		suite.assertFalse(value.isHex());
+		suite.assertFalse(value.isOct());
 		suite.assertEqual(value.length(), str_t::length(test));
 	}
 };
