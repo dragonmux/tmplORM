@@ -3,7 +3,7 @@ include ../Makefile.inc
 CFLAGS_EXTRA = -I..
 CFLAGS = -c $(OPTIM_FLAGS) -Wall -Wextra -pedantic -std=c++11 $(CFLAGS_EXTRA) -o $@ $<
 
-CRUNCHMAKE = crunchMake -I..
+CRUNCHMAKE = crunchMake -I.. -z defs
 # $(shell pkg-config --cflags --libs crunch++ zlib)
 ifeq ($(BUILD_VERBOSE), 0)
 	CRUNCHMAKE += -q
