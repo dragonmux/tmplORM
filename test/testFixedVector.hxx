@@ -9,4 +9,9 @@ namespace boundedIterator
 	void testDec(testsuit &suite);
 }
 
+namespace fixedVector
+{
+	void testInvalid(testsuit &suite);
+}
+
 #endif /*TEST_FIXED_VECTOR__HXX*/

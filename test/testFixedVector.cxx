@@ -2,14 +2,6 @@
 #include <fixedVector.hxx>
 #include "testFixedVector.hxx"
 
-class testFixedVector final : public testsuit
-{
-public:
-	void registerTests() final override
-	{
-	}
-};
-
 class testBoundedIterator final : public testsuit
 {
 public:
@@ -27,8 +19,19 @@ public:
 	}
 };
 
+class testFixedVector final : public testsuit
+{
+public:
+	void testInvalid() { fixedVector::testInvalid(*this); }
+
+	void registerTests() final override
+	{
+		CXX_TEST(testInvalid)
+	}
+};
+
 CRUNCH_API void registerCXXTests() noexcept;
 void registerCXXTests() noexcept
 {
-	registerTestClasses<testFixedVector, testBoundedIterator>();
+	registerTestClasses<testBoundedIterator, testFixedVector>();
 }
