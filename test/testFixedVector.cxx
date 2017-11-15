@@ -23,11 +23,13 @@ class testFixedVector final : public testsuit
 {
 public:
 	void testInvalid() { fixedVector::testInvalid(*this); }
+	void testIndexing() { fixedVector::testIndexing(*this); }
 	void testSwap() { fixedVector::testSwap(*this); }
 
 	void registerTests() final override
 	{
 		CXX_TEST(testInvalid)
+		CXX_TEST(testIndexing)
 		CXX_TEST(testSwap)
 	}
 };

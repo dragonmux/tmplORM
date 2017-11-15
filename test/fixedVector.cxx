@@ -65,13 +65,20 @@ namespace fixedVector
 	{
 		try
 		{
-			int value = vec[0];
+			int value = vec[2];
 			(void)value;
 			suite.fail("fixedVector_t<> failed to throw exception when expected");
 		}
 		catch (const E &except)
 			{ suite.assertEqual(except.what(), errorText); }
 	}
+
+	template<typename T> struct typeOfVector;
+	template<typename T> struct typeOfVector<fixedVector_t<T>> { using type = T; };
+	template<typename T> struct typeOfVector<const fixedVector_t<T>> { using type = const T; };
+
+	template<typename T, typename value_t = typename typeOfVector<T>::type>
+		value_t &index(T &vec, const size_t index) { return vec[index]; }
 
 	void testInvalid(testsuit &suite)
 	{
@@ -84,6 +91,27 @@ namespace fixedVector
 		suite.assertEqual(vec.count(), 0);
 		testThrowsExcept<fixedVector_t<int>, vectorStateException_t>(suite, vec, "fixedVector_t in invalid state");
 		testThrowsExcept<const fixedVector_t<int>, vectorStateException_t>(suite, vec, "fixedVector_t in invalid state");
+	}
+
+	void testIndexing(testsuit &suite)
+	{
+		using fixedVec = fixedVector_t<int>;
+		using constFixedVec = const fixedVector_t<int>;
+
+		fixedVec vec(2);
+		suite.assertTrue(vec.valid());
+		try
+		{
+			suite.assertEqual(index<fixedVec>(vec, 0), 0);
+			suite.assertEqual(index<constFixedVec>(vec, 0), 0);
+			index<fixedVec>(vec, 1) = 5;
+			suite.assertEqual(index<constFixedVec>(vec, 1), 5);
+		}
+		catch (const std::out_of_range &)
+			{ suite.fail("Unexpected exception thrown during normal fixedVector_t<> access"); }
+
+		testThrowsExcept<fixedVec, std::out_of_range>(suite, vec, "Index into fixedVector_t out of bounds");
+		testThrowsExcept<constFixedVec, std::out_of_range>(suite, vec, "Index into fixedVector_t out of bounds");
 	}
 
 	void testSwap(testsuit &suite)
