@@ -32,8 +32,12 @@ public:
 	}
 
 	void testInvalid() { fixedVector::testInvalid(*this); }
-	void testIndexing() { fixedVector::testIndexing(*this); }
 	void testSwap() { fixedVector::testSwap(*this); }
+
+	void testIndexing() try
+		{ fixedVector::testIndexing(*this); }
+	catch (const std::out_of_range &)
+		{ fail("Unexpected exception thrown during normal fixedVector_t<> access"); }
 
 	void registerTests() final override
 	{

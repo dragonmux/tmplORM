@@ -109,15 +109,10 @@ namespace fixedVector
 		suite.assertTrue(vec.valid());
 		testIterNotEqual<fixedVector_t<int>>(suite, vec);
 		testIterNotEqual<const fixedVector_t<int>>(suite, vec);
-		try
-		{
-			suite.assertEqual(index<fixedVec>(vec, 0), 0);
-			suite.assertEqual(index<constFixedVec>(vec, 0), 0);
-			index<fixedVec>(vec, 1) = 5;
-			suite.assertEqual(index<constFixedVec>(vec, 1), 5);
-		}
-		catch (const std::out_of_range &)
-			{ suite.fail("Unexpected exception thrown during normal fixedVector_t<> access"); }
+		suite.assertEqual(index<fixedVec>(vec, 0), 0);
+		suite.assertEqual(index<constFixedVec>(vec, 0), 0);
+		index<fixedVec>(vec, 1) = 5;
+		suite.assertEqual(index<constFixedVec>(vec, 1), 5);
 
 		testThrowsExcept<fixedVec, std::out_of_range>(suite, vec, "Index into fixedVector_t out of bounds");
 		testThrowsExcept<constFixedVec, std::out_of_range>(suite, vec, "Index into fixedVector_t out of bounds");
