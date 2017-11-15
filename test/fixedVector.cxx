@@ -80,6 +80,11 @@ namespace fixedVector
 	template<typename T, typename value_t = typename typeOfVector<T>::type>
 		value_t &index(T &vec, const size_t index) { return vec[index]; }
 
+	template<typename T> void testIterEqual(testsuit &suite, T &vec)
+		{ suite.assertTrue(vec.begin() == vec.end()); }
+	template<typename T> void testIterNotEqual(testsuit &suite, T &vec)
+		{ suite.assertTrue(vec.begin() != vec.end()); }
+
 	void testInvalid(testsuit &suite)
 	{
 		fixedVector_t<int> vec;
@@ -91,6 +96,8 @@ namespace fixedVector
 		suite.assertEqual(vec.count(), 0);
 		testThrowsExcept<fixedVector_t<int>, vectorStateException_t>(suite, vec, "fixedVector_t in invalid state");
 		testThrowsExcept<const fixedVector_t<int>, vectorStateException_t>(suite, vec, "fixedVector_t in invalid state");
+		testIterEqual<fixedVector_t<int>>(suite, vec);
+		testIterEqual<const fixedVector_t<int>>(suite, vec);
 	}
 
 	void testIndexing(testsuit &suite)
@@ -100,6 +107,8 @@ namespace fixedVector
 
 		fixedVec vec(2);
 		suite.assertTrue(vec.valid());
+		testIterNotEqual<fixedVector_t<int>>(suite, vec);
+		testIterNotEqual<const fixedVector_t<int>>(suite, vec);
 		try
 		{
 			suite.assertEqual(index<fixedVec>(vec, 0), 0);
@@ -131,5 +140,19 @@ namespace fixedVector
 		suite.assertEqual(vecB.data(), dataA);
 		suite.assertEqual(vecA.length(), 3);
 		suite.assertEqual(vecB.length(), 2);
+
+		fixedVector_t<int> vecC(std::move(vecB));
+		suite.assertFalse(vecB.valid());
+		suite.assertTrue(vecC.valid());
+		suite.assertEqual(vecB.length(), 0);
+		suite.assertEqual(vecC.length(), 2);
+		suite.assertEqual(vecC.data(), dataA);
+
+		vecB = std::move(vecC);
+		suite.assertTrue(vecB.valid());
+		suite.assertFalse(vecC.valid());
+		suite.assertEqual(vecB.length(), 2);
+		suite.assertEqual(vecC.length(), 0);
+		suite.assertEqual(vecB.data(), dataA);
 	}
 }
