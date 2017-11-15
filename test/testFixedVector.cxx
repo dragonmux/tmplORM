@@ -22,12 +22,19 @@ public:
 class testFixedVector final : public testsuit
 {
 public:
+	void testTraits()
+	{
+		assertFalse(std::is_copy_constructible<fixedVector_t<char>>::value);
+		assertFalse(std::is_copy_assignable<fixedVector_t<char>>::value);
+	}
+
 	void testInvalid() { fixedVector::testInvalid(*this); }
 	void testIndexing() { fixedVector::testIndexing(*this); }
 	void testSwap() { fixedVector::testSwap(*this); }
 
 	void registerTests() final override
 	{
+		CXX_TEST(testTraits)
 		CXX_TEST(testInvalid)
 		CXX_TEST(testIndexing)
 		CXX_TEST(testSwap)
