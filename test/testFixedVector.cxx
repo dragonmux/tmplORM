@@ -24,6 +24,9 @@ class testFixedVector final : public testsuit
 public:
 	void testTraits()
 	{
+		assertTrue(std::is_move_constructible<fixedVector_t<char>>::value);
+		assertTrue(std::is_move_assignable<fixedVector_t<char>>::value);
+		assertTrue(std::is_default_constructible<fixedVector_t<char>>::value);
 		assertFalse(std::is_copy_constructible<fixedVector_t<char>>::value);
 		assertFalse(std::is_copy_assignable<fixedVector_t<char>>::value);
 	}
