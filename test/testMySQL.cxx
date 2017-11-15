@@ -339,13 +339,13 @@ public:
 
 	void testInvalid()
 	{
-		/*mySQLClient_t testClient;
+		mySQLClient_t testClient;
 		assertFalse(testClient.valid());
 		assertFalse(testClient.queryResult().valid());
 		mySQLPreparedQuery_t testQuery = testClient.prepare("", 0);
 		assertFalse(testQuery.valid());
 		assertFalse(testQuery.execute());
-		assertEqual(testQuery.rowID(), 0);*/
+		assertEqual(testQuery.rowID(), 0);
 		mySQLResult_t testResult;
 		assertFalse(testResult.valid());
 		assertEqual(testResult.numRows(), 0);
@@ -380,7 +380,7 @@ public:
 	{
 		//CXX_TEST(start)
 		CXX_TEST(testInvalid)
-		//CXX_TEST(testClient)
+		CXX_TEST(testClient)
 		//CXX_TEST(stop)
 	}
 };

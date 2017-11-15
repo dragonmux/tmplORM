@@ -35,7 +35,7 @@ $(DEPS):
 testString.so: O_FILE = ../string.o
 testMySQL.so: O_FILE = ../mysql.o ../string.o
 #testMSSQL.so: O_FILE = ../mssql.o
-testMySQLMapper.so testMySQL.so: CRUNCHMAKE += $(shell mysql_config --include --libmysqld-libs)
+testMySQLMapper.so testMySQL.so: CRUNCHMAKE += $(shell mysql_config --include --libs)
 testConversions.so: O_FILE = conversions.o
 testFixedVector.so: O_FILE = fixedVector.o
 testConversions.so: conversions.o testConversions.cxx
