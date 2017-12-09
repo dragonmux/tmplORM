@@ -1,0 +1,10 @@
+{
+	"files.associations": {
+		"audit_null.c": "cpp",
+		"client_ed25519.c": "cpp",
+		"server_ed25519.c": "cpp",
+		"plugin_example.c": "cpp",
+		"server_audit.c": "cpp",
+		"sql_errlog.c": "cpp"
+	}
+}
