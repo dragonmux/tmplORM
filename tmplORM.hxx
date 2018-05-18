@@ -365,6 +365,37 @@ namespace tmplORM
 		template<typename fieldName> using bit_t = bool_t<fieldName>;
 	}
 
+	// TODO: Fixme. This is half garbage atm.
+	namespace condition
+	{
+		using tmplORM::types::type_t;
+
+		template<typename... conditions> struct where_t { };
+
+		template<typename fieldName, typename value_t> struct equals { };
+		template<typename fieldName, typename value_t> struct notEquals { };
+		template<typename fieldName, typename value_t> struct less { };
+		template<typename fieldName, typename value_t> struct lessOrEquals { };
+		template<typename fieldName, typename value_t> struct more { };
+		template<typename fieldName, typename value_t> struct moreOrEquals { };
+		template<typename fieldName, typename value_t> struct between { };
+		template<typename... conditions> struct and_ { };
+		template<typename... conditions> struct or_ { };
+
+		// Compile-time operators for defining WHERE conditions
+		namespace operators
+		{
+			template<typename fieldName, typename T, typename value_t> constexpr equals<fieldName, value_t>
+				operator ==(const type_t<fieldName, T> &field, const value_t &value) noexcept;
+			template<typename fieldName, typename T, typename value_t> constexpr notEquals<fieldName, value_t>
+				operator !=(const type_t<fieldName, T> &field, const value_t &value) noexcept;
+		}
+
+		// TODO: Perform the condition stack unwind to count the actual number of things that need binding
+		template<typename T> constexpr size_t countCond() noexcept { return 0; }
+	}
+	template<typename... conditions> using where = condition::where_t<conditions...>;
+
 	namespace common
 	{
 		using tmplORM::types::type_t;
