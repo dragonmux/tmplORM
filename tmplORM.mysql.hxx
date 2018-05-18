@@ -274,6 +274,33 @@ namespace tmplORM
 				return data;
 			}
 
+			/*template<typename T, typename where, typename tableName, typename... fields_t> fixedVector_t<T> select(const model_t<tableName, fields_t...> &)
+			{
+				fixedVector_t<T> data;
+				// Generate the SELECT query with WHERE clause
+				using select = select_<tableName, where, fields_t...>;
+				// Now prepare that query abd bind data to the WHERE clause
+				mySQLPreparedQuery_t query{database.prepare(select::data, countCond_t<where>::count)};
+				bindCond<where, fields_t...>::bind(model.fields(), query);
+				// Next, run the query
+				if (!query.execute())
+					throw mySQLValueError_t(mySQLErrorType_t::queryError);
+				// Pull the result set back
+				mySQLPreparedResult_t result = database.queryResult();
+				if (!result.valid())
+					throw mySQLValueError_t(mySQLErrorType_t::queryError);
+				// For each result, bind a new T's fields to the columns in the query and pull the resulting data set back
+				// This is split into a pre-bind phase that does an initial call to ask for field lengths of variable length fields
+				// Then does an allocations and bind pass for the real call to ask for the data of all the fields
+				for (size_t i = 0; i < result.numRows(); ++i)
+				{
+					T value;
+					bindSelect<fields_t...>::bind(value.fields(), result);
+					data[i] = std::move(value);
+				}
+				return data;
+			}*/
+
 			// Unpacks a model_t into its name and fields
 			template<typename tableName, typename... fields_t> bool add(model_t<tableName, fields_t...> &model)
 			{
