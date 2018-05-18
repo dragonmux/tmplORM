@@ -151,7 +151,7 @@ namespace tmplORM
 
 			template<typename T> using bindValue_ = bindValue_t<std::is_pointer<T>::value>;
 
-			template<typename T> void mySQLPreparedQuery_t::bind(const size_t index, const T &value, const fieldLength_t length) noexcept
+			template<typename T> void mySQLBind_t::bind(const size_t index, const T &value, const fieldLength_t length) noexcept
 			{
 				if (index >= numParams)
 					return;
@@ -165,7 +165,7 @@ namespace tmplORM
 				bindT<T>(param);
 			}
 
-			template<typename T> void mySQLPreparedQuery_t::bind(const size_t index, const nullptr_t, const fieldLength_t) noexcept
+			template<typename T> void mySQLBind_t::bind(const size_t index, const nullptr_t, const fieldLength_t) noexcept
 			{
 				if (index >= numParams)
 					return;

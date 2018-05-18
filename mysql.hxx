@@ -149,13 +149,35 @@ public:
 	mySQLResult_t &operator =(const mySQLResult_t &) = delete;
 };
 
+struct mySQLBind_t final
+{
+private:
+	fixedVector_t<MYSQL_BIND> params;
+	fixedVector_t<managedPtr_t<void>> paramStorage;
+	size_t numParams;
+
+public:
+	mySQLBind_t() noexcept : params(), paramStorage(), numParams(0) { }
+	mySQLBind_t(const size_t paramsCount) noexcept;
+	mySQLBind_t(mySQLBind_t &&binds) noexcept;
+	~mySQLBind_t() noexcept = default;
+	void operator =(mySQLBind_t && binds) noexcept;
+
+	bool valid() const noexcept { return !numParams || params; }
+	bool haveData() const noexcept { return params.valid(); }
+	MYSQL_BIND *data() const noexcept { return params.data(); }
+	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept;
+	template<typename T> void bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept;
+
+	mySQLBind_t(const mySQLBind_t &) = delete;
+	mySQLBind_t &operator =(const mySQLBind_t &) = delete;
+};
+
 struct tmplORM_API mySQLPreparedQuery_t final
 {
 private:
 	MYSQL_STMT *query;
-	fixedVector_t<MYSQL_BIND> params;
-	fixedVector_t<managedPtr_t<void>> paramStorage;
-	size_t numParams;
+	mySQLBind_t params;
 	bool executed;
 
 	void dtor() noexcept;
@@ -166,7 +188,7 @@ protected:
 
 public:
 	/*! @brief Default constructor for prepared query objects, constructing an invalid query by default */
-	mySQLPreparedQuery_t() noexcept : query(nullptr), params(), paramStorage(), numParams(0), executed(false) { }
+	mySQLPreparedQuery_t() noexcept : query(nullptr), params(), executed(false) { }
 	mySQLPreparedQuery_t(mySQLPreparedQuery_t &&qry) noexcept;
 	~mySQLPreparedQuery_t() noexcept;
 	mySQLPreparedQuery_t &operator =(mySQLPreparedQuery_t &&qry) noexcept;
@@ -177,8 +199,8 @@ public:
 	bool valid() const noexcept { return query; }
 	bool execute() noexcept;
 	uint64_t rowID() const noexcept;
-	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept;
-	template<typename T> void bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept;
+	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept { params.bind(index, value, length); }
+	template<typename T> void bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept { params.bind<T>(index, nullptr, length); }
 
 	/*! @brief Deleted copy constructor for mySQLPreparedQuery_t as prepared queries are not copyable */
 	mySQLPreparedQuery_t(const mySQLPreparedQuery_t &) = delete;

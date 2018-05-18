@@ -172,6 +172,23 @@ uint32_t mySQLClient_t::errorNum() const noexcept { return valid() ? mysql_errno
  */
 const char *mySQLClient_t::error() const noexcept { return valid() ? mysql_error(con) : nullptr; }
 
+mySQLBind_t::mySQLBind_t(mySQLBind_t &&binds) noexcept : mySQLBind_t() { *this = std::move(binds); }
+
+mySQLBind_t::mySQLBind_t(const size_t paramsCount) noexcept : params(paramsCount), paramStorage(paramsCount), numParams(paramsCount)
+{
+	if (!params.valid())
+		return;
+	for (size_t i = 0; i < numParams; ++i)
+		params[i].buffer_type = MYSQL_TYPE_NULL;
+}
+
+void mySQLBind_t::operator =(mySQLBind_t &&binds) noexcept
+{
+	params.swap(binds.params);
+	paramStorage.swap(binds.paramStorage);
+	std::swap(numParams, binds.numParams);
+}
+
 /*!
  * @internal
  * @brief Constructor for prepared queries from MySQL query statements
@@ -180,15 +197,10 @@ const char *mySQLClient_t::error() const noexcept { return valid() ? mysql_error
  * @param paramsCount The count of the number of parameters that the query statement contains
  */
 mySQLPreparedQuery_t::mySQLPreparedQuery_t(MYSQL *const con, const char *const queryStmt, const size_t paramsCount) noexcept :
-	query(mysql_stmt_init(con)), params(paramsCount), paramStorage(paramsCount), numParams(paramsCount), executed(false)
+	query(mysql_stmt_init(con)), params(paramsCount), executed(false)
 {
-	if (!query || (numParams && !params))
+	if (!query || !params.valid())
 		return;
-	else if (numParams)
-	{
-		for (size_t i = 0; i < numParams; ++i)
-			params[i].buffer_type = MYSQL_TYPE_NULL;
-	}
 	if (mysql_stmt_prepare(query, queryStmt, strlen(queryStmt) + 1) != 0)
 		dtor();
 }
@@ -228,7 +240,6 @@ mySQLPreparedQuery_t &mySQLPreparedQuery_t::operator =(mySQLPreparedQuery_t &&qr
 {
 	std::swap(query, qry.query);
 	std::swap(params, qry.params);
-	std::swap(numParams, qry.numParams);
 	std::swap(executed, qry.executed);
 	return *this;
 }
@@ -238,7 +249,7 @@ bool mySQLPreparedQuery_t::execute() noexcept
 {
 	if (!executed && valid())
 	{
-		if (params)
+		if (params.haveData())
 			mysql_stmt_bind_param(query, params.data());
 		executed = mysql_stmt_execute(query) == 0;
 	}
