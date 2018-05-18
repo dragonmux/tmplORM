@@ -556,6 +556,7 @@ namespace tmplORM
 
 			template<typename... models> bool createTable() { return collect(session.template createTable(models())...); }
 			template<typename model> fixedVector_t<model> select() { return session.template select<model>(model()); }
+			template<typename model, typename where> fixedVector_t<model> select(const where &cond) { return session.template select<model, where>(model(), cond); }
 			template<typename... models_t> bool add(const models_t &...models) { return collect(session.template add(models)...); }
 			/*!
 			 * @brief Add model instances to the database

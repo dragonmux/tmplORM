@@ -40,6 +40,8 @@
 		"type_traits": "cpp",
 		"typeinfo": "cpp",
 		"utility": "cpp",
-		"codecvt": "cpp"
+		"codecvt": "cpp",
+		"*.ic": "cpp",
+		"*.ipp": "cpp"
 	}
 }
