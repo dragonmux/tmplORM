@@ -24,6 +24,16 @@ inline namespace common
 		{ using value = tycat<selectList__<N, field>, selectList<fields...>>; };
 	template<> struct selectList_t<0> { using value = typestring<>; };
 
+	namespace whereClause
+	{
+		using namespace tmplORM::condition;
+
+		template<typename> struct selectWhere_t;
+		template<typename... where> struct selectWhere_t<where_t<where...>>
+			{ using value = tycat<ts(" WHERE ")>; };
+	}
+	template<typename where> using selectWhere = typename whereClause::selectWhere_t<where>::value;
+
 	// Intermediary container type for handling conversion of a field into a form suitable for an INSERT query
 	template<size_t N> struct insertList__t
 	{
