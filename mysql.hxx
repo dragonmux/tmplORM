@@ -156,9 +156,13 @@ private:
 	fixedVector_t<managedPtr_t<void>> paramStorage;
 	size_t numParams;
 
+protected:
+	mySQLBind_t(const size_t paramsCount) noexcept;
+	friend struct mySQLPreparedResult_t;
+	friend struct mySQLPreparedQuery_t;
+
 public:
 	mySQLBind_t() noexcept : params(), paramStorage(), numParams(0) { }
-	mySQLBind_t(const size_t paramsCount) noexcept;
 	mySQLBind_t(mySQLBind_t &&binds) noexcept;
 	~mySQLBind_t() noexcept = default;
 	void operator =(mySQLBind_t && binds) noexcept;
@@ -171,6 +175,34 @@ public:
 
 	mySQLBind_t(const mySQLBind_t &) = delete;
 	mySQLBind_t &operator =(const mySQLBind_t &) = delete;
+};
+
+struct tmplORM_API mySQLPreparedResult_t final
+{
+private:
+	MYSQL_STMT *const query;
+	mySQLBind_t columns;
+
+protected:
+	mySQLPreparedResult_t(MYSQL_STMT *const query, const size_t columnCount) noexcept;
+	friend struct mySQLPreparedQuery_t;
+
+public:
+	mySQLPreparedResult_t() noexcept : query(nullptr), columns() { }
+	mySQLPreparedResult_t(mySQLPreparedResult_t &&res) noexcept;
+	~mySQLPreparedResult_t() noexcept;
+	void operator =(mySQLPreparedResult_t &&res) noexcept;
+	/*!
+	 * @brief Call to determine if this prepared query object is valid
+	 * @returns true if the object is valid, false otherwise
+	 */
+	bool valid() const noexcept { return columns.valid(); }
+	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept { columns.bind(index, value, length); }
+	template<typename T> void bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept { columns.bind<T>(index, nullptr, length); }
+	uint64_t numRows() const noexcept;
+
+	mySQLPreparedResult_t(const mySQLPreparedResult_t &) = delete;
+	mySQLPreparedResult_t &operator =(const mySQLPreparedResult_t &) = delete;
 };
 
 struct tmplORM_API mySQLPreparedQuery_t final
@@ -191,7 +223,7 @@ public:
 	mySQLPreparedQuery_t() noexcept : query(nullptr), params(), executed(false) { }
 	mySQLPreparedQuery_t(mySQLPreparedQuery_t &&qry) noexcept;
 	~mySQLPreparedQuery_t() noexcept;
-	mySQLPreparedQuery_t &operator =(mySQLPreparedQuery_t &&qry) noexcept;
+	void operator =(mySQLPreparedQuery_t &&qry) noexcept;
 	/*!
 	 * @brief Call to determine if this prepared query object is valid
 	 * @returns true if the object is valid, false otherwise
@@ -201,6 +233,7 @@ public:
 	uint64_t rowID() const noexcept;
 	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept { params.bind(index, value, length); }
 	template<typename T> void bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept { params.bind<T>(index, nullptr, length); }
+	mySQLPreparedResult_t queryResult(const size_t columnCount) const noexcept;
 
 	/*! @brief Deleted copy constructor for mySQLPreparedQuery_t as prepared queries are not copyable */
 	mySQLPreparedQuery_t(const mySQLPreparedQuery_t &) = delete;

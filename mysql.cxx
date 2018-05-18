@@ -189,6 +189,10 @@ void mySQLBind_t::operator =(mySQLBind_t &&binds) noexcept
 	std::swap(numParams, binds.numParams);
 }
 
+mySQLPreparedResult_t::mySQLPreparedResult_t(MYSQL_STMT *const qry, const size_t columnCount) noexcept : query(qry), columns(columnCount) { }
+
+uint64_t mySQLPreparedResult_t::numRows() const noexcept { return query ? mysql_stmt_num_rows(query) : 0; }
+
 /*!
  * @internal
  * @brief Constructor for prepared queries from MySQL query statements
@@ -236,12 +240,11 @@ void mySQLPreparedQuery_t::dtor() noexcept
  * @brief Move assignment operator for the context of a MySQL prepared query
  * @param qry The original prepared query who's context we will make our own in trade
  */
-mySQLPreparedQuery_t &mySQLPreparedQuery_t::operator =(mySQLPreparedQuery_t &&qry) noexcept
+void mySQLPreparedQuery_t::operator =(mySQLPreparedQuery_t &&qry) noexcept
 {
 	std::swap(query, qry.query);
 	std::swap(params, qry.params);
 	std::swap(executed, qry.executed);
-	return *this;
 }
 
 /*! @brief Executes the prepared query */
@@ -258,6 +261,7 @@ bool mySQLPreparedQuery_t::execute() noexcept
 
 /*! @brief Returns the ID of a freshly inserted row for this prepared query, or 0 otherwise */
 uint64_t mySQLPreparedQuery_t::rowID() const noexcept { return executed ? mysql_stmt_insert_id(query) : 0; }
+mySQLPreparedResult_t mySQLPreparedQuery_t::queryResult(const size_t columnCount) const noexcept { return executed ? mySQLPreparedResult_t{query, columnCount} : mySQLPreparedResult_t{}; }
 /*!
  * @internal
  * @brief Constructor for results from MySQL queries
