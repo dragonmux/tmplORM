@@ -81,10 +81,6 @@ define ldconfig
 	fi
 endef
 
-ifeq ($(shell if [ $(GCC_VER) -lt 4 ]; then echo 1; else echo 0; fi), 1)
-	$(error You must use a GCC or Clang supporting at least the GCC 4 interface)
-endif
-
 # Set up build engine variables
 GCC ?= gcc
 GXX ?= g++
@@ -101,6 +97,10 @@ else
 	GCC_FLAGS = -fvisibility=hidden -fvisibility-inlines-hidden
 	OPTIM_FLAGS = -O2
 	DEBUG = 0
+endif
+
+ifeq ($(shell if [ $(GCC_VER) -lt 4 ]; then echo 1; else echo 0; fi), 1)
+	$(error You must use a GCC or Clang supporting at least the GCC 4 interface)
 endif
 
 CC = $(GCC) $(GCC_FLAGS)
