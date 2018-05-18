@@ -218,6 +218,9 @@ namespace tmplORM
 		template<typename tableName, typename... fields> using select_ = toString<
 			tycat<ts("SELECT "), selectList<fields...>, ts(" FROM "), backtick<tableName>, ts(";")>
 		>;
+		template<typename tableName, typename where, typename... fields> using selectWhere_ = toString<
+			tycat<ts("SELECT "), selectList<fields...>, ts(" FROM "), backtick<tableName>, selectWhere<where>, ts(";")>
+		>;
 		// tycat<> builds up the query string for inserting the data
 		template<typename tableName, typename... fields> using add_ = toString<
 			tycat<ts("INSERT INTO "), backtick<tableName>, ts(" ("), insertList<fields...>, ts(") VALUES ("), placeholder<countInsert_t<fields...>::count>, ts(");")>
@@ -278,7 +281,7 @@ namespace tmplORM
 			{
 				fixedVector_t<T> data;
 				// Generate the SELECT query with WHERE clause
-				using select = select_<tableName, where, fields_t...>;
+				using select = selectWhere_<tableName, where, fields_t...>;
 				// Now prepare that query abd bind data to the WHERE clause
 				mySQLPreparedQuery_t query{database.prepare(select::data, countCond_t<where>::count)};
 				bindCond<where, fields_t...>::bind(model.fields(), query);
@@ -305,7 +308,7 @@ namespace tmplORM
 			template<typename tableName, typename... fields_t> bool add(model_t<tableName, fields_t...> &model)
 			{
 				using add = add_<tableName, fields_t...>;
-				mySQLPreparedQuery_t query(database.prepare(add::value, countInsert_t<fields_t...>::count));
+				mySQLPreparedQuery_t query{database.prepare(add::value, countInsert_t<fields_t...>::count)};
 				bindInsert<fields_t...>::bind(model.fields(), query);
 				if (query.execute())
 				{
