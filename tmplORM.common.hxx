@@ -101,7 +101,8 @@ inline namespace common
 	template<typename... fields> using updateWhere = typename updateWhere_t<hasPrimaryKey<fields...>(), fields...>::value;
 
 	template<bool, typename tableName, typename... fields> struct update_t { using value = typestring<>; };
-	template<typename tableName, typename... fields> using update_ = toString<typename update_t<sizeof...(fields) == countPrimary<fields...>::count, tableName, fields...>::value>;
+	template<typename tableName, typename... fields> using update_ = toString<typename update_t<sizeof...(fields) ==
+		countPrimary<fields...>::count, tableName, fields...>::value>;
 
 	/*! @brief Binds a model's fields to a prepared query state for a SELECT query on that model, ensuring that auto-increment fields are not bound */
 	template<size_t idx, typename... fields_t> struct bindSelect_t
