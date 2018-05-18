@@ -402,6 +402,8 @@ namespace tmplORM
 		using tmplORM::types::autoInc_t;
 		using tmplORM::types::primary_t;
 		using tmplORM::types::alias_t;
+		using tmplORM::condition::where_t;
+		using tmplORM::condition::countCond;
 
 		// This is strictly only required to work around a bug in MSVC++, however it turns out to be useful when writing the generator aliases per-engine.
 		template<typename> struct toString { };
@@ -495,6 +497,12 @@ namespace tmplORM
 			{ constexpr static size_t count = (isPrimaryKey(field()) ? 1 : 0) + countPrimary_t<N - 1, fields...>::count; };
 		template<> struct countPrimary_t<0> { constexpr static size_t count = 0; };
 		template<typename... fields> using countPrimary = countPrimary_t<sizeof...(fields), fields...>;
+
+		template<typename condition, typename... conditions> constexpr size_t countCond_() noexcept { return countCond<condition>() + countCond_<conditions...>(); }
+		/*! @brief Counts how many values require binding for a SELECT query WHERE clause */
+		template<typename> struct countCond_t;
+		template<typename... conditions> struct countCond_t<where_t<conditions...>>
+			{ constexpr static const size_t count = countCond_<conditions...>(); };
 
 		template<typename fieldName, typename T> constexpr size_t countInsert_(const type_t<fieldName, T> &) noexcept { return 1; }
 		template<typename T> constexpr size_t countInsert_(const autoInc_t<T> &) noexcept { return 0; }
