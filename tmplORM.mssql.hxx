@@ -277,6 +277,24 @@ namespace tmplORM
 				return data;
 			}
 
+			/*template<typename T, typename where, typename tableName, typename... fields_t> fixedVector_t<T> select(const model_t<tableName, fields_t...> &, const where &cond) noexcept
+			{
+				fixedVector_t<T> data;
+				using select = select_<tableName, where, fields_t...>;
+				tSQLResult_t result(database.query(select::value));
+				for (size_t i = 0; i < result.numRows(); ++i, result.next())
+				{
+					T value;
+					if (!result.valid())
+						return {};
+					bindSelect<fields_t...>::bind(value.fields(), result);
+					data[i] = std::move(value);
+				}
+				if (result.valid())
+					return {};
+				return data;
+			}*/
+
 			template<typename tableName, typename... fields_t> bool add(model_t<tableName, fields_t...> &model) noexcept
 			{
 				using insert = add_<tableName, fields_t...>;
