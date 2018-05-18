@@ -277,14 +277,14 @@ namespace tmplORM
 				return data;
 			}
 
-			/*template<typename T, typename where, typename tableName, typename... fields_t> fixedVector_t<T> select(const model_t<tableName, fields_t...> &)
+			template<typename T, typename where, typename tableName, typename... fields_t> fixedVector_t<T> select(const model_t<tableName, fields_t...> &, const where &cond)
 			{
 				fixedVector_t<T> data;
 				// Generate the SELECT query with WHERE clause
 				using select = selectWhere_<tableName, where, fields_t...>;
 				// Now prepare that query abd bind data to the WHERE clause
 				mySQLPreparedQuery_t query{database.prepare(select::data, countCond_t<where>::count)};
-				bindCond<where, fields_t...>::bind(model.fields(), query);
+				bindCond<where, fields_t...>::bind(cond, query);
 				// Next, run the query
 				if (!query.execute())
 					throw mySQLValueError_t(mySQLErrorType_t::queryError);
@@ -302,7 +302,7 @@ namespace tmplORM
 					data[i] = std::move(value);
 				}
 				return data;
-			}*/
+			}
 
 			// Unpacks a model_t into its name and fields
 			template<typename tableName, typename... fields_t> bool add(model_t<tableName, fields_t...> &model)

@@ -156,6 +156,11 @@ inline namespace common
 		}
 	};
 
+	template<typename, typename...> struct bindCond_t;
+	template<typename... conditions, typename... fields> struct bindCond_t<where_t<conditions...>, fields...>
+		{ };
+	template<typename where, typename... fields> using bindCond = bindCond_t<where, fields...>;
+
 	/*! @brief Binds a model's fields to a prepared query state for an INSERT query on that model, ensuring that auto-increment fields are not bound */
 	template<size_t index, size_t bindIdx, typename... fields_t> struct bindInsert_t
 	{
