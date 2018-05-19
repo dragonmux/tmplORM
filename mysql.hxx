@@ -172,6 +172,7 @@ public:
 	MYSQL_BIND *data() const noexcept { return params.data(); }
 	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept;
 	template<typename T> void bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept;
+	size_t count() const noexcept { return numParams; }
 
 	mySQLBind_t(const mySQLBind_t &) = delete;
 	mySQLBind_t &operator =(const mySQLBind_t &) = delete;
@@ -199,6 +200,8 @@ public:
 	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept { columns.bind(index, value, length); }
 	template<typename T> void bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept { columns.bind<T>(index, nullptr, length); }
 	uint64_t numRows() const noexcept;
+	bool next() const noexcept;
+	void fetchColumn(const size_t index) const noexcept;
 
 	mySQLPreparedResult_t(const mySQLPreparedResult_t &) = delete;
 	mySQLPreparedResult_t &operator =(const mySQLPreparedResult_t &) = delete;
