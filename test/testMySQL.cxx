@@ -342,10 +342,15 @@ public:
 		mySQLClient_t testClient;
 		assertFalse(testClient.valid());
 		assertFalse(testClient.queryResult().valid());
+		assertEqual(testClient.errorNum(), 0);
+		assertNull(testClient.error());
 		mySQLPreparedQuery_t testQuery = testClient.prepare("", 0);
 		assertFalse(testQuery.valid());
 		assertFalse(testQuery.execute());
 		assertEqual(testQuery.rowID(), 0);
+		mySQLPreparedResult_t testPrepResult = testQuery.queryResult(0);
+		assertTrue(testPrepResult.valid());
+		assertEqual(testPrepResult.numRows(), 0);
 		mySQLResult_t testResult;
 		assertFalse(testResult.valid());
 		assertEqual(testResult.numRows(), 0);
@@ -355,6 +360,10 @@ public:
 		assertEqual(testRow.numFields(), 0);
 		assertFalse(testRow.next());
 		assertTrue(testRow[0].isNull());
+		mySQLBind_t testBind;
+		assertTrue(testBind.valid());
+		assertFalse(testBind.haveData());
+		assertNull(testBind.data());
 	}
 
 	void testClient()
