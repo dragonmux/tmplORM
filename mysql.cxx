@@ -172,27 +172,6 @@ uint32_t mySQLClient_t::errorNum() const noexcept { return valid() ? mysql_errno
  */
 const char *mySQLClient_t::error() const noexcept { return valid() ? mysql_error(con) : nullptr; }
 
-mySQLBind_t::mySQLBind_t(mySQLBind_t &&binds) noexcept : mySQLBind_t() { *this = std::move(binds); }
-
-mySQLBind_t::mySQLBind_t(const size_t paramsCount) noexcept : params(paramsCount), paramStorage(paramsCount), numParams(paramsCount)
-{
-	if (!params.valid())
-		return;
-	for (size_t i = 0; i < numParams; ++i)
-		params[i].buffer_type = MYSQL_TYPE_NULL;
-}
-
-void mySQLBind_t::operator =(mySQLBind_t &&binds) noexcept
-{
-	params.swap(binds.params);
-	paramStorage.swap(binds.paramStorage);
-	std::swap(numParams, binds.numParams);
-}
-
-mySQLPreparedResult_t::mySQLPreparedResult_t(MYSQL_STMT *const qry, const size_t columnCount) noexcept : query(qry), columns(columnCount) { }
-
-uint64_t mySQLPreparedResult_t::numRows() const noexcept { return query ? mysql_stmt_num_rows(query) : 0; }
-
 /*!
  * @internal
  * @brief Constructor for prepared queries from MySQL query statements
@@ -262,6 +241,25 @@ bool mySQLPreparedQuery_t::execute() noexcept
 /*! @brief Returns the ID of a freshly inserted row for this prepared query, or 0 otherwise */
 uint64_t mySQLPreparedQuery_t::rowID() const noexcept { return executed ? mysql_stmt_insert_id(query) : 0; }
 mySQLPreparedResult_t mySQLPreparedQuery_t::queryResult(const size_t columnCount) const noexcept { return executed ? mySQLPreparedResult_t{query, columnCount} : mySQLPreparedResult_t{}; }
+mySQLPreparedResult_t::mySQLPreparedResult_t(MYSQL_STMT *const qry, const size_t columnCount) noexcept : query(qry), columns(columnCount) { }
+uint64_t mySQLPreparedResult_t::numRows() const noexcept { return query ? mysql_stmt_num_rows(query) : 0; }
+mySQLBind_t::mySQLBind_t(mySQLBind_t &&binds) noexcept : mySQLBind_t() { *this = std::move(binds); }
+
+mySQLBind_t::mySQLBind_t(const size_t paramsCount) noexcept : params(paramsCount), paramStorage(paramsCount), numParams(paramsCount)
+{
+	if (!params.valid())
+		return;
+	for (size_t i = 0; i < numParams; ++i)
+		params[i].buffer_type = MYSQL_TYPE_NULL;
+}
+
+void mySQLBind_t::operator =(mySQLBind_t &&binds) noexcept
+{
+	params.swap(binds.params);
+	paramStorage.swap(binds.paramStorage);
+	std::swap(numParams, binds.numParams);
+}
+
 /*!
  * @internal
  * @brief Constructor for results from MySQL queries
