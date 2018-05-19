@@ -190,8 +190,7 @@ protected:
 public:
 	mySQLPreparedResult_t() noexcept : query(nullptr), columns() { }
 	mySQLPreparedResult_t(mySQLPreparedResult_t &&res) noexcept;
-	~mySQLPreparedResult_t() noexcept;
-	void operator =(mySQLPreparedResult_t &&res) noexcept;
+	~mySQLPreparedResult_t() noexcept = default;
 	/*!
 	 * @brief Call to determine if this prepared query object is valid
 	 * @returns true if the object is valid, false otherwise
@@ -203,6 +202,7 @@ public:
 
 	mySQLPreparedResult_t(const mySQLPreparedResult_t &) = delete;
 	mySQLPreparedResult_t &operator =(const mySQLPreparedResult_t &) = delete;
+	mySQLPreparedResult_t &operator =(mySQLPreparedResult_t &&) = delete;
 };
 
 struct tmplORM_API mySQLPreparedQuery_t final

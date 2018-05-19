@@ -242,6 +242,8 @@ bool mySQLPreparedQuery_t::execute() noexcept
 uint64_t mySQLPreparedQuery_t::rowID() const noexcept { return executed ? mysql_stmt_insert_id(query) : 0; }
 mySQLPreparedResult_t mySQLPreparedQuery_t::queryResult(const size_t columnCount) const noexcept { return executed ? mySQLPreparedResult_t{query, columnCount} : mySQLPreparedResult_t{}; }
 mySQLPreparedResult_t::mySQLPreparedResult_t(MYSQL_STMT *const qry, const size_t columnCount) noexcept : query(qry), columns(columnCount) { }
+mySQLPreparedResult_t::mySQLPreparedResult_t(mySQLPreparedResult_t &&res) noexcept : query(res.query), columns()
+	{ std::swap(columns, res.columns); }
 uint64_t mySQLPreparedResult_t::numRows() const noexcept { return query ? mysql_stmt_num_rows(query) : 0; }
 mySQLBind_t::mySQLBind_t(mySQLBind_t &&binds) noexcept : mySQLBind_t() { *this = std::move(binds); }
 
