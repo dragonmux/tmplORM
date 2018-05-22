@@ -248,6 +248,14 @@ mySQLPreparedResult_t::mySQLPreparedResult_t(mySQLPreparedResult_t &&res) noexce
 	{ std::swap(columns, res.columns); }
 uint64_t mySQLPreparedResult_t::numRows() const noexcept { return query ? mysql_stmt_num_rows(query) : 0; }
 
+void mySQLPreparedResult_t::bindForBuffer(const size_t index) noexcept
+{
+	MYSQL_BIND &param = columns.data()[index];
+	param.length = &param.buffer_length;
+	param.buffer = nullptr;
+	param.buffer_length = 0;
+}
+
 bool mySQLPreparedResult_t::next() const noexcept
 {
 	mysql_stmt_bind_result(query, columns.data());

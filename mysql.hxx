@@ -199,6 +199,7 @@ public:
 	bool valid() const noexcept { return columns.valid(); }
 	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept { columns.bind(index, value, length); }
 	template<typename T> void bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept { columns.bind<T>(index, nullptr, length); }
+	void bindForBuffer(const size_t index) noexcept;
 	uint64_t numRows() const noexcept;
 	bool next() const noexcept;
 	void fetchColumn(const size_t index) const noexcept;
