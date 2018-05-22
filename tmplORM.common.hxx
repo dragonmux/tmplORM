@@ -156,6 +156,38 @@ inline namespace common
 		}
 	};
 
+	/*! @brief Binds a model's fields to a prepared query state for a SELECT query on that model */
+	template<size_t index, typename... fields_t> struct bindSelectCore_t
+	{
+		constexpr static size_t idx = index - 1;
+
+		template<typename fieldName, typename T, typename field_t, typename query_t>
+			static void bindField(const type_t<fieldName, T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
+		{
+			bindSelectCore_t<idx, fields_t...>::bind(fields, query);
+			bindField_t<index, field_t>::bind(field, query);
+		}
+
+		template<typename fieldName, size_t length, typename field_t, typename query_t>
+			static void bindField(const unicode_t<fieldName, length> &, const field_t &, const std::tuple<fields_t...> &fields, query_t &query) noexcept
+		{
+			bindSelectCore_t<idx, fields_t...>::bind(fields, query);
+			query.bindForBuffer(index);
+		}
+
+		template<typename query_t> static void bind(const std::tuple<fields_t...> &fields, query_t &query) noexcept
+		{
+			const auto &field = std::get<index>(fields);
+			bindField(field, field, fields, query);
+		}
+	};
+
+	/*! @brief End (base) case for bindSelectCore_t that terminates the recursion */
+	template<typename... fields> struct bindSelectCore_t<0, fields...>
+		{ template<typename query_t> static void bind(const std::tuple<fields...> &, query_t &) noexcept { } };
+	/*! @brief Helper type for bindSelectCore_t that makes the binding type easier to use */
+	template<typename... fields> using bindSelectCore = bindSelectCore_t<sizeof...(fields), fields...>;
+
 	template<typename, typename...> struct bindCond_t;
 	template<typename... conditions, typename... fields> struct bindCond_t<where_t<conditions...>, fields...>
 		{ };
