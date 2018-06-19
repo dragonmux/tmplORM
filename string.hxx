@@ -20,6 +20,8 @@ tmplORM_FNAPI std::unique_ptr<const char []> vaFormatString(const char *format, 
 tmplORM_FNAPI std::unique_ptr<char []> stringDup(const char *const str) noexcept;
 tmplORM_FNAPI std::unique_ptr<const char []> strNewDup(const char *const str) noexcept;
 
+inline std::unique_ptr<char []> stringDup(const std::unique_ptr<char []> &str) noexcept { return stringDup(str.get()); }
+
 struct utf16_t final
 {
 private:
