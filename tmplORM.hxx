@@ -133,7 +133,7 @@ namespace tmplORM
 			using type = typename T::type;
 			using T::operator =;
 			using T::value;
-			operator const type() const noexcept { return value(); }
+			using T::operator const type;
 			using T::operator ==;
 			using T::operator !=;
 		};
@@ -171,26 +171,24 @@ namespace tmplORM
 			const type value() const noexcept { return _value(); }
 			type value() noexcept { return T::value(); }
 			void value(const type &_value) noexcept { _null = false; T::value(_value); }
+			operator const type() const noexcept { return _value(); }
 		};
 
 		// Encodes as a VARCHAR type field (NVARCHAR for MSSQL)
 		template<typename _fieldName, size_t _length> struct unicode_t : public type_t<_fieldName, const char *>
 		{
-		/*private:
+		private:
 			using parentType_t = type_t<_fieldName, const char *>;
 
 		public:
-			using type = char *;
+			using type = typename parentType_t::type;
 			using parentType_t::operator =;
 			using parentType_t::value;
-			using parentType_t::operator const char *const;
+			using parentType_t::operator const type;
 			using parentType_t::operator ==;
 			using parentType_t::operator !=;
 
-			operator type() const noexcept { return const_cast<const type>(parentType_t::_value); }
-			void operator =(type const value) noexcept { *this = const_cast<const char *const>(value); }
-			type value() noexcept { return *this; }
-			size_t length() const noexcept { return value() ? std::char_traits<char>::length(value()) : 0; }*/
+			size_t length() const noexcept { return value() ? std::char_traits<char>::length(value()) : 0; }
 		};
 
 		// Encodes as a TEXT type field (NTEXT for MSSQL)
@@ -200,24 +198,22 @@ namespace tmplORM
 			using parentType_t = type_t<_fieldName, const char *>;
 
 		public:
-			using type = char *;
+			using type = typename parentType_t::type;
 			using parentType_t::operator =;
 			using parentType_t::value;
-			using parentType_t::operator const char *const;
+			using parentType_t::operator const type;
 			using parentType_t::operator ==;
 			using parentType_t::operator !=;
 
-			operator type() const noexcept { return const_cast<const type>(parentType_t::_value); }
-			void operator =(type const value) noexcept { *this = const_cast<const char *const>(value); }
-			type value() noexcept { return *this; }
 			size_t length() const noexcept { return value() ? std::char_traits<char>::length(value()) : 0; }
 		};
 
 		template<typename _fieldName> using int64_t = type_t<_fieldName, std::int64_t>;
 		template<typename _fieldName> using int32_t = type_t<_fieldName, std::int32_t>;
 		template<typename _fieldName> using int16_t = type_t<_fieldName, std::int16_t>;
+		template<typename _fieldName> using int8_t = type_t<_fieldName, std::int8_t>;
 
-		template<typename _fieldName> struct int8_t : public type_t<_fieldName, std::int8_t>
+		/*template<typename _fieldName> struct int8_t : public type_t<_fieldName, std::int8_t>
 		{
 		private:
 			using parentType_t = type_t<_fieldName, std::int8_t>;
@@ -232,7 +228,7 @@ namespace tmplORM
 			void value(const std::int64_t &_value) noexcept { parentType_t::value(std::int8_t(_value)); }
 			type value() noexcept { return *this; }
 			const type value() const noexcept { return *this; }
-		};
+		};*/
 
 		template<typename _fieldName> using bool_t = type_t<_fieldName, bool>;
 		template<typename _fieldName> using float_t = type_t<_fieldName, float>;
