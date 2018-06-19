@@ -1,5 +1,9 @@
+#include <memory>
+#include <string>
 #include <crunch++.h>
 #include <mssql.hxx>
+#include <string.hxx>
+#include "constString.hxx"
 
 /*!
  * @internal
@@ -10,6 +14,19 @@
  */
 
 using namespace tmplORM::mssql::driver;
+
+std::unique_ptr<tSQLClient_t> testClient{};
+constString_t host, username, password;
+
+bool haveEnvironment() noexcept
+{
+	// driver?
+	host = getenv("MSSQL_HOST");
+	// port?
+	username = getenv("MSSQL_USERNAME");
+	password = getenv("MSSQL_PASSWORD");
+	return !(host.empty() || username.empty() || password.empty());
+}
 
 class testMSSQL_t final : public testsuit
 {
@@ -28,9 +45,30 @@ public:
 		assertTrue(testValue.isNull());
 	}
 
+	void testConnect()
+	{
+		assertNull(testClient.get());
+		testClient = makeUnique<tSQLClient_t>();
+		assertNotNull(testClient.get());
+		assertFalse(testClient->valid());
+	}
+
+	void testDisconnect()
+	{
+		if (testClient->valid())
+			testClient->disconnect();
+		assertFalse(testClient->valid());
+		testClient = nullptr;
+		assertNull(testClient.get());
+	}
+
 	void registerTests() final override
 	{
+		if (!haveEnvironment())
+			skip("No suitable environment found, refusing to run");
 		CXX_TEST(testInvalid)
+		CXX_TEST(testConnect)
+		CXX_TEST(testDisconnect)
 	}
 };
 
