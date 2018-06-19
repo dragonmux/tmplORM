@@ -10,10 +10,10 @@ namespace tmplORM
 	{
 		namespace rSON
 		{
-			using jsonAtom_t = rSON::JSONAtom;
+			using jsonAtom_t = ::rSON::JSONAtom;
 
 			template<typename nullable_t, bool = std::is_same<typename std::remove_const<typename nullable_t::type>::type, char *>::value ||
-				std::is_same<typename nullable_t::type, types::baseTypes::ormDateTime_t>::value> ||
+				std::is_same<typename nullable_t::type, types::baseTypes::ormDateTime_t>::value ||
 				std::is_same<typename nullable_t::type, types::baseTypes::ormDate_t>::value>
 				struct nullableValue_t
 			{
@@ -50,15 +50,15 @@ namespace tmplORM
 			{
 			private:
 				using nullable_t = types::nullable_t<T>;
-		
+
 			public:
 				using type = typename nullable_t::type;
 				using nullable_t::operator =;
 				using nullable_t::value;
 				using nullable_t::operator ==;
 				using nullable_t::operator !=;
-		
-				void operator =(const jsonAtom_t &_value) noexcept { value(_value); }
+
+				void operator =(const jsonAtom_t &_value) { value(_value); }
 				void value(const jsonAtom_t &_value)
 				{
 					const nullableValue_t<nullable_t> setter;
