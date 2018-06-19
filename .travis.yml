@@ -21,6 +21,7 @@ install:
     fi
   - make
 script:
+  - make buildCheck
   - make -C test
   - make -C test check
 after_success:
