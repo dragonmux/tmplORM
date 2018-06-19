@@ -8,10 +8,10 @@
 #include <new>
 #include <chrono>
 #include <type_traits>
-#include "typestring/typestring.hh"
-#include "tmplORM.extern.hxx"
-#include "tmplORM.types.hxx"
-#include "fixedVector.hxx"
+#include <typestring/typestring.hh>
+#include <tmplORM.extern.hxx>
+#include <tmplORM.types.hxx>
+#include <fixedVector.hxx>
 
 #define ts(x) typestring_is(x)
 #define ts_(x) ts(x)()

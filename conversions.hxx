@@ -4,7 +4,7 @@
 #include <type_traits>
 #include <utility>
 #include <string>
-#include "string.hxx"
+#include <string.hxx>
 
 template<typename> struct isBoolean_ : public std::false_type { };
 template<> struct isBoolean_<bool> : public std::true_type { };
