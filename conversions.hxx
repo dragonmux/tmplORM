@@ -1,5 +1,5 @@
-#ifndef CONVERSIONS__HXX
-#define CONVERSIONS__HXX
+#ifndef tmplORM_CONVERSIONS__HXX
+#define tmplORM_CONVERSIONS__HXX
 
 #include <type_traits>
 #include <utility>
@@ -199,4 +199,4 @@ inline void swapBytes(uint64_t &val) noexcept
 		((val & 0xFF000000) << 8) | ((val & 0xFF0000) << 24) | ((val & 0xFF00) << 40) | ((val & 0xFF) << 56);
 }
 
-#endif /*CONVERSIONS__HXX*/
+#endif /*tmplORM_CONVERSIONS__HXX*/

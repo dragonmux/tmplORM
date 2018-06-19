@@ -1,11 +1,11 @@
-#ifndef STRING__HXX
-#define STRING__HXX
+#ifndef tmplORM_STRING__HXX
+#define tmplORM_STRING__HXX
 
 #include <cstdarg>
 #include <memory>
 #include <new>
 #include <string>
-#include "tmplORM.extern.hxx"
+#include <tmplORM.extern.hxx>
 #define tmplORM_STRING_FORMAT_ARGS(n, m) __attribute__((format(printf, n, m)))
 
 /*!
@@ -100,4 +100,4 @@ template<typename T> inline typename makeUnique_<T>::arrayType makeUnique(const 
 
 template<typename T, typename... Args> inline typename makeUnique_<T>::invalidType makeUnique(Args &&...) noexcept = delete;
 
-#endif /*STRING__HXX*/
+#endif /*tmplORM_STRING__HXX*/
