@@ -216,8 +216,6 @@ private:
 	mutable bool haveConnection, needsCommit;
 	mutable tSQLExecError_t _error;
 
-	bool connect(const stringPtr_t &connString) const noexcept;
-
 protected:
 	bool error(const int16_t err, const int16_t handleType, void *const handle) const noexcept;
 	bool error(const tSQLExecErrorType_t err, const int16_t handleType, void *const handle) const noexcept;
