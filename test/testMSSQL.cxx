@@ -57,6 +57,55 @@ public:
 		testClient = makeUnique<tSQLClient_t>();
 		assertNotNull(testClient.get());
 		assertFalse(testClient->valid());
+		const bool selected = testClient->selectDB("master");
+		if (!selected)
+		{
+			const auto &error = testClient->error();
+			printf("DB selection failed (%u): %s\n", error.errorNum(), error.error());
+			printf("\tstate code: %s\n", error.state());
+		}
+		const bool connected = testClient->connect(driver, host, port, username, password);
+		if (!connected)
+		{
+			const auto &error = testClient->error();
+			printf("Connection failed (%u): %s\n", error.errorNum(), error.error());
+			printf("\tstate code: %s\n", error.state());
+		}
+		assertTrue(connected);
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		assertTrue(testClient->valid());
+	}
+
+	void testCreateDB()
+	{
+		assertTrue(testClient->valid());
+		tSQLResult_t result = testClient->query("CREATE DATABASE [tmplORM];");
+		assertTrue(result.valid());
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+	}
+
+	void testSelectDB()
+	{
+		assertTrue(testClient->valid());
+		puts("Selecting database tmplORM");
+		const bool selected = testClient->selectDB("tmplORM");
+		if (!selected)
+		{
+			const auto &error = testClient->error();
+			printf("DB selection failed (%u): %s\n", error.errorNum(), error.error());
+			printf("\tstate code: %s\n", error.state());
+		}
+		assertTrue(selected);
+		puts("Checking for errors");
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+	}
+
+	void testDestroyDB()
+	{
+		assertTrue(testClient->valid());
+		tSQLResult_t result = testClient->query("DROP DATABASE [tmplORM];");
+		assertTrue(result.valid());
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 	}
 
 	void testDisconnect()
@@ -74,6 +123,11 @@ public:
 			skip("No suitable environment found, refusing to run");
 		CXX_TEST(testInvalid)
 		CXX_TEST(testConnect)
+		CXX_TEST(testCreateDB)
+//		CXX_TEST(testDisconnect)
+		CXX_TEST(testSelectDB)
+
+		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
 	}
 };
