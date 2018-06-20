@@ -396,17 +396,15 @@ tSQLExecError_t::tSQLExecError_t(const tSQLExecErrorType_t error, const int16_t 
 {
 	if (handle)
 	{
-		sqlState_t state;
 		int16_t messageLen = 0;
-		static_assert(state.size() == SQL_SQLSTATE_SIZE + 1, "sqlState_t not the correct length for this ODBC interface");
+		static_assert(sqlState_t{}.size() == SQL_SQLSTATE_SIZE + 1, "sqlState_t not the correct length for this ODBC interface");
 
-		SQLGetDiagField(handleType, handle, 1, SQL_DIAG_SQLSTATE, state.data(), state.size(), nullptr);
-		std::swap(_state, state);
-		SQLGetDiagField(handleType, handle, 1, SQL_DIAG_MESSAGE_TEXT, nullptr, 0, &messageLen);
+		SQLGetDiagFieldA(handleType, handle, 1, SQL_DIAG_SQLSTATE, _state.data(), _state.size(), nullptr);
+		SQLGetDiagFieldA(handleType, handle, 1, SQL_DIAG_MESSAGE_TEXT, nullptr, 0, &messageLen);
 		_message = makeUnique<char []>(++messageLen);
 		if (_message)
 		{
-			SQLGetDiagField(handleType, handle, 1, SQL_DIAG_MESSAGE_TEXT, _message.get(), messageLen, nullptr);
+			SQLGetDiagFieldA(handleType, handle, 1, SQL_DIAG_MESSAGE_TEXT, _message.get(), messageLen, nullptr);
 			_message[messageLen - 1] = 0;
 		}
 	}

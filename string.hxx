@@ -42,6 +42,7 @@ public:
 	operator char16_t *() const noexcept { return str.get(); }
 	operator const uint16_t *() const noexcept { return reinterpret_cast<uint16_t *const>(str.get()); }
 	operator uint16_t *() const noexcept { return reinterpret_cast<uint16_t *const>(str.get()); }
+	operator void *() const noexcept { return static_cast<void *const>(str.get()); }
 	explicit operator bool() const noexcept { return bool(str); }
 };
 
