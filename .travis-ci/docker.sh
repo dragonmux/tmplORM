@@ -1,5 +1,3 @@
-#!/bin/bash
-
 dir=$(readlink -f `dirname ${BASH_SOURCE[0]*/}`)
 mssqlPass=`$dir/makePassword.py`
 
