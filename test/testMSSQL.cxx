@@ -16,16 +16,18 @@
 using namespace tmplORM::mssql::driver;
 
 std::unique_ptr<tSQLClient_t> testClient{};
-constString_t host, username, password;
+constString_t driver, host, username, password;
+
+constexpr static uint32_t port = 1433;
 
 bool haveEnvironment() noexcept
 {
-	// driver?
+	driver = getenv("MSSQL_DRIVER");
 	host = getenv("MSSQL_HOST");
 	// port?
 	username = getenv("MSSQL_USERNAME");
 	password = getenv("MSSQL_PASSWORD");
-	return !(host.empty() || username.empty() || password.empty());
+	return !(driver.empty() || host.empty() || username.empty() || password.empty());
 }
 
 class testMSSQL_t final : public testsuit
