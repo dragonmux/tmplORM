@@ -35,6 +35,10 @@ class testMSSQL_t final : public testsuit
 public:
 	void testInvalid()
 	{
+		tSQLClient_t testClient;
+		assertFalse(testClient.valid());
+		assertFalse(testClient.query("").valid());
+		assertFalse(testClient.prepare("", 0).valid());
 		tSQLQuery_t testQuery;
 		assertFalse(testQuery.valid());
 		assertFalse(testQuery.execute().valid());
