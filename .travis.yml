@@ -183,3 +183,4 @@ env:
     - COVERAGE=1
 services:
   - mysql
+  - docker
