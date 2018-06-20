@@ -112,7 +112,7 @@ public:
 	reverse_iterator crend() const noexcept { return rend(); }
 	size_t size() const noexcept { return length_; }
 	size_t length() const noexcept { return length_; }
-	constexpr size_t max_size() const noexcept { return std::numeric_limits<size_t>::max(); }
+	size_t max_size() const noexcept { return std::numeric_limits<size_t>::max(); }
 	void clear() noexcept { *this = constString_t{}; }
 	bool empty() const noexcept { return length_ == 0; }
 
