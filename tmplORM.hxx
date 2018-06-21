@@ -76,12 +76,12 @@ namespace tmplORM
 		protected:
 			T _value;
 
-		private:
-			bool _modified;
+		/*private:
+			bool _modified;*/
 
 		public:
-			constexpr type_t() noexcept : _value(), _modified(false) { }
-			constexpr type_t(const T value) noexcept : _value(value), _modified(false) { }
+			constexpr type_t() noexcept : _value()/*, _modified(false)*/ { }
+			constexpr type_t(const T value) noexcept : _value(value)/*, _modified(false)*/ { }
 
 			constexpr const char *fieldName() const noexcept { return _fieldName::data(); }
 			const T value() const noexcept { return _value; }
@@ -89,13 +89,13 @@ namespace tmplORM
 			// Make the type behave like its' contained type..
 			operator const T() const noexcept { return _value; }
 			void operator =(const T &_value) noexcept { value(_value); }
-			bool modified() const noexcept { return _modified; }
+			//bool modified() const noexcept { return _modified; }
 			constexpr static bool nullable = false;
 
 			void value(const T &newValue) noexcept
 			{
 				_value = newValue;
-				_modified = true;
+				//_modified = true;
 			}
 
 			bool operator ==(const type_t<_fieldName, T> &value) const noexcept { return _value == value._value; }
