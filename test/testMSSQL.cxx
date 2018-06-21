@@ -168,8 +168,16 @@ public:
 		assertTrue(result.hasData());
 		assertEqual(result.numRows(), 0);
 		assertEqual(result.numFields(), 1);
-		assertFalse(result[0].isNull());
-		testData[0].entryID = result[0];
+		// XXX: This should but doesn't work due to a strange edge-case in msodbcsql17
+		// The edge case causes the first tSQLValue_t to construct properly, via a call to SQLGetData()
+		// but when the second index to the same data occurs, the underlying driver always returns
+		// SQL NULL - we need to cache the constructed tSQLValue_t in the tSQLResult_t and clean the cache
+		// on each .next()
+		//assertFalse(result[0].isNull());
+		//testData[0].entryID = result[0];
+		tSQLValue_t value = result[0];
+		assertFalse(value.isNull());
+		testData[0].entryID = value;
 		assertEqual(testData[0].entryID, 1);
 	}
 	catch (const tSQLValueError_t &error)
