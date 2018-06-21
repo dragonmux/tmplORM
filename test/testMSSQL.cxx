@@ -125,7 +125,7 @@ public:
 		CXX_TEST(testConnect)
 		CXX_TEST(testCreateDB)
 //		CXX_TEST(testDisconnect)
-		CXX_TEST(testSelectDB)
+//		CXX_TEST(testSelectDB)
 
 		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
