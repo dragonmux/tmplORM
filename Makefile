@@ -26,7 +26,7 @@ TYPE_H = typestring/typestring.hh
 
 O = string.o mysql.o mssql.o
 H = mysql.hxx mssql.hxx tmplORM.hxx tmplORM.mysql.hxx tmplORM.mssql.hxx tmplORM.common.hxx tmplORM.types.hxx tmplORM.rSON.hxx \
-	tmplORM.extern.hxx conversions.hxx fixedVector.hxx string.hxx
+	tmplORM.extern.hxx conversions.hxx fixedVector.hxx string.hxx managedPtr.hxx
 GCH = tmplORM.gch tmplORM.mysql.gch tmplORM.mssql.gch
 VERMAJ = .0
 VERMIN = $(VERMAJ).0
