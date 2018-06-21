@@ -3,6 +3,7 @@
 #include <crunch++.h>
 #include <mssql.hxx>
 #include <string.hxx>
+#include <tmplORM.mssql.hxx>
 #include "constString.hxx"
 
 /*!
@@ -14,11 +15,27 @@
  */
 
 using namespace tmplORM::mssql::driver;
+using irqus::typestring;
+using tmplORM::mssql::fieldLength;
 
 std::unique_ptr<tSQLClient_t> testClient{};
 constString_t driver, host, username, password;
 
 constexpr static uint32_t port = 1433;
+
+struct data_t
+{
+	tmplORM::types::int32_t<typestring<>> entryID;
+	tmplORM::types::unicode_t<typestring<>, 50> name;
+	tmplORM::types::nullable_t<tmplORM::types::int32_t<typestring<>>> value;
+	tmplORM::types::dateTime_t<typestring<>> when;
+};
+
+std::array<data_t, 2> testData
+{
+	data_t{0, "kevin", 50, {}},
+	data_t{0, "dave", nullptr, {}}
+};
 
 bool haveEnvironment() noexcept
 {
