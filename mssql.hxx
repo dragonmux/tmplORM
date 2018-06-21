@@ -50,7 +50,7 @@ public:
 	tSQLExecError_t(const tSQLExecErrorType_t error, const int16_t handleType, void *const handle) noexcept;
 	tSQLExecError_t(tSQLExecError_t &&err) noexcept : tSQLExecError_t() { *this = std::move(err); }
 	~tSQLExecError_t() noexcept { }
-	tSQLExecError_t &operator =(tSQLExecError_t &&err) noexcept;
+	void operator =(tSQLExecError_t &&err) noexcept;
 
 	const char *error() const noexcept;
 	const char *state() const noexcept { return _state.data(); }
@@ -79,7 +79,7 @@ public:
 	tSQLValue_t(const void *const _data, const uint64_t _length, const int16_t _type) noexcept;
 	tSQLValue_t(tSQLValue_t &&value) noexcept : tSQLValue_t() { *this = std::move(value); }
 	~tSQLValue_t() noexcept { }
-	tSQLValue_t &operator =(tSQLValue_t &&value) noexcept;
+	void operator =(tSQLValue_t &&value) noexcept;
 
 	bool isNull() const noexcept { return !data; }
 	std::unique_ptr<char []> asString(const bool release = true) const;
@@ -153,7 +153,7 @@ public:
 	tSQLResult_t() noexcept : client(nullptr), queryHandle(nullptr), _hasData(false), _freeHandle(true), fields(0), fieldInfo() { }
 	tSQLResult_t(tSQLResult_t &&res) noexcept : tSQLResult_t() { *this = std::move(res); }
 	~tSQLResult_t() noexcept;
-	tSQLResult_t &operator =(tSQLResult_t &&res) noexcept;
+	void operator =(tSQLResult_t &&res) noexcept;
 	/*!
 	 * @brief Call to determine if this result object is valid
 	 * @returns true if the object is valid, false otherwise
@@ -192,7 +192,7 @@ public:
 	tSQLQuery_t() noexcept : client(nullptr), queryHandle(nullptr), numParams(0), paramStorage(), dataLengths(), executed(false) { }
 	tSQLQuery_t(tSQLQuery_t &&qry) noexcept : tSQLQuery_t() { *this = std::move(qry); }
 	~tSQLQuery_t() noexcept;
-	tSQLQuery_t &operator =(tSQLQuery_t &&qry) noexcept;
+	void operator =(tSQLQuery_t &&qry) noexcept;
 	/*!
 	 * @brief Call to determine if this prepared query object is valid
 	 * @returns true if the object is valid, false otherwise
@@ -227,7 +227,7 @@ public:
 	tSQLClient_t() noexcept;
 	tSQLClient_t(tSQLClient_t &&con) noexcept;
 	~tSQLClient_t() noexcept;
-	tSQLClient_t &operator =(tSQLClient_t &&con) noexcept;
+	void operator =(tSQLClient_t &&con) noexcept;
 	/*!
 	 * @brief Call to determine if this client connection container is valid
 	 * @returns true if the object is valid, false otherwise

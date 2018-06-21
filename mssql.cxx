@@ -67,17 +67,11 @@ inline int16_t odbcToCType(const int16_t typeODBC) noexcept
 tSQLClient_t::tSQLClient_t() noexcept : dbHandle(nullptr), connection(nullptr), haveConnection(false), needsCommit(false), _error()
 {
 	if (SQLAllocHandle(SQL_HANDLE_ENV, nullptr, &dbHandle) != SQL_SUCCESS || !dbHandle)
-	{
 		error(tSQLExecErrorType_t::connect, SQL_HANDLE_ENV, dbHandle);
-		return;
-	}
 	else if (error(SQLSetEnvAttr(dbHandle, SQL_ATTR_ODBC_VERSION, reinterpret_cast<void *>(long(SQL_OV_ODBC3)), 0), SQL_HANDLE_ENV, dbHandle))
 		return;
 	else if (SQLAllocHandle(SQL_HANDLE_DBC, dbHandle, &connection) != SQL_SUCCESS || !connection)
-	{
 		error(tSQLExecErrorType_t::connect, SQL_HANDLE_DBC, connection);
-		return;
-	}
 }
 
 tSQLClient_t::~tSQLClient_t() noexcept
@@ -87,14 +81,13 @@ tSQLClient_t::~tSQLClient_t() noexcept
 	SQLFreeHandle(SQL_HANDLE_ENV, dbHandle);
 }
 
-tSQLClient_t &tSQLClient_t::operator =(tSQLClient_t &&con) noexcept
+void tSQLClient_t::operator =(tSQLClient_t &&con) noexcept
 {
 	std::swap(dbHandle, con.dbHandle);
 	std::swap(connection, con.connection);
 	std::swap(haveConnection, con.haveConnection);
 	std::swap(needsCommit, con.needsCommit);
 	std::swap(_error, con._error);
-	return *this;
 }
 
 void tSQLClient_t::disconnect() const noexcept
@@ -138,8 +131,8 @@ tSQLQuery_t tSQLClient_t::prepare(const char *const queryStmt, const size_t para
 {
 	void *queryHandle = nullptr;
 	if (!valid() || error(SQLAllocHandle(SQL_HANDLE_STMT, connection, &queryHandle), SQL_HANDLE_STMT, queryHandle) || !queryHandle)
-		return tSQLQuery_t();
-	return tSQLQuery_t(this, queryHandle, queryStmt, paramsCount);
+		return {};
+	return {this, queryHandle, queryStmt, paramsCount};
 }
 
 tSQLResult_t tSQLClient_t::query(const char *const queryStmt) const noexcept
@@ -147,7 +140,7 @@ tSQLResult_t tSQLClient_t::query(const char *const queryStmt) const noexcept
 	const auto query = prepare(queryStmt, 0);
 	if (query.valid())
 		return query.execute();
-	return tSQLResult_t();
+	return {};
 }
 
 bool tSQLClient_t::beginTransact() const noexcept
@@ -191,7 +184,7 @@ tSQLQuery_t::~tSQLQuery_t() noexcept
 		error(SQLFreeHandle(SQL_HANDLE_STMT, queryHandle));
 }
 
-tSQLQuery_t &tSQLQuery_t::operator =(tSQLQuery_t &&qry) noexcept
+void tSQLQuery_t::operator =(tSQLQuery_t &&qry) noexcept
 {
 	swap(client, qry.client);
 	swap(queryHandle, qry.queryHandle);
@@ -199,18 +192,17 @@ tSQLQuery_t &tSQLQuery_t::operator =(tSQLQuery_t &&qry) noexcept
 	std::swap(paramStorage, qry.paramStorage);
 	std::swap(dataLengths, qry.dataLengths);
 	std::swap(executed, qry.executed);
-	return *this;
 }
 
 tSQLResult_t tSQLQuery_t::execute() const noexcept
 {
 	if (!valid() || !queryHandle || !client || executed)
-		return tSQLResult_t();
+		return {};
 	else if (error(SQLExecute(queryHandle)) && client->error() != tSQLExecErrorType_t::dataAvail &&
 		client->error() != tSQLExecErrorType_t::noData)
-		return tSQLResult_t();
+		return {};
 	executed = true;
-	return tSQLResult_t(client, std::move(queryHandle), client->error() == tSQLExecErrorType_t::ok);
+	return {client, std::move(queryHandle), client->error() == tSQLExecErrorType_t::ok};
 }
 
 bool tSQLQuery_t::error(const int16_t err) const noexcept
@@ -250,14 +242,13 @@ tSQLResult_t::~tSQLResult_t() noexcept
 		SQLFreeHandle(SQL_HANDLE_STMT, queryHandle);
 }
 
-tSQLResult_t &tSQLResult_t::operator =(tSQLResult_t &&res) noexcept
+void tSQLResult_t::operator =(tSQLResult_t &&res) noexcept
 {
 	swap(client, res.client);
 	swap(queryHandle, res.queryHandle);
 	swap(_hasData, res._hasData);
 	swap(_freeHandle, res._freeHandle);
 	swap(fields, res.fields);
-	return *this;
 }
 
 uint64_t tSQLResult_t::numRows() const noexcept
@@ -276,7 +267,7 @@ inline bool isBinType(const int16_t type) noexcept { return type == SQL_LONGVARB
 tSQLValue_t tSQLResult_t::operator [](const uint16_t idx) const noexcept
 {
 	if (idx >= fields || !valid())
-		return tSQLValue_t();
+		return {};
 	const uint16_t column = idx + 1;
 
 	// Pitty this can't use C++17 syntax: [const int16_t type, const uint32_t valueLength] = fieldInfo[idx];
@@ -289,7 +280,7 @@ tSQLValue_t tSQLResult_t::operator [](const uint16_t idx) const noexcept
 		uint32_t temp = 0;
 		long length = 0;
 		if (error(SQLGetData(queryHandle, column, cType, &temp, 0, &length)) || length == SQL_NULL_DATA || length == SQL_NO_TOTAL)
-			return tSQLValue_t();
+			return {};
 		valueLength = uint32_t(length) + 1;
 		if (isWCharType(type))
 			++valueLength;
@@ -297,7 +288,7 @@ tSQLValue_t tSQLResult_t::operator [](const uint16_t idx) const noexcept
 
 	auto valueStorage = makeUnique<char []>(valueLength);
 	if (!valueStorage)
-		return tSQLValue_t();
+		return {};
 	valueStorage[valueLength - 1] = 0;
 	if (isWCharType(type))
 		valueStorage[valueLength - 2] = 0;
@@ -305,9 +296,9 @@ tSQLValue_t tSQLResult_t::operator [](const uint16_t idx) const noexcept
 	if (!(isBinType(type) && valueLength == 1))
 	{
 		if (error(SQLGetData(queryHandle, column, cType, valueStorage.get(), valueLength, nullptr)))
-			return tSQLValue_t();
+			return {};
 	}
-	return tSQLValue_t(valueStorage.release(), valueLength, type);
+	return {valueStorage.release(), valueLength, type};
 }
 
 bool tSQLResult_t::error(const int16_t err) const noexcept
@@ -324,12 +315,11 @@ tSQLValue_t::tSQLValue_t(const void *const _data, const uint64_t _length, const 
 	}
 }
 
-tSQLValue_t &tSQLValue_t::operator =(tSQLValue_t &&value) noexcept
+void tSQLValue_t::operator =(tSQLValue_t &&value) noexcept
 {
 	std::swap(data, value.data);
 	swap(length, value.length);
 	swap(type, value.type);
-	return *this;
 }
 
 template<typename T> const T &reinterpret(const stringPtr_t &data) noexcept
@@ -339,7 +329,7 @@ std::unique_ptr<char []> tSQLValue_t::asString(const bool release) const
 {
 	if (isNull() || (!isCharType(type) && !isWCharType(type)))
 		throw tSQLValueError_t(tSQLErrorType_t::stringError);
-	return release ? std::unique_ptr<char []>(const_cast<char *>(data.release())) : stringDup(data.get());
+	return release ? std::unique_ptr<char []>{const_cast<char *>(data.release())} : stringDup(data.get());
 }
 
 template<int16_t rawType, int16_t, tSQLErrorType_t error, typename T> T asInt(const tSQLValue_t &val, const stringPtr_t &data, const int16_t type)
@@ -417,12 +407,11 @@ tSQLExecError_t::tSQLExecError_t(const tSQLExecErrorType_t error, const int16_t 
 	}
 }
 
-tSQLExecError_t &tSQLExecError_t::operator =(tSQLExecError_t &&err) noexcept
+void tSQLExecError_t::operator =(tSQLExecError_t &&err) noexcept
 {
 	swap(_error, err._error);
 	std::swap(_state, err._state);
 	std::swap(_message, err._message);
-	return *this;
 }
 
 const char *tSQLExecError_t::error() const noexcept
