@@ -334,7 +334,6 @@ std::unique_ptr<char []> tSQLValue_t::asString(const bool release) const
 
 template<int16_t rawType, int16_t, tSQLErrorType_t error, typename T> T asInt(const tSQLValue_t &val, const stringPtr_t &data, const int16_t type)
 {
-	printf("val null? %s, type: %d, rawType: %d\n", val.isNull() ? "true" : "false", type, rawType);
 	if (val.isNull() || type != rawType)
 		throw tSQLValueError_t(error);
 	return reinterpret<T>(data);
