@@ -121,6 +121,26 @@ public:
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 	}
 
+	void testCreateTable()
+	{
+		assertTrue(testClient->valid());
+		tSQLResult_t result = testClient->query(
+			"CREATE TABLE [tmplORM] ("
+			"[EntryID] INT NOT NULL PRIMARY KEY IDENTITY, "
+			"[Name] NVARCHAR(50) NOT NULL, "
+			"[Value] INT NULL, "
+			"[When] DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP);"
+		);
+		if (!result.valid())
+		{
+			const auto &error = testClient->error();
+			printf("Query failed (%u): %s\n", error.errorNum(), error.error());
+			printf("\tstate code: %s\n", error.state());
+		}
+		assertTrue(result.valid());
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+	}
+
 	void testDestroyDB()
 	{
 		assertTrue(testClient->valid());
@@ -153,6 +173,7 @@ public:
 		CXX_TEST(testConnect)
 		CXX_TEST(testCreateDB)
 		CXX_TEST(testSelectDB)
+		CXX_TEST(testCreateTable)
 		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
 	}
