@@ -169,6 +169,11 @@ public:
 		fail("Exception thrown while converting value");
 	}
 
+	void testResult()
+	{
+		assertTrue(testClient->valid());
+	}
+
 	void testDestroyDB()
 	{
 		assertTrue(testClient->valid());
@@ -203,6 +208,7 @@ public:
 		CXX_TEST(testSelectDB)
 		CXX_TEST(testCreateTable)
 		CXX_TEST(testPrepared)
+		CXX_TEST(testResult)
 		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
 	}
