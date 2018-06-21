@@ -168,7 +168,6 @@ public:
 		assertTrue(result.hasData());
 		assertEqual(result.numRows(), 0);
 		assertEqual(result.numFields(), 1);
-		assertTrue(result.next());
 		assertFalse(result[0].isNull());
 		testData[0].entryID = result[0];
 		assertEqual(testData[0].entryID, 1);
@@ -220,7 +219,7 @@ public:
 		CXX_TEST(testCreateDB)
 		CXX_TEST(testSelectDB)
 		CXX_TEST(testCreateTable)
-		//CXX_TEST(testPrepared)
+		CXX_TEST(testPrepared)
 		CXX_TEST(testResult)
 		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
