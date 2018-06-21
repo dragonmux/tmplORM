@@ -96,7 +96,13 @@ public:
 	void testCreateDB()
 	{
 		assertTrue(testClient->valid());
-		tSQLResult_t result = testClient->query("CREATE DATABASE [tmplORM];");
+		tSQLResult_t result = testClient->query("CREATE DATABASE [tmplORM] COLLATE latin1_general_100_CI_AI_SC;");
+		if (!result.valid())
+		{
+			const auto &error = testClient->error();
+			printf("Query failed (%u): %s\n", error.errorNum(), error.error());
+			printf("\tstate code: %s\n", error.state());
+		}
 		assertTrue(result.valid());
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 	}
@@ -104,7 +110,6 @@ public:
 	void testSelectDB()
 	{
 		assertTrue(testClient->valid());
-		puts("Selecting database tmplORM");
 		const bool selected = testClient->selectDB("tmplORM");
 		if (!selected)
 		{
@@ -113,7 +118,6 @@ public:
 			printf("\tstate code: %s\n", error.state());
 		}
 		assertTrue(selected);
-		puts("Checking for errors");
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 	}
 
