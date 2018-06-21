@@ -111,7 +111,13 @@ bool tSQLClient_t::connect(const char *const driver, const char *const host, con
 {
 	if (!connection || haveConnection)
 		return !error(tSQLExecErrorType_t::connect);
-	auto connString = formatString("DRIVER=%s;SERVER=tcp:%s,%u;UID=%s;PWD=%s;DATABASE=master;TRUSTED_CONNECTION=no", driver, host, port ? port : 1433, user, passwd);
+	/*int32_t databaseLength{};
+	SQLGetConnectAttr(connection, SQL_ATTR_CURRENT_CATALOG, nullptr, 0, &databaseLength);
+	printf("Current database string length: %d\n", databaseLength);
+	if (!databaseLength)
+		return !error(tSQLExecErrorType_t::connect);*/
+
+	auto connString = formatString("DRIVER=%s;SERVER=tcp:%s,%u;UID=%s;PWD=%s;TRUSTED_CONNECTION=no", driver, host, port ? port : 1433, user, passwd);
 	if (!connString)
 		return !error(tSQLExecErrorType_t::connect);
 	auto odbcString = utf16::convert(connString.get());
@@ -125,7 +131,7 @@ bool tSQLClient_t::selectDB(const char *const db) const noexcept
 	if (!connection || !db)
 		return false;
 	auto odbcString = utf16::convert(db);
-	return !error(SQLSetConnectAttr(connection, SQL_ATTR_CURRENT_CATALOG, odbcString, utf16::length(odbcString)), SQL_HANDLE_DBC, connection);
+	return !error(SQLSetConnectAttr(connection, SQL_ATTR_CURRENT_CATALOG, odbcString, utf16::length(odbcString) * 2), SQL_HANDLE_DBC, connection);
 }
 
 tSQLQuery_t tSQLClient_t::prepare(const char *const queryStmt, const size_t paramsCount) const noexcept
