@@ -124,7 +124,14 @@ public:
 	void testDestroyDB()
 	{
 		assertTrue(testClient->valid());
+		assertTrue(testClient->selectDB("master"));
 		tSQLResult_t result = testClient->query("DROP DATABASE [tmplORM];");
+		if (!result.valid())
+		{
+			const auto &error = testClient->error();
+			printf("Query failed (%u): %s\n", error.errorNum(), error.error());
+			printf("\tstate code: %s\n", error.state());
+		}
 		assertTrue(result.valid());
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 	}
@@ -145,9 +152,7 @@ public:
 		CXX_TEST(testInvalid)
 		CXX_TEST(testConnect)
 		CXX_TEST(testCreateDB)
-//		CXX_TEST(testDisconnect)
-//		CXX_TEST(testSelectDB)
-
+		CXX_TEST(testSelectDB)
 		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
 	}
