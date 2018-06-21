@@ -141,6 +141,34 @@ public:
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 	}
 
+	void testPrepared() try
+	{
+		assertTrue(testClient->valid());
+		tSQLQuery_t query = testClient->prepare(
+			"INSERT INTO [tmplORM] ([Name], [Value]) "
+			"OUTPUT INSERTED.[EntryID] VALUES (?, ?)", 2
+		);
+		assertTrue(query.valid());
+
+		query.bind(0, testData[0].name.value(), fieldLength(testData[0].name));
+		query.bind(1, testData[0].value.value(), fieldLength(testData[0].value));
+		tSQLResult_t result = query.execute();
+		assertTrue(result.valid());
+
+		assertTrue(result.hasData());
+		assertEqual(result.numRows(), 0);
+		assertEqual(result.numFields(), 1);
+		assertTrue(result.next());
+		assertFalse(result[0].isNull());
+		testData[0].entryID = result[0];
+		assertEqual(testData[0].entryID, 1);
+	}
+	catch (const tSQLValueError_t &error)
+	{
+		puts(error.error());
+		fail("Exception thrown while converting value");
+	}
+
 	void testDestroyDB()
 	{
 		assertTrue(testClient->valid());
@@ -174,6 +202,7 @@ public:
 		CXX_TEST(testCreateDB)
 		CXX_TEST(testSelectDB)
 		CXX_TEST(testCreateTable)
+		CXX_TEST(testPrepared)
 		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
 	}
