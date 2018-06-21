@@ -70,31 +70,38 @@ public:
 
 	void testConnect()
 	{
-		assertNull(testClient.get());
-		testClient = makeUnique<tSQLClient_t>();
-		assertNotNull(testClient.get());
-		assertFalse(testClient->valid());
-		const bool selected = testClient->selectDB("master");
+		assertNull(testClient);
+		tSQLClient_t client;
+		assertFalse(client.valid());
+		const bool selected = client.selectDB("master");
 		if (!selected)
 		{
-			const auto &error = testClient->error();
+			const auto &error = client.error();
 			printf("DB selection failed (%u): %s\n", error.errorNum(), error.error());
 			printf("\tstate code: %s\n", error.state());
 		}
-		const bool connected = testClient->connect(driver, host, port, username, password);
+		const bool connected = client.connect(driver, host, port, username, password);
 		if (!connected)
 		{
-			const auto &error = testClient->error();
+			const auto &error = client.error();
 			printf("Connection failed (%u): %s\n", error.errorNum(), error.error());
 			printf("\tstate code: %s\n", error.state());
 		}
 		assertTrue(connected);
-		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		assertTrue(client.error() == tSQLExecErrorType_t::ok);
+		assertTrue(client.valid());
+
+		testClient = makeUnique<tSQLClient_t>();
+		assertNotNull(testClient);
+		assertFalse(testClient->valid());
+		*testClient = std::move(client);
+		assertFalse(client.valid());
 		assertTrue(testClient->valid());
 	}
 
 	void testCreateDB()
 	{
+		assertNotNull(testClient);
 		assertTrue(testClient->valid());
 		tSQLResult_t result = testClient->query("CREATE DATABASE [tmplORM] COLLATE latin1_general_100_CI_AI_SC;");
 		if (!result.valid())
@@ -109,6 +116,7 @@ public:
 
 	void testSelectDB()
 	{
+		assertNotNull(testClient);
 		assertTrue(testClient->valid());
 		const bool selected = testClient->selectDB("tmplORM");
 		if (!selected)
@@ -123,6 +131,7 @@ public:
 
 	void testCreateTable()
 	{
+		assertNotNull(testClient);
 		assertTrue(testClient->valid());
 		tSQLResult_t result = testClient->query(
 			"CREATE TABLE [tmplORM] ("
@@ -143,6 +152,7 @@ public:
 
 	void testPrepared() try
 	{
+		assertNotNull(testClient);
 		assertTrue(testClient->valid());
 		tSQLQuery_t query = testClient->prepare(
 			"INSERT INTO [tmplORM] ([Name], [Value]) "
@@ -171,11 +181,13 @@ public:
 
 	void testResult()
 	{
+		assertNotNull(testClient);
 		assertTrue(testClient->valid());
 	}
 
 	void testDestroyDB()
 	{
+		assertNotNull(testClient);
 		assertTrue(testClient->valid());
 		assertTrue(testClient->selectDB("master"));
 		tSQLResult_t result = testClient->query("DROP DATABASE [tmplORM];");
@@ -191,6 +203,7 @@ public:
 
 	void testDisconnect()
 	{
+		assertNotNull(testClient);
 		if (testClient->valid())
 			testClient->disconnect();
 		assertFalse(testClient->valid());
