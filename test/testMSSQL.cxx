@@ -207,7 +207,7 @@ public:
 		CXX_TEST(testCreateDB)
 		CXX_TEST(testSelectDB)
 		CXX_TEST(testCreateTable)
-		CXX_TEST(testPrepared)
+		//CXX_TEST(testPrepared)
 		CXX_TEST(testResult)
 		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
