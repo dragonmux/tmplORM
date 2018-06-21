@@ -188,6 +188,8 @@ namespace tmplORM
 			using parentType_t::operator ==;
 			using parentType_t::operator !=;
 
+			constexpr unicode_t() noexcept : parentType_t{} { }
+			constexpr unicode_t(const type value) noexcept : parentType_t{value} { }
 			size_t length() const noexcept { return value() ? std::char_traits<char>::length(value()) : 0; }
 		};
 
@@ -205,6 +207,8 @@ namespace tmplORM
 			using parentType_t::operator ==;
 			using parentType_t::operator !=;
 
+			constexpr unicodeText_t() noexcept : parentType_t{} { }
+			constexpr unicodeText_t(const type value) noexcept : parentType_t{value} { }
 			size_t length() const noexcept { return value() ? std::char_traits<char>::length(value()) : 0; }
 		};
 
