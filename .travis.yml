@@ -72,7 +72,6 @@ matrix:
     #        - gcc-4.9
     #        - g++-4.9
     #        - clang-4.0
-    #        - unixodbc-dev
     #        - libmysqld-dev
     #        - libaio-dev
     #        - libwrap0-dev
@@ -89,7 +88,6 @@ matrix:
     #        - gcc-4.9
     #        - g++-4.9
     #        - clang-5.0
-    #        - unixodbc-dev
     #        - libmysqld-dev
     #        - libaio-dev
     #        - libwrap0-dev
@@ -103,7 +101,6 @@ matrix:
           packages:
             - gcc-5
             - g++-5
-            - unixodbc-dev
             - libmysqld-dev
             - libaio-dev
             - libwrap0-dev
@@ -117,7 +114,6 @@ matrix:
           packages:
             - gcc-5
             - g++-5
-            - unixodbc-dev
             - libmysqld-dev
             - libaio-dev
             - libwrap0-dev
@@ -131,7 +127,6 @@ matrix:
           packages:
             - gcc-6
             - g++-6
-            - unixodbc-dev
             - libmysqld-dev
             - libaio-dev
             - libwrap0-dev
@@ -145,7 +140,6 @@ matrix:
           packages:
             - gcc-6
             - g++-6
-            - unixodbc-dev
             - libmysqld-dev
             - libaio-dev
             - libwrap0-dev
@@ -159,7 +153,6 @@ matrix:
           packages:
             - gcc-7
             - g++-7
-            - unixodbc-dev
             - libmysqld-dev
             - libaio-dev
             - libwrap0-dev
@@ -173,7 +166,32 @@ matrix:
           packages:
             - gcc-7
             - g++-7
-            - unixodbc-dev
+            - libmysqld-dev
+            - libaio-dev
+            - libwrap0-dev
+#        mariadb: '10.1'
+    - compiler: gcc-8
+      env: GCC=gcc-8 GXX=g++-8 COVERAGE=0
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-8
+            - g++-8
+            - libmysqld-dev
+            - libaio-dev
+            - libwrap0-dev
+#        mariadb: '10.1'
+    - compiler: gcc-8
+      env: GCC=gcc-8 GXX=g++-8 GCOV=gcov-8
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-8
+            - g++-8
             - libmysqld-dev
             - libaio-dev
             - libwrap0-dev
