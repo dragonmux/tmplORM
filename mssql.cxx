@@ -222,10 +222,7 @@ tSQLResult_t::tSQLResult_t(const tSQLClient_t *const _client, void *const &&hand
 	uint16_t &_fields = const_cast<uint16_t &>(fields);
 	swap(queryHandle, handle);
 	if (error(SQLNumResultCols(queryHandle, reinterpret_cast<int16_t *>(&_fields))) || (fields & 0x8000))
-	{
 		_fields = 0;
-		return;
-	}
 	else if (fields)
 	{
 		fieldInfo = makeUnique<fieldType_t []>(fields);
@@ -242,6 +239,8 @@ tSQLResult_t::tSQLResult_t(const tSQLClient_t *const _client, void *const &&hand
 			}
 			fieldInfo[i] = std::make_pair(int16_t(type), uint32_t(length));
 		}
+		if (hasData)
+			next();
 	}
 }
 
@@ -343,9 +342,9 @@ std::unique_ptr<char []> tSQLValue_t::asString(const bool release) const
 	return release ? std::unique_ptr<char []>(const_cast<char *>(data.release())) : stringDup(data.get());
 }
 
-template<int16_t rawType, int16_t cType, tSQLErrorType_t error, typename T> T asInt(const tSQLValue_t &val, const stringPtr_t &data, const int16_t type)
+template<int16_t rawType, int16_t, tSQLErrorType_t error, typename T> T asInt(const tSQLValue_t &val, const stringPtr_t &data, const int16_t type)
 {
-	if (val.isNull() || (type != rawType && type != cType))
+	if (val.isNull() || type != rawType)
 		throw tSQLValueError_t(error);
 	return reinterpret<T>(data);
 }
