@@ -211,10 +211,35 @@ private:
 		fail("Exception thrown while converting value");
 	}
 
-	void testResult()
+	void testResult() try
 	{
 		assertNotNull(testClient);
 		assertTrue(testClient->valid());
+		tSQLResult_t result = testClient->query("SELECT [EntryID], [Name], [Value], [When] FROM [tmplORM];");
+		assertTrue(result.valid());
+		//assertEqual(result.numRows(), 2);
+		assertEqual(result.numFields(), 4);
+
+		assertEqual(result[0], testData[0].entryID);
+		assertEqual(result[1], testData[0].name);
+		assertFalse(result[2].isNull());
+		assertEqual(result[2], testData[0].value);
+		testData[0].when = result[3].asDateTime();
+		auto when = testData[0].when.value();
+		printf("%04u-%02u-%02u %02u:%02u:%02u\n", when.year(), when.month(), when.day(),
+			when.hour(), when.minute(), when.second());
+		assertTrue(result.next());
+
+		assertEqual(result[0], testData[1].entryID);
+		assertEqual(result[1], testData[1].name);
+		assertTrue(testData[1].value.isNull());
+		testData[1].when = result[3].asDateTime();
+		assertFalse(result.next());
+	}
+	catch (const tSQLValueError_t &error)
+	{
+		puts(error.error());
+		fail("Exception thrown while converting value");
 	}
 
 	void testDestroyDB()
