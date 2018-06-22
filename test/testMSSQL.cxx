@@ -160,31 +160,50 @@ private:
 	{
 		assertNotNull(testClient);
 		assertTrue(testClient->valid());
-		tSQLQuery_t query = testClient->prepare(
+		tSQLQuery_t query;
+		assertFalse(query.valid());
+		tSQLResult_t result;
+
+		assertFalse(result.valid());
+		query = testClient->prepare(
 			"INSERT INTO [tmplORM] ([Name], [Value]) "
-			"OUTPUT INSERTED.[EntryID] VALUES (?, ?)", 2
+			"OUTPUT INSERTED.[EntryID] VALUES (?, ?);", 2
 		);
 		assertTrue(query.valid());
-
 		query.bind(0, testData[0].name.value(), fieldLength(testData[0].name));
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 		query.bind(1, testData[0].value.value(), fieldLength(testData[0].value));
-		tSQLResult_t result = query.execute();
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		result = query.execute();
 		assertTrue(result.valid());
 
 		assertTrue(result.hasData());
 		assertEqual(result.numRows(), 0);
 		assertEqual(result.numFields(), 1);
-		// XXX: This should but doesn't work due to a strange edge-case in msodbcsql17
-		// The edge case causes the first tSQLValue_t to construct properly, via a call to SQLGetData()
-		// but when the second index to the same data occurs, the underlying driver always returns
-		// SQL NULL - we need to cache the constructed tSQLValue_t in the tSQLResult_t and clean the cache
-		// on each .next()
-		//assertFalse(result[0].isNull());
-		//testData[0].entryID = result[0];
-		tSQLValue_t value = result[0];
-		assertFalse(value.isNull());
-		testData[0].entryID = value;
+		assertFalse(result[0].isNull());
+		testData[0].entryID = result[0];
 		assertEqual(testData[0].entryID, 1);
+		assertFalse(result.next());
+
+		query = testClient->prepare(
+			"INSERT INTO [tmplORM] ([Name], [Value]) "
+			"OUTPUT INSERTED.[EntryID] VALUES (?, ?);", 2
+		);
+		assertTrue(query.valid());
+		query.bind(0, testData[1].name.value(), fieldLength(testData[1].name));
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		query.bind<const char *>(1, nullptr, fieldLength(testData[1].value));
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		result = query.execute();
+		assertTrue(result.valid());
+
+		assertTrue(result.hasData());
+		assertEqual(result.numRows(), 0);
+		assertEqual(result.numFields(), 1);
+		assertFalse(result[0].isNull());
+		testData[1].entryID = result[0];
+		assertEqual(testData[1].entryID, 2);
+		assertFalse(result.next());
 	}
 	catch (const tSQLValueError_t &error)
 	{
