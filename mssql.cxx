@@ -222,13 +222,13 @@ tSQLResult_t::tSQLResult_t(const tSQLClient_t *const _client, void *handle, cons
 		for (uint16_t i = 0; i < fields; ++i)
 		{
 			long type = 0, length = 0;
-			if (error(SQLColAttribute(queryHandle, i + 1, SQL_DESC_TYPE, nullptr, 0, nullptr, &type)) || !type ||
+			if (error(SQLColAttribute(queryHandle, i + 1, SQL_DESC_CONCISE_TYPE, nullptr, 0, nullptr, &type)) || !type ||
 				error(SQLColAttribute(queryHandle, i + 1, SQL_DESC_OCTET_LENGTH, nullptr, 0, nullptr, &length)) || length < 0)
 			{
 				fieldInfo.reset();
 				return;
 			}
-			fieldInfo[i] = std::make_pair(int16_t(type), uint32_t(length));
+			fieldInfo[i] = {int16_t(type), uint32_t(length)};
 		}
 		if (hasData)
 			next();
@@ -378,15 +378,17 @@ const void *tSQLValue_t::asBuffer(size_t &bufferLength, const bool release) cons
 
 ormDate_t tSQLValue_t::asDate() const
 {
-	if (isNull() || type != SQL_DATE)
+	if (isNull() || type != SQL_TYPE_DATE)
 		throw tSQLValueError_t(tSQLErrorType_t::dateError);
 	auto date = reinterpret<SQL_DATE_STRUCT>(data);
 	return {uint16_t(date.year), date.month, date.day};
 }
 
+// TODO: ormTime_t tSQLValue_t::asTime() const => SQL_TYPE_TIME, SQL_TIME_STRUCT
+
 ormDateTime_t tSQLValue_t::asDateTime() const
 {
-	if (isNull() || type != SQL_TIMESTAMP)
+	if (isNull() || type != SQL_TYPE_TIMESTAMP)
 		throw tSQLValueError_t(tSQLErrorType_t::dateTimeError);
 	auto dateTime = reinterpret<SQL_TIMESTAMP_STRUCT>(data);
 	return {uint16_t(dateTime.year), dateTime.month, dateTime.day, dateTime.hour,
