@@ -137,20 +137,20 @@ struct tmplORM_API tSQLResult_t final
 {
 private:
 	using fieldType_t = std::pair<int16_t, uint32_t>;
-	const tSQLClient_t *const client;
-	void *const queryHandle;
+	const tSQLClient_t *client;
+	void *queryHandle;
 	const bool _hasData, _freeHandle;
-	const uint16_t fields;
+	uint16_t fields;
 	std::unique_ptr<fieldType_t []> fieldInfo;
 
 protected:
-	tSQLResult_t(const tSQLClient_t *const _client, void *const &&handle, const bool hasData, const bool freeHandle = true) noexcept;
+	tSQLResult_t(const tSQLClient_t *const _client, void *handle, const bool hasData, const bool freeHandle = true) noexcept;
 	bool error(const int16_t err) const noexcept;
 	friend struct tSQLQuery_t;
 
 public:
 	/*! @brief Default constructor for result objects, constructing invalid result objects by default */
-	tSQLResult_t() noexcept : client(nullptr), queryHandle(nullptr), _hasData(false), _freeHandle(true), fields(0), fieldInfo() { }
+	tSQLResult_t() noexcept : client{nullptr}, queryHandle{nullptr}, _hasData{false}, _freeHandle{true}, fields{0}, fieldInfo{}, valueCache{} { }
 	tSQLResult_t(tSQLResult_t &&res) noexcept : tSQLResult_t() { *this = std::move(res); }
 	~tSQLResult_t() noexcept;
 	void operator =(tSQLResult_t &&res) noexcept;
@@ -176,14 +176,14 @@ struct tmplORM_API tSQLQuery_t final
 {
 private:
 	const tSQLClient_t *const client;
-	void *const queryHandle;
+	void *queryHandle;
 	size_t numParams;
 	fixedVector_t<managedPtr_t<void>> paramStorage;
 	fixedVector_t<long> dataLengths;
 	mutable bool executed;
 
 protected:
-	tSQLQuery_t(const tSQLClient_t *const _client, void *const handle, const char *const queryStmt, const size_t paramsCount) noexcept;
+	tSQLQuery_t(const tSQLClient_t *const _client, void *handle, const char *const queryStmt, const size_t paramsCount) noexcept;
 	bool error(const int16_t err) const noexcept;
 	friend struct tSQLClient_t;
 

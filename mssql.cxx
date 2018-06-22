@@ -169,7 +169,7 @@ bool tSQLClient_t::error(const tSQLExecErrorType_t err, const int16_t handleType
 	return _error != tSQLExecErrorType_t::ok;
 }
 
-tSQLQuery_t::tSQLQuery_t(const tSQLClient_t *const parent, void *const handle, const char *const queryStmt, const size_t paramsCount) noexcept :
+tSQLQuery_t::tSQLQuery_t(const tSQLClient_t *const parent, void *handle, const char *const queryStmt, const size_t paramsCount) noexcept :
 	client(parent), queryHandle(handle), numParams(paramsCount), paramStorage(paramsCount), dataLengths(paramsCount), executed(false)
 {
 	if (!queryHandle || (numParams && !dataLengths) || !client)
@@ -202,23 +202,22 @@ tSQLResult_t tSQLQuery_t::execute() const noexcept
 		client->error() != tSQLExecErrorType_t::noData)
 		return {};
 	executed = true;
-	return {client, std::move(queryHandle), client->error() == tSQLExecErrorType_t::ok};
+	return {client, queryHandle, client->error() == tSQLExecErrorType_t::ok};
 }
 
 bool tSQLQuery_t::error(const int16_t err) const noexcept
 	{ return !client || client->error(err, SQL_HANDLE_STMT, queryHandle); }
 
-tSQLResult_t::tSQLResult_t(const tSQLClient_t *const _client, void *const &&handle, const bool hasData, const bool freeHandle) noexcept :
-	client(_client), queryHandle(), _hasData(hasData), _freeHandle(freeHandle), fields(0), fieldInfo()
+tSQLResult_t::tSQLResult_t(const tSQLClient_t *const _client, void *handle, const bool hasData, const bool freeHandle) noexcept :
+	client{_client}, queryHandle{handle}, _hasData{hasData}, _freeHandle{freeHandle}, fields{0}, fieldInfo{}, valueCache{}
 {
-	uint16_t &_fields = const_cast<uint16_t &>(fields);
-	swap(queryHandle, handle);
-	if (error(SQLNumResultCols(queryHandle, reinterpret_cast<int16_t *>(&_fields))) || (fields & 0x8000))
-		_fields = 0;
+	if (error(SQLNumResultCols(queryHandle, reinterpret_cast<int16_t *>(&fields))) || (fields & 0x8000))
+		fields = 0;
 	else if (fields)
 	{
 		fieldInfo = makeUnique<fieldType_t []>(fields);
-		if (!fieldInfo)
+		valueCache = fixedVector_t<tSQLValue_t>{fields};
+		if (!fieldInfo || !valueCache.valid())
 			return;
 		for (uint16_t i = 0; i < fields; ++i)
 		{
@@ -244,11 +243,12 @@ tSQLResult_t::~tSQLResult_t() noexcept
 
 void tSQLResult_t::operator =(tSQLResult_t &&res) noexcept
 {
-	swap(client, res.client);
-	swap(queryHandle, res.queryHandle);
+	std::swap(client, res.client);
+	std::swap(queryHandle, res.queryHandle);
 	swap(_hasData, res._hasData);
 	swap(_freeHandle, res._freeHandle);
-	swap(fields, res.fields);
+	std::swap(fields, res.fields);
+	std::swap(fieldInfo, res.fieldInfo);
 }
 
 uint64_t tSQLResult_t::numRows() const noexcept
@@ -296,16 +296,17 @@ tSQLValue_t tSQLResult_t::operator [](const uint16_t idx) const noexcept
 	if (!(isBinType(type) && valueLength == 1))
 	{
 		if (error(SQLGetData(queryHandle, column, cType, valueStorage.get(), valueLength, nullptr)))
-			return {};
+			return nullValue;
 	}
-	return {valueStorage.release(), valueLength, type};
+	valueCache[idx] = {valueStorage.release(), valueLength, type};
+	return valueCache[idx];
 }
 
 bool tSQLResult_t::error(const int16_t err) const noexcept
 	{ return !client || client->error(err, SQL_HANDLE_STMT, queryHandle); }
 
 tSQLValue_t::tSQLValue_t(const void *const _data, const uint64_t _length, const int16_t _type) noexcept :
-	data(static_cast<const char *const>(_data)), length(_length), type(_type)
+	data{static_cast<const char *const>(_data)}, length{_length}, type{_type}
 {
 	if (isWCharType(type))
 	{
@@ -470,7 +471,7 @@ const char *tSQLValueError_t::error() const noexcept
 		case tSQLErrorType_t::dateError:
 			return "Error converting value to a date quantity";
 		case tSQLErrorType_t::dateTimeError:
-			return "Error converting value to a date+time quantity";
+			return "Error converting value to a date and time quantity";
 		case tSQLErrorType_t::uuidError:
 			return "Error converting value to a UUID";
 	}
