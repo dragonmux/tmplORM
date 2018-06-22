@@ -249,6 +249,7 @@ void tSQLResult_t::operator =(tSQLResult_t &&res) noexcept
 	swap(_freeHandle, res._freeHandle);
 	std::swap(fields, res.fields);
 	std::swap(fieldInfo, res.fieldInfo);
+	valueCache.swap(res.valueCache);
 }
 
 uint64_t tSQLResult_t::numRows() const noexcept
@@ -259,15 +260,26 @@ uint64_t tSQLResult_t::numRows() const noexcept
 	return uint64_t(rows);
 }
 
-bool tSQLResult_t::next() const noexcept { return valid() && !error(SQLFetch(queryHandle)); }
+bool tSQLResult_t::next() const noexcept
+{
+	if (!valid())
+		return false;
+	for (auto &value : valueCache)
+		value = tSQLValue_t{};
+	return !error(SQLFetch(queryHandle));
+}
+
 inline bool isCharType(const int16_t type) noexcept { return type == SQL_LONGVARCHAR || type ==  SQL_VARCHAR || type == SQL_CHAR; }
 inline bool isWCharType(const int16_t type) noexcept { return type == SQL_WLONGVARCHAR || type == SQL_WVARCHAR || type == SQL_WCHAR; }
 inline bool isBinType(const int16_t type) noexcept { return type == SQL_LONGVARBINARY || type == SQL_VARBINARY || type == SQL_BINARY; }
+tSQLValue_t tSQLResult_t::nullValue{};
 
-tSQLValue_t tSQLResult_t::operator [](const uint16_t idx) const noexcept
+tSQLValue_t &tSQLResult_t::operator [](const uint16_t idx) const noexcept
 {
 	if (idx >= fields || !valid())
-		return {};
+		return nullValue;
+	else if (!valueCache[idx].isNull())
+		return valueCache[idx];
 	const uint16_t column = idx + 1;
 
 	// Pitty this can't use C++17 syntax: [const int16_t type, const uint32_t valueLength] = fieldInfo[idx];
@@ -280,7 +292,7 @@ tSQLValue_t tSQLResult_t::operator [](const uint16_t idx) const noexcept
 		uint32_t temp = 0;
 		long length = 0;
 		if (error(SQLGetData(queryHandle, column, cType, &temp, 0, &length)) || length == SQL_NULL_DATA || length == SQL_NO_TOTAL)
-			return {};
+			return nullValue;
 		valueLength = uint32_t(length) + 1;
 		if (isWCharType(type))
 			++valueLength;
@@ -288,7 +300,7 @@ tSQLValue_t tSQLResult_t::operator [](const uint16_t idx) const noexcept
 
 	auto valueStorage = makeUnique<char []>(valueLength);
 	if (!valueStorage)
-		return {};
+		return nullValue;
 	valueStorage[valueLength - 1] = 0;
 	if (isWCharType(type))
 		valueStorage[valueLength - 2] = 0;

@@ -142,6 +142,8 @@ private:
 	const bool _hasData, _freeHandle;
 	uint16_t fields;
 	std::unique_ptr<fieldType_t []> fieldInfo;
+	mutable fixedVector_t<tSQLValue_t> valueCache;
+	static tSQLValue_t nullValue;
 
 protected:
 	tSQLResult_t(const tSQLClient_t *const _client, void *handle, const bool hasData, const bool freeHandle = true) noexcept;
@@ -163,7 +165,7 @@ public:
 	uint64_t numRows() const noexcept;
 	uint16_t numFields() const noexcept { return fields; }
 	bool next() const noexcept;
-	tSQLValue_t operator [](const uint16_t idx) const noexcept;
+	tSQLValue_t &operator [](const uint16_t idx) const noexcept;
 
 	/*! @brief Deleted copy constructor for tSQLResult_t as results are not copyable */
 	tSQLResult_t(const tSQLResult_t &) = delete;
