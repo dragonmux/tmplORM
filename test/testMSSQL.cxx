@@ -49,7 +49,13 @@ bool haveEnvironment() noexcept
 
 class testMSSQL_t final : public testsuit
 {
-public:
+private:
+	void printError(const char *prefix, const tSQLExecError_t &error) const noexcept
+	{
+		const auto errorNum = uint8_t(error.errorNum());
+		printf("%s failed (%u): %s\n", prefix, errorNum, error.error());
+	}
+
 	void testInvalid()
 	{
 		tSQLClient_t testClient;
@@ -77,14 +83,14 @@ public:
 		if (!selected)
 		{
 			const auto &error = client.error();
-			printf("DB selection failed (%u): %s\n", error.errorNum(), error.error());
+			printError("DB selection", error);
 			printf("\tstate code: %s\n", error.state());
 		}
 		const bool connected = client.connect(driver, host, port, username, password);
 		if (!connected)
 		{
 			const auto &error = client.error();
-			printf("Connection failed (%u): %s\n", error.errorNum(), error.error());
+			printError("Connection", error);
 			printf("\tstate code: %s\n", error.state());
 		}
 		assertTrue(connected);
@@ -107,7 +113,7 @@ public:
 		if (!result.valid())
 		{
 			const auto &error = testClient->error();
-			printf("Query failed (%u): %s\n", error.errorNum(), error.error());
+			printError("Query", error);
 			printf("\tstate code: %s\n", error.state());
 		}
 		assertTrue(result.valid());
@@ -122,7 +128,7 @@ public:
 		if (!selected)
 		{
 			const auto &error = testClient->error();
-			printf("DB selection failed (%u): %s\n", error.errorNum(), error.error());
+			printError("DB selection", error);
 			printf("\tstate code: %s\n", error.state());
 		}
 		assertTrue(selected);
@@ -143,7 +149,7 @@ public:
 		if (!result.valid())
 		{
 			const auto &error = testClient->error();
-			printf("Query failed (%u): %s\n", error.errorNum(), error.error());
+			printError("Query", error);
 			printf("\tstate code: %s\n", error.state());
 		}
 		assertTrue(result.valid());
@@ -201,7 +207,7 @@ public:
 		if (!result.valid())
 		{
 			const auto &error = testClient->error();
-			printf("Query failed (%u): %s\n", error.errorNum(), error.error());
+			printError("Query", error);
 			printf("\tstate code: %s\n", error.state());
 		}
 		assertTrue(result.valid());
@@ -218,6 +224,7 @@ public:
 		assertNull(testClient.get());
 	}
 
+public:
 	void registerTests() final override
 	{
 		if (!haveEnvironment())
