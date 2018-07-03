@@ -94,6 +94,8 @@ namespace tmplORM
 					uint16_t _second;
 					uint32_t _nanoSecond;
 
+					void display() const noexcept { printf("%04u-%02u-%02u %02u:%02u:%02u.%u\n", _year, _month, _day, _hour, _minute, _second, _nanoSecond); }
+
 					constexpr bool isLeap(const rep_t year) const noexcept
 						{ return (year % 4) == 0 && ((year % 100) != 0 || (year % 400) == 0); }
 					constexpr bool isLeap(const years &year) const noexcept { return isLeap(year.count()); }
@@ -197,6 +199,8 @@ namespace tmplORM
 						_second = durationIn<seconds>(rem);
 						rem -= seconds{_second};
 						_nanoSecond = durationIn<nanoseconds>(rem);
+
+						display();
 					}
 					ormDateTime_t(const timePoint_t &point) noexcept :
 						ormDateTime_t{point.time_since_epoch()} { }
