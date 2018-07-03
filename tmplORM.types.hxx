@@ -29,8 +29,11 @@ namespace tmplORM
 					_year(year), _month(month), _day(day) { }
 
 				constexpr uint16_t year() const noexcept { return _year; }
+				void year(const uint16_t year) noexcept { _year = year; }
 				constexpr uint16_t month() const noexcept { return _month; }
+				void month(const uint16_t month) noexcept { _month = month; }
 				constexpr uint16_t day() const noexcept { return _day; }
+				void day(const uint16_t day) noexcept { _day = day; }
 
 				ormDate_t(const char *date) noexcept : ormDate_t()
 				{
@@ -40,6 +43,10 @@ namespace tmplORM
 					date += 3;
 					_day = toInt_t<uint16_t>(date, 2);
 				}
+
+				bool operator ==(const ormDate_t &date) const noexcept
+					{ return _year == date._year && _month == date._month && _day == date._day; }
+				bool operator !=(const ormDate_t &date) const noexcept { return !(*this == date); }
 			};
 
 			struct ormDateTime_t final : public ormDate_t
