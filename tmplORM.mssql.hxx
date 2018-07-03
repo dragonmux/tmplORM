@@ -141,14 +141,20 @@ namespace tmplORM
 			};
 
 			template<typename T> using bindValue_ = bindValue_t<std::is_pointer<T>::value>;
-			template<typename T> int16_t bindDigits(int16_t value) noexcept { return value; }
+			template<typename T> size_t bindDigits(size_t value) noexcept { return value; }
 			// 29 here might seem arbitrary but it's because of MSSQL and ODBC.
 			// More specifically, https://docs.microsoft.com/en-us/sql/odbc/reference/appendixes/column-size
 			// which states that for SQL_TYPE_TIMESTAMP, the precision field must be populated with a value that is
 			// 20 + s, where s is the 'seconds precision' - a ns value requires 9 radix-10 digits.
-			template<> constexpr int16_t bindDigits<ormDateTime_t>(int16_t) noexcept { return 29; }
+			template<> constexpr size_t bindDigits<ormDateTime_t>(size_t) noexcept { return 29; }
+			// This value is a magic number thing - 10 is the number of characters in the date format specification
+			template<> constexpr size_t bindDigits<ormDate_t>(size_t) noexcept { return 10; }
 			// This value is also a magic number thing - 9 for the core type + 9 for the ns value as above.
-			template<> constexpr int16_t bindDigits<ormDate_t>(int16_t) noexcept { return 18; }
+			//template<> constexpr size_t bindDigits<ormTime_t>(size_t) noexcept { return 18; }
+
+			template<typename T> constexpr int16_t bindScale() noexcept { return 0; }
+			template<> constexpr int16_t bindScale<ormDateTime_t>() noexcept { return 9; }
+			//template<> constexpr int16_t bindScale<ormTime_t>() noexcept { return 9; }
 
 			template<typename T> void tSQLQuery_t::bind(const size_t index, const T &value, const fieldLength_t length) noexcept
 			{
@@ -160,8 +166,8 @@ namespace tmplORM
 				if (dataType == SQL_C_BINARY)
 					dataLengths[index] = dataLen;
 
-				error(SQLBindParameter(queryHandle, index + 1, SQL_PARAM_INPUT, dataType, odbcDataType,
-					bindDigits<T>(length.second), 0, bindValue_<T>()(value, paramStorage[index]), dataLen, lenPtr));
+				error(SQLBindParameter(queryHandle, index + 1, SQL_PARAM_INPUT, dataType, odbcDataType, bindDigits<T>(length.second),
+					bindScale<T>(), bindValue_<T>()(value, paramStorage[index]), dataLen, lenPtr));
 			}
 
 			template<typename T> void tSQLQuery_t::bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept
