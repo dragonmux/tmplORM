@@ -1,5 +1,6 @@
 #include <memory>
 #include <string>
+#include <chrono>
 #include <crunch++.h>
 #include <mssql.hxx>
 #include <string.hxx>
@@ -17,6 +18,9 @@
 using namespace tmplORM::mssql::driver;
 using irqus::typestring;
 using tmplORM::mssql::fieldLength;
+using tmplORM::types::baseTypes::ormDateTime_t;
+
+using systemClock_t = std::chrono::system_clock;
 
 std::unique_ptr<tSQLClient_t> testClient{};
 constString_t driver, host, username, password;
@@ -185,14 +189,17 @@ private:
 		assertEqual(testData[0].entryID, 1);
 		assertFalse(result.next());
 
+		testData[1].when = now;
 		query = testClient->prepare(
-			"INSERT INTO [tmplORM] ([Name], [Value]) "
-			"OUTPUT INSERTED.[EntryID] VALUES (?, ?);", 2
+			"INSERT INTO [tmplORM] ([Name], [Value], [When]) "
+			"OUTPUT INSERTED.[EntryID] VALUES (?, ?, ?);", 3
 		);
 		assertTrue(query.valid());
 		query.bind(0, testData[1].name.value(), fieldLength(testData[1].name));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 		query.bind<const char *>(1, nullptr, fieldLength(testData[1].value));
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		query.bind(2, testData[1].when.value(), fieldLength(testData[1].when));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 		result = query.execute();
 		assertTrue(result.valid());
@@ -233,7 +240,7 @@ private:
 		assertEqual(result[0], testData[1].entryID);
 		assertEqual(result[1], testData[1].name);
 		assertTrue(testData[1].value.isNull());
-		testData[1].when = result[3].asDateTime();
+		assertTrue(result[3].asDateTime() == now);
 		assertFalse(result.next());
 	}
 	catch (const tSQLValueError_t &error)
