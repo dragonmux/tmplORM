@@ -48,7 +48,7 @@ namespace tmplORM
 		template<> struct stringType_t<double> { using value = ts("FLOAT"); };
 		template<> struct stringType_t<char *> { using value = ts("NTEXT"); };
 		template<> struct stringType_t<ormDate_t> { using value = ts("DATE"); };
-		template<> struct stringType_t<ormDateTime_t> { using value = ts("DATETIME"); };
+		template<> struct stringType_t<ormDateTime_t> { using value = ts("DATETIME2"); };
 		template<> struct stringType_t<ormUUID_t> { using value = ts("UNIQUEIDENTIFIER"); };
 		template<typename T> using stringType = typename stringType_t<T>::value;
 
@@ -152,6 +152,7 @@ namespace tmplORM
 			template<> constexpr size_t bindDigits<ormDate_t>(size_t) noexcept { return 10; }
 			// This value is also a magic number thing - 9 for the core type + 9 for the ns value as above.
 			//template<> constexpr size_t bindDigits<ormTime_t>(size_t) noexcept { return 18; }
+			// Other documentation: https://docs.microsoft.com/en-us/sql/t-sql/data-types/datetime2-transact-sql
 
 			template<typename T> constexpr int16_t bindScale() noexcept { return 0; }
 			template<> constexpr int16_t bindScale<ormDateTime_t>() noexcept { return 7; }
