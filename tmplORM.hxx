@@ -292,8 +292,9 @@ namespace tmplORM
 					time -= minute;
 					const auto second = duration_cast<seconds>(time);
 					time -= second;
-					return ormDateTime_t(_value.year(), _value.month(), _value.day(),
-						hour.count(), minute.count(), second.count(), time.count());
+					return {_value.year(), _value.month(), _value.day(),
+						uint16_t(hour.count()), uint16_t(minute.count()),
+						uint16_t(second.count()), uint32_t(time.count())};
 				}
 
 				void value(const ormDateTime_t &_value) noexcept
@@ -302,8 +303,8 @@ namespace tmplORM
 					time += seconds(_value.second());
 					time += minutes(_value.minute());
 					time += hours(_value.hour());
-					parentType_t::value(_dateTime_t(_value.year(), _value.month(), _value.day(),
-						duration_cast<typename _dateTime_t::duration_t>(time)));
+					parentType_t::value({_value.year(), _value.month(), _value.day(),
+						duration_cast<typename _dateTime_t::duration_t>(time)});
 				}
 			};
 
@@ -325,11 +326,11 @@ namespace tmplORM
 				ormDate_t value() const noexcept
 				{
 					const _dateTime_t _value = parentType_t::value();
-					return ormDate_t(_value.year(), _value.month(), _value.day());
+					return {_value.year(), _value.month(), _value.day()};
 				}
 
 				void value(const ormDate_t &_value) noexcept
-					{ parentType_t::value(_dateTime_t(_value.year(), _value.month(), _value.day())); }
+					{ parentType_t::value({_value.year(), _value.month(), _value.day()}); }
 			};
 		}
 		using dateTimeTypes::dateTime_t;
