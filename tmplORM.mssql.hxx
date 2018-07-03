@@ -115,7 +115,8 @@ namespace tmplORM
 					dateTime.minute = value.minute();
 					dateTime.second = value.second();
 					// The documentation tells us that this field is in ns, so..
-					dateTime.fraction = value.nanoSecond();
+					dateTime.fraction = value.nanoSecond() / 100;
+					dateTime.fraction *= 100; // This is here to fix the accuracy for the server
 
 					paramStorage = makeManaged<SQL_TIMESTAMP_STRUCT>(dateTime);
 					return paramStorage.get();
@@ -142,18 +143,18 @@ namespace tmplORM
 
 			template<typename T> using bindValue_ = bindValue_t<std::is_pointer<T>::value>;
 			template<typename T> size_t bindDigits(size_t value) noexcept { return value; }
-			// 29 here might seem arbitrary but it's because of MSSQL and ODBC.
+			// 27 here might seem arbitrary but it's because of MSSQL and ODBC.
 			// More specifically, https://docs.microsoft.com/en-us/sql/odbc/reference/appendixes/column-size
 			// which states that for SQL_TYPE_TIMESTAMP, the precision field must be populated with a value that is
-			// 20 + s, where s is the 'seconds precision' - a ns value requires 9 radix-10 digits.
-			template<> constexpr size_t bindDigits<ormDateTime_t>(size_t) noexcept { return 29; }
+			// 20 + s, where s is the 'seconds precision' - a ns value requires 9 radix-10 digits, but server only supports 7.
+			template<> constexpr size_t bindDigits<ormDateTime_t>(size_t) noexcept { return 27; }
 			// This value is a magic number thing - 10 is the number of characters in the date format specification
 			template<> constexpr size_t bindDigits<ormDate_t>(size_t) noexcept { return 10; }
 			// This value is also a magic number thing - 9 for the core type + 9 for the ns value as above.
 			//template<> constexpr size_t bindDigits<ormTime_t>(size_t) noexcept { return 18; }
 
 			template<typename T> constexpr int16_t bindScale() noexcept { return 0; }
-			template<> constexpr int16_t bindScale<ormDateTime_t>() noexcept { return 9; }
+			template<> constexpr int16_t bindScale<ormDateTime_t>() noexcept { return 7; }
 			//template<> constexpr int16_t bindScale<ormTime_t>() noexcept { return 9; }
 
 			template<typename T> void tSQLQuery_t::bind(const size_t index, const T &value, const fieldLength_t length) noexcept
