@@ -51,6 +51,8 @@ bool haveEnvironment() noexcept
 	return !(driver.empty() || host.empty() || username.empty() || password.empty());
 }
 
+ormDateTime_t now = systemClock_t::now();
+
 class testMSSQL_t final : public testsuit
 {
 private:
@@ -202,6 +204,12 @@ private:
 		query.bind(2, testData[1].when.value(), fieldLength(testData[1].when));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 		result = query.execute();
+		if (testClient->error() != tSQLExecErrorType_t::ok)
+		{
+			const auto &error = testClient->error();
+			printError("Bind", error);
+			printf("\tstate code: %s\n", error.state());
+		}
 		assertTrue(result.valid());
 
 		assertTrue(result.hasData());
