@@ -51,6 +51,41 @@ namespace tmplORM
 
 			namespace chrono
 			{
+				using systemClock_t = std::chrono::system_clock;
+				using timePoint_t = systemClock_t::time_point;
+				using systemTime_t = timePoint_t::duration;
+				template<typename rep_t, typename period_t>
+					using duration_t = std::chrono::duration<rep_t, period_t>;
+				template<typename target_t, typename source_t>
+				constexpr target_t durationAs(const source_t &d)
+					{ return std::chrono::duration_cast<target_t>(d); }
+				template<typename target_t, typename source_t>
+				constexpr typename target_t::rep durationIn(const source_t &d)
+					{ return durationAs<target_t>(d).count(); }
+				template<std::intmax_t num, std::intmax_t denom = 1>
+					using ratio_t = std::ratio<num, denom>;
+
+				using rep_t = systemClock_t::rep;
+				using years = duration_t<rep_t, ratio_t<31556952>>;
+				using months = duration_t<rep_t, ratio_t<2629746>>;
+				using days = duration_t<rep_t, ratio_t<86400>>;
+				using hours = std::chrono::hours;
+				using minutes = std::chrono::minutes;
+				using seconds = std::chrono::seconds;
+				using nanoseconds = std::chrono::nanoseconds;
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wliteral-suffix"
+				constexpr years operator ""y(const unsigned long long value) noexcept { return years{value}; }
+				constexpr days operator ""day(const unsigned long long value) noexcept { return days{value}; }
+#pragma GCC diagnostic pop
+
+				constexpr static std::array<std::array<uint16_t, 12>, 2> monthDays
+				{{
+					{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
+					{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+				}};
+
 				struct ormDateTime_t final : public ormDate_t
 				{
 				private:
@@ -58,6 +93,50 @@ namespace tmplORM
 					uint16_t _minute;
 					uint16_t _second;
 					uint32_t _nanoSecond;
+
+					constexpr bool isLeap(const rep_t year) const noexcept
+						{ return (year % 4) == 0 && ((year % 100) != 0 || (year % 400) == 0); }
+					constexpr bool isLeap(const years &year) const noexcept { return isLeap(year.count()); }
+					constexpr rep_t div(const years a, const rep_t b) const noexcept
+						{ return (a.count() / b) + ((a.count() % b) < 0); }
+					constexpr days leapsFor(const years year) const noexcept
+						{ return days{div(year, 4) - div(year, 100) + div(year, 400)}; }
+
+					template<typename value_t> void correctDay(days &day, value_t &rem) noexcept
+					{
+						while (rem.count() < 0)
+						{
+							rem += 1day;
+							--day;
+						}
+						while (rem >= 1day)
+						{
+							rem -= 1day;
+							++day;
+						}
+					}
+
+					uint16_t computeYear(days &day) noexcept
+					{
+						years year = 1970y;
+						while (day.count() < 0 || day.count() > (isLeap(year) ? 366 : 365))
+						{
+							const years guess = year + years{day.count() / 365} - years{(day.count() % 365) < 0};
+							day -= days{(guess - year).count() * 365} + leapsFor(guess - 1y) - leapsFor(year - 1y);
+							year = guess;
+						}
+						return year.count();
+					}
+
+					uint16_t computeMonth(const uint16_t year, days &day) noexcept
+					{
+						const auto &daysFor = monthDays[isLeap(year)];
+						uint32_t i{0};
+						++day;
+						while (day.count() > daysFor[i])
+							day -= days{daysFor[i++]};
+						return i + 1;
+					}
 
 					/*!
 					* @brief Raise 10 to the power of power.
@@ -101,6 +180,26 @@ namespace tmplORM
 						else
 							_nanoSecond = nanoSeconds / power10(nanoSeconds.length() - 9);
 					}
+
+					ormDateTime_t(const systemTime_t time) noexcept : ormDateTime_t{}
+					{
+						auto day = days{durationAs<seconds>(time) / seconds{1day}};
+						auto rem = time - day;
+						correctDay(day, rem);
+						_year = computeYear(day);
+						_month = computeMonth(_year, day);
+						_day = day.count();
+
+						_hour = durationIn<hours>(rem);
+						rem -= hours{_hour};
+						_minute = durationIn<minutes>(rem);
+						rem -= minutes{_minute};
+						_second = durationIn<seconds>(rem);
+						rem -= seconds{_second};
+						_nanoSecond = durationIn<nanoseconds>(rem);
+					}
+					ormDateTime_t(const timePoint_t &point) noexcept :
+						ormDateTime_t{point.time_since_epoch()} { }
 
 					bool operator ==(const ormDateTime_t &dateTime) const noexcept
 						{ return ormDate_t(*this) == dateTime && _hour == dateTime._hour && _minute == dateTime._minute &&
