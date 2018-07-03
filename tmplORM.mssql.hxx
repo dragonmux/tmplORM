@@ -75,9 +75,9 @@ namespace tmplORM
  		template<> struct bind_t<void *>
  			{ constexpr static int16_t typeC = SQL_C_BINARY; constexpr static int16_t typeODBC = SQL_BINARY; };
 		template<> struct bind_t<ormDate_t>
-			{ constexpr static const int16_t typeC = SQL_C_DATE; constexpr static const int16_t typeODBC = SQL_DATE; };
+			{ constexpr static const int16_t typeC = SQL_C_TYPE_DATE; constexpr static const int16_t typeODBC = SQL_DATE; };
 		template<> struct bind_t<ormDateTime_t>
-			{ constexpr static const int16_t typeC = SQL_C_TIMESTAMP; constexpr static const int16_t typeODBC = SQL_DATETIME; };
+			{ constexpr static const int16_t typeC = SQL_C_TYPE_TIMESTAMP; constexpr static const int16_t typeODBC = SQL_DATETIME; };
 		template<> struct bind_t<ormUUID_t>
 			{ constexpr static const int16_t typeC = SQL_C_GUID; constexpr static const int16_t typeODBC = SQL_GUID; };
 		/*template<> struct bind_t<nullptr_t>
@@ -85,10 +85,10 @@ namespace tmplORM
 
 		namespace driver
 		{
-			template<typename T> struct bindLength_t { constexpr static const uint32_t length = sizeof(T); };
-			template<> struct bindLength_t<ormDate_t> { constexpr static const uint32_t length = SQL_DATE_LEN; };
-			template<> struct bindLength_t<ormDateTime_t> { constexpr static const uint32_t length = SQL_TIMESTAMP_LEN; };
-			template<> struct bindLength_t<ormUUID_t> { constexpr static const uint32_t length = sizeof(SQLGUID); };
+			template<typename T> struct bindLength_t { constexpr static uint32_t length = sizeof(T); };
+			template<> struct bindLength_t<ormDate_t> { constexpr static uint32_t length = sizeof(SQL_DATE_STRUCT); };
+			template<> struct bindLength_t<ormDateTime_t> { constexpr static uint32_t length = sizeof(SQL_TIMESTAMP_STRUCT); };
+			template<> struct bindLength_t<ormUUID_t> { constexpr static uint32_t length = sizeof(SQLGUID); };
 
 			template<bool> struct bindValue_t
 			{
@@ -114,7 +114,8 @@ namespace tmplORM
 					dateTime.hour = value.hour();
 					dateTime.minute = value.minute();
 					dateTime.second = value.second();
-					//dateTime.fraction = value.nanoSecond() / std::chrono::duration_cast<nanoseconds_t>(1_us).count();
+					// The documentation tells us that this field is in ns, so..
+					dateTime.fraction = value.nanoSecond();
 
 					paramStorage = makeManaged<SQL_TIMESTAMP_STRUCT>(dateTime);
 					return paramStorage.get();
