@@ -80,6 +80,7 @@ namespace tmplORM
 				constexpr days operator ""day(const unsigned long long value) noexcept { return days{value}; }
 #pragma GCC diagnostic pop
 
+				//extern "C" void __tz_compute(time_t timer, struct tm *tm, int use_localtime);
 				constexpr static std::array<std::array<uint16_t, 12>, 2> monthDays
 				{{
 					{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
@@ -199,6 +200,13 @@ namespace tmplORM
 						_second = durationIn<seconds>(rem);
 						rem -= seconds{_second};
 						_nanoSecond = durationIn<nanoseconds>(rem);
+
+						/*tzset();
+						const time_t value = systemClock_t::to_time_t(timePoint_t{time});
+						tm timeZone{};
+						timeZone.tm_year = _year - 1900;
+						__tz_compute(value, &timeZone, true);
+						printf("Offset: %u\n", timeZone.tm_gmtoff);*/
 
 						display();
 					}
