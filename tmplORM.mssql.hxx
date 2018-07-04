@@ -75,9 +75,9 @@ namespace tmplORM
  		template<> struct bind_t<void *>
  			{ constexpr static int16_t typeC = SQL_C_BINARY; constexpr static int16_t typeODBC = SQL_BINARY; };
 		template<> struct bind_t<ormDate_t>
-			{ constexpr static const int16_t typeC = SQL_C_TYPE_DATE; constexpr static const int16_t typeODBC = SQL_DATE; };
+			{ constexpr static const int16_t typeC = SQL_C_TYPE_DATE; constexpr static const int16_t typeODBC = SQL_TYPE_DATE; };
 		template<> struct bind_t<ormDateTime_t>
-			{ constexpr static const int16_t typeC = SQL_C_TYPE_TIMESTAMP; constexpr static const int16_t typeODBC = SQL_DATETIME; };
+			{ constexpr static const int16_t typeC = SQL_C_TYPE_TIMESTAMP; constexpr static const int16_t typeODBC = SQL_TYPE_TIMESTAMP; };
 		template<> struct bind_t<ormUUID_t>
 			{ constexpr static const int16_t typeC = SQL_C_GUID; constexpr static const int16_t typeODBC = SQL_GUID; };
 		/*template<> struct bind_t<nullptr_t>
@@ -156,7 +156,7 @@ namespace tmplORM
 
 			template<typename T> constexpr int16_t bindScale() noexcept { return 0; }
 			template<> constexpr int16_t bindScale<ormDateTime_t>() noexcept { return 7; }
-			//template<> constexpr int16_t bindScale<ormTime_t>() noexcept { return 9; }
+			//template<> constexpr int16_t bindScale<ormTime_t>() noexcept { return 7; }
 
 			template<typename T> void tSQLQuery_t::bind(const size_t index, const T &value, const fieldLength_t length) noexcept
 			{
