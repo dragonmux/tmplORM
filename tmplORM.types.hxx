@@ -208,7 +208,7 @@ namespace tmplORM
 						__tz_compute(value, &timeZone, true);
 						printf("Offset: %u\n", timeZone.tm_gmtoff);*/
 
-						display();
+						//display();
 					}
 					ormDateTime_t(const timePoint_t &point) noexcept :
 						ormDateTime_t{point.time_since_epoch()} { }
