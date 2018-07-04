@@ -244,9 +244,6 @@ private:
 		assertNotEqual(when.year(), 0);
 		assertNotEqual(when.month(), 0);
 		assertNotEqual(when.day(), 0);
-		assertNotEqual(when.hour(), 0);
-		assertNotEqual(when.minute(), 0);
-		assertNotEqual(when.second(), 0);
 		assertTrue(result.next());
 
 		assertEqual(result[0], testData[1].entryID);
