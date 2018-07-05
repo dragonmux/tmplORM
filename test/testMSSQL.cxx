@@ -306,6 +306,24 @@ public:
 class testMSSQLValue_t final : public testsuit
 {
 private:
+	char *S_(const char *const str, const int64_t len = -1) noexcept
+	{
+		if (len == -1)
+			return stringDup(str).release();
+		char *ret = new (std::nothrow) char[len + 1];
+		if (!ret)
+			return nullptr;
+		return static_cast<char *>(memcpy(ret, str, len + 1));
+	}
+
+	template<typename T> T tryOkConversion(const tSQLValue_t &value)
+	{
+		try { return value; }
+		catch (const tSQLValueError_t &error)
+			{ fail(error.error()); }
+		return {};
+	}
+
 	template<typename T> void tryFailConversion(const tSQLValue_t &value)
 	{
 		try
@@ -317,9 +335,22 @@ private:
 		catch (const tSQLValueError_t &) { }
 	}
 
+	template<typename T> void tryOk(const tSQLValue_t value, const T expected)
+	{
+		assertFalse(value.isNull());
+		T var = tryOkConversion<T>(value);
+		assertEqual(var, expected);
+	}
+
 	template<typename T> void tryIsNull(const tSQLValue_t value)
 	{
 		assertTrue(value.isNull());
+		tryFailConversion<T>(value);
+	}
+
+	template<typename T> void tryShouldFail(const tSQLValue_t value)
+	{
+		assertFalse(value.isNull());
 		tryFailConversion<T>(value);
 	}
 
@@ -337,10 +368,29 @@ private:
 		tryIsNull<int64_t>({});
 	}
 
+	void testString()
+	{
+		static const std::array<char, 23> testData =
+		{
+			'T', 'h', 'i', 's', ' ', 'i', 's', ' ',
+			'\x00', '\xFF', ' ', 'o', 'n', 'l', 'y', ' ',
+			'a', ' ', 't', 'e', 's', 't', '\0'
+		};
+		auto value = tSQLValue_t{nullptr, 0, SQL_VARCHAR};
+		assertTrue(value.isNull());
+		tryFailConversion<std::unique_ptr<char []>>(value);
+		value = {S_(testData.data(), testData.size()), testData.size(), SQL_VARCHAR};
+		assertFalse(value.isNull());
+		auto testStr = value.asString(true);
+		assertNotNull(testStr);
+		assertEqual(testStr.get(), testData.data(), testData.size());
+	}
+
 public:
 	void registerTests() final override
 	{
 		CXX_TEST(testNull)
+		CXX_TEST(testString)
 	}
 };
 
