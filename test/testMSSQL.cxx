@@ -341,3 +341,8 @@ public:
 	void registerTests() final override
 	{
 		CXX_TEST(testNull)
+	}
+};
+
+CRUNCH_API void registerCXXTests() noexcept;
+void registerCXXTests() noexcept {registerTestClasses<testMSSQLValue_t, testMSSQL_t>(); }
