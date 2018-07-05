@@ -1,6 +1,7 @@
 #include <memory>
 #include <string>
 #include <chrono>
+#include <type_traits>
 #include <crunch++.h>
 #include <mssql.hxx>
 #include <string.hxx>
@@ -316,6 +317,18 @@ private:
 		return static_cast<char *>(memcpy(ret, str, len + 1));
 	}
 
+	template<typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
+		char *S_(const T value) noexcept
+	{
+		constexpr size_t len = sizeof(T);
+		char *ret = new (std::nothrow) char[len + 1];
+		if (!ret)
+			return nullptr;
+		ret[len] = 0;
+		*reinterpret_cast<T *>(ret) = value;
+		return ret;
+	}
+
 	template<typename T> T tryOkConversion(const tSQLValue_t &value)
 	{
 		try { return value; }
@@ -386,11 +399,121 @@ private:
 		assertEqual(testStr.get(), testData.data(), testData.size());
 	}
 
+	void testUint8()
+	{
+		tryIsNull<uint8_t>({nullptr, 0, SQL_TINYINT});
+		tryShouldFail<uint8_t>({S_(""), 0, SQL_VARCHAR});
+		tryShouldFail<uint8_t>({S_(""), 0, SQL_SMALLINT});
+		tryShouldFail<uint8_t>({S_(""), 0, SQL_INTEGER});
+		tryShouldFail<uint8_t>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<uint8_t>({S_(""), 0, SQL_VARBINARY});
+		tryShouldFail<uint8_t>({S_(""), 0, SQL_BIT});
+		tryShouldFail<uint8_t>({S_(""), 0, SQL_TYPE_DATE});
+		tryShouldFail<uint8_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
+		tryOk<uint8_t>({S_<uint8_t>(128), 2, SQL_TINYINT}, 128);
+		tryOk<uint8_t>({S_<uint8_t>(255), 2, SQL_TINYINT}, 255);
+		tryOk<uint8_t>({S_(""), 1, SQL_TINYINT}, 0);
+		tryOk<uint8_t>({S_(""), 0, SQL_TINYINT}, 0);
+	}
+
+	void testInt8()
+	{
+		tryIsNull<int8_t>({nullptr, 0, SQL_TINYINT});
+		tryShouldFail<int8_t>({S_(""), 0, SQL_VARCHAR});
+		tryShouldFail<int8_t>({S_(""), 0, SQL_SMALLINT});
+		tryShouldFail<int8_t>({S_(""), 0, SQL_INTEGER});
+		tryShouldFail<int8_t>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<int8_t>({S_(""), 0, SQL_VARBINARY});
+		tryShouldFail<int8_t>({S_(""), 0, SQL_BIT});
+		tryShouldFail<int8_t>({S_(""), 0, SQL_TYPE_DATE});
+		tryShouldFail<int8_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
+		tryOk<int8_t>({S_<int8_t>(127), 2, SQL_TINYINT}, 127);
+		tryOk<int8_t>({S_(""), 1, SQL_TINYINT}, 0);
+		tryOk<int8_t>({S_(""), 0, SQL_TINYINT}, 0);
+		tryOk<int8_t>({S_<int8_t>(-1), 2, SQL_TINYINT}, -1);
+		tryOk<int8_t>({S_<int8_t>(-127), 2, SQL_TINYINT}, -127);
+		tryOk<int8_t>({S_<int8_t>(128), 2, SQL_TINYINT}, -128);
+	}
+
+	void testUint16()
+	{
+		tryIsNull<uint16_t>({nullptr, 0, SQL_SMALLINT});
+		tryShouldFail<uint16_t>({S_(""), 0, SQL_VARCHAR});
+		tryShouldFail<uint16_t>({S_(""), 0, SQL_TINYINT});
+		tryShouldFail<uint16_t>({S_(""), 0, SQL_INTEGER});
+		tryShouldFail<uint16_t>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<uint16_t>({S_(""), 0, SQL_VARBINARY});
+		tryOk<uint16_t>({S_<uint16_t>(128), 3, SQL_SMALLINT}, 128);
+		tryOk<uint16_t>({S_<uint16_t>(255), 3, SQL_SMALLINT}, 255);
+		tryOk<uint16_t>({S_<uint16_t>(32768), 3, SQL_SMALLINT}, 32768);
+		tryOk<uint16_t>({S_<uint16_t>(65535), 3, SQL_SMALLINT}, 65535);
+		tryOk<uint16_t>({S_(""), 1, SQL_SMALLINT}, 0);
+		tryOk<uint16_t>({S_(""), 0, SQL_SMALLINT}, 0);
+	}
+
+	void testInt16()
+	{
+		tryIsNull<int16_t>({nullptr, 0, SQL_SMALLINT});
+		tryShouldFail<int16_t>({S_(""), 0, SQL_VARCHAR});
+		tryShouldFail<int16_t>({S_(""), 0, SQL_TINYINT});
+		tryShouldFail<int16_t>({S_(""), 0, SQL_INTEGER});
+		tryShouldFail<int16_t>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<int16_t>({S_(""), 0, SQL_VARBINARY});
+		tryOk<int16_t>({S_<int16_t>(127), 3, SQL_SMALLINT}, 127);
+		tryOk<int16_t>({S_<int16_t>(32767), 3, SQL_SMALLINT}, 32767);
+		tryOk<int16_t>({S_(""), 1, SQL_SMALLINT}, 0);
+		tryOk<int16_t>({S_(""), 0, SQL_SMALLINT}, 0);
+		tryOk<int16_t>({S_<int16_t>(-1), 3, SQL_SMALLINT}, -1);
+		tryOk<int16_t>({S_<int16_t>(-32767), 3, SQL_SMALLINT}, -32767);
+		tryOk<int16_t>({S_<int16_t>(-32768), 3, SQL_SMALLINT}, -32768);
+	}
+
+	void testUint32()
+	{
+		tryIsNull<uint32_t>({nullptr, 0, SQL_INTEGER});
+		tryShouldFail<uint32_t>({S_(""), 0, SQL_VARCHAR});
+		tryShouldFail<uint32_t>({S_(""), 0, SQL_TINYINT});
+		tryShouldFail<uint32_t>({S_(""), 0, SQL_SMALLINT});
+		tryShouldFail<uint32_t>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<uint32_t>({S_(""), 0, SQL_VARBINARY});
+		tryOk<uint32_t>({S_<uint32_t>(128), 5, SQL_INTEGER}, 128);
+		tryOk<uint32_t>({S_<uint32_t>(255), 5, SQL_INTEGER}, 255);
+		tryOk<uint32_t>({S_<uint32_t>(32768), 5, SQL_INTEGER}, 32768);
+		tryOk<uint32_t>({S_<uint32_t>(65535), 5, SQL_INTEGER}, 65535);
+		tryOk<uint32_t>({S_<uint32_t>(2147483648), 5, SQL_INTEGER}, 2147483648);
+		tryOk<uint32_t>({S_<uint32_t>(4294967295), 5, SQL_INTEGER}, 4294967295);
+		tryOk<uint32_t>({S_(""), 1, SQL_INTEGER}, 0);
+		tryOk<uint32_t>({S_(""), 0, SQL_INTEGER}, 0);
+	}
+
+	void testInt32()
+	{
+		tryIsNull<int32_t>({nullptr, 0, SQL_INTEGER});
+		tryShouldFail<int32_t>({S_(""), 0, SQL_VARCHAR});
+		tryShouldFail<int32_t>({S_(""), 0, SQL_TINYINT});
+		tryShouldFail<int32_t>({S_(""), 0, SQL_SMALLINT});
+		tryShouldFail<int32_t>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<int32_t>({S_(""), 0, SQL_VARBINARY});
+		tryOk<int32_t>({S_<int32_t>(127), 4, SQL_INTEGER}, 127);
+		tryOk<int32_t>({S_<int32_t>(32767), 6, SQL_INTEGER}, 32767);
+		tryOk<int32_t>({S_<int32_t>(2147483647), 11, SQL_INTEGER}, 2147483647);
+		tryOk<int32_t>({S_(""), 1, SQL_INTEGER}, 0);
+		tryOk<int32_t>({S_(""), 0, SQL_INTEGER}, 0);
+		tryOk<int32_t>({S_<int32_t>(-1), 3, SQL_INTEGER}, -1);
+		tryOk<int32_t>({S_<int32_t>(-2147483647), 12, SQL_INTEGER}, -2147483647);
+		tryOk<int32_t>({S_<int32_t>(-2147483648), 12, SQL_INTEGER}, -2147483648);
+	}
+
 public:
 	void registerTests() final override
 	{
 		CXX_TEST(testNull)
 		CXX_TEST(testString)
+		CXX_TEST(testUint8)
+		CXX_TEST(testInt8)
+		CXX_TEST(testUint16)
+		CXX_TEST(testInt16)
+		CXX_TEST(testUint32)
 	}
 };
 
