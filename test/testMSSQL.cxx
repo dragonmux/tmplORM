@@ -303,8 +303,41 @@ public:
 	}
 };
 
-CRUNCH_API void registerCXXTests() noexcept;
-void registerCXXTests() noexcept
+class testMSSQLValue_t final : public testsuit
 {
-	registerTestClasses<testMSSQL_t>();
-}
+private:
+	template<typename T> void tryFailConversion(const tSQLValue_t &value)
+	{
+		try
+		{
+			T v = value;
+			printf("Conversion for %s: ", typeid(T).name());
+			fail("Conversion succeeded (expected to fail)");
+		}
+		catch (const tSQLValueError_t &) { }
+	}
+
+	template<typename T> void tryIsNull(const tSQLValue_t value)
+	{
+		assertTrue(value.isNull());
+		tryFailConversion<T>(value);
+	}
+
+	void testNull()
+	{
+		assertTrue(tSQLValue_t{}.isNull());
+		assertFalse(tSQLValue_t{S_(""), 1, SQL_VARCHAR}.isNull());
+		tryIsNull<uint8_t>({});
+		tryIsNull<int8_t>({});
+		tryIsNull<uint16_t>({});
+		tryIsNull<int16_t>({});
+		tryIsNull<uint32_t>({});
+		tryIsNull<int32_t>({});
+		tryIsNull<uint64_t>({});
+		tryIsNull<int64_t>({});
+	}
+
+public:
+	void registerTests() final override
+	{
+		CXX_TEST(testNull)
