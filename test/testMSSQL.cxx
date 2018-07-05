@@ -287,6 +287,23 @@ private:
 		assertNull(testClient.get());
 	}
 
+	void testError()
+	{
+		constexpr const char *unknownError = "Unknown error";
+		constexpr const char *noError = "No error";
+		assertNotEqual(tSQLExecError_t{tSQLExecErrorType_t::ok, 0, nullptr}.error(), unknownError);
+		assertEqual(tSQLExecError_t{tSQLExecErrorType_t::ok, 0, nullptr}.error(), noError);
+		assertNotEqual(tSQLExecError_t{tSQLExecErrorType_t::connect, 0, nullptr}.error(), unknownError);
+		assertNotEqual(tSQLExecError_t{tSQLExecErrorType_t::query, 0, nullptr}.error(), unknownError);
+		assertNotEqual(tSQLExecError_t{tSQLExecErrorType_t::handleInv, 0, nullptr}.error(), unknownError);
+		assertNotEqual(tSQLExecError_t{tSQLExecErrorType_t::generalError, 0, nullptr}.error(), unknownError);
+		assertNotEqual(tSQLExecError_t{tSQLExecErrorType_t::needData, 0, nullptr}.error(), unknownError);
+		assertNotEqual(tSQLExecError_t{tSQLExecErrorType_t::noData, 0, nullptr}.error(), unknownError);
+		assertNotEqual(tSQLExecError_t{tSQLExecErrorType_t::dataAvail, 0, nullptr}.error(), unknownError);
+		assertEqual(tSQLExecError_t{tSQLExecErrorType_t::unknown, 0, nullptr}.error(), unknownError);
+		assertEqual(tSQLExecError_t{(tSQLExecErrorType_t)-1, 0, nullptr}.error(), unknownError);
+	}
+
 public:
 	void registerTests() final override
 	{
@@ -301,6 +318,7 @@ public:
 		CXX_TEST(testResult)
 		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
+		CXX_TEST(testError)
 	}
 };
 
