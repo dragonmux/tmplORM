@@ -395,7 +395,4 @@ public:
 };
 
 CRUNCH_API void registerCXXTests() noexcept;
-void registerCXXTests() noexcept
-{
-	registerTestClasses<testMySQLValue_t, testMySQL_t>();
-}
+void registerCXXTests() noexcept {registerTestClasses<testMySQLValue_t, testMySQL_t>(); }

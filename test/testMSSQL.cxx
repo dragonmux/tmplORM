@@ -443,6 +443,9 @@ private:
 		tryShouldFail<uint16_t>({S_(""), 0, SQL_INTEGER});
 		tryShouldFail<uint16_t>({S_(""), 0, SQL_BIGINT});
 		tryShouldFail<uint16_t>({S_(""), 0, SQL_VARBINARY});
+		tryShouldFail<uint16_t>({S_(""), 0, SQL_BIT});
+		tryShouldFail<uint16_t>({S_(""), 0, SQL_TYPE_DATE});
+		tryShouldFail<uint16_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
 		tryOk<uint16_t>({S_<uint16_t>(128), 3, SQL_SMALLINT}, 128);
 		tryOk<uint16_t>({S_<uint16_t>(255), 3, SQL_SMALLINT}, 255);
 		tryOk<uint16_t>({S_<uint16_t>(32768), 3, SQL_SMALLINT}, 32768);
@@ -459,6 +462,9 @@ private:
 		tryShouldFail<int16_t>({S_(""), 0, SQL_INTEGER});
 		tryShouldFail<int16_t>({S_(""), 0, SQL_BIGINT});
 		tryShouldFail<int16_t>({S_(""), 0, SQL_VARBINARY});
+		tryShouldFail<int16_t>({S_(""), 0, SQL_BIT});
+		tryShouldFail<int16_t>({S_(""), 0, SQL_TYPE_DATE});
+		tryShouldFail<int16_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
 		tryOk<int16_t>({S_<int16_t>(127), 3, SQL_SMALLINT}, 127);
 		tryOk<int16_t>({S_<int16_t>(32767), 3, SQL_SMALLINT}, 32767);
 		tryOk<int16_t>({S_(""), 1, SQL_SMALLINT}, 0);
