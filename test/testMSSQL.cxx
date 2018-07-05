@@ -510,6 +510,29 @@ private:
 		tryOk<int32_t>({S_<int32_t>(-2147483648), 12, SQL_INTEGER}, -2147483648);
 	}
 
+	void testError()
+	{
+		constexpr const char *unknownError = "An unknown error occured";
+		constexpr const char *noError = "No error occured";
+		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::noError}.error(), unknownError);
+		assertEqual(tSQLValueError_t{tSQLErrorType_t::noError}.error(), noError);
+		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::stringError}.error(), unknownError);
+		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::boolError}.error(), unknownError);
+		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::uint8Error}.error(), unknownError);
+		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::int8Error}.error(), unknownError);
+		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::uint16Error}.error(), unknownError);
+		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::int16Error}.error(), unknownError);
+		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::uint32Error}.error(), unknownError);
+		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::int32Error}.error(), unknownError);
+		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::uint64Error}.error(), unknownError);
+		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::int64Error}.error(), unknownError);
+		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::binError}.error(), unknownError);
+		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::dateError}.error(), unknownError);
+		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::dateTimeError}.error(), unknownError);
+		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::uuidError}.error(), unknownError);
+		assertEqual(tSQLValueError_t{(tSQLErrorType_t)-1}.error(), unknownError);
+	}
+
 public:
 	void registerTests() final override
 	{
@@ -520,6 +543,7 @@ public:
 		CXX_TEST(testUint16)
 		CXX_TEST(testInt16)
 		CXX_TEST(testUint32)
+		CXX_TEST(testError)
 	}
 };
 
