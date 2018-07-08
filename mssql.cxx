@@ -365,7 +365,7 @@ bool tSQLValue_t::asBool() const
 {
 	if (isNull() || type != SQL_BIT)
 		throw tSQLValueError_t(tSQLErrorType_t::boolError);
-	return reinterpret<uint8_t>(data) != 0;
+	return reinterpret<uint8_t>(data);
 }
 
 const void *tSQLValue_t::asBuffer(size_t &bufferLength, const bool release) const

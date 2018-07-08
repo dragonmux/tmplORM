@@ -500,6 +500,9 @@ private:
 		tryShouldFail<uint32_t>({S_(""), 0, SQL_SMALLINT});
 		tryShouldFail<uint32_t>({S_(""), 0, SQL_BIGINT});
 		tryShouldFail<uint32_t>({S_(""), 0, SQL_VARBINARY});
+		tryShouldFail<uint32_t>({S_(""), 0, SQL_BIT});
+		tryShouldFail<uint32_t>({S_(""), 0, SQL_TYPE_DATE});
+		tryShouldFail<uint32_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
 		tryOk<uint32_t>({S_<uint32_t>(128), 5, SQL_INTEGER}, 128);
 		tryOk<uint32_t>({S_<uint32_t>(255), 5, SQL_INTEGER}, 255);
 		tryOk<uint32_t>({S_<uint32_t>(32768), 5, SQL_INTEGER}, 32768);
@@ -518,6 +521,9 @@ private:
 		tryShouldFail<int32_t>({S_(""), 0, SQL_SMALLINT});
 		tryShouldFail<int32_t>({S_(""), 0, SQL_BIGINT});
 		tryShouldFail<int32_t>({S_(""), 0, SQL_VARBINARY});
+		tryShouldFail<int32_t>({S_(""), 0, SQL_BIT});
+		tryShouldFail<int32_t>({S_(""), 0, SQL_TYPE_DATE});
+		tryShouldFail<int32_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
 		tryOk<int32_t>({S_<int32_t>(127), 4, SQL_INTEGER}, 127);
 		tryOk<int32_t>({S_<int32_t>(32767), 6, SQL_INTEGER}, 32767);
 		tryOk<int32_t>({S_<int32_t>(2147483647), 11, SQL_INTEGER}, 2147483647);
@@ -526,6 +532,23 @@ private:
 		tryOk<int32_t>({S_<int32_t>(-1), 3, SQL_INTEGER}, -1);
 		tryOk<int32_t>({S_<int32_t>(-2147483647), 12, SQL_INTEGER}, -2147483647);
 		tryOk<int32_t>({S_<int32_t>(-2147483648), 12, SQL_INTEGER}, -2147483648);
+	}
+
+	void testBool()
+	{
+		tryIsNull<bool>({nullptr, 0, SQL_BIT});
+		tryShouldFail<bool>({S_(""), 0, SQL_VARCHAR});
+		tryShouldFail<bool>({S_(""), 0, SQL_TINYINT});
+		tryShouldFail<bool>({S_(""), 0, SQL_SMALLINT});
+		tryShouldFail<bool>({S_(""), 0, SQL_INTEGER});
+		tryShouldFail<bool>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<bool>({S_(""), 0, SQL_VARBINARY});
+		tryShouldFail<bool>({S_(""), 0, SQL_TYPE_DATE});
+		tryShouldFail<bool>({S_(""), 0, SQL_TYPE_TIMESTAMP});
+		tryOk<bool>({S_<bool>(false), 2, SQL_BIT}, false);
+//		tryOk<bool>({S_<bool>(true), 2, SQL_BIT}, true);
+		tryOk<bool>({S_(""), 0, SQL_BIT}, false);
+		tryOk<bool>({S_(""), 1, SQL_BIT}, false);
 	}
 
 	void testError()
@@ -561,6 +584,8 @@ public:
 		CXX_TEST(testUint16)
 		CXX_TEST(testInt16)
 		CXX_TEST(testUint32)
+		CXX_TEST(testInt32)
+		CXX_TEST(testBool)
 		CXX_TEST(testError)
 	}
 };
