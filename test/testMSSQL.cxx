@@ -237,7 +237,7 @@ private:
 		assertEqual(result.numFields(), 4);
 
 		assertEqual(result[0], testData[0].entryID);
-		assertEqual(result[1], testData[0].name);
+		assertEqual(result[1].asString().get(), testData[0].name);
 		assertFalse(result[2].isNull());
 		assertEqual(result[2], testData[0].value);
 		testData[0].when = result[3].asDateTime();
@@ -248,7 +248,7 @@ private:
 		assertTrue(result.next());
 
 		assertEqual(result[0], testData[1].entryID);
-		assertEqual(result[1], testData[1].name);
+		assertEqual(result[1].asString().get(), testData[1].name);
 		assertTrue(testData[1].value.isNull());
 		// Apply MSSQL rounding..
 		now.nanoSecond((now.nanoSecond() / 100) * 100);

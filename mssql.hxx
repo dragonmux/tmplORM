@@ -101,7 +101,7 @@ public:
 	/*! @brief Auto-converter for strings */
 	operator std::unique_ptr<char []>() const { return asString(); }
 	/*! @brief Auto-converter to raw buffer */
-	operator const char *() const noexcept { return data.get(); }
+	//operator const char *() const noexcept { return data.get(); }
 	/*! @brief Auto-converter for booleans */
 	explicit operator bool() const { return asBool(); }
 	/*! @brief Auto-converter for uint8_t's */
