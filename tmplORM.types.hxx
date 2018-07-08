@@ -74,11 +74,8 @@ namespace tmplORM
 				using seconds = std::chrono::seconds;
 				using nanoseconds = std::chrono::nanoseconds;
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wliteral-suffix"
-				constexpr years operator ""y(const unsigned long long value) noexcept { return years{value}; }
-				constexpr days operator ""day(const unsigned long long value) noexcept { return days{value}; }
-#pragma GCC diagnostic pop
+				constexpr years operator ""_y(const unsigned long long value) noexcept { return years{value}; }
+				constexpr days operator ""_day(const unsigned long long value) noexcept { return days{value}; }
 
 				//extern "C" void __tz_compute(time_t timer, struct tm *tm, int use_localtime);
 				constexpr static std::array<std::array<uint16_t, 12>, 2> monthDays
@@ -109,23 +106,23 @@ namespace tmplORM
 					{
 						while (rem.count() < 0)
 						{
-							rem += 1day;
+							rem += 1_day;
 							--day;
 						}
-						while (rem >= 1day)
+						while (rem >= 1_day)
 						{
-							rem -= 1day;
+							rem -= 1_day;
 							++day;
 						}
 					}
 
 					uint16_t computeYear(days &day) noexcept
 					{
-						years year = 1970y;
+						years year = 1970_y;
 						while (day.count() < 0 || day.count() > (isLeap(year) ? 366 : 365))
 						{
 							const years guess = year + years{day.count() / 365} - years{(day.count() % 365) < 0};
-							day -= days{(guess - year).count() * 365} + leapsFor(guess - 1y) - leapsFor(year - 1y);
+							day -= days{(guess - year).count() * 365} + leapsFor(guess - 1_y) - leapsFor(year - 1_y);
 							year = guess;
 						}
 						return year.count();
@@ -186,7 +183,7 @@ namespace tmplORM
 
 					ormDateTime_t(const systemTime_t time) noexcept : ormDateTime_t{}
 					{
-						auto day = days{durationAs<seconds>(time) / seconds{1day}};
+						auto day = days{durationAs<seconds>(time) / seconds{1_day}};
 						auto rem = time - day;
 						correctDay(day, rem);
 						_year = computeYear(day);
