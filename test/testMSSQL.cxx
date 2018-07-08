@@ -578,8 +578,8 @@ private:
 		tryShouldFail<ormDate_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
 		tryOk<ormDate_t>({S_<SQL_DATE_STRUCT>({}), 7, SQL_TYPE_DATE}, {});
 		tryOk<ormDate_t>({S_<SQL_DATE_STRUCT>(asSQLType(ormDate_t{now})), 7, SQL_TYPE_DATE}, now);
-		tryOk<ormDate_t>({S_(""), 0, SQL_TYPE_DATE}, {});
-		tryOk<ormDate_t>({S_(""), 1, SQL_TYPE_DATE}, {});
+		tryShouldFail<ormDate_t>({S_(""), 0, SQL_TYPE_DATE});
+		tryShouldFail<ormDate_t>({S_(""), 1, SQL_TYPE_DATE});
 	}
 
 	void testDateTime()
@@ -596,8 +596,8 @@ private:
 		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_TYPE_DATE});
 		tryOk<ormDateTime_t>({S_<SQL_TIMESTAMP_STRUCT>({}), 17, SQL_TYPE_TIMESTAMP}, {});
 		tryOk<ormDateTime_t>({S_<SQL_TIMESTAMP_STRUCT>(asSQLType(now)), 17, SQL_TYPE_TIMESTAMP}, now);
-		tryOk<ormDateTime_t>({S_(""), 0, SQL_TYPE_TIMESTAMP}, {});
-		tryOk<ormDateTime_t>({S_(""), 1, SQL_TYPE_TIMESTAMP}, {});
+		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
+		tryShouldFail<ormDateTime_t>({S_(""), 1, SQL_TYPE_TIMESTAMP});
 	}
 
 	void testError()

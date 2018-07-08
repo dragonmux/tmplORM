@@ -378,7 +378,7 @@ const void *tSQLValue_t::asBuffer(size_t &bufferLength, const bool release) cons
 
 ormDate_t tSQLValue_t::asDate() const
 {
-	if (isNull() || type != SQL_TYPE_DATE)
+	if (isNull() || type != SQL_TYPE_DATE || length < sizeof(SQL_TYPE_DATE))
 		throw tSQLValueError_t(tSQLErrorType_t::dateError);
 	auto date = reinterpret<SQL_DATE_STRUCT>(data);
 	return {uint16_t(date.year), date.month, date.day};
@@ -388,7 +388,7 @@ ormDate_t tSQLValue_t::asDate() const
 
 ormDateTime_t tSQLValue_t::asDateTime() const
 {
-	if (isNull() || type != SQL_TYPE_TIMESTAMP)
+	if (isNull() || type != SQL_TYPE_TIMESTAMP || length < sizeof(SQL_TYPE_TIMESTAMP))
 		throw tSQLValueError_t(tSQLErrorType_t::dateTimeError);
 	auto dateTime = reinterpret<SQL_TIMESTAMP_STRUCT>(data);
 	return {uint16_t(dateTime.year), dateTime.month, dateTime.day, dateTime.hour,
