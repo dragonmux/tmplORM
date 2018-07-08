@@ -349,7 +349,7 @@ private:
 
 	template<typename T> T tryOkConversion(const tSQLValue_t &value)
 	{
-		try { return T{value}; }
+		try { return {value}; }
 		catch (const tSQLValueError_t &error)
 			{ fail(error.error()); }
 		return {};
@@ -359,7 +359,7 @@ private:
 	{
 		try
 		{
-			T v = T{value};
+			volatile T v{value};
 			printf("Conversion for %s: ", typeid(T).name());
 			fail("Conversion succeeded (expected to fail)");
 		}
@@ -546,7 +546,7 @@ private:
 		tryShouldFail<bool>({S_(""), 0, SQL_TYPE_DATE});
 		tryShouldFail<bool>({S_(""), 0, SQL_TYPE_TIMESTAMP});
 		tryOk<bool>({S_<uint8_t>(false), 2, SQL_BIT}, false);
-//		tryOk<bool>({S_<uint8_t>(true), 2, SQL_BIT}, true);
+		tryOk<bool>({S_<uint8_t>(true), 2, SQL_BIT}, true);
 		tryOk<bool>({S_(""), 0, SQL_BIT}, false);
 		tryOk<bool>({S_(""), 1, SQL_BIT}, false);
 	}
