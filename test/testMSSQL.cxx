@@ -335,7 +335,8 @@ private:
 		return static_cast<char *>(memcpy(ret, str, len + 1));
 	}
 
-	template<typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
+	template<typename T, typename = typename std::enable_if<std::is_integral<T>::value ||
+		std::is_same<T, SQL_DATE_STRUCT>::value || std::is_same<T, SQL_TIMESTAMP_STRUCT>::value>::type>
 		char *S_(const T value) noexcept
 	{
 		constexpr size_t len = sizeof(T);
@@ -346,6 +347,13 @@ private:
 		*reinterpret_cast<T *>(ret) = value;
 		return ret;
 	}
+
+	template<typename T> void checkValue(const T &var, const T &expected)
+		{ assertEqual(var, expected); }
+	void checkValue(const ormDate_t &var, const ormDate_t &expected)
+		{ assertTrue(var == expected); }
+	void checkValue(const ormDateTime_t &var, const ormDateTime_t &expected)
+		{ assertTrue(var == expected); }
 
 	template<typename T> T tryOkConversion(const tSQLValue_t &value)
 	{
@@ -370,7 +378,7 @@ private:
 	{
 		assertFalse(value.isNull());
 		T var = tryOkConversion<T>(value);
-		assertEqual(var, expected);
+		checkValue(var, expected);
 	}
 
 	template<typename T> void tryIsNull(const tSQLValue_t value)
@@ -551,6 +559,24 @@ private:
 		tryOk<bool>({S_(""), 1, SQL_BIT}, false);
 	}
 
+	void testDate()
+	{
+		tryIsNull<ormDate_t>({nullptr, 0, SQL_TYPE_DATE});
+		tryShouldFail<ormDate_t>({S_(""), 0, SQL_VARCHAR});
+		tryShouldFail<ormDate_t>({S_(""), 0, SQL_TINYINT});
+		tryShouldFail<ormDate_t>({S_(""), 0, SQL_SMALLINT});
+		tryShouldFail<ormDate_t>({S_(""), 0, SQL_INTEGER});
+		tryShouldFail<ormDate_t>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<ormDate_t>({S_(""), 0, SQL_VARBINARY});
+		tryShouldFail<ormDate_t>({S_(""), 0, SQL_BIT});
+		tryShouldFail<ormDate_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
+		tryOk<ormDate_t>({S_<SQL_DATE_STRUCT>({}), 2, SQL_TYPE_DATE}, {});
+		tryOk<ormDate_t>({S_<SQL_DATE_STRUCT>({int16_t(now.year()), now.month(), now.day()}), 2,
+			SQL_TYPE_DATE}, {now.year(), now.month(), now.day()});
+		tryOk<ormDate_t>({S_(""), 0, SQL_TYPE_DATE}, {});
+		tryOk<ormDate_t>({S_(""), 1, SQL_TYPE_DATE}, {});
+	}
+
 	void testError()
 	{
 		constexpr const char *unknownError = "An unknown error occured";
@@ -586,6 +612,7 @@ public:
 		CXX_TEST(testUint32)
 		CXX_TEST(testInt32)
 		CXX_TEST(testBool)
+		CXX_TEST(testDate)
 		CXX_TEST(testError)
 	}
 };
