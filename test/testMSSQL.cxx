@@ -348,6 +348,9 @@ private:
 		return ret;
 	}
 
+	SQL_DATE_STRUCT asSQLType(const ormDate_t value) noexcept
+		{ return {int16_t(value.year()), value.month(), value.day()}; }
+
 	template<typename T> void checkValue(const T &var, const T &expected)
 		{ assertEqual(var, expected); }
 	void checkValue(const ormDate_t &var, const ormDate_t &expected)
@@ -571,8 +574,7 @@ private:
 		tryShouldFail<ormDate_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<ormDate_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
 		tryOk<ormDate_t>({S_<SQL_DATE_STRUCT>({}), 2, SQL_TYPE_DATE}, {});
-		tryOk<ormDate_t>({S_<SQL_DATE_STRUCT>({int16_t(now.year()), now.month(), now.day()}), 2,
-			SQL_TYPE_DATE}, {now.year(), now.month(), now.day()});
+		tryOk<ormDate_t>({S_<SQL_DATE_STRUCT>(asSQLType(ormDate_t{now})), 2, SQL_TYPE_DATE}, now);
 		tryOk<ormDate_t>({S_(""), 0, SQL_TYPE_DATE}, {});
 		tryOk<ormDate_t>({S_(""), 1, SQL_TYPE_DATE}, {});
 	}
