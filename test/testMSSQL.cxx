@@ -350,6 +350,9 @@ private:
 
 	SQL_DATE_STRUCT asSQLType(const ormDate_t value) noexcept
 		{ return {int16_t(value.year()), value.month(), value.day()}; }
+	SQL_TIMESTAMP_STRUCT asSQLType(const ormDateTime_t value) noexcept
+		{ return {int16_t(value.year()), value.month(), value.day(),
+			value.hour(), value.minute(), value.second(), value.nanoSecond()}; }
 
 	template<typename T> void checkValue(const T &var, const T &expected)
 		{ assertEqual(var, expected); }
@@ -573,10 +576,28 @@ private:
 		tryShouldFail<ormDate_t>({S_(""), 0, SQL_VARBINARY});
 		tryShouldFail<ormDate_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<ormDate_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
-		tryOk<ormDate_t>({S_<SQL_DATE_STRUCT>({}), 2, SQL_TYPE_DATE}, {});
-		tryOk<ormDate_t>({S_<SQL_DATE_STRUCT>(asSQLType(ormDate_t{now})), 2, SQL_TYPE_DATE}, now);
+		tryOk<ormDate_t>({S_<SQL_DATE_STRUCT>({}), 7, SQL_TYPE_DATE}, {});
+		tryOk<ormDate_t>({S_<SQL_DATE_STRUCT>(asSQLType(ormDate_t{now})), 7, SQL_TYPE_DATE}, now);
 		tryOk<ormDate_t>({S_(""), 0, SQL_TYPE_DATE}, {});
 		tryOk<ormDate_t>({S_(""), 1, SQL_TYPE_DATE}, {});
+	}
+
+	void testDateTime()
+	{
+		now.nanoSecond((now.nanoSecond() / 100) * 100);
+		tryIsNull<ormDateTime_t>({nullptr, 0, SQL_TYPE_TIMESTAMP});
+		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_VARCHAR});
+		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_TINYINT});
+		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_SMALLINT});
+		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_INTEGER});
+		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_VARBINARY});
+		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_BIT});
+		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_TYPE_DATE});
+		tryOk<ormDateTime_t>({S_<SQL_TIMESTAMP_STRUCT>({}), 17, SQL_TYPE_TIMESTAMP}, {});
+		tryOk<ormDateTime_t>({S_<SQL_TIMESTAMP_STRUCT>(asSQLType(now)), 17, SQL_TYPE_TIMESTAMP}, now);
+		tryOk<ormDateTime_t>({S_(""), 0, SQL_TYPE_TIMESTAMP}, {});
+		tryOk<ormDateTime_t>({S_(""), 1, SQL_TYPE_TIMESTAMP}, {});
 	}
 
 	void testError()
@@ -615,6 +636,7 @@ public:
 		CXX_TEST(testInt32)
 		CXX_TEST(testBool)
 		CXX_TEST(testDate)
+		CXX_TEST(testDateTime)
 		CXX_TEST(testError)
 	}
 };
