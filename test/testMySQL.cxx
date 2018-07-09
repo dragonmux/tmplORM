@@ -21,6 +21,11 @@ using namespace tmplORM::mysql::driver;
 #define u64(n)		UINT64_C(n)
 #define i64(n)		INT64_C(n)
 
+std::unique_ptr<mySQLClient_t> testClient{};
+constString_t driver, host, username, password;
+
+constexpr static uint32_t port = 3306;
+
 class testMySQL_t final : public testsuit
 {
 private:
@@ -65,11 +70,19 @@ private:
 		assertFalse(client3.valid());
 	}
 
+	void testConnect()
+	{
+		assertNull(testClient);
+		mySQLClient_t client;
+		assertFalse(client.valid());
+	}
+
 public:
 	void registerTests() final override
 	{
 		CXX_TEST(testInvalid)
 		CXX_TEST(testClientType)
+		CXX_TEST(testConnect)
 	}
 };
 
