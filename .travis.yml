@@ -73,7 +73,7 @@ matrix:
     #        - gcc-4.9
     #        - g++-4.9
     #        - clang-4.0
-    #        - libmysql-dev
+    #        - libmysqlclient-dev
     #        - libaio-dev
     #        - libwrap0-dev
     #- compiler: clang-5.0
@@ -88,7 +88,7 @@ matrix:
     #        - gcc-4.9
     #        - g++-4.9
     #        - clang-5.0
-    #        - libmysql-dev
+    #        - libmysqlclient-dev
     #        - libaio-dev
     #        - libwrap0-dev
     - compiler: gcc-5
@@ -100,7 +100,7 @@ matrix:
           packages:
             - gcc-5
             - g++-5
-            - libmysql-dev
+            - libmysqlclient-dev
 #            - libaio-dev
 #            - libwrap0-dev
     - compiler: gcc-5
@@ -112,7 +112,7 @@ matrix:
           packages:
             - gcc-5
             - g++-5
-            - libmysql-dev
+            - libmysqlclient-dev
             - libaio-dev
             - libwrap0-dev
     - compiler: gcc-6
@@ -124,7 +124,7 @@ matrix:
           packages:
             - gcc-6
             - g++-6
-            - libmysql-dev
+            - libmysqlclient-dev
             - libaio-dev
             - libwrap0-dev
     - compiler: gcc-6
@@ -136,7 +136,7 @@ matrix:
           packages:
             - gcc-6
             - g++-6
-            - libmysql-dev
+            - libmysqlclient-dev
             - libaio-dev
             - libwrap0-dev
     - compiler: gcc-7
@@ -148,7 +148,7 @@ matrix:
           packages:
             - gcc-7
             - g++-7
-            - libmysql-dev
+            - libmysqlclient-dev
             - libaio-dev
             - libwrap0-dev
     - compiler: gcc-7
@@ -160,7 +160,7 @@ matrix:
           packages:
             - gcc-7
             - g++-7
-            - libmysql-dev
+            - libmysqlclient-dev
             - libaio-dev
             - libwrap0-dev
     - compiler: gcc-8
@@ -172,7 +172,7 @@ matrix:
           packages:
             - gcc-8
             - g++-8
-            - libmysql-dev
+            - libmysqlclient-dev
             - libaio-dev
             - libwrap0-dev
     - compiler: gcc-8
@@ -184,7 +184,7 @@ matrix:
           packages:
             - gcc-8
             - g++-8
-            - libmysql-dev
+            - libmysqlclient-dev
             - libaio-dev
             - libwrap0-dev
 
