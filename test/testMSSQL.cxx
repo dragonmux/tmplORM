@@ -12,7 +12,7 @@
  * @internal
  * @file
  * @author Rachel Mant
- * @date 2017
+ * @date 2017-2018
  * @brief Unit tests for the MSSQL driver abstraction layer
  */
 
@@ -22,6 +22,8 @@ using tmplORM::mssql::fieldLength;
 using tmplORM::types::baseTypes::ormDateTime_t;
 
 using systemClock_t = std::chrono::system_clock;
+#define u64(n)		UINT64_C(n)
+#define i64(n)		INT64_C(n)
 
 std::unique_ptr<tSQLClient_t> testClient{};
 constString_t driver, host, username, password;
@@ -538,14 +540,61 @@ private:
 		tryShouldFail<int32_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<int32_t>({S_(""), 0, SQL_TYPE_DATE});
 		tryShouldFail<int32_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
-		tryOk<int32_t>({S_<int32_t>(127), 4, SQL_INTEGER}, 127);
-		tryOk<int32_t>({S_<int32_t>(32767), 6, SQL_INTEGER}, 32767);
-		tryOk<int32_t>({S_<int32_t>(2147483647), 11, SQL_INTEGER}, 2147483647);
+		tryOk<int32_t>({S_<int32_t>(127), 5, SQL_INTEGER}, 127);
+		tryOk<int32_t>({S_<int32_t>(32767), 5, SQL_INTEGER}, 32767);
+		tryOk<int32_t>({S_<int32_t>(2147483647), 5, SQL_INTEGER}, 2147483647);
 		tryOk<int32_t>({S_(""), 1, SQL_INTEGER}, 0);
 		tryOk<int32_t>({S_(""), 0, SQL_INTEGER}, 0);
-		tryOk<int32_t>({S_<int32_t>(-1), 3, SQL_INTEGER}, -1);
-		tryOk<int32_t>({S_<int32_t>(-2147483647), 12, SQL_INTEGER}, -2147483647);
-		tryOk<int32_t>({S_<int32_t>(-2147483648), 12, SQL_INTEGER}, -2147483648);
+		tryOk<int32_t>({S_<int32_t>(-1), 5, SQL_INTEGER}, -1);
+		tryOk<int32_t>({S_<int32_t>(-2147483647), 5, SQL_INTEGER}, -2147483647);
+		tryOk<int32_t>({S_<int32_t>(-2147483648), 5, SQL_INTEGER}, -2147483648);
+	}
+
+	void testUint64()
+	{
+		tryIsNull<uint64_t>({nullptr, 0, SQL_BIGINT});
+		tryShouldFail<uint64_t>({S_(""), 0, SQL_VARCHAR});
+		tryShouldFail<uint64_t>({S_(""), 0, SQL_TINYINT});
+		tryShouldFail<uint64_t>({S_(""), 0, SQL_SMALLINT});
+		tryShouldFail<uint64_t>({S_(""), 0, SQL_INTEGER});
+		tryShouldFail<uint64_t>({S_(""), 0, SQL_VARBINARY});
+		tryShouldFail<uint64_t>({S_(""), 0, SQL_BIT});
+		tryShouldFail<uint64_t>({S_(""), 0, SQL_TYPE_DATE});
+		tryShouldFail<uint64_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
+		tryOk<uint64_t>({S_<uint64_t>(128), 9, SQL_BIGINT}, 128);
+		tryOk<uint64_t>({S_<uint64_t>(255), 9, SQL_BIGINT}, 255);
+		tryOk<uint64_t>({S_<uint64_t>(32768), 9, SQL_BIGINT}, 32768);
+		tryOk<uint64_t>({S_<uint64_t>(65535), 9, SQL_BIGINT}, 65535);
+		tryOk<uint64_t>({S_<uint64_t>(2147483648), 9, SQL_BIGINT}, 2147483648);
+		tryOk<uint64_t>({S_<uint64_t>(4294967295), 9, SQL_BIGINT}, 4294967295);
+		tryOk<uint64_t>({S_<uint64_t>(u64(9223372036854775808)), 9, SQL_BIGINT}, u64(9223372036854775808));
+		tryOk<uint64_t>({S_<uint64_t>(u64(18446744073709551615)), 9, SQL_BIGINT}, u64(18446744073709551615));
+		tryOk<uint64_t>({S_(""), 1, SQL_BIGINT}, 0);
+		tryOk<uint64_t>({S_(""), 0, SQL_BIGINT}, 0);
+	}
+
+	void testInt64()
+	{
+		tryIsNull<int64_t>({nullptr, 0, SQL_BIGINT});
+		tryShouldFail<int64_t>({S_(""), 0, SQL_VARCHAR});
+		tryShouldFail<int64_t>({S_(""), 0, SQL_TINYINT});
+		tryShouldFail<int64_t>({S_(""), 0, SQL_SMALLINT});
+		tryShouldFail<int64_t>({S_(""), 0, SQL_INTEGER});
+		tryShouldFail<int64_t>({S_(""), 0, SQL_VARBINARY});
+		tryShouldFail<int64_t>({S_(""), 0, SQL_BIT});
+		tryShouldFail<int64_t>({S_(""), 0, SQL_TYPE_DATE});
+		tryShouldFail<int64_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
+		tryOk<int64_t>({S_<int64_t>(127), 9, SQL_BIGINT}, 127);
+		tryOk<int64_t>({S_<int64_t>(32767), 9, SQL_BIGINT}, 32767);
+		tryOk<int64_t>({S_<int64_t>(2147483647), 9, SQL_BIGINT}, 2147483647);
+		tryOk<int64_t>({S_<int64_t>(i64(9223372036854775807)), 9, SQL_BIGINT}, i64(9223372036854775807));
+		tryOk<int64_t>({S_(""), 1, SQL_BIGINT}, 0);
+		tryOk<int64_t>({S_(""), 0, SQL_BIGINT}, 0);
+		tryOk<int64_t>({S_<int64_t>(-1), 9, SQL_BIGINT}, -1);
+		tryOk<int64_t>({S_<int64_t>(-2147483647), 9, SQL_BIGINT}, -2147483647);
+		tryOk<int64_t>({S_<int64_t>(-2147483648), 9, SQL_BIGINT}, -2147483648);
+		tryOk<int64_t>({S_<int64_t>(i64(-9223372036854775807)), 9, SQL_BIGINT}, i64(-9223372036854775807));
+		tryOk<int64_t>({S_<int64_t>(i64(-9223372036854775807) - 1), 9, SQL_BIGINT}, i64(-9223372036854775807) - 1);
 	}
 
 	void testBool()
@@ -634,6 +683,8 @@ public:
 		CXX_TEST(testInt16)
 		CXX_TEST(testUint32)
 		CXX_TEST(testInt32)
+		CXX_TEST(testUint64)
+		CXX_TEST(testInt64)
 		CXX_TEST(testBool)
 		CXX_TEST(testDate)
 		CXX_TEST(testDateTime)
