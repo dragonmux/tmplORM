@@ -5,6 +5,8 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <tmplORM.mysql.hxx>
+#include "constString.hxx"
 
 /*!
  * @internal
@@ -15,6 +17,61 @@
  */
 
 using namespace tmplORM::mysql::driver;
+
+#define u64(n)		UINT64_C(n)
+#define i64(n)		INT64_C(n)
+
+class testMySQL_t final : public testsuit
+{
+private:
+	void testInvalid()
+	{
+		mySQLClient_t testClient;
+		assertFalse(testClient.valid());
+		assertFalse(testClient.queryResult().valid());
+		assertEqual(testClient.errorNum(), 0);
+		assertNull(testClient.error());
+		mySQLPreparedQuery_t testQuery = testClient.prepare("", 0);
+		assertFalse(testQuery.valid());
+		assertFalse(testQuery.execute());
+		assertEqual(testQuery.rowID(), 0);
+		mySQLPreparedResult_t testPrepResult = testQuery.queryResult(0);
+		assertTrue(testPrepResult.valid());
+		assertEqual(testPrepResult.numRows(), 0);
+		mySQLResult_t testResult;
+		assertFalse(testResult.valid());
+		assertEqual(testResult.numRows(), 0);
+		assertFalse(testResult.resultRows().valid());
+		mySQLRow_t testRow;
+		assertFalse(testRow.valid());
+		assertEqual(testRow.numFields(), 0);
+		assertFalse(testRow.next());
+		assertTrue(testRow[0].isNull());
+		mySQLBind_t testBind;
+		assertTrue(testBind.valid());
+		assertFalse(testBind.haveData());
+		assertNull(testBind.data());
+	}
+
+	void testClientType()
+	{
+		mySQLClient_t client1;
+		assertFalse(client1.valid());
+		mySQLClient_t client2(client1);
+		assertFalse(client1.valid());
+		mySQLClient_t client3;
+		assertFalse(client3.valid());
+		client3 = client2;
+		assertFalse(client3.valid());
+	}
+
+public:
+	void registerTests() final override
+	{
+		CXX_TEST(testInvalid)
+		CXX_TEST(testClientType)
+	}
+};
 
 class testMySQLValue_t final : public testsuit
 {
@@ -236,8 +293,8 @@ public:
 		tryOk<uint64_t>({"65535", 6, MYSQL_TYPE_LONGLONG}, 65535);
 		tryOk<uint64_t>({"2147483648", 11, MYSQL_TYPE_LONGLONG}, 2147483648);
 		tryOk<uint64_t>({"4294967295", 11, MYSQL_TYPE_LONGLONG}, 4294967295);
-		tryOk<uint64_t>({"9223372036854775808", 20, MYSQL_TYPE_LONGLONG}, UINT64_C(9223372036854775808));
-		tryOk<uint64_t>({"18446744073709551615", 21, MYSQL_TYPE_LONGLONG}, UINT64_C(18446744073709551615));
+		tryOk<uint64_t>({"9223372036854775808", 20, MYSQL_TYPE_LONGLONG}, u64(9223372036854775808));
+		tryOk<uint64_t>({"18446744073709551615", 21, MYSQL_TYPE_LONGLONG}, u64(18446744073709551615));
 		tryOk<uint64_t>({"", 1, MYSQL_TYPE_LONGLONG}, 0);
 		tryOk<uint64_t>({"", 0, MYSQL_TYPE_LONGLONG}, 0);
 		tryShouldFail<uint64_t>({"-1", 3, MYSQL_TYPE_LONGLONG});
@@ -258,11 +315,12 @@ public:
 		tryOk<int64_t>({"127", 4, MYSQL_TYPE_LONGLONG}, 127);
 		tryOk<int64_t>({"32767", 6, MYSQL_TYPE_LONGLONG}, 32767);
 		tryOk<int64_t>({"2147483647", 11, MYSQL_TYPE_LONGLONG}, 2147483647);
-		tryOk<int64_t>({"9223372036854775807", 20, MYSQL_TYPE_LONGLONG}, 9223372036854775807U);
+		tryOk<int64_t>({"9223372036854775807", 20, MYSQL_TYPE_LONGLONG}, i64(9223372036854775807));
 		tryOk<int64_t>({"", 1, MYSQL_TYPE_LONGLONG}, 0);
 		tryOk<int64_t>({"", 0, MYSQL_TYPE_LONGLONG}, 0);
 		tryOk<int64_t>({"-1", 3, MYSQL_TYPE_LONGLONG}, -1);
-		tryOk<int64_t>({"-9223372036854775807", 21, MYSQL_TYPE_LONGLONG}, -9223372036854775807);
+		tryOk<int64_t>({"-9223372036854775807", 21, MYSQL_TYPE_LONGLONG}, i64(-9223372036854775807));
+		tryOk<int64_t>({"-9223372036854775808", 21, MYSQL_TYPE_LONGLONG}, i64(-9223372036854775807) - 1);
 		//tryShouldFail<int64_t>({"-9223372036854775808", 21, MYSQL_TYPE_LONGLONG});
 		tryShouldFail<int64_t>({"a", 2, MYSQL_TYPE_LONGLONG});
 		tryShouldFail<int64_t>({"18446744073709551616", 21, MYSQL_TYPE_LONGLONG});
@@ -302,95 +360,6 @@ public:
 		CXX_TEST(testUint64)
 		CXX_TEST(testInt64)
 		CXX_TEST(testError)
-	}
-};
-
-class testMySQL_t final : public testsuit
-{
-	const std::array<const char *const, 3> embeddedOptions =
-		{{"mysql_tests", "--defaults-file=test.ini", nullptr}};
-	const std::array<const char *const, 3> embeddedGroups =
-		{{"libmysqld_server", "libmysqld_client", nullptr}};
-
-	void deleteDir(const char *const dir)
-	{
-		DIR *dataDir = opendir(dir);
-		if (!dataDir)
-			return;
-		dirent *file;
-		do
-		{
-			file = readdir(dataDir);
-			if (!file)
-				break;
-			unlink(file->d_name);
-		}
-		while (file);
-		closedir(dataDir);
-		rmdir(dir);
-	}
-
-public:
-	void start()
-	{
-		assertFalse(mysql_server_init(embeddedOptions.size(), const_cast<char **>(embeddedOptions.data()),
-			const_cast<char **>(embeddedGroups.data())));
-	}
-
-	void testInvalid()
-	{
-		mySQLClient_t testClient;
-		assertFalse(testClient.valid());
-		assertFalse(testClient.queryResult().valid());
-		assertEqual(testClient.errorNum(), 0);
-		assertNull(testClient.error());
-		mySQLPreparedQuery_t testQuery = testClient.prepare("", 0);
-		assertFalse(testQuery.valid());
-		assertFalse(testQuery.execute());
-		assertEqual(testQuery.rowID(), 0);
-		mySQLPreparedResult_t testPrepResult = testQuery.queryResult(0);
-		assertTrue(testPrepResult.valid());
-		assertEqual(testPrepResult.numRows(), 0);
-		mySQLResult_t testResult;
-		assertFalse(testResult.valid());
-		assertEqual(testResult.numRows(), 0);
-		assertFalse(testResult.resultRows().valid());
-		mySQLRow_t testRow;
-		assertFalse(testRow.valid());
-		assertEqual(testRow.numFields(), 0);
-		assertFalse(testRow.next());
-		assertTrue(testRow[0].isNull());
-		mySQLBind_t testBind;
-		assertTrue(testBind.valid());
-		assertFalse(testBind.haveData());
-		assertNull(testBind.data());
-	}
-
-	void testClient()
-	{
-		mySQLClient_t client1;
-		assertFalse(client1.valid());
-		mySQLClient_t client2(client1);
-		assertFalse(client1.valid());
-		mySQLClient_t client3;
-		assertFalse(client3.valid());
-		client3 = client2;
-		assertFalse(client3.valid());
-	}
-
-	void stop()
-	{
-		mysql_server_end();
-		deleteDir("data");
-		deleteDir("english");
-	}
-
-	void registerTests() final override
-	{
-		//CXX_TEST(start)
-		CXX_TEST(testInvalid)
-		CXX_TEST(testClient)
-		//CXX_TEST(stop)
 	}
 };
 
