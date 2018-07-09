@@ -5,11 +5,15 @@ class testDateTime_t final : public testsuit
 {
 private:
 	void testCtor() { dateTime::testCtor(*this); }
+	void testFromString() { dateTime::testFromString(*this); }
+	void testFromSystemTime() { dateTime::testFromSystemTime(*this); }
 
 public:
 	void registerTests() final override
 	{
 		CXX_TEST(testCtor)
+		CXX_TEST(testFromString)
+		CXX_TEST(testFromSystemTime)
 	}
 };
 

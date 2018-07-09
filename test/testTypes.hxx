@@ -4,6 +4,8 @@
 namespace dateTime
 {
 	void testCtor(testsuit &suite);
+	void testFromString(testsuit &suite);
+	void testFromSystemTime(testsuit &suite);
 }
 
 #endif /*TEST_TYPES__HXX*/
