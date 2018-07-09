@@ -31,6 +31,9 @@ after_success:
       ./buildCheck;
       bash <(curl -s https://codecov.io/bash) -x $GCOV;
     fi
+after_script:
+  - docker stop $MSSQL_CONTAINER
+  - docker stop $MYSQL_CONTAINER
 
 matrix:
   include:
@@ -46,7 +49,6 @@ matrix:
     #        - gcc-4.9
     #        - g++-4.9
     #        - clang-3.8
-#    #    mariadb: '10.1'
     #- compiler: clang-3.9
     #  env: GCC=clang-3.9 GXX=clang++-3.9 COVERAGE=0
     #  addons:
@@ -59,7 +61,6 @@ matrix:
     #        - gcc-4.9
     #        - g++-4.9
     #        - clang-3.9
-#    #    mariadb: '10.1'
     #- compiler: clang-4.0
     #  env: GCC=clang-4.0 GXX=clang++-4.0 COVERAGE=0
     #  addons:
@@ -72,10 +73,9 @@ matrix:
     #        - gcc-4.9
     #        - g++-4.9
     #        - clang-4.0
-    #        - libmysqld-dev
+    #        - libmysql-dev
     #        - libaio-dev
     #        - libwrap0-dev
-#    #    mariadb: '10.1'
     #- compiler: clang-5.0
     #  env: GCC=clang-5.0 GXX=clang++-5.0 COVERAGE=0
     #  addons:
@@ -88,10 +88,9 @@ matrix:
     #        - gcc-4.9
     #        - g++-4.9
     #        - clang-5.0
-    #        - libmysqld-dev
+    #        - libmysql-dev
     #        - libaio-dev
     #        - libwrap0-dev
-#    #    mariadb: '10.1'
     - compiler: gcc-5
       env: GCC=gcc-5 GXX=g++-5 COVERAGE=0
       addons:
@@ -101,10 +100,9 @@ matrix:
           packages:
             - gcc-5
             - g++-5
-            - libmysqld-dev
-            - libaio-dev
-            - libwrap0-dev
-#        mariadb: '10.1'
+            - libmysql-dev
+#            - libaio-dev
+#            - libwrap0-dev
     - compiler: gcc-5
       env: GCC=gcc-5 GXX=g++-5 GCOV=gcov-5
       addons:
@@ -114,10 +112,9 @@ matrix:
           packages:
             - gcc-5
             - g++-5
-            - libmysqld-dev
+            - libmysql-dev
             - libaio-dev
             - libwrap0-dev
-#        mariadb: '10.1'
     - compiler: gcc-6
       env: GCC=gcc-6 GXX=g++-6 COVERAGE=0
       addons:
@@ -127,10 +124,9 @@ matrix:
           packages:
             - gcc-6
             - g++-6
-            - libmysqld-dev
+            - libmysql-dev
             - libaio-dev
             - libwrap0-dev
-#        mariadb: '10.1'
     - compiler: gcc-6
       env: GCC=gcc-6 GXX=g++-6 GCOV=gcov-6
       addons:
@@ -140,10 +136,9 @@ matrix:
           packages:
             - gcc-6
             - g++-6
-            - libmysqld-dev
+            - libmysql-dev
             - libaio-dev
             - libwrap0-dev
-#        mariadb: '10.1'
     - compiler: gcc-7
       env: GCC=gcc-7 GXX=g++-7 COVERAGE=0
       addons:
@@ -153,10 +148,9 @@ matrix:
           packages:
             - gcc-7
             - g++-7
-            - libmysqld-dev
+            - libmysql-dev
             - libaio-dev
             - libwrap0-dev
-#        mariadb: '10.1'
     - compiler: gcc-7
       env: GCC=gcc-7 GXX=g++-7 GCOV=gcov-7
       addons:
@@ -166,10 +160,9 @@ matrix:
           packages:
             - gcc-7
             - g++-7
-            - libmysqld-dev
+            - libmysql-dev
             - libaio-dev
             - libwrap0-dev
-#        mariadb: '10.1'
     - compiler: gcc-8
       env: GCC=gcc-8 GXX=g++-8 COVERAGE=0
       addons:
@@ -179,10 +172,9 @@ matrix:
           packages:
             - gcc-8
             - g++-8
-            - libmysqld-dev
+            - libmysql-dev
             - libaio-dev
             - libwrap0-dev
-#        mariadb: '10.1'
     - compiler: gcc-8
       env: GCC=gcc-8 GXX=g++-8 GCOV=gcov-8
       addons:
@@ -192,14 +184,12 @@ matrix:
           packages:
             - gcc-8
             - g++-8
-            - libmysqld-dev
+            - libmysql-dev
             - libaio-dev
             - libwrap0-dev
-#        mariadb: '10.1'
 
 env:
   global:
     - COVERAGE=1
 services:
-  - mysql
   - docker
