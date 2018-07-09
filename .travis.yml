@@ -49,6 +49,7 @@ matrix:
     #        - gcc-4.9
     #        - g++-4.9
     #        - clang-3.8
+    #        - libmysqlclient-dev
     #- compiler: clang-3.9
     #  env: GCC=clang-3.9 GXX=clang++-3.9 COVERAGE=0
     #  addons:
@@ -61,6 +62,7 @@ matrix:
     #        - gcc-4.9
     #        - g++-4.9
     #        - clang-3.9
+    #        - libmysqlclient-dev
     #- compiler: clang-4.0
     #  env: GCC=clang-4.0 GXX=clang++-4.0 COVERAGE=0
     #  addons:
@@ -74,8 +76,6 @@ matrix:
     #        - g++-4.9
     #        - clang-4.0
     #        - libmysqlclient-dev
-    #        - libaio-dev
-    #        - libwrap0-dev
     #- compiler: clang-5.0
     #  env: GCC=clang-5.0 GXX=clang++-5.0 COVERAGE=0
     #  addons:
@@ -89,8 +89,6 @@ matrix:
     #        - g++-4.9
     #        - clang-5.0
     #        - libmysqlclient-dev
-    #        - libaio-dev
-    #        - libwrap0-dev
     - compiler: gcc-5
       env: GCC=gcc-5 GXX=g++-5 COVERAGE=0
       addons:
@@ -101,8 +99,6 @@ matrix:
             - gcc-5
             - g++-5
             - libmysqlclient-dev
-#            - libaio-dev
-#            - libwrap0-dev
     - compiler: gcc-5
       env: GCC=gcc-5 GXX=g++-5 GCOV=gcov-5
       addons:
@@ -113,8 +109,6 @@ matrix:
             - gcc-5
             - g++-5
             - libmysqlclient-dev
-            - libaio-dev
-            - libwrap0-dev
     - compiler: gcc-6
       env: GCC=gcc-6 GXX=g++-6 COVERAGE=0
       addons:
@@ -125,8 +119,6 @@ matrix:
             - gcc-6
             - g++-6
             - libmysqlclient-dev
-            - libaio-dev
-            - libwrap0-dev
     - compiler: gcc-6
       env: GCC=gcc-6 GXX=g++-6 GCOV=gcov-6
       addons:
@@ -137,8 +129,6 @@ matrix:
             - gcc-6
             - g++-6
             - libmysqlclient-dev
-            - libaio-dev
-            - libwrap0-dev
     - compiler: gcc-7
       env: GCC=gcc-7 GXX=g++-7 COVERAGE=0
       addons:
@@ -149,8 +139,6 @@ matrix:
             - gcc-7
             - g++-7
             - libmysqlclient-dev
-            - libaio-dev
-            - libwrap0-dev
     - compiler: gcc-7
       env: GCC=gcc-7 GXX=g++-7 GCOV=gcov-7
       addons:
@@ -161,8 +149,6 @@ matrix:
             - gcc-7
             - g++-7
             - libmysqlclient-dev
-            - libaio-dev
-            - libwrap0-dev
     - compiler: gcc-8
       env: GCC=gcc-8 GXX=g++-8 COVERAGE=0
       addons:
@@ -173,8 +159,6 @@ matrix:
             - gcc-8
             - g++-8
             - libmysqlclient-dev
-            - libaio-dev
-            - libwrap0-dev
     - compiler: gcc-8
       env: GCC=gcc-8 GXX=g++-8 GCOV=gcov-8
       addons:
@@ -185,8 +169,6 @@ matrix:
             - gcc-8
             - g++-8
             - libmysqlclient-dev
-            - libaio-dev
-            - libwrap0-dev
 
 env:
   global:
