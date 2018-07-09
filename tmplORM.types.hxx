@@ -174,7 +174,7 @@ namespace tmplORM
 						dateTime += 3;
 						_second = toInt_t<uint16_t>(dateTime, 2);
 						dateTime += 3;
-						toInt_t<uint32_t> nanoSeconds(dateTime);
+						toInt_t<uint64_t> nanoSeconds(dateTime);
 						if (nanoSeconds.length() <= 9)
 							_nanoSecond = nanoSeconds * power10(9 - nanoSeconds.length());
 						else
