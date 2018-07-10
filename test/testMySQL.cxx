@@ -103,6 +103,40 @@ private:
 		assertTrue(testClient->valid());
 	}
 
+	void testCreateDB()
+	{
+		assertNotNull(testClient);
+		assertTrue(testClient->valid());
+		const bool result = testClient->query("CREATE DATABASE `tmplORM` CHARACTER SET utf8 COLLATE utf8_unicode_ci;");
+		if (!result)
+			printError("Query", *testClient);
+		assertTrue(result);
+		assertEqual(testClient->errorNum(), 0);
+	}
+
+	void testSelectDB()
+	{
+		assertNotNull(testClient);
+		assertTrue(testClient->valid());
+		const bool selected = testClient->selectDB("tmplORM");
+		if (!selected)
+			printError("DB selection", *testClient);
+		assertTrue(selected);
+		assertEqual(testClient->errorNum(), 0);
+	}
+
+	void testDestroyDB()
+	{
+		assertNotNull(testClient);
+		assertTrue(testClient->valid());
+		assertTrue(testClient->selectDB("mysql"));
+		const bool result = testClient->query("DROP DATABASE `tmplORM`;");
+		if (!result)
+			printError("Query", *testClient);
+		assertTrue(result);
+		assertEqual(testClient->errorNum(), 0);
+	}
+
 	void testDisconnect()
 	{
 		assertNotNull(testClient);
@@ -121,6 +155,9 @@ public:
 		CXX_TEST(testInvalid)
 		CXX_TEST(testClientType)
 		CXX_TEST(testConnect)
+		CXX_TEST(testCreateDB)
+		CXX_TEST(testSelectDB)
+		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
 	}
 };
