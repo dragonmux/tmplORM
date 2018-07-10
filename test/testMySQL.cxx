@@ -1,4 +1,4 @@
-#include <functional>
+#include <chrono>
 #include <crunch++.h>
 #include <mysql.hxx>
 
@@ -22,9 +22,18 @@ using namespace tmplORM::mysql::driver;
 #define i64(n)		INT64_C(n)
 
 std::unique_ptr<mySQLClient_t> testClient{};
-constString_t driver, host, username, password;
+constString_t host, username, password;
 
 constexpr static uint32_t port = 3306;
+
+bool haveEnvironment() noexcept
+{
+	host = getenv("MYSQL_HOST");
+	// port?
+	username = getenv("MYSQL_USERNAME");
+	password = getenv("MYSQL_PASSWORD");
+	return !(host.empty() || username.empty() || password.empty());
+}
 
 class testMySQL_t final : public testsuit
 {
@@ -80,6 +89,8 @@ private:
 public:
 	void registerTests() final override
 	{
+		if (!haveEnvironment())
+			skip("No suitable environment found, refusing to run");
 		CXX_TEST(testInvalid)
 		CXX_TEST(testClientType)
 		CXX_TEST(testConnect)
