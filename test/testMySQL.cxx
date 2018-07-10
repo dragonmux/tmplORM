@@ -38,6 +38,13 @@ bool haveEnvironment() noexcept
 class testMySQL_t final : public testsuit
 {
 private:
+	void printError(const char *prefix, const mySQLClient_t &client)
+	{
+		const auto errorStr = client.error();
+		const auto errorNum = client.errorNum();
+		printf("%s failed (%u): %s\n", prefix, errorNum, errorStr);
+	}
+
 	void testInvalid()
 	{
 		mySQLClient_t testClient;
@@ -84,6 +91,26 @@ private:
 		assertNull(testClient);
 		mySQLClient_t client;
 		assertFalse(client.valid());
+		const bool connected = client.connect(host, port, username, password);
+		if (!connected)
+			printError("Connection", client);
+		assertTrue(connected);
+		assertEqual(client.errorNum(), 0);
+		assertTrue(client.valid());
+
+		testClient = makeUnique<mySQLClient_t>();
+		assertNotNull(testClient);
+		assertTrue(testClient->valid());
+	}
+
+	void testDisconnect()
+	{
+		assertNotNull(testClient);
+		if (testClient->valid())
+			testClient->disconnect();
+		assertFalse(testClient->valid());
+		testClient = nullptr;
+		assertNull(testClient.get());
 	}
 
 public:
@@ -94,6 +121,7 @@ public:
 		CXX_TEST(testInvalid)
 		CXX_TEST(testClientType)
 		CXX_TEST(testConnect)
+		CXX_TEST(testDisconnect)
 	}
 };
 
