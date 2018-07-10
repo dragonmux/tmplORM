@@ -207,6 +207,8 @@ public:
 		tryShouldFail<uint8_t>({"", 0, MYSQL_TYPE_LONG});
 		tryShouldFail<uint8_t>({"", 0, MYSQL_TYPE_LONGLONG});
 		tryShouldFail<uint8_t>({"", 0, MYSQL_TYPE_BLOB});
+		tryShouldFail<uint8_t>({"", 0, MYSQL_TYPE_DATE});
+		tryShouldFail<uint8_t>({"", 0, MYSQL_TYPE_DATETIME});
 		tryOk<uint8_t>({"128", 4, MYSQL_TYPE_TINY}, 128);
 		tryOk<uint8_t>({"255", 4, MYSQL_TYPE_TINY}, 255);
 		tryOk<uint8_t>({"", 1, MYSQL_TYPE_TINY}, 0);
@@ -226,6 +228,8 @@ public:
 		tryShouldFail<int8_t>({"", 0, MYSQL_TYPE_LONG});
 		tryShouldFail<int8_t>({"", 0, MYSQL_TYPE_LONGLONG});
 		tryShouldFail<int8_t>({"", 0, MYSQL_TYPE_BLOB});
+		tryShouldFail<int8_t>({"", 0, MYSQL_TYPE_DATE});
+		tryShouldFail<int8_t>({"", 0, MYSQL_TYPE_DATETIME});
 		tryOk<int8_t>({"127", 4, MYSQL_TYPE_TINY}, 127);
 		tryOk<int8_t>({"", 1, MYSQL_TYPE_TINY}, 0);
 		tryOk<int8_t>({"", 0, MYSQL_TYPE_TINY}, 0);
@@ -248,6 +252,8 @@ public:
 		tryShouldFail<uint16_t>({"", 0, MYSQL_TYPE_LONG});
 		tryShouldFail<uint16_t>({"", 0, MYSQL_TYPE_LONGLONG});
 		tryShouldFail<uint16_t>({"", 0, MYSQL_TYPE_BLOB});
+		tryShouldFail<uint16_t>({"", 0, MYSQL_TYPE_DATE});
+		tryShouldFail<uint16_t>({"", 0, MYSQL_TYPE_DATETIME});
 		tryOk<uint16_t>({"128", 4, MYSQL_TYPE_SHORT}, 128);
 		tryOk<uint16_t>({"255", 4, MYSQL_TYPE_SHORT}, 255);
 		tryOk<uint16_t>({"32768", 6, MYSQL_TYPE_SHORT}, 32768);
@@ -269,6 +275,8 @@ public:
 		tryShouldFail<int16_t>({"", 0, MYSQL_TYPE_LONG});
 		tryShouldFail<int16_t>({"", 0, MYSQL_TYPE_LONGLONG});
 		tryShouldFail<int16_t>({"", 0, MYSQL_TYPE_BLOB});
+		tryShouldFail<int16_t>({"", 0, MYSQL_TYPE_DATE});
+		tryShouldFail<int16_t>({"", 0, MYSQL_TYPE_DATETIME});
 		tryOk<int16_t>({"127", 4, MYSQL_TYPE_SHORT}, 127);
 		tryOk<int16_t>({"32767", 6, MYSQL_TYPE_SHORT}, 32767);
 		tryOk<int16_t>({"", 1, MYSQL_TYPE_SHORT}, 0);
@@ -292,6 +300,8 @@ public:
 		tryShouldFail<uint32_t>({"", 0, MYSQL_TYPE_SHORT});
 		tryShouldFail<uint32_t>({"", 0, MYSQL_TYPE_LONGLONG});
 		tryShouldFail<uint32_t>({"", 0, MYSQL_TYPE_BLOB});
+		tryShouldFail<uint32_t>({"", 0, MYSQL_TYPE_DATE});
+		tryShouldFail<uint32_t>({"", 0, MYSQL_TYPE_DATETIME});
 		tryOk<uint32_t>({"128", 4, MYSQL_TYPE_LONG}, 128);
 		tryOk<uint32_t>({"255", 4, MYSQL_TYPE_LONG}, 255);
 		tryOk<uint32_t>({"32768", 6, MYSQL_TYPE_LONG}, 32768);
@@ -315,6 +325,8 @@ public:
 		tryShouldFail<int32_t>({"", 0, MYSQL_TYPE_SHORT});
 		tryShouldFail<int32_t>({"", 0, MYSQL_TYPE_LONGLONG});
 		tryShouldFail<int32_t>({"", 0, MYSQL_TYPE_BLOB});
+		tryShouldFail<int32_t>({"", 0, MYSQL_TYPE_DATE});
+		tryShouldFail<int32_t>({"", 0, MYSQL_TYPE_DATETIME});
 		tryOk<int32_t>({"127", 4, MYSQL_TYPE_LONG}, 127);
 		tryOk<int32_t>({"32767", 6, MYSQL_TYPE_LONG}, 32767);
 		tryOk<int32_t>({"2147483647", 11, MYSQL_TYPE_LONG}, 2147483647);
@@ -339,6 +351,8 @@ public:
 		tryShouldFail<uint64_t>({"", 0, MYSQL_TYPE_SHORT});
 		tryShouldFail<uint64_t>({"", 0, MYSQL_TYPE_LONG});
 		tryShouldFail<uint64_t>({"", 0, MYSQL_TYPE_BLOB});
+		tryShouldFail<uint64_t>({"", 0, MYSQL_TYPE_DATE});
+		tryShouldFail<uint64_t>({"", 0, MYSQL_TYPE_DATETIME});
 		tryOk<uint64_t>({"128", 4, MYSQL_TYPE_LONGLONG}, 128);
 		tryOk<uint64_t>({"255", 4, MYSQL_TYPE_LONGLONG}, 255);
 		tryOk<uint64_t>({"32768", 6, MYSQL_TYPE_LONGLONG}, 32768);
@@ -364,6 +378,8 @@ public:
 		tryShouldFail<int64_t>({"", 0, MYSQL_TYPE_SHORT});
 		tryShouldFail<int64_t>({"", 0, MYSQL_TYPE_LONG});
 		tryShouldFail<int64_t>({"", 0, MYSQL_TYPE_BLOB});
+		tryShouldFail<int64_t>({"", 0, MYSQL_TYPE_DATE});
+		tryShouldFail<int64_t>({"", 0, MYSQL_TYPE_DATETIME});
 		tryOk<int64_t>({"127", 4, MYSQL_TYPE_LONGLONG}, 127);
 		tryOk<int64_t>({"32767", 6, MYSQL_TYPE_LONGLONG}, 32767);
 		tryOk<int64_t>({"2147483647", 11, MYSQL_TYPE_LONGLONG}, 2147483647);
@@ -396,6 +412,9 @@ public:
 		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::int32Error).error(), unknownError);
 		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::uint64Error).error(), unknownError);
 		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::int64Error).error(), unknownError);
+		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::dateError).error(), unknownError);
+		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::dateTimeError).error(), unknownError);
+		//assertNotEqual(mySQLValueError_t(mySQLErrorType_t::uuidError).error(), unknownError);
 		assertEqual(mySQLValueError_t((mySQLErrorType_t)-1).error(), unknownError);
 	}
 
