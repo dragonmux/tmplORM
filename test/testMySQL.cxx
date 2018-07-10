@@ -120,6 +120,8 @@ private:
 		testClient = makeUnique<mySQLClient_t>();
 		assertNotNull(testClient);
 		assertTrue(testClient->valid());
+		// If we try to connect again while already connected, it should no-op.
+		assertTrue(client.connect(host, port, username, password));
 	}
 
 	void testCreateDB()
@@ -201,6 +203,11 @@ private:
 
 		testData[1].entryID = query.rowID();
 		assertEqual(testData[1].entryID, 2);
+
+		query = testClient->prepare("", 1);
+		assertFalse(query.valid());
+		query = testClient->prepare("", 0);
+		assertFalse(query.valid());
 	}
 
 	void testResult() try
