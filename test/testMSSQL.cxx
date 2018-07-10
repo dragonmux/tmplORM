@@ -29,6 +29,7 @@ std::unique_ptr<tSQLClient_t> testClient{};
 constString_t driver, host, username, password;
 
 constexpr static uint32_t port = 1433;
+ormDateTime_t now = systemClock_t::now();
 
 struct data_t
 {
@@ -54,8 +55,6 @@ bool haveEnvironment() noexcept
 	return !(driver.empty() || host.empty() || username.empty() || password.empty());
 }
 
-ormDateTime_t now = systemClock_t::now();
-
 class testMSSQL_t final : public testsuit
 {
 private:
@@ -63,6 +62,7 @@ private:
 	{
 		const auto errorNum = uint8_t(error.errorNum());
 		printf("%s failed (%u): %s\n", prefix, errorNum, error.error());
+		printf("\tstate code: %s\n", error.state());
 	}
 
 	void testInvalid()
@@ -90,18 +90,10 @@ private:
 		assertFalse(client.valid());
 		const bool selected = client.selectDB("master");
 		if (!selected)
-		{
-			const auto &error = client.error();
-			printError("DB selection", error);
-			printf("\tstate code: %s\n", error.state());
-		}
+			printError("DB selection", client.error());
 		const bool connected = client.connect(driver, host, port, username, password);
 		if (!connected)
-		{
-			const auto &error = client.error();
-			printError("Connection", error);
-			printf("\tstate code: %s\n", error.state());
-		}
+			printError("Connection", client.error());
 		assertTrue(connected);
 		assertTrue(client.error() == tSQLExecErrorType_t::ok);
 		assertTrue(client.valid());
@@ -120,11 +112,7 @@ private:
 		assertTrue(testClient->valid());
 		tSQLResult_t result = testClient->query("CREATE DATABASE [tmplORM] COLLATE latin1_general_100_CI_AI_SC;");
 		if (!result.valid())
-		{
-			const auto &error = testClient->error();
-			printError("Query", error);
-			printf("\tstate code: %s\n", error.state());
-		}
+			printError("Query", testClient->error());
 		assertTrue(result.valid());
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 	}
@@ -135,11 +123,7 @@ private:
 		assertTrue(testClient->valid());
 		const bool selected = testClient->selectDB("tmplORM");
 		if (!selected)
-		{
-			const auto &error = testClient->error();
-			printError("DB selection", error);
-			printf("\tstate code: %s\n", error.state());
-		}
+			printError("DB selection", testClient->error());
 		assertTrue(selected);
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 	}
@@ -156,11 +140,7 @@ private:
 			"[When] DATETIME2 NOT NULL DEFAULT CURRENT_TIMESTAMP);"
 		);
 		if (!result.valid())
-		{
-			const auto &error = testClient->error();
-			printError("Query", error);
-			printf("\tstate code: %s\n", error.state());
-		}
+			printError("Query", testClient->error());
 		assertTrue(result.valid());
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 	}
@@ -172,8 +152,8 @@ private:
 		tSQLQuery_t query;
 		assertFalse(query.valid());
 		tSQLResult_t result;
-
 		assertFalse(result.valid());
+
 		query = testClient->prepare(
 			"INSERT INTO [tmplORM] ([Name], [Value]) "
 			"OUTPUT INSERTED.[EntryID] VALUES (?, ?);", 2
@@ -184,6 +164,8 @@ private:
 		query.bind(1, testData[0].value.value(), fieldLength(testData[0].value));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 		result = query.execute();
+		if (testClient->error() != tSQLExecErrorType_t::ok)
+			printError("Prepared exec", testClient->error());
 		assertTrue(result.valid());
 
 		assertTrue(result.hasData());
@@ -208,11 +190,7 @@ private:
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 		result = query.execute();
 		if (testClient->error() != tSQLExecErrorType_t::ok)
-		{
-			const auto &error = testClient->error();
-			printError("Bind", error);
-			printf("\tstate code: %s\n", error.state());
-		}
+			printError("Prepared exec", testClient->error());
 		assertTrue(result.valid());
 
 		assertTrue(result.hasData());
@@ -234,6 +212,8 @@ private:
 		assertNotNull(testClient);
 		assertTrue(testClient->valid());
 		tSQLResult_t result = testClient->query("SELECT [EntryID], [Name], [Value], [When] FROM [tmplORM];");
+		if (testClient->error() != tSQLExecErrorType_t::ok)
+			printError("Query", testClient->error());
 		assertTrue(result.valid());
 		//assertEqual(result.numRows(), 2);
 		assertEqual(result.numFields(), 4);
@@ -242,7 +222,7 @@ private:
 		assertEqual(result[1].asString().get(), testData[0].name);
 		assertFalse(result[2].isNull());
 		assertEqual(result[2], testData[0].value);
-		testData[0].when = result[3].asDateTime();
+		testData[0].when = result[3];
 		auto when = testData[0].when.value();
 		assertNotEqual(when.year(), 0);
 		assertNotEqual(when.month(), 0);
@@ -251,7 +231,7 @@ private:
 
 		assertEqual(result[0], testData[1].entryID);
 		assertEqual(result[1].asString().get(), testData[1].name);
-		assertTrue(testData[1].value.isNull());
+		assertTrue(result[2].isNull());
 		// Apply MSSQL rounding..
 		now.nanoSecond((now.nanoSecond() / 100) * 100);
 		assertTrue(result[3].asDateTime() == now);
@@ -270,11 +250,7 @@ private:
 		assertTrue(testClient->selectDB("master"));
 		tSQLResult_t result = testClient->query("DROP DATABASE [tmplORM];");
 		if (!result.valid())
-		{
-			const auto &error = testClient->error();
-			printError("Query", error);
-			printf("\tstate code: %s\n", error.state());
-		}
+			printError("Query", testClient->error());
 		assertTrue(result.valid());
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 	}
