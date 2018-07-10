@@ -142,13 +142,15 @@ namespace tmplORM
 					* @brief Raise 10 to the power of power.
 					* @note This is intentionally limited to positive natural numbers.
 					*/
-					size_t power10(const size_t power) const noexcept
+					size_t power10(const size_t power) noexcept
+						{ return power ? power10(power - 1) * 10 : 1; }
+					/*size_t power10(const size_t power) const noexcept
 					{
 						size_t ret = 1;
 						for (size_t i = 0; i < power; ++i)
 							ret *= 10;
 						return ret;
-					}
+					}*/
 
 				public:
 					constexpr ormDateTime_t() noexcept : ormDate_t(), _hour(0), _minute(0), _second(0), _nanoSecond(0) { }
@@ -173,7 +175,10 @@ namespace tmplORM
 						_minute = toInt_t<uint16_t>(dateTime, 2);
 						dateTime += 3;
 						_second = toInt_t<uint16_t>(dateTime, 2);
-						dateTime += 3;
+						dateTime += 2;
+						if (dateTime[0] == 0)
+							return;
+						++dateTime;
 						toInt_t<uint64_t> nanoSeconds(dateTime);
 						if (nanoSeconds.length() <= 9)
 							_nanoSecond = nanoSeconds * power10(9 - nanoSeconds.length());
