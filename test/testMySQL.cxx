@@ -162,6 +162,86 @@ private:
 		assertEqual(testClient->errorNum(), 0);
 	}
 
+	void testPreparedQuery()
+	{
+		assertNotNull(testClient);
+		assertTrue(testClient->valid());
+		mySQLPreparedQuery_t query;
+		assertFalse(query.valid());
+		bool result{};
+		assertFalse(result);
+
+		query = testClient->prepare("INSERT INTO `tmplORM` (`Name`, `Value`) VALUES (?, ?);", 2);
+		assertTrue(query.valid());
+		query.bind(0, testData[0].name.value(), fieldLength(testData[0].name));
+		assertEqual(testClient->errorNum(), 0);
+		query.bind(1, testData[0].value.value(), fieldLength(testData[0].value));
+		assertEqual(testClient->errorNum(), 0);
+		result = query.execute();
+		if (!result)
+			printError("Prepared exec", *testClient);
+		assertTrue(result);
+
+		testData[0].entryID = query.rowID();
+		assertEqual(testData[0].entryID, 1);
+
+		testData[1].when = now;
+		query = testClient->prepare("INSERT INTO `tmplORM` (`Name`, `Value`, `When`) VALUES (?, ?, ?);", 3);
+		assertTrue(query.valid());
+		query.bind(0, testData[1].name.value(), fieldLength(testData[1].name));
+		assertEqual(testClient->errorNum(), 0);
+		query.bind<const char *>(1, nullptr, fieldLength(testData[1].value));
+		assertEqual(testClient->errorNum(), 0);
+		query.bind(2, testData[1].when.value(), fieldLength(testData[1].when));
+		assertEqual(testClient->errorNum(), 0);
+		result = query.execute();
+		if (!result)
+			printError("Prepared exec", *testClient);
+		assertTrue(result);
+
+		testData[1].entryID = query.rowID();
+		assertEqual(testData[1].entryID, 2);
+	}
+
+	void testResult() try
+	{
+		assertNotNull(testClient);
+		assertTrue(testClient->valid());
+		const bool query = testClient->query("SELECT `EntryID`, `Name`, `Value`, `When` FROM `tmplORM`;");
+		if (!query)
+			printError("Query", *testClient);
+		assertTrue(query);
+		mySQLResult_t result = testClient->queryResult();
+		assertTrue(result.valid());
+		assertEqual(result.numRows(), 2);
+		mySQLRow_t row = result.resultRows();
+		assertTrue(row.valid());
+		assertEqual(row.numFields(), 4);
+
+		assertEqual(row[0], testData[0].entryID);
+		assertEqual(row[1].asString().get(), testData[0].name);
+		assertFalse(row[2].isNull());
+		testData[0].when = row[3];
+		auto when = testData[0].when.value();
+		assertNotEqual(when.year(), 0);
+		assertNotEqual(when.month(), 0);
+		assertNotEqual(when.day(), 0);
+		assertTrue(row.next());
+
+		assertEqual(row[0], testData[1].entryID);
+		assertEqual(row[1].asString().get(), testData[1].name);
+		assertTrue(row[2].isNull());
+		// MySQL discards the fractional part..
+		now.nanoSecond(0);
+		assertTrue(row[3].asDateTime() == now);
+		assertFalse(row.next());
+	}
+	catch (const mySQLValueError_t &error)
+	{
+		puts(error.error());
+		fail("Exception thrown while converting value");
+	}
+
 	void testDestroyDB()
 	{
 		assertNotNull(testClient);
@@ -195,6 +275,8 @@ public:
 		CXX_TEST(testCreateDB)
 		CXX_TEST(testSelectDB)
 		CXX_TEST(testCreateTable)
+		CXX_TEST(testPreparedQuery)
+		CXX_TEST(testResult)
 		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
 	}
