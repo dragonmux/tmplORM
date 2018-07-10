@@ -25,6 +25,7 @@ using std::nullptr_t;
 typedef unsigned long sql_ulong_t;
 #define MySQL_FORMAT_ARGS(n, m) __attribute__((format(printf, n, m)))
 using mySQLFieldType_t = enum enum_field_types;
+using namespace tmplORM::types::baseTypes;
 using tmplORM::common::fieldLength_t;
 
 struct tmplORM_API mySQLValue_t final
@@ -54,11 +55,13 @@ public:
 	int32_t asInt32() const;
 	uint64_t asUint64() const;
 	int64_t asInt64() const;
+	ormDate_t asDate() const;
+	ormDateTime_t asDateTime() const;
 
 	/*! @brief Auto-converter for strings */
 	operator std::unique_ptr<char []>() const { return asString(); }
 	/*! @brief Auto-converter for raw strings */
-	operator const char *() const { return data; }
+	//operator const char *() const { return data; }
 	/*! @brief Auto-converter for booleans */
 	explicit operator bool() const { return asBool(0); }
 	/*! @brief Auto-converter for uint8_t's */
@@ -77,6 +80,10 @@ public:
 	operator uint64_t() const { return asUint64(); }
 	/*! @brief Auto-converter for int64_t's */
 	operator int64_t() const { return asInt64(); }
+	/*! @brief Auto-converter for ormDate_t's */
+	operator ormDate_t() const { return asDate(); }
+	/*! @brief Auto-converter for ormDateTime_t's */
+	operator ormDateTime_t() const { return asDateTime(); }
 
 	/*! @brief Deleted copy constructor for mySQLValue_t as wrapped values are not copyable */
 	mySQLValue_t(const mySQLValue_t &) = delete;
@@ -285,7 +292,8 @@ enum class mySQLErrorType_t : uint8_t
 	uint8Error, int8Error,
 	uint16Error, int16Error,
 	uint32Error, int32Error,
-	uint64Error, int64Error
+	uint64Error, int64Error,
+	dateError, dateTimeError
 };
 
 struct tmplORM_API mySQLValueError_t final

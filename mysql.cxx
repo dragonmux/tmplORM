@@ -580,6 +580,20 @@ int64_t mySQLValue_t::asInt64() const
 	return num;
 }
 
+ormDate_t mySQLValue_t::asDate() const
+{
+	if (isNull() || type != MYSQL_TYPE_DATE || len != 10)
+		throw mySQLValueError_t(mySQLErrorType_t::dateError);
+	return {data};
+}
+
+ormDateTime_t mySQLValue_t::asDateTime() const
+{
+	if (isNull() || type != MYSQL_TYPE_DATETIME || len != 19)
+		throw mySQLValueError_t(mySQLErrorType_t::dateTimeError);
+	return {data};
+}
+
 const char *mySQLValueError_t::error() const noexcept
 {
 	switch (errorType)
@@ -608,6 +622,12 @@ const char *mySQLValueError_t::error() const noexcept
 			return "Error converting value to an unsigned 64-bit integer";
 		case mySQLErrorType_t::int64Error:
 			return "Error converting value to a signed 64-bit integer";
+		case mySQLErrorType_t::dateError:
+			return "Error converting value to a date quantity";
+		case mySQLErrorType_t::dateTimeError:
+			return "Error converting value to a date and time quantity";
+		//case mySQLErrorType_t::uuidError:
+		//	return "Error converting value to a UUID";
 	}
 	return "An unknown error occured";
 }
