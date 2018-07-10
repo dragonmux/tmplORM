@@ -144,6 +144,24 @@ private:
 		assertEqual(testClient->errorNum(), 0);
 	}
 
+	void testCreateTable()
+	{
+		assertNotNull(testClient);
+		assertTrue(testClient->valid());
+		const bool result = testClient->query(
+			"CREATE TABLE `tmplORM` ("
+			"`EntryID` INT NOT NULL PRIMARY KEY AUTO_INCREMENT, "
+			"`Name` VARCHAR(50) NOT NULL, "
+			"`Value` INT NULL, "
+			"`When` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"
+			") CHARACTER SET utf8;"
+		);
+		if (!result)
+			printError("Query", *testClient);
+		assertTrue(result);
+		assertEqual(testClient->errorNum(), 0);
+	}
+
 	void testDestroyDB()
 	{
 		assertNotNull(testClient);
@@ -176,6 +194,7 @@ public:
 		CXX_TEST(testConnect)
 		CXX_TEST(testCreateDB)
 		CXX_TEST(testSelectDB)
+		CXX_TEST(testCreateTable)
 		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
 	}
