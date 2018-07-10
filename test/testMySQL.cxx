@@ -17,14 +17,33 @@
  */
 
 using namespace tmplORM::mysql::driver;
+using irqus::typestring;
+using tmplORM::mysql::fieldLength;
+using tmplORM::types::baseTypes::ormDateTime_t;
 
 #define u64(n)		UINT64_C(n)
 #define i64(n)		INT64_C(n)
 
+using systemClock_t = std::chrono::system_clock;
 std::unique_ptr<mySQLClient_t> testClient{};
 constString_t host, username, password;
 
 constexpr static uint32_t port = 3306;
+ormDateTime_t now = systemClock_t::now();
+
+struct data_t
+{
+	tmplORM::types::int32_t<typestring<>> entryID;
+	tmplORM::types::unicode_t<typestring<>, 50> name;
+	tmplORM::types::nullable_t<tmplORM::types::int32_t<typestring<>>> value;
+	tmplORM::types::dateTime_t<typestring<>> when;
+};
+
+std::array<data_t, 2> testData
+{
+	data_t{0, "kevin", 50, {}},
+	data_t{0, "dave", nullptr, {}}
+};
 
 bool haveEnvironment() noexcept
 {
