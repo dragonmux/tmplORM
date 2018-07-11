@@ -73,7 +73,7 @@ namespace tmplORM
 			template<typename T> typename std::enable_if<isNumeric<T>::value>::type
 				bindT(MYSQL_BIND &param) noexcept { param.is_unsigned = std::is_unsigned<T>::value; }
 
-			template<bool> struct bindValue_t
+			template<bool> struct bindValueIn_t
 			{
 				using nanoseconds_t = std::chrono::nanoseconds;
 
@@ -143,35 +143,85 @@ namespace tmplORM
 				}
 			};
 
-			template<> struct bindValue_t<true>
+			template<> struct bindValueIn_t<true>
 			{
 				template<typename T> bool operator ()(MYSQL_BIND &param, const T *const value, managedPtr_t<void> &) noexcept
 					{ param.buffer = const_cast<T *>(value); return true; }
 			};
 
-			template<typename T> using bindValue_ = bindValue_t<std::is_pointer<T>::value>;
+			template<typename T> using bindValueIn_ = bindValueIn_t<std::is_pointer<T>::value>;
 
-			template<typename T> void mySQLBind_t::bind(const size_t index, const T &value, const fieldLength_t length) noexcept
+			template<typename T> void mySQLBind_t::bindIn(const size_t index, const T &value, const fieldLength_t length) noexcept
 			{
 				if (index >= numParams)
 					return;
 				MYSQL_BIND &param = params[index];
 				param.buffer_type = bindType_t<T>::value;
 				param.buffer_length = length.first;
-				if (!bindValue_<T>()(param, value, paramStorage[index]))
+				if (!bindValueIn_<T>()(param, value, paramStorage[index]))
 					return;
 				param.length = &param.buffer_length;
 				param.is_null = notNullParam;
 				bindT<T>(param);
 			}
 
-			template<typename T> void mySQLBind_t::bind(const size_t index, const nullptr_t, const fieldLength_t) noexcept
+			template<typename T> void mySQLBind_t::bindIn(const size_t index, const nullptr_t, const fieldLength_t) noexcept
 			{
 				if (index >= numParams)
 					return;
 				MYSQL_BIND &param = params[index];
 				param.buffer_type = bindType_t<T>::value;
 				param.is_null = const_cast<char *>(&nullParam);
+			}
+
+			template<typename value_t> struct bindOutStorage_t
+			{
+				constexpr uint32_t length() const noexcept { return sizeof(value_t); }
+				managedPtr_t<void> operator ()() const noexcept { return makeManaged<value_t>(); }
+			};
+
+			template<> struct bindOutStorage_t<ormDate_t>
+			{
+				constexpr uint32_t length() const noexcept { return sizeof(MYSQL_TIME); }
+				managedPtr_t<void> operator ()() const noexcept { return makeManaged<MYSQL_TIME>(); }
+			};
+
+			template<> struct bindOutStorage_t<ormDateTime_t>
+			{
+				constexpr uint32_t length() const noexcept { return sizeof(MYSQL_TIME); }
+				managedPtr_t<void> operator ()() const noexcept { return makeManaged<MYSQL_TIME>(); }
+			};
+
+			/*template<> struct bindOutStorage_t<ormUUID_t>
+			{
+				constexpr uint32_t length() const noexcept { return 32; }
+				managedPtr_t<void> operator ()() const noexcept { return makeManaged<char []>(32); }
+			};*/
+
+			template<typename T> struct bindValueOut_t
+			{
+				bool operator ()(MYSQL_BIND &param, managedPtr_t<void> &paramStorage) noexcept
+				{
+					const bindOutStorage_t<T> makeStorage;
+					paramStorage = makeStorage();
+					if (!paramStorage)
+						return false;
+					param.buffer_length = makeStorage.length();
+					return true;
+				}
+			};
+
+			template<typename T> void mySQLBind_t::bindOut(const size_t index, const fieldLength_t length)
+				noexcept
+			{
+				if (index >= numParams)
+					return;
+				MYSQL_BIND &param = params[index];
+				param.buffer_type = bindType_t<T>::value;
+				if (!bindValueOut_t<T>()(param, paramStorage[index]))
+					return;
+				param.length = &param.buffer_length;
+				param.is_null = notNullParam;
 			}
 		}
 

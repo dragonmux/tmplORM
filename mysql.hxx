@@ -177,8 +177,9 @@ public:
 	bool valid() const noexcept { return !numParams || params; }
 	bool haveData() const noexcept { return params.valid(); }
 	MYSQL_BIND *data() const noexcept { return params.data(); }
-	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept;
-	template<typename T> void bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept;
+	template<typename T> void bindIn(const size_t index, const T &value, const fieldLength_t length) noexcept;
+	template<typename T> void bindIn(const size_t index, const nullptr_t, const fieldLength_t length) noexcept;
+	template<typename T> void bindOut(const size_t index, const fieldLength_t length) noexcept;
 	size_t count() const noexcept { return numParams; }
 
 	mySQLBind_t(const mySQLBind_t &) = delete;
@@ -204,8 +205,7 @@ public:
 	 * @returns true if the object is valid, false otherwise
 	 */
 	bool valid() const noexcept { return columns.valid(); }
-	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept { columns.bind(index, value, length); }
-	template<typename T> void bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept { columns.bind<T>(index, nullptr, length); }
+	template<typename T> void bind(const size_t index, const fieldLength_t length) noexcept { columns.bindOut<T>(index, length); }
 	void bindForBuffer(const size_t index) noexcept;
 	uint64_t numRows() const noexcept;
 	bool next() const noexcept;
@@ -242,8 +242,8 @@ public:
 	bool valid() const noexcept { return query; }
 	bool execute() noexcept;
 	uint64_t rowID() const noexcept;
-	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept { params.bind(index, value, length); }
-	template<typename T> void bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept { params.bind<T>(index, nullptr, length); }
+	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept { params.bindIn(index, value, length); }
+	template<typename T> void bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept { params.bindIn<T>(index, nullptr, length); }
 	mySQLPreparedResult_t queryResult(const size_t columnCount) const noexcept;
 
 	/*! @brief Deleted copy constructor for mySQLPreparedQuery_t as prepared queries are not copyable */
