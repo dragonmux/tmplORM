@@ -1,13 +1,15 @@
 #include <chrono>
 #include <crunch++.h>
-#include <tmplORM.types.hxx>
+#include <tmplORM.hxx>
 #include "testTypes.hxx"
 
-using namespace tmplORM::types::baseTypes;
 using systemClock_t = std::chrono::system_clock;
 
 namespace dateTime
 {
+	using namespace tmplORM::types::baseTypes;
+	using namespace tmplORM::types::dateTimeTypes;
+
 	void testCtor(testsuit &suite)
 	{
 		const ormDateTime_t a;
@@ -73,5 +75,14 @@ namespace dateTime
 		suite.assertEqual(a.minute(), local.tm_min);
 		suite.assertEqual(a.second(), local.tm_sec);
 		suite.assertEqual(a.nanoSecond(), (now.time_since_epoch() - seconds{time}).count());
+	}
+
+	void testWrapper(testsuit &suite)
+	{
+		const _dateTime_t a;
+		suite.assertEqual(a.year(), 0);
+		suite.assertEqual(a.month(), 0);
+		suite.assertEqual(a.day(), 0);
+		suite.assertEqual(a.time().count(), 0);
 	}
 }
