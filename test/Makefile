@@ -1,6 +1,6 @@
 include ../Makefile.inc
 
-CFLAGS_EXTRA = -I..
+CFLAGS_EXTRA = -I.. -MMD -MF ../.dep/test/$*.d
 CFLAGS = -c $(OPTIM_FLAGS) -Wall -Wextra -pedantic -std=c++11 $(CFLAGS_EXTRA) -o $@ $<
 
 CRUNCHMAKE = crunchMake -I.. -z defs
@@ -41,15 +41,17 @@ testConversions.so: O_FILE = conversions.o
 testFixedVector.so: O_FILE = fixedVector.o
 testTypes.so: O_FILE = tmplORM.types.o
 testMSSQL.so: constString.hxx
-testConversions.so: conversions.o testConversions.cxx
-testFixedVector.so: fixedVector.o testFixedVector.cxx
-testTypes.so: tmplORM.types.o testTypes.cxx
+testConversions.so: conversions.o
+testFixedVector.so: fixedVector.o
+testTypes.so: tmplORM.types.o
+%.so: $(O_FILE)
 #$(TESTS): $(subst .so,.cxx,$@)
 %.so: %.cxx
 	$(call run-cmd,crunchMake,$(subst .so,.cxx,$@))
 
-$(O): $(subst .o,.cxx,$@) | $(DEPS)
-	$(Q)$(MAKE) FOR_TESTS=1 -C .. test/$@
+$(O): CFLAGS_EXTRA += -I. $(shell pkg-config --cflags crunch++)
+%.o: %.cxx | $(DEPS)
+	$(call run-cmd,cxx,$(CFLAGS))
 
 check: all
 	$(call run-cmd,crunch,$(subst .so,,$(TESTS)))
