@@ -29,7 +29,7 @@ all: $(GCH) $(DEPS) $(TESTS)
 $(DEPS):
 	$(call run-cmd,install_dir,$@)
 
-%.gch: %.hxx
+%.gch: %.hxx | $(DEPS)
 	$(call run-cmd,cxx,$(CFLAGS))
 
 testString.so: O_FILE = ../string.o
