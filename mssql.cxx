@@ -154,7 +154,11 @@ bool tSQLClient_t::beginTransact() const noexcept
 bool tSQLClient_t::endTransact(const bool commitSuccess) const noexcept
 {
 	if (needsCommit && valid())
-		needsCommit = error(SQLEndTran(SQL_HANDLE_DBC, connection, commitSuccess ? SQL_COMMIT : SQL_ROLLBACK), SQL_HANDLE_DBC, connection);
+	{
+		needsCommit = error(SQLEndTran(SQL_HANDLE_DBC, connection, commitSuccess ? SQL_COMMIT : SQL_ROLLBACK),
+			SQL_HANDLE_DBC, connection) || error(SQLSetConnectAttr(connection, SQL_ATTR_AUTOCOMMIT,
+			reinterpret_cast<void *>(long(SQL_AUTOCOMMIT_ON)), 0), SQL_HANDLE_DBC, connection);
+	}
 	return !needsCommit;
 }
 
