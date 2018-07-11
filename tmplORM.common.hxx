@@ -147,10 +147,11 @@ inline namespace common
 
 	template<size_t bindIndex, typename field_t> struct bindField_t<bindIndex, field_t, true>
 	{
+		using value_t = typename field_t::type;
 		template<typename query_t> static void bind(const field_t &field, query_t &query) noexcept
 		{
 			if (field.isNull())
-				query.template bind<typename field_t::type>(bindIndex, nullptr, fieldLength(field_t()));
+				query.template bind<value_t>(bindIndex, nullptr, fieldLength(field_t()));
 			else
 				query.bind(bindIndex, field.value(), fieldLength(field));
 		}
@@ -164,12 +165,20 @@ inline namespace common
 		template<typename fieldName, typename T, typename field_t, typename query_t>
 			static void bindField(const type_t<fieldName, T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
 		{
+			using value_t = typename field_t::type;
 			bindSelectCore_t<idx, fields_t...>::bind(fields, query);
-			bindField_t<index, field_t>::bind(field, query);
+			query.template bind<value_t>(index, fieldLength(field));
 		}
 
 		template<typename fieldName, size_t length, typename field_t, typename query_t>
 			static void bindField(const unicode_t<fieldName, length> &, const field_t &, const std::tuple<fields_t...> &fields, query_t &query) noexcept
+		{
+			bindSelectCore_t<idx, fields_t...>::bind(fields, query);
+			query.bindForBuffer(index);
+		}
+
+		template<typename fieldName, typename field_t, typename query_t>
+			static void bindField(const unicodeText_t<fieldName> &, const field_t &, const std::tuple<fields_t...> &fields, query_t &query) noexcept
 		{
 			bindSelectCore_t<idx, fields_t...>::bind(fields, query);
 			query.bindForBuffer(index);
