@@ -219,7 +219,7 @@ private:
 		assertEqual(result.numFields(), 4);
 
 		assertEqual(result[0], testData[0].entryID);
-		assertEqual(result[1].asString().get(), testData[0].name);
+		assertEqual(result[1].asString(false).get(), testData[0].name);
 		assertFalse(result[2].isNull());
 		assertEqual(result[2], testData[0].value);
 		testData[0].when = result[3];
@@ -241,6 +241,71 @@ private:
 	{
 		puts(error.error());
 		fail("Exception thrown while converting value");
+	}
+
+	void testTransact()
+	{
+		assertNotNull(testClient);
+		assertTrue(testClient->valid());
+		tSQLResult_t result;
+		assertFalse(result.valid());
+		const bool started = testClient->beginTransact();
+		if (!started)
+			printError("Start transaction", testClient->error());
+		assertTrue(started);
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+
+		result = testClient->query("UPDATE [tmplORM] SET [Name] = 'Karl' WHERE [EntryID] = '1';");
+		if (!result.valid())
+		{
+			printError("Query", testClient->error());
+			testClient->rollback();
+		}
+		assertTrue(result.valid());
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+
+		const bool rolledBack = testClient->rollback();
+		if (!rolledBack)
+			printError("Abort transaction", testClient->error());
+		assertTrue(rolledBack);
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+
+		result = testClient->query("SELECT [Name] FROM [tmplORM] WHERE [EntryID] = '1';");
+		if (testClient->error() != tSQLExecErrorType_t::ok)
+			printError("Query", testClient->error());
+		assertTrue(result.valid());
+		assertEqual(result.numFields(), 1);
+		assertEqual(result[0].asString(false).get(), testData[0].name);
+		assertFalse(result.next());
+
+		const bool restarted = testClient->beginTransact();
+		if (!restarted)
+			printError("Start transaction", testClient->error());
+		assertTrue(restarted);
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+
+		result = testClient->query("UPDATE [tmplORM] SET [Name] = 'Karl' WHERE [EntryID] = '1';");
+		if (!result.valid())
+		{
+			printError("Query", testClient->error());
+			testClient->rollback();
+		}
+		assertTrue(result.valid());
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+
+		const bool committed = testClient->commit();
+		if (!committed)
+			printError("Commit transaction", testClient->error());
+		assertTrue(committed);
+
+		result = testClient->query("SELECT [Name] FROM [tmplORM] WHERE [EntryID] = '1';");
+		if (testClient->error() != tSQLExecErrorType_t::ok)
+			printError("Query", testClient->error());
+		assertTrue(result.valid());
+		assertEqual(result.numFields(), 1);
+		assertNotEqual(result[0].asString(false).get(), testData[0].name);
+		assertEqual(result[0].asString(false).get(), "Karl");
+		assertFalse(result.next());
 	}
 
 	void testDestroyDB()
@@ -294,6 +359,7 @@ public:
 		CXX_TEST(testCreateTable)
 		CXX_TEST(testPrepared)
 		CXX_TEST(testResult)
+		CXX_TEST(testTransact)
 		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
 		CXX_TEST(testError)
