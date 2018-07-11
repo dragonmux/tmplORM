@@ -246,25 +246,24 @@ namespace tmplORM
 			struct _dateTime_t
 			{
 			public:
-				using timePoint_t = time_point<system_clock>;
-				using duration_t = typename timePoint_t::duration;
+				using duration_t = typename system_clock::duration;
 
 			private:
 				uint16_t _year;
 				uint16_t _month;
 				uint16_t _day;
-				timePoint_t _time;
+				duration_t _time;
 
 			public:
 				constexpr _dateTime_t() noexcept : _year(0), _month(0), _day(0), _time() { }
 				_dateTime_t(const uint16_t year, const uint16_t month, const uint16_t day, const duration_t &time) noexcept :
-					_year(year), _month(month), _day(day), _time(timePoint_t(time)) { }
+					_year{year}, _month{month}, _day{day}, _time{time} { }
 				_dateTime_t(const uint16_t year, const uint16_t month, const uint16_t day) noexcept :
-					_year(year), _month(month), _day(day), _time() { }
+					_year{year}, _month{month}, _day{day}, _time{} { }
 				constexpr uint16_t year() const noexcept { return _year; }
 				constexpr uint16_t month() const noexcept { return _month; }
 				constexpr uint16_t day() const noexcept { return _day; }
-				constexpr const timePoint_t &time() const noexcept { return _time; }
+				constexpr const duration_t &time() const noexcept { return _time; }
 			};
 
 			template<typename _fieldName> struct dateTime_t : public type_t<_fieldName, _dateTime_t>
@@ -285,7 +284,7 @@ namespace tmplORM
 				ormDateTime_t value() const noexcept
 				{
 					const _dateTime_t _value = parentType_t::value();
-					nanoseconds time(_value.time().time_since_epoch());
+					auto time{_value.time()};
 					const auto hour = duration_cast<hours>(time);
 					time -= hour;
 					const auto minute = duration_cast<minutes>(time);
