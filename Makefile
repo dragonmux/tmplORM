@@ -1,18 +1,12 @@
 include Makefile.inc
 
 PKG_CONFIG_PKGS =
-CFLAGS_EXTRA = $(shell mysql_config --include)
+CFLAGS_EXTRA = -MMD -MF .dep/$*.d $(shell mysql_config --include)
 #$(shell pkg-config --cflags $(PKG_CONFIG_PKGS))
-DEFS = $(OPTIM_FLAGS) -Wall -Wextra -pedantic -std=c++11 -I. $(CFLAGS_EXTRA)
-CFLAGS = -c $(DEFS) -o $@ $<
-DEPFLAGS = -E -MM $(DEFS) -o .dep/$*.d $<
+CFLAGS = -c $(OPTIM_FLAGS) -Wall -Wextra -pedantic -std=c++11 -I. $(CFLAGS_EXTRA) -o $@ $<
 LIBS = $(shell mysql_config --libs) -lodbc -ldl -pthread
 #$(shell pkg-config --libs $(PKG_CONFIG_PKGS))
 LFLAGS = $(OPTIM_FLAGS) -shared $(O) $(LIBS) -o $@
-ifeq ($(strip $(FOR_TESTS)), 1)
-	DEFS += -I. -Itest
-	CFLAGS_EXTRA += $(shell pkg-config --cflags crunch++)
-endif
 
 SED = sed -e 's:@LIBDIR@:$(LIBDIR):g' -e 's:@PREFIX@:$(PREFIX):g' -e 's:@VERSION@:$(VER):g'
 
@@ -63,7 +57,6 @@ $(SO): $(O)
 	$(call run-cmd,sed,$<,$@)
 
 %.o: %.cxx | $(DEPS)
-	$(call makedep,$(CXX),$(DEPFLAGS))
 	$(call run-cmd,cxx,$(CFLAGS))
 
 %.gch: %.hxx
