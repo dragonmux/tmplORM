@@ -249,6 +249,42 @@ private:
 		fail("Exception thrown while converting value");
 	}
 
+	template<typename field_t> void bind(mySQLPreparedResult_t &result, const size_t index, field_t &value) noexcept
+		{ result.template bind<typename field_t::type>(index, fieldLength(value)); }
+
+	void testPreparedResult()
+	{
+		data_t data;
+		assertNotNull(testClient);
+		assertTrue(testClient->valid());
+		mySQLPreparedQuery_t query;
+		assertFalse(query.valid());
+
+		query = testClient->prepare("SELECT `EntryID`, `Name`, `Value`, `When` "
+			"FROM `tmplORM` WHERE `EntryID` = ?;", 1);
+		assertTrue(query.valid());
+		query.bind(0, testData[0].entryID.value(), fieldLength(testData[0].entryID));
+		assertEqual(testClient->errorNum(), 0);
+		const bool queryResult = query.execute();
+		if (!queryResult)
+			printError("Prepared exec", *testClient);
+		assertTrue(queryResult);
+
+		mySQLPreparedResult_t result = query.queryResult(4);
+		assertTrue(result.valid());
+		//assertEqual(result.numRows(), 1);
+		bind(result, 0, data.entryID);
+		assertEqual(testClient->errorNum(), 0);
+		result.bindForBuffer(1);
+		assertEqual(testClient->errorNum(), 0);
+		bind(result, 2, data.value);
+		assertEqual(testClient->errorNum(), 0);
+		bind(result, 3, data.when);
+		assertEqual(testClient->errorNum(), 0);
+
+		// TODO: Continue this test to pull back real data and play.. needs the rest of the type written first.
+	}
+
 	void testDestroyDB()
 	{
 		assertNotNull(testClient);
@@ -284,6 +320,7 @@ public:
 		CXX_TEST(testCreateTable)
 		CXX_TEST(testPreparedQuery)
 		CXX_TEST(testResult)
+		CXX_TEST(testPreparedResult)
 		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
 	}
