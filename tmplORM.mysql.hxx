@@ -348,7 +348,11 @@ namespace tmplORM
 				for (size_t i = 0; i < result.numRows(); ++i)
 				{
 					T value;
-					bindSelect<fields_t...>::bind(value.fields(), result);
+					bindSelectCore<fields_t...>::bind(value.fields(), result);
+					// If there is an issue fetching the data for this record, return the empty fixedVector_t<>
+					if (!result.next())
+						return {};
+					//bindSelectAlloc<fields_t...>::bind(value.fields(), result);
 					data[i] = std::move(value);
 				}
 				return data;
