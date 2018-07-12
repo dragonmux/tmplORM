@@ -274,17 +274,17 @@ namespace tmplORM
 			public:
 				using type = ormDateTime_t;
 				operator ormDateTime_t() const noexcept { return dateTime(); }
-				void operator =(const char *const _value) noexcept { value(ormDateTime_t(_value)); }
+				void operator =(const char *const _value) noexcept { value(ormDateTime_t{_value}); }
 				void operator =(const ormDateTime_t &_value) noexcept { value(_value); }
 				void operator =(ormDateTime_t &&_value) noexcept { value(_value); }
 				void dateTime(const ormDateTime_t &_value) noexcept { value(_value); }
 				ormDateTime_t dateTime() const noexcept { return value(); }
-				void value(const char *const _value) noexcept { value(ormDateTime_t(_value)); }
+				void value(const char *const _value) noexcept { value(ormDateTime_t{_value}); }
 
 				ormDateTime_t value() const noexcept
 				{
 					const _dateTime_t _value = parentType_t::value();
-					auto time{_value.time()};
+					_dateTime_t::duration_t time{_value.time()};
 					const auto hour = duration_cast<hours>(time);
 					time -= hour;
 					const auto minute = duration_cast<minutes>(time);
