@@ -104,6 +104,10 @@ private:
 		*testClient = std::move(client);
 		assertFalse(client.valid());
 		assertTrue(testClient->valid());
+
+		assertFalse(testClient->connect(driver, host, port, username, password));
+		assertTrue(testClient->error() == tSQLExecErrorType_t::connect);
+		assertFalse(client.beginTransact());
 	}
 
 	void testCreateDB()
@@ -126,6 +130,7 @@ private:
 			printError("DB selection", testClient->error());
 		assertTrue(selected);
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		assertFalse(testClient->selectDB(nullptr));
 	}
 
 	void testCreateTable()
@@ -254,6 +259,7 @@ private:
 			printError("Start transaction", testClient->error());
 		assertTrue(started);
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		assertFalse(testClient->beginTransact());
 
 		result = testClient->query("UPDATE [tmplORM] SET [Name] = 'Karl' WHERE [EntryID] = '1';");
 		if (!result.valid())
