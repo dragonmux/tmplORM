@@ -92,10 +92,10 @@ namespace tmplORM
 
 			template<bool> struct bindValue_t
 			{
-				template<typename T> auto operator ()(const T &val, managedPtr_t<void> &) noexcept -> void *const
-					{ return reinterpret_cast<void *const>(const_cast<T *const>(&val)); }
+				template<typename T> void *operator ()(const T &val, managedPtr_t<void> &) const noexcept
+					{ return const_cast<T *>(&val); }
 
-				auto operator ()(const ormDate_t &value, managedPtr_t<void> &paramStorage) noexcept -> void *const
+				void *operator ()(const ormDate_t &value, managedPtr_t<void> &paramStorage) const noexcept
 				{
 					SQL_DATE_STRUCT date;
 					date.year = value.year();
@@ -105,7 +105,7 @@ namespace tmplORM
 					return paramStorage.get();
 				}
 
-				auto operator ()(const ormDateTime_t &value, managedPtr_t<void> &paramStorage) noexcept -> void *const
+				void *operator ()(const ormDateTime_t &value, managedPtr_t<void> &paramStorage) const noexcept
 				{
 					SQL_TIMESTAMP_STRUCT dateTime;
 					dateTime.year = value.year();
@@ -122,7 +122,7 @@ namespace tmplORM
 					return paramStorage.get();
 				}
 
-				auto operator ()(const ormUUID_t &value, managedPtr_t<void> &paramStorage) noexcept -> void *const
+				void *operator ()(const ormUUID_t &value, managedPtr_t<void> &paramStorage) const noexcept
 				{
 					SQLGUID guid;
 					guid.Data1 = value.data1();
@@ -137,8 +137,8 @@ namespace tmplORM
 
 			template<> struct bindValue_t<true>
 			{
-				template<typename T> auto operator ()(const T *const val, managedPtr_t<void> &) noexcept -> void *const
-					{ return reinterpret_cast<void *const>(const_cast<T *const>(val)); }
+				template<typename T> void *operator ()(const T *const val, managedPtr_t<void> &) const noexcept
+					{ return const_cast<T *>(val); }
 			};
 
 			template<typename T> using bindValue_ = bindValue_t<std::is_pointer<T>::value>;
@@ -169,7 +169,7 @@ namespace tmplORM
 					dataLengths[index] = dataLen;
 
 				error(SQLBindParameter(queryHandle, index + 1, SQL_PARAM_INPUT, dataType, odbcDataType, bindDigits<T>(length.second),
-					bindScale<T>(), bindValue_<T>()(value, paramStorage[index]), dataLen, lenPtr));
+					bindScale<T>(), bindValue_<T>{}(value, paramStorage[index]), dataLen, lenPtr));
 			}
 
 			template<typename T> void tSQLQuery_t::bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept
