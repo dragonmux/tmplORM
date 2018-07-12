@@ -40,9 +40,9 @@ public:
 	operator std::unique_ptr<char16_t []>() noexcept { return std::move(str); }
 	operator const char16_t *() const noexcept { return str.get(); }
 	operator char16_t *() const noexcept { return str.get(); }
-	operator const uint16_t *() const noexcept { return reinterpret_cast<uint16_t *const>(str.get()); }
-	operator uint16_t *() const noexcept { return reinterpret_cast<uint16_t *const>(str.get()); }
-	operator void *() const noexcept { return static_cast<void *const>(str.get()); }
+	operator const uint16_t *() const noexcept { return reinterpret_cast<uint16_t *>(str.get()); }
+	operator uint16_t *() const noexcept { return reinterpret_cast<uint16_t *>(str.get()); }
+	operator void *() const noexcept { return static_cast<void *>(str.get()); }
 	explicit operator bool() const noexcept { return bool(str); }
 };
 
@@ -64,8 +64,8 @@ public:
 	operator std::unique_ptr<char []>() noexcept { return std::move(str); }
 	operator const char *() const noexcept { return str.get(); }
 	operator char *() const noexcept { return str.get(); }
-	operator const uint8_t *() const noexcept { return reinterpret_cast<uint8_t *const>(str.get()); }
-	operator uint8_t *() const noexcept { return reinterpret_cast<uint8_t *const>(str.get()); }
+	operator const uint8_t *() const noexcept { return reinterpret_cast<uint8_t *>(str.get()); }
+	operator uint8_t *() const noexcept { return reinterpret_cast<uint8_t *>(str.get()); }
 	explicit operator bool() const noexcept { return bool(str); }
 };
 
