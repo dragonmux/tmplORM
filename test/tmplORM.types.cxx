@@ -84,5 +84,44 @@ namespace dateTime
 		suite.assertEqual(a.month(), 0);
 		suite.assertEqual(a.day(), 0);
 		suite.assertEqual(a.time().count(), 0);
+		const _dateTime_t b{2018, 07, 04};
+		suite.assertEqual(b.year(), 2018);
+		suite.assertEqual(b.month(), 07);
+		suite.assertEqual(b.day(), 04);
+		suite.assertEqual(b.time().count(), 0);
+		const _dateTime_t c{2018, 07, 04, nanoseconds{1234567890}};
+		suite.assertEqual(c.year(), 2018);
+		suite.assertEqual(c.month(), 07);
+		suite.assertEqual(c.day(), 04);
+		suite.assertEqual(c.time().count(), 1234567890);
+	}
+}
+
+namespace types
+{
+	using irqus::typestring;
+	using dateTime_t = tmplORM::types::dateTime_t<typestring<>>;
+	using date_t = tmplORM::types::date_t<typestring<>>;
+	using namespace tmplORM::types::baseTypes;
+
+	const auto now = ormDateTime_t{systemClock_t::now()};
+
+	void testDateTime(testsuit &suite)
+	{
+		dateTime_t dateTime;
+		const ormDateTime_t a = dateTime.value();
+		suite.assertEqual(a.year(), 0);
+		suite.assertEqual(a.month(), 0);
+		suite.assertEqual(a.day(), 0);
+		suite.assertEqual(a.hour(), 0);
+		suite.assertEqual(a.minute(), 0);
+		suite.assertEqual(a.second(), 0);
+		suite.assertEqual(a.nanoSecond(), 0);
+		dateTime.value(now);
+		suite.assertTrue(dateTime.value() == now);
+	}
+
+	void testDate(testsuit &suite)
+	{
 	}
 }

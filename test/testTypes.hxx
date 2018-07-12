@@ -9,4 +9,10 @@ namespace dateTime
 	void testWrapper(testsuit &suite);
 }
 
+namespace types
+{
+	void testDateTime(testsuit &suite);
+	void testDate(testsuit &suite);
+}
+
 #endif /*TEST_TYPES__HXX*/
