@@ -273,6 +273,8 @@ namespace tmplORM
 
 			public:
 				using type = ormDateTime_t;
+				constexpr dateTime_t() noexcept : parentType_t{} {}
+				dateTime_t(const ormDateTime_t _value) noexcept : parentType_t{} { value(_value); }
 				operator ormDateTime_t() const noexcept { return dateTime(); }
 				void operator =(const char *const _value) noexcept { value(_value); }
 				void operator =(const ormDateTime_t &_value) noexcept { value(_value); }
@@ -314,6 +316,8 @@ namespace tmplORM
 
 			public:
 				using type = ormDate_t;
+				constexpr date_t() noexcept : parentType_t{} { }
+				date_t(const ormDate_t _value) noexcept : parentType_t{} { value(_value); }
 				operator ormDate_t() const noexcept { return date(); }
 				void operator =(const char *const _value) noexcept { value(ormDate_t(_value)); }
 				void operator =(const ormDate_t &_value) noexcept { value(_value); }
