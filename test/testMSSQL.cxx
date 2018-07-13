@@ -220,7 +220,7 @@ private:
 		if (testClient->error() != tSQLExecErrorType_t::ok)
 			printError("Query", testClient->error());
 		assertTrue(result.valid());
-		//assertEqual(result.numRows(), 2);
+		assertEqual(result.numRows(), 0);
 		assertEqual(result.numFields(), 4);
 
 		assertEqual(result[0], testData[0].entryID);
@@ -269,6 +269,8 @@ private:
 		}
 		assertTrue(result.valid());
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		assertEqual(result.numFields(), 0);
+		assertEqual(result.numRows(), 1);
 
 		const bool rolledBack = testClient->rollback();
 		if (!rolledBack)
@@ -281,6 +283,7 @@ private:
 			printError("Query", testClient->error());
 		assertTrue(result.valid());
 		assertEqual(result.numFields(), 1);
+		assertEqual(result.numRows(), 0);
 		assertEqual(result[0].asString(false).get(), testData[0].name);
 		assertFalse(result.next());
 
@@ -298,6 +301,8 @@ private:
 		}
 		assertTrue(result.valid());
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		assertEqual(result.numFields(), 0);
+		assertEqual(result.numRows(), 1);
 
 		const bool committed = testClient->commit();
 		if (!committed)
@@ -309,6 +314,7 @@ private:
 			printError("Query", testClient->error());
 		assertTrue(result.valid());
 		assertEqual(result.numFields(), 1);
+		assertEqual(result.numRows(), 0);
 		assertNotEqual(result[0].asString(false).get(), testData[0].name);
 		assertEqual(result[0].asString(false).get(), "Karl");
 		assertFalse(result.next());

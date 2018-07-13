@@ -152,7 +152,8 @@ protected:
 
 public:
 	/*! @brief Default constructor for result objects, constructing invalid result objects by default */
-	tSQLResult_t() noexcept : client{nullptr}, queryHandle{nullptr}, _hasData{false}, _freeHandle{true}, fields{0}, fieldInfo{}, valueCache{} { }
+	tSQLResult_t() noexcept : client{nullptr}, queryHandle{nullptr}, _hasData{false},
+		_freeHandle{true}, fields{0}, fieldInfo{}, valueCache{} { }
 	tSQLResult_t(tSQLResult_t &&res) noexcept : tSQLResult_t() { *this = std::move(res); }
 	~tSQLResult_t() noexcept;
 	void operator =(tSQLResult_t &&res) noexcept;
