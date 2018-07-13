@@ -188,6 +188,7 @@ private:
 			"[String] NVARCHAR(50) NOT NULL, "
 			//"[Text] NVARCHAR(MAX) NOT NULL, "
 			"[Float] REAL NOT NULL, "
+			"[Double] FLOAT NOT NULL, "
 			"[Date] DATE NOT NULL, "
 			"[DateTime] DATETIME2 NOT NULL, "
 			"[UUID] UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID());"
@@ -377,8 +378,9 @@ private:
 
 		tSQLQuery_t query = testClient->prepare(
 			"INSERT INTO [TypeTest] ([Int64], [Int32], [Int16], [Int8], "
-			"[Bool], [String]"/*, [Text]*/", [Float], [Date], [DateTime]) "
-			"OUTPUT INSERTED.[EntryID] VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);"/*, ?);", 10*/, 9
+			"[Bool], [String]"/*, [Text]*/", [Float], [Double], [Date], [DateTime]) "
+			"OUTPUT INSERTED.[EntryID] VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, "//"?, "
+			"?);", 10
 		);
 		assertTrue(query.valid());
 		query.bind(0, typeData.int64.value(), fieldLength(typeData.int64));
@@ -397,11 +399,13 @@ private:
 		query.bind(6, typeData.text.value(), fieldLength(typeData.text));
 		printError("Bind", testClient->error());
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);*/
-		query.bind(6/*7*/, typeData.decimal.value(), fieldLength(typeData.decimal));
+		query.bind(6/*7*/, typeData.decimalF.value(), fieldLength(typeData.decimalF));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
-		query.bind(7/*8*/, typeData.date.value(), fieldLength(typeData.date));
+		query.bind(7/*8*/, typeData.decimalD.value(), fieldLength(typeData.decimalD));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
-		query.bind(8/*9*/, typeData.dateTime.value(), fieldLength(typeData.dateTime));
+		query.bind(8/*9*/, typeData.date.value(), fieldLength(typeData.date));
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		query.bind(9/*10*/, typeData.dateTime.value(), fieldLength(typeData.dateTime));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 		result = query.execute();
 		if (testClient->error() != tSQLExecErrorType_t::ok)
@@ -417,12 +421,12 @@ private:
 		assertFalse(result.next());
 
 		result = testClient->query("SELECT [EntryID], [Int64], [Int32], [Int16], [Int8], "
-			"[Bool], [String], [Date], [DateTime] FROM [TypeTest];");
+			"[Bool], [String]"/*, [Text]*/", [Float], [Double], [Date], [DateTime] FROM [TypeTest];");
 		if (testClient->error() != tSQLExecErrorType_t::ok)
 			printError("Query", testClient->error());
 		assertTrue(result.valid());
 		assertEqual(result.numRows(), 0);
-		assertEqual(result.numFields(), 9);
+		assertEqual(result.numFields(), 11);
 
 		ormDateTime_t dateTime = typeData.dateTime;
 		// Apply MSSQL rounding..
@@ -435,8 +439,10 @@ private:
 		assertEqual(result[4], typeData.int8);
 		assertTrue(bool{result[5]} == typeData.boolean);
 		assertEqual(result[6].asString(false).get(), typeData.string);
-		assertTrue(result[7].asDate() == typeData.date);
-		assertTrue(result[8].asDateTime() == dateTime);
+		//assertEqual(result[7].asString(false).get(), typeData.text);
+		assertEqual(result[7].asFloat(), typeData.decimalF);
+		assertTrue(result[9].asDate() == typeData.date);
+		assertTrue(result[10].asDateTime() == dateTime);
 		assertFalse(result.next());
 	}
 	catch (const tSQLValueError_t &error)
