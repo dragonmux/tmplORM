@@ -84,8 +84,8 @@ namespace tmplORM
 			constexpr type_t(const T value) noexcept : _value(value)/*, _modified(false)*/ { }
 
 			constexpr const char *fieldName() const noexcept { return _fieldName::data(); }
-			const T value() const noexcept { return _value; }
- 			T value() noexcept { return _value; }
+			const T &value() const noexcept { return _value; }
+			T &value() noexcept { return _value; }
 			// Make the type behave like its' contained type..
 			operator const T() const noexcept { return _value; }
 			void operator =(const T &_value) noexcept { value(_value); }
