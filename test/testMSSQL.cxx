@@ -188,9 +188,9 @@ private:
 #if 0
 			//"[Text] NVARCHAR(MAX) NOT NULL, "
 			"[Float] REAL NOT NULL, "
+#endif
 			"[Date] DATE NOT NULL, "
 			"[DateTime] DATETIME2 NOT NULL, "
-#endif
 			"[UUID] UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID());"
 		);
 		if (!result.valid())
@@ -378,8 +378,8 @@ private:
 
 		tSQLQuery_t query = testClient->prepare(
 			"INSERT INTO [TypeTest] ([Int64], [Int32], [Int16], [Int8], "
-			"[Bool], [String]"/*, [Text]*/ /*", [Float], [Date], [DateTime]"*/") "
-			"OUTPUT INSERTED.[EntryID] VALUES (?, ?, ?, ?, ?, ?);"/*, ?, ?, ?);"/, ?);", 10*/, 6
+			"[Bool], [String]"/*, [Text]*/ /*", [Float]"*/", [Date], [DateTime]) "
+			"OUTPUT INSERTED.[EntryID] VALUES (?, ?, ?, ?, ?, ?, ?, ?);"/*, ?);"/, ?);", 10*/, 8
 		);
 		assertTrue(query.valid());
 		query.bind(0, typeData.int64.value(), fieldLength(typeData.int64));
@@ -401,11 +401,11 @@ private:
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);*/
 		query.bind(6/*7*/, typeData.decimal.value(), fieldLength(typeData.decimal));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
-		query.bind(7/*8*/, typeData.date.value(), fieldLength(typeData.date));
-		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
-		query.bind(8/*9*/, typeData.dateTime.value(), fieldLength(typeData.dateTime));
-		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 #endif
+		query.bind(6/*8*/, typeData.date.value(), fieldLength(typeData.date));
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		query.bind(7/*9*/, typeData.dateTime.value(), fieldLength(typeData.dateTime));
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 		result = query.execute();
 		if (testClient->error() != tSQLExecErrorType_t::ok)
 			printError("Prepared exec", testClient->error());
@@ -420,20 +420,26 @@ private:
 		assertFalse(result.next());
 
 		result = testClient->query("SELECT [EntryID], [Int64], [Int32], [Int16], [Int8], "
-			"[Bool], [String] FROM [TypeTest];");
+			"[Bool], [String], [Date], [DateTime] FROM [TypeTest];");
 		if (testClient->error() != tSQLExecErrorType_t::ok)
 			printError("Query", testClient->error());
 		assertTrue(result.valid());
 		assertEqual(result.numRows(), 0);
-		assertEqual(result.numFields(), 7);
+		assertEqual(result.numFields(), 9);
+
+		ormDateTime_t dateTime = typeData.dateTime;
+		// Apply MSSQL rounding..
+		dateTime.nanoSecond((dateTime.nanoSecond() / 100) * 100);
 
 		assertEqual(result[0], typeData.entryID);
 		assertEqual(result[1], typeData.int64);
 		assertEqual(result[2], typeData.int32);
 		assertEqual(result[3], typeData.int16);
 		assertEqual(result[4], typeData.int8);
-		assertEqual(bool{result[5]} == typeData.boolean);
+		assertTrue(bool{result[5]} == typeData.boolean);
 		assertEqual(result[6].asString(false).get(), typeData.string);
+		assertTrue(result[7].asDate() == typeData.date);
+		assertTrue(result[8].asDateTime() == dateTime);
 		assertFalse(result.next());
 	}
 	catch (const tSQLValueError_t &error)
