@@ -113,6 +113,7 @@ private:
 		const bool selected = client.selectDB("master");
 		if (!selected)
 			printError("DB selection", client.error());
+		assertFalse(client.connect(driver, host, port, username, ""));
 		const bool connected = client.connect(driver, host, port, username, password);
 		if (!connected)
 			printError("Connection", client.error());
@@ -159,7 +160,10 @@ private:
 	{
 		assertNotNull(testClient);
 		assertTrue(testClient->valid());
-		tSQLResult_t result = testClient->query(
+		tSQLResult_t result;
+		assertFalse(result.valid());
+
+		result = testClient->query(
 			"CREATE TABLE [tmplORM] ("
 			"[EntryID] INT NOT NULL PRIMARY KEY IDENTITY, "
 			"[Name] NVARCHAR(50) NOT NULL, "
@@ -358,7 +362,10 @@ private:
 	{
 		assertNotNull(testClient);
 		if (testClient->valid())
+		{
+			assertTrue(testClient->beginTransact());
 			testClient->disconnect();
+		}
 		assertFalse(testClient->valid());
 		testClient = nullptr;
 		assertNull(testClient.get());
