@@ -183,9 +183,9 @@ private:
 			"[Int32] INT NOT NULL, "
 			"[Int16] SMALLINT NOT NULL, "
 			"[Int8] TINYINT NOT NULL, "
-#if 0
 			"[Bool] BIT NOT NULL, "
 			"[String] NVARCHAR(50) NOT NULL, "
+#if 0
 			//"[Text] NVARCHAR(MAX) NOT NULL, "
 			"[Float] REAL NOT NULL, "
 			"[Date] DATE NOT NULL, "
@@ -377,9 +377,9 @@ private:
 		assertFalse(result.valid());
 
 		tSQLQuery_t query = testClient->prepare(
-			"INSERT INTO [TypeTest] ([Int64], [Int32], [Int16], [Int8]) "//, "
-			/*"[Bool], [String]"*/ /*, [Text]*/ /*", [Float], [Date], [DateTime]) "*/
-			"OUTPUT INSERTED.[EntryID] VALUES (?, ?, ?, ?);"/*, ?, ?, ?, ?, ?);"/, ?);", 10*/, 4
+			"INSERT INTO [TypeTest] ([Int64], [Int32], [Int16], [Int8], "
+			"[Bool], [String]"/*, [Text]*/ /*", [Float], [Date], [DateTime]"*/") "
+			"OUTPUT INSERTED.[EntryID] VALUES (?, ?, ?, ?, ?, ?);"/*, ?, ?, ?);"/, ?);", 10*/, 6
 		);
 		assertTrue(query.valid());
 		query.bind(0, typeData.int64.value(), fieldLength(typeData.int64));
@@ -390,11 +390,11 @@ private:
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 		query.bind(3, typeData.int8.value(), fieldLength(typeData.int8));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
-#if 0
 		query.bind(4, typeData.boolean.value(), fieldLength(typeData.boolean));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 		query.bind(5, typeData.string.value(), fieldLength(typeData.string));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+#if 0
 		/*puts("Binding parameter 7");
 		query.bind(6, typeData.text.value(), fieldLength(typeData.text));
 		printError("Bind", testClient->error());
@@ -419,18 +419,21 @@ private:
 		assertEqual(typeData.entryID, 1);
 		assertFalse(result.next());
 
-		result = testClient->query("SELECT [EntryID], [Int64], [Int32], [Int16], [Int8] FROM [TypeTest];");
+		result = testClient->query("SELECT [EntryID], [Int64], [Int32], [Int16], [Int8], "
+			"[Bool], [String] FROM [TypeTest];");
 		if (testClient->error() != tSQLExecErrorType_t::ok)
 			printError("Query", testClient->error());
 		assertTrue(result.valid());
 		assertEqual(result.numRows(), 0);
-		assertEqual(result.numFields(), 5);
+		assertEqual(result.numFields(), 7);
 
 		assertEqual(result[0], typeData.entryID);
 		assertEqual(result[1], typeData.int64);
 		assertEqual(result[2], typeData.int32);
 		assertEqual(result[3], typeData.int16);
 		assertEqual(result[4], typeData.int8);
+		assertEqual(bool{result[5]} == typeData.boolean);
+		assertEqual(result[6].asString(false).get(), typeData.string);
 		assertFalse(result.next());
 	}
 	catch (const tSQLValueError_t &error)
