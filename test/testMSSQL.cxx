@@ -367,6 +367,43 @@ private:
 		assertFalse(result.next());
 	}
 
+	void testBind()
+	{
+		assertNotNull(testClient);
+		assertTrue(testClient->valid());
+		tSQLResult_t result;
+		assertFalse(result.valid());
+
+		tSQLQuery_t query = testClient->prepare(
+			"INSERT INTO [TypesTest] ([Int64], [Int32], [Int16], [Int8], "
+			"[Bool], [String]"/*, [Text]*/", [Float], [Date], [DateTime]) "
+			"OUTPUT INSERTED.[EntryID] VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", 10
+		);
+		assertTrue(query.valid());
+		query.bind(0, typeData.int64.value(), fieldLength(typeData.int64));
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		query.bind(1, typeData.int32.value(), fieldLength(typeData.int32));
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		query.bind(2, typeData.int16.value(), fieldLength(typeData.int16));
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		query.bind(3, typeData.int8.value(), fieldLength(typeData.int8));
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		query.bind(4, typeData.boolean.value(), fieldLength(typeData.boolean));
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		query.bind(5, typeData.string.value(), fieldLength(typeData.string));
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		/*puts("Binding parameter 7");
+		query.bind(6, typeData.text.value(), fieldLength(typeData.text));
+		printError("Bind", testClient->error());
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);*/
+		query.bind(6/*7*/, typeData.decimal.value(), fieldLength(typeData.decimal));
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		query.bind(7/*8*/, typeData.date.value(), fieldLength(typeData.date));
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		query.bind(8/*9*/, typeData.dateTime.value(), fieldLength(typeData.dateTime));
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+	}
+
 	void testDestroyDB()
 	{
 		assertNotNull(testClient);
@@ -422,6 +459,7 @@ public:
 		CXX_TEST(testPrepared)
 		CXX_TEST(testResult)
 		CXX_TEST(testTransact)
+		CXX_TEST(testBind)
 		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
 		CXX_TEST(testError)
