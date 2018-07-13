@@ -185,10 +185,8 @@ private:
 			"[Int8] TINYINT NOT NULL, "
 			"[Bool] BIT NOT NULL, "
 			"[String] NVARCHAR(50) NOT NULL, "
-#if 0
 			//"[Text] NVARCHAR(MAX) NOT NULL, "
 			"[Float] REAL NOT NULL, "
-#endif
 			"[Date] DATE NOT NULL, "
 			"[DateTime] DATETIME2 NOT NULL, "
 			"[UUID] UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID());"
@@ -378,8 +376,8 @@ private:
 
 		tSQLQuery_t query = testClient->prepare(
 			"INSERT INTO [TypeTest] ([Int64], [Int32], [Int16], [Int8], "
-			"[Bool], [String]"/*, [Text]*/ /*", [Float]"*/", [Date], [DateTime]) "
-			"OUTPUT INSERTED.[EntryID] VALUES (?, ?, ?, ?, ?, ?, ?, ?);"/*, ?);"/, ?);", 10*/, 8
+			"[Bool], [String]"/*, [Text]*/", [Float], [Date], [DateTime]) "
+			"OUTPUT INSERTED.[EntryID] VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);"/*, ?);", 10*/, 9
 		);
 		assertTrue(query.valid());
 		query.bind(0, typeData.int64.value(), fieldLength(typeData.int64));
@@ -394,17 +392,15 @@ private:
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 		query.bind(5, typeData.string.value(), fieldLength(typeData.string));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
-#if 0
 		/*puts("Binding parameter 7");
 		query.bind(6, typeData.text.value(), fieldLength(typeData.text));
 		printError("Bind", testClient->error());
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);*/
 		query.bind(6/*7*/, typeData.decimal.value(), fieldLength(typeData.decimal));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
-#endif
-		query.bind(6/*8*/, typeData.date.value(), fieldLength(typeData.date));
+		query.bind(7/*8*/, typeData.date.value(), fieldLength(typeData.date));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
-		query.bind(7/*9*/, typeData.dateTime.value(), fieldLength(typeData.dateTime));
+		query.bind(8/*9*/, typeData.dateTime.value(), fieldLength(typeData.dateTime));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 		result = query.execute();
 		if (testClient->error() != tSQLExecErrorType_t::ok)
