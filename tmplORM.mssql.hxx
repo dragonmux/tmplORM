@@ -46,7 +46,7 @@ namespace tmplORM
 		template<> struct stringType_t<float> { using value = ts("REAL"); };
 		// Yes really.. this represents a full double (8-byte float) when given no parameters..
 		template<> struct stringType_t<double> { using value = ts("FLOAT"); };
-		template<> struct stringType_t<char *> { using value = ts("NTEXT"); };
+		template<> struct stringType_t<char *> { using value = ts("NVARCHAR(MAX)"); };
 		template<> struct stringType_t<ormDate_t> { using value = ts("DATE"); };
 		template<> struct stringType_t<ormDateTime_t> { using value = ts("DATETIME2"); };
 		template<> struct stringType_t<ormUUID_t> { using value = ts("UNIQUEIDENTIFIER"); };
