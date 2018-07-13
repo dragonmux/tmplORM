@@ -174,6 +174,26 @@ private:
 			printError("Query", testClient->error());
 		assertTrue(result.valid());
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+
+		result = testClient->query(
+			"CREATE TABLE [TypeTest] ("
+			"[EntryID] INT NOT NULL PRIMARY KEY IDENTITY, "
+			"[Int64] BIGINT NOT NULL, "
+			"[Int32] INT NOT NULL, "
+			"[Int16] SMALLINT NOT NULL, "
+			"[Int8] TINYINT NOT NULL, "
+			"[Bool] BIT NOT NULL, "
+			"[String] NVARCHAR(50) NOT NULL, "
+			"[Text] NVARCHAR(MAX) NOT NULL, "
+			"[Float] REAL NOT NULL, "
+			"[Date] DATE NOT NULL, "
+			"[DateTime] DATETIME2 NOT NULL, "
+			"[UUID] UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID());"
+		);
+		if (!result.valid())
+			printError("Query", testClient->error());
+		assertTrue(result.valid());
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 	}
 
 	void testPrepared() try
