@@ -39,10 +39,32 @@ struct data_t
 	tmplORM::types::dateTime_t<typestring<>> when;
 };
 
+struct type_t
+{
+	tmplORM::types::int32_t<typestring<>> entryID;
+	tmplORM::types::int64_t<typestring<>> int64;
+	tmplORM::types::int32_t<typestring<>> int32;
+	tmplORM::types::int16_t<typestring<>> int16;
+	tmplORM::types::int8_t<typestring<>> int8;
+	tmplORM::types::bool_t<typestring<>> boolean;
+	tmplORM::types::unicode_t<typestring<>, 50> string;
+	tmplORM::types::unicodeText_t<typestring<>> text;
+	tmplORM::types::float_t<typestring<>> decimal;
+	tmplORM::types::date_t<typestring<>> date;
+	tmplORM::types::dateTime_t<typestring<>> dateTime;
+};
+
 std::array<data_t, 2> testData
 {
 	data_t{0, "kevin", 50, {}},
 	data_t{0, "dave", nullptr, {}}
+};
+
+type_t typeData{
+	0, i64(9223372036854775807), 2147483647,
+	32767, 127, true, "This is a string",
+	"This is some text", 2.125, ormDate_t{2018, 07, 04},
+	ormDateTime_t{2018, 07, 04, 12, 34, 56, 789012345}
 };
 
 bool haveEnvironment() noexcept
