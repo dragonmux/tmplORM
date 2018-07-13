@@ -274,12 +274,12 @@ namespace tmplORM
 			public:
 				using type = ormDateTime_t;
 				operator ormDateTime_t() const noexcept { return dateTime(); }
-				void operator =(const char *const _value) noexcept { value(ormDateTime_t{_value}); }
+				void operator =(const char *const _value) noexcept { value(_value); }
 				void operator =(const ormDateTime_t &_value) noexcept { value(_value); }
 				void operator =(ormDateTime_t &&_value) noexcept { value(_value); }
 				void dateTime(const ormDateTime_t &_value) noexcept { value(_value); }
 				ormDateTime_t dateTime() const noexcept { return value(); }
-				void value(const char *const _value) noexcept { value(ormDateTime_t{_value}); }
+				void value(const char *const _value) noexcept { _value ? value(ormDateTime_t{_value}) : value(ormDateTime_t{}); }
 
 				ormDateTime_t value() const noexcept
 				{

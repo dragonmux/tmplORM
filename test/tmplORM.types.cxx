@@ -117,8 +117,32 @@ namespace types
 		suite.assertEqual(a.minute(), 0);
 		suite.assertEqual(a.second(), 0);
 		suite.assertEqual(a.nanoSecond(), 0);
+
 		dateTime.value(now);
 		suite.assertTrue(dateTime.value() == now);
+		suite.assertTrue(dateTime.dateTime() == now);
+
+		dateTime = ormDateTime_t{};
+		const ormDateTime_t b = dateTime;
+		suite.assertEqual(b.year(), 0);
+		suite.assertEqual(b.month(), 0);
+		suite.assertEqual(b.day(), 0);
+		suite.assertEqual(b.hour(), 0);
+		suite.assertEqual(b.minute(), 0);
+		suite.assertEqual(b.second(), 0);
+		suite.assertEqual(b.nanoSecond(), 0);
+
+		dateTime = "2018-07-04 12:34:56:789012345";
+		const ormDateTime_t c = dateTime;
+		suite.assertEqual(c.year(), 2018);
+		suite.assertEqual(c.month(), 07);
+		suite.assertEqual(c.day(), 04);
+		suite.assertEqual(c.hour(), 12);
+		suite.assertEqual(c.minute(), 34);
+		suite.assertEqual(c.second(), 56);
+		suite.assertEqual(c.nanoSecond(), 789012345);
+
+		dateTime = {};
 	}
 
 	void testDate(testsuit &suite)
