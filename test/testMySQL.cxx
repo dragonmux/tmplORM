@@ -242,6 +242,13 @@ private:
 		now.nanoSecond(0);
 		assertTrue(row[3].asDateTime() == now);
 		assertFalse(row.next());
+
+		assertTrue(result.valid());
+		mySQLResult_t testResult;
+		assertFalse(testResult.valid());
+		testResult = std::move(result);
+		assertFalse(result.valid());
+		assertTrue(testResult.valid());
 	}
 	catch (const mySQLValueError_t &error)
 	{
