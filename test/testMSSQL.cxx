@@ -183,12 +183,14 @@ private:
 			"[Int32] INT NOT NULL, "
 			"[Int16] SMALLINT NOT NULL, "
 			"[Int8] TINYINT NOT NULL, "
+#if 0
 			"[Bool] BIT NOT NULL, "
 			"[String] NVARCHAR(50) NOT NULL, "
 			//"[Text] NVARCHAR(MAX) NOT NULL, "
 			"[Float] REAL NOT NULL, "
 			"[Date] DATE NOT NULL, "
 			"[DateTime] DATETIME2 NOT NULL, "
+#endif
 			"[UUID] UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID());"
 		);
 		if (!result.valid())
@@ -375,9 +377,9 @@ private:
 		assertFalse(result.valid());
 
 		tSQLQuery_t query = testClient->prepare(
-			"INSERT INTO [TypesTest] ([Int64], [Int32], [Int16], [Int8], "
-			"[Bool], [String]"/*, [Text]*/", [Float], [Date], [DateTime]) "
-			"OUTPUT INSERTED.[EntryID] VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);"/*, ?);", 10*/, 9
+			"INSERT INTO [TypeTest] ([Int64], [Int32], [Int16], [Int8]) "//, "
+			/*"[Bool], [String]"*/ /*, [Text]*/ /*", [Float], [Date], [DateTime]) "*/
+			"OUTPUT INSERTED.[EntryID] VALUES (?, ?, ?, ?);"/*, ?, ?, ?, ?, ?);"/, ?);", 10*/, 4
 		);
 		assertTrue(query.valid());
 		query.bind(0, typeData.int64.value(), fieldLength(typeData.int64));
@@ -388,6 +390,7 @@ private:
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 		query.bind(3, typeData.int8.value(), fieldLength(typeData.int8));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+#if 0
 		query.bind(4, typeData.boolean.value(), fieldLength(typeData.boolean));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 		query.bind(5, typeData.string.value(), fieldLength(typeData.string));
@@ -402,6 +405,28 @@ private:
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 		query.bind(8/*9*/, typeData.dateTime.value(), fieldLength(typeData.dateTime));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+#endif
+		result = query.execute();
+		if (testClient->error() != tSQLExecErrorType_t::ok)
+			printError("Prepared exec", testClient->error());
+		assertTrue(result.valid());
+
+		assertTrue(result.hasData());
+		assertEqual(result.numRows(), 0);
+		assertEqual(result.numFields(), 1);
+		assertFalse(result[0].isNull());
+		typeData.entryID = result[0];
+		assertEqual(typeData.entryID, 1);
+		assertFalse(result.next());
+
+		result = testClient->query("SELECT [EntryID], [Int64], [Int32], [Int16], [Int8] FROM [TypeTest];");
+		if (testClient->error() != tSQLExecErrorType_t::ok)
+			printError("Query", testClient->error());
+		assertTrue(result.valid());
+		assertEqual(result.numRows(), 0);
+		assertEqual(result.numFields(), 5);
+
+		assertFalse(result.next());
 	}
 
 	void testDestroyDB()
