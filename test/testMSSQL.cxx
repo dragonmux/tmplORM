@@ -369,7 +369,7 @@ private:
 		assertFalse(result.next());
 	}
 
-	void testBind()
+	void testBind() try
 	{
 		assertNotNull(testClient);
 		assertTrue(testClient->valid());
@@ -426,7 +426,17 @@ private:
 		assertEqual(result.numRows(), 0);
 		assertEqual(result.numFields(), 5);
 
+		assertEqual(result[0], typeData.entryID);
+		assertEqual(result[1], typeData.int64);
+		assertEqual(result[2], typeData.int32);
+		assertEqual(result[3], typeData.int16);
+		assertEqual(result[4], typeData.int8);
 		assertFalse(result.next());
+	}
+	catch (const tSQLValueError_t &error)
+	{
+		puts(error.error());
+		fail("Exception thrown while converting value");
 	}
 
 	void testDestroyDB()
