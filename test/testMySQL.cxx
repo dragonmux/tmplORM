@@ -314,6 +314,8 @@ private:
 		assertNull(testClient.get());
 	}
 
+	// TODO: Build a test that checks that connecting to an invalid server fails the way it should here.
+
 public:
 	void registerTests() final override
 	{
@@ -336,6 +338,13 @@ public:
 class testMySQLValue_t final : public testsuit
 {
 private:
+	template<typename T> void checkValue(const T &var, const T &expected)
+		{ assertEqual(var, expected); }
+	void checkValue(const ormDate_t &var, const ormDate_t &expected)
+		{ assertTrue(var == expected); }
+	void checkValue(const ormDateTime_t &var, const ormDateTime_t &expected)
+		{ assertTrue(var == expected); }
+
 	template<typename T> T tryOkConversion(const mySQLValue_t &value)
 	{
 		try { return value; }
@@ -359,7 +368,7 @@ private:
 	{
 		assertFalse(value.isNull());
 		T var = tryOkConversion<T>(value);
-		assertEqual(var, expected);
+		checkValue(var, expected);
 	}
 
 	template<typename T> void tryIsNull(const mySQLValue_t value)
@@ -417,6 +426,7 @@ public:
 		tryShouldFail<uint8_t>({"", 0, MYSQL_TYPE_BLOB});
 		tryShouldFail<uint8_t>({"", 0, MYSQL_TYPE_DATE});
 		tryShouldFail<uint8_t>({"", 0, MYSQL_TYPE_DATETIME});
+		tryShouldFail<uint8_t>({"", 0, MYSQL_TYPE_BIT});
 		tryOk<uint8_t>({"128", 4, MYSQL_TYPE_TINY}, 128);
 		tryOk<uint8_t>({"255", 4, MYSQL_TYPE_TINY}, 255);
 		tryOk<uint8_t>({"", 1, MYSQL_TYPE_TINY}, 0);
@@ -438,6 +448,7 @@ public:
 		tryShouldFail<int8_t>({"", 0, MYSQL_TYPE_BLOB});
 		tryShouldFail<int8_t>({"", 0, MYSQL_TYPE_DATE});
 		tryShouldFail<int8_t>({"", 0, MYSQL_TYPE_DATETIME});
+		tryShouldFail<int8_t>({"", 0, MYSQL_TYPE_BIT});
 		tryOk<int8_t>({"127", 4, MYSQL_TYPE_TINY}, 127);
 		tryOk<int8_t>({"", 1, MYSQL_TYPE_TINY}, 0);
 		tryOk<int8_t>({"", 0, MYSQL_TYPE_TINY}, 0);
@@ -462,6 +473,7 @@ public:
 		tryShouldFail<uint16_t>({"", 0, MYSQL_TYPE_BLOB});
 		tryShouldFail<uint16_t>({"", 0, MYSQL_TYPE_DATE});
 		tryShouldFail<uint16_t>({"", 0, MYSQL_TYPE_DATETIME});
+		tryShouldFail<uint16_t>({"", 0, MYSQL_TYPE_BIT});
 		tryOk<uint16_t>({"128", 4, MYSQL_TYPE_SHORT}, 128);
 		tryOk<uint16_t>({"255", 4, MYSQL_TYPE_SHORT}, 255);
 		tryOk<uint16_t>({"32768", 6, MYSQL_TYPE_SHORT}, 32768);
@@ -485,6 +497,7 @@ public:
 		tryShouldFail<int16_t>({"", 0, MYSQL_TYPE_BLOB});
 		tryShouldFail<int16_t>({"", 0, MYSQL_TYPE_DATE});
 		tryShouldFail<int16_t>({"", 0, MYSQL_TYPE_DATETIME});
+		tryShouldFail<int16_t>({"", 0, MYSQL_TYPE_BIT});
 		tryOk<int16_t>({"127", 4, MYSQL_TYPE_SHORT}, 127);
 		tryOk<int16_t>({"32767", 6, MYSQL_TYPE_SHORT}, 32767);
 		tryOk<int16_t>({"", 1, MYSQL_TYPE_SHORT}, 0);
@@ -510,6 +523,7 @@ public:
 		tryShouldFail<uint32_t>({"", 0, MYSQL_TYPE_BLOB});
 		tryShouldFail<uint32_t>({"", 0, MYSQL_TYPE_DATE});
 		tryShouldFail<uint32_t>({"", 0, MYSQL_TYPE_DATETIME});
+		tryShouldFail<uint32_t>({"", 0, MYSQL_TYPE_BIT});
 		tryOk<uint32_t>({"128", 4, MYSQL_TYPE_LONG}, 128);
 		tryOk<uint32_t>({"255", 4, MYSQL_TYPE_LONG}, 255);
 		tryOk<uint32_t>({"32768", 6, MYSQL_TYPE_LONG}, 32768);
@@ -535,6 +549,7 @@ public:
 		tryShouldFail<int32_t>({"", 0, MYSQL_TYPE_BLOB});
 		tryShouldFail<int32_t>({"", 0, MYSQL_TYPE_DATE});
 		tryShouldFail<int32_t>({"", 0, MYSQL_TYPE_DATETIME});
+		tryShouldFail<int32_t>({"", 0, MYSQL_TYPE_BIT});
 		tryOk<int32_t>({"127", 4, MYSQL_TYPE_LONG}, 127);
 		tryOk<int32_t>({"32767", 6, MYSQL_TYPE_LONG}, 32767);
 		tryOk<int32_t>({"2147483647", 11, MYSQL_TYPE_LONG}, 2147483647);
@@ -561,6 +576,7 @@ public:
 		tryShouldFail<uint64_t>({"", 0, MYSQL_TYPE_BLOB});
 		tryShouldFail<uint64_t>({"", 0, MYSQL_TYPE_DATE});
 		tryShouldFail<uint64_t>({"", 0, MYSQL_TYPE_DATETIME});
+		tryShouldFail<uint64_t>({"", 0, MYSQL_TYPE_BIT});
 		tryOk<uint64_t>({"128", 4, MYSQL_TYPE_LONGLONG}, 128);
 		tryOk<uint64_t>({"255", 4, MYSQL_TYPE_LONGLONG}, 255);
 		tryOk<uint64_t>({"32768", 6, MYSQL_TYPE_LONGLONG}, 32768);
@@ -588,6 +604,7 @@ public:
 		tryShouldFail<int64_t>({"", 0, MYSQL_TYPE_BLOB});
 		tryShouldFail<int64_t>({"", 0, MYSQL_TYPE_DATE});
 		tryShouldFail<int64_t>({"", 0, MYSQL_TYPE_DATETIME});
+		tryShouldFail<int64_t>({"", 0, MYSQL_TYPE_BIT});
 		tryOk<int64_t>({"127", 4, MYSQL_TYPE_LONGLONG}, 127);
 		tryOk<int64_t>({"32767", 6, MYSQL_TYPE_LONGLONG}, 32767);
 		tryOk<int64_t>({"2147483647", 11, MYSQL_TYPE_LONGLONG}, 2147483647);
@@ -603,6 +620,49 @@ public:
 		//tryShouldFail<int64_t>({"-129", 5, MYSQL_TYPE_LONGLONG});
 		tryShouldFail<int64_t>({"73786976294838206464", 21, MYSQL_TYPE_LONGLONG});
 		tryShouldFail<int64_t>({"1-27", 5, MYSQL_TYPE_LONGLONG});
+	}
+
+	void testDate()
+	{
+		auto nowString = formatString("%04u-%02u-%02u", now.year(), now.month(), now.day());
+
+		tryIsNull<ormDate_t>({nullptr, 0, MYSQL_TYPE_DATE});
+		tryIsNull<ormDate_t>({"", 0, MYSQL_TYPE_NULL});
+		tryShouldFail<ormDate_t>({"", 0, MYSQL_TYPE_VARCHAR});
+		tryShouldFail<ormDate_t>({"", 0, MYSQL_TYPE_TINY});
+		tryShouldFail<ormDate_t>({"", 0, MYSQL_TYPE_SHORT});
+		tryShouldFail<ormDate_t>({"", 0, MYSQL_TYPE_LONG});
+		tryShouldFail<ormDate_t>({"", 0, MYSQL_TYPE_LONGLONG});
+		tryShouldFail<ormDate_t>({"", 0, MYSQL_TYPE_BLOB});
+		tryShouldFail<ormDate_t>({"", 0, MYSQL_TYPE_DATETIME});
+		tryShouldFail<ormDate_t>({"", 0, MYSQL_TYPE_BIT});
+		tryOk<ormDate_t>({"0000-00-00", 10, MYSQL_TYPE_DATE}, {});
+		tryOk<ormDate_t>({nowString.get(), 10, MYSQL_TYPE_DATE}, now);
+		tryShouldFail<ormDate_t>({"", 0, MYSQL_TYPE_DATE});
+		tryShouldFail<ormDate_t>({"", 1, MYSQL_TYPE_DATE});
+	}
+
+	void testDateTime()
+	{
+		auto nowString = formatString("%04u-%02u-%02u %02u:%02u:%02u", now.year(), now.month(),
+			now.day(), now.hour(), now.minute(), now.second());
+		// MySQL doesn't store this part of the ormDateTime_t..
+		now.nanoSecond(0);
+
+		tryIsNull<ormDateTime_t>({nullptr, 0, MYSQL_TYPE_DATETIME});
+		tryIsNull<ormDateTime_t>({"", 0, MYSQL_TYPE_NULL});
+		tryShouldFail<ormDateTime_t>({"", 0, MYSQL_TYPE_VARCHAR});
+		tryShouldFail<ormDateTime_t>({"", 0, MYSQL_TYPE_TINY});
+		tryShouldFail<ormDateTime_t>({"", 0, MYSQL_TYPE_SHORT});
+		tryShouldFail<ormDateTime_t>({"", 0, MYSQL_TYPE_LONG});
+		tryShouldFail<ormDateTime_t>({"", 0, MYSQL_TYPE_LONGLONG});
+		tryShouldFail<ormDateTime_t>({"", 0, MYSQL_TYPE_BLOB});
+		tryShouldFail<ormDateTime_t>({"", 0, MYSQL_TYPE_DATE});
+		tryShouldFail<ormDateTime_t>({"", 0, MYSQL_TYPE_BIT});
+		tryOk<ormDateTime_t>({"0000-00-00 00:00:00", 19, MYSQL_TYPE_DATETIME}, {});
+		tryOk<ormDateTime_t>({nowString.get(), 19, MYSQL_TYPE_DATETIME}, now);
+		tryShouldFail<ormDateTime_t>({"", 0, MYSQL_TYPE_DATETIME});
+		tryShouldFail<ormDateTime_t>({"", 1, MYSQL_TYPE_DATETIME});
 	}
 
 	void testError()
@@ -638,6 +698,8 @@ public:
 		CXX_TEST(testInt32)
 		CXX_TEST(testUint64)
 		CXX_TEST(testInt64)
+		CXX_TEST(testDate)
+		CXX_TEST(testDateTime)
 		CXX_TEST(testError)
 	}
 };
