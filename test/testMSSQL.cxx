@@ -84,6 +84,7 @@ private:
 	{
 		const auto errorNum = uint8_t(error.errorNum());
 		printf("%s failed (%u): %s\n", prefix, errorNum, error.error());
+		printf("\tserver message: %s\n", error.message());
 		printf("\tstate code: %s\n", error.state());
 	}
 
@@ -184,7 +185,7 @@ private:
 			"[Int8] TINYINT NOT NULL, "
 			"[Bool] BIT NOT NULL, "
 			"[String] NVARCHAR(50) NOT NULL, "
-			"[Text] NVARCHAR(MAX) NOT NULL, "
+			//"[Text] NVARCHAR(MAX) NOT NULL, "
 			"[Float] REAL NOT NULL, "
 			"[Date] DATE NOT NULL, "
 			"[DateTime] DATETIME2 NOT NULL, "
