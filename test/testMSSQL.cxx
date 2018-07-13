@@ -49,7 +49,8 @@ struct type_t
 	tmplORM::types::bool_t<typestring<>> boolean;
 	tmplORM::types::unicode_t<typestring<>, 50> string;
 	tmplORM::types::unicodeText_t<typestring<>> text;
-	tmplORM::types::float_t<typestring<>> decimal;
+	tmplORM::types::float_t<typestring<>> decimalF;
+	tmplORM::types::double_t<typestring<>> decimalD;
 	tmplORM::types::date_t<typestring<>> date;
 	tmplORM::types::dateTime_t<typestring<>> dateTime;
 };
@@ -63,7 +64,7 @@ std::array<data_t, 2> testData
 type_t typeData{
 	0, i64(9223372036854775807), 2147483647,
 	32767, 127, true, "This is a string",
-	"This is some text", 2.125, ormDate_t{2018, 07, 04},
+	"This is some text", 2.125, 5.325, ormDate_t{2018, 07, 04},
 	ormDateTime_t{2018, 07, 04, 12, 34, 56, 789012345}
 };
 
