@@ -364,6 +364,8 @@ uint32_t tSQLValue_t::asUint32() const { return asInt<SQL_INTEGER, SQL_C_ULONG, 
 int32_t tSQLValue_t::asInt32() const { return asInt<SQL_INTEGER, SQL_C_SLONG, tSQLErrorType_t::int32Error, int32_t>(*this, data, type); }
 uint64_t tSQLValue_t::asUint64() const { return asInt<SQL_BIGINT, SQL_C_UBIGINT, tSQLErrorType_t::uint64Error, uint64_t>(*this, data, type); }
 int64_t tSQLValue_t::asInt64() const { return asInt<SQL_BIGINT, SQL_C_SBIGINT, tSQLErrorType_t::int64Error, int64_t>(*this, data, type); }
+float tSQLValue_t::asFloat() const { return asInt<SQL_REAL, SQL_C_FLOAT, tSQLErrorType_t::floatError, float>(*this, data, type); }
+double tSQLValue_t::asDouble() const { return asInt<SQL_FLOAT, SQL_C_DOUBLE, tSQLErrorType_t::doubleError, double>(*this, data, type); }
 
 bool tSQLValue_t::asBool() const
 {
@@ -484,6 +486,10 @@ const char *tSQLValueError_t::error() const noexcept
 			return "Error converting value to an unsigned 64-bit integer";
 		case tSQLErrorType_t::int64Error:
 			return "Error converting value to a signed 64-bit integer";
+		case tSQLErrorType_t::floatError:
+			return "Error converting value to a single-precision floating point number";
+		case tSQLErrorType_t::doubleError:
+			return "Error converting value to a double-precision floating point number";
 		case tSQLErrorType_t::binError:
 			return "Error converting value to binary buffer";
 		case tSQLErrorType_t::dateError:

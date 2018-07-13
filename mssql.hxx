@@ -94,6 +94,8 @@ public:
 	int32_t asInt32() const;
 	uint64_t asUint64() const;
 	int64_t asInt64() const;
+	float asFloat() const;
+	double asDouble() const;
 	ormDate_t asDate() const;
 	ormDateTime_t asDateTime() const;
 	ormUUID_t asUUID() const;
@@ -120,6 +122,10 @@ public:
 	operator uint64_t() const { return asUint64(); }
 	/*! @brief Auto-converter for int64_t's */
 	operator int64_t() const { return asInt64(); }
+	/*! @brief Auto-converter for floats */
+	operator float() const { return asFloat(); }
+	/*! @brief Auto-converter for doubles */
+	operator double() const { return asDouble(); }
 	/*! @brief Auto-converter for dates */
 	operator ormDate_t() const { return asDate(); }
 	/*! @brief Auto-converter for date-times */
@@ -261,6 +267,7 @@ enum class tSQLErrorType_t : uint8_t
 	uint16Error, int16Error,
 	uint32Error, int32Error,
 	uint64Error, int64Error,
+	floatError, doubleError,
 	dateError, dateTimeError,
 	uuidError
 };
