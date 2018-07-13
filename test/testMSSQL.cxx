@@ -847,6 +847,8 @@ private:
 		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::int32Error}.error(), unknownError);
 		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::uint64Error}.error(), unknownError);
 		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::int64Error}.error(), unknownError);
+		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::floatError}.error(), unknownError);
+		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::doubleError}.error(), unknownError);
 		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::binError}.error(), unknownError);
 		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::dateError}.error(), unknownError);
 		assertNotEqual(tSQLValueError_t{tSQLErrorType_t::dateTimeError}.error(), unknownError);
