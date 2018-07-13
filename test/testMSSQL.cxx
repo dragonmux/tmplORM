@@ -377,7 +377,7 @@ private:
 		tSQLQuery_t query = testClient->prepare(
 			"INSERT INTO [TypesTest] ([Int64], [Int32], [Int16], [Int8], "
 			"[Bool], [String]"/*, [Text]*/", [Float], [Date], [DateTime]) "
-			"OUTPUT INSERTED.[EntryID] VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", 10
+			"OUTPUT INSERTED.[EntryID] VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);"/*, ?);", 10*/, 9
 		);
 		assertTrue(query.valid());
 		query.bind(0, typeData.int64.value(), fieldLength(typeData.int64));
