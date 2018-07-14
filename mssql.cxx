@@ -60,6 +60,11 @@ inline int16_t odbcToCType(const int16_t typeODBC) noexcept
 			return SQL_C_STINYINT;
 		case SQL_GUID:
 			return SQL_C_GUID;
+		case SQL_REAL:
+			return SQL_C_FLOAT;
+		case SQL_FLOAT:
+		case SQL_DOUBLE:
+			return SQL_C_DOUBLE;
 	}
 	return typeODBC;
 }
@@ -104,11 +109,6 @@ bool tSQLClient_t::connect(const char *const driver, const char *const host, con
 {
 	if (!connection || haveConnection)
 		return !error(tSQLExecErrorType_t::connect);
-	/*int32_t databaseLength{};
-	SQLGetConnectAttr(connection, SQL_ATTR_CURRENT_CATALOG, nullptr, 0, &databaseLength);
-	printf("Current database string length: %d\n", databaseLength);
-	if (!databaseLength)
-		return !error(tSQLExecErrorType_t::connect);*/
 
 	auto connString = formatString("DRIVER=%s;SERVER=tcp:%s,%u;UID=%s;PWD=%s;TRUSTED_CONNECTION=no", driver, host, port ? port : 1433, user, passwd);
 	if (!connString)
@@ -365,7 +365,13 @@ int32_t tSQLValue_t::asInt32() const { return asInt<SQL_INTEGER, SQL_C_SLONG, tS
 uint64_t tSQLValue_t::asUint64() const { return asInt<SQL_BIGINT, SQL_C_UBIGINT, tSQLErrorType_t::uint64Error, uint64_t>(*this, data, type); }
 int64_t tSQLValue_t::asInt64() const { return asInt<SQL_BIGINT, SQL_C_SBIGINT, tSQLErrorType_t::int64Error, int64_t>(*this, data, type); }
 float tSQLValue_t::asFloat() const { return asInt<SQL_REAL, SQL_C_FLOAT, tSQLErrorType_t::floatError, float>(*this, data, type); }
-double tSQLValue_t::asDouble() const { return asInt<SQL_FLOAT, SQL_C_DOUBLE, tSQLErrorType_t::doubleError, double>(*this, data, type); }
+
+double tSQLValue_t::asDouble() const
+{
+	if (isNull() || (type != SQL_FLOAT && type != SQL_DOUBLE))
+		throw tSQLValueError_t(tSQLErrorType_t::doubleError);
+	return reinterpret<double>(data);
+}
 
 bool tSQLValue_t::asBool() const
 {
