@@ -441,6 +441,7 @@ private:
 		assertEqual(result[6].asString(false).get(), typeData.string);
 		//assertEqual(result[7].asString(false).get(), typeData.text);
 		assertEqual(result[7].asFloat(), typeData.decimalF);
+		assertEqual(result[8], typeData.decimalD);
 		assertTrue(result[9].asDate() == typeData.date);
 		assertTrue(result[10].asDateTime() == dateTime);
 		assertFalse(result.next());

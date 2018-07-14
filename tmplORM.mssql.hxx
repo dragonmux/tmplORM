@@ -45,8 +45,7 @@ namespace tmplORM
 		template<> struct stringType_t<uint64_t> { using value = ts("BIGINT UNSIGNED"); };
 		template<> struct stringType_t<bool> { using value = ts("BIT"); };
 		template<> struct stringType_t<float> { using value = ts("REAL"); };
-		// Yes really.. this represents a full double (8-byte float) when given no parameters..
-		template<> struct stringType_t<double> { using value = ts("FLOAT"); };
+		template<> struct stringType_t<double> { using value = ts("DOUBLE"); };
 		template<> struct stringType_t<char *> { using value = ts("NVARCHAR(MAX)"); };
 		template<> struct stringType_t<ormDate_t> { using value = ts("DATE"); };
 		template<> struct stringType_t<ormDateTime_t> { using value = ts("DATETIME2"); };
@@ -68,7 +67,7 @@ namespace tmplORM
 		template<> struct bind_t<float>
 			{ constexpr static const int16_t typeC = SQL_C_FLOAT; constexpr static const int16_t typeODBC = SQL_REAL; };
 		template<> struct bind_t<double>
-			{ constexpr static const int16_t typeC = SQL_C_DOUBLE; constexpr static const int16_t typeODBC = SQL_FLOAT; };
+			{ constexpr static const int16_t typeC = SQL_C_DOUBLE; constexpr static const int16_t typeODBC = SQL_DOUBLE; };
 		template<> struct bind_t<char *>
 			{ constexpr static const int16_t typeC = SQL_C_CHAR; constexpr static const int16_t typeODBC = SQL_VARCHAR; };
 		template<> struct bind_t<const char *>
