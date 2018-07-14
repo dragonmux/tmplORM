@@ -630,6 +630,8 @@ private:
 		tryShouldFail<uint8_t>({S_(""), 0, SQL_SMALLINT});
 		tryShouldFail<uint8_t>({S_(""), 0, SQL_INTEGER});
 		tryShouldFail<uint8_t>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<uint8_t>({S_(""), 0, SQL_REAL});
+		tryShouldFail<uint8_t>({S_(""), 0, SQL_DOUBLE});
 		tryShouldFail<uint8_t>({S_(""), 0, SQL_VARBINARY});
 		tryShouldFail<uint8_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<uint8_t>({S_(""), 0, SQL_TYPE_DATE});
@@ -647,6 +649,8 @@ private:
 		tryShouldFail<int8_t>({S_(""), 0, SQL_SMALLINT});
 		tryShouldFail<int8_t>({S_(""), 0, SQL_INTEGER});
 		tryShouldFail<int8_t>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<int8_t>({S_(""), 0, SQL_REAL});
+		tryShouldFail<int8_t>({S_(""), 0, SQL_DOUBLE});
 		tryShouldFail<int8_t>({S_(""), 0, SQL_VARBINARY});
 		tryShouldFail<int8_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<int8_t>({S_(""), 0, SQL_TYPE_DATE});
@@ -666,6 +670,8 @@ private:
 		tryShouldFail<uint16_t>({S_(""), 0, SQL_TINYINT});
 		tryShouldFail<uint16_t>({S_(""), 0, SQL_INTEGER});
 		tryShouldFail<uint16_t>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<uint16_t>({S_(""), 0, SQL_REAL});
+		tryShouldFail<uint16_t>({S_(""), 0, SQL_DOUBLE});
 		tryShouldFail<uint16_t>({S_(""), 0, SQL_VARBINARY});
 		tryShouldFail<uint16_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<uint16_t>({S_(""), 0, SQL_TYPE_DATE});
@@ -685,6 +691,8 @@ private:
 		tryShouldFail<int16_t>({S_(""), 0, SQL_TINYINT});
 		tryShouldFail<int16_t>({S_(""), 0, SQL_INTEGER});
 		tryShouldFail<int16_t>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<int16_t>({S_(""), 0, SQL_REAL});
+		tryShouldFail<int16_t>({S_(""), 0, SQL_DOUBLE});
 		tryShouldFail<int16_t>({S_(""), 0, SQL_VARBINARY});
 		tryShouldFail<int16_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<int16_t>({S_(""), 0, SQL_TYPE_DATE});
@@ -705,6 +713,8 @@ private:
 		tryShouldFail<uint32_t>({S_(""), 0, SQL_TINYINT});
 		tryShouldFail<uint32_t>({S_(""), 0, SQL_SMALLINT});
 		tryShouldFail<uint32_t>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<uint32_t>({S_(""), 0, SQL_REAL});
+		tryShouldFail<uint32_t>({S_(""), 0, SQL_DOUBLE});
 		tryShouldFail<uint32_t>({S_(""), 0, SQL_VARBINARY});
 		tryShouldFail<uint32_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<uint32_t>({S_(""), 0, SQL_TYPE_DATE});
@@ -726,6 +736,8 @@ private:
 		tryShouldFail<int32_t>({S_(""), 0, SQL_TINYINT});
 		tryShouldFail<int32_t>({S_(""), 0, SQL_SMALLINT});
 		tryShouldFail<int32_t>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<int32_t>({S_(""), 0, SQL_REAL});
+		tryShouldFail<int32_t>({S_(""), 0, SQL_DOUBLE});
 		tryShouldFail<int32_t>({S_(""), 0, SQL_VARBINARY});
 		tryShouldFail<int32_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<int32_t>({S_(""), 0, SQL_TYPE_DATE});
@@ -747,6 +759,8 @@ private:
 		tryShouldFail<uint64_t>({S_(""), 0, SQL_TINYINT});
 		tryShouldFail<uint64_t>({S_(""), 0, SQL_SMALLINT});
 		tryShouldFail<uint64_t>({S_(""), 0, SQL_INTEGER});
+		tryShouldFail<uint64_t>({S_(""), 0, SQL_REAL});
+		tryShouldFail<uint64_t>({S_(""), 0, SQL_DOUBLE});
 		tryShouldFail<uint64_t>({S_(""), 0, SQL_VARBINARY});
 		tryShouldFail<uint64_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<uint64_t>({S_(""), 0, SQL_TYPE_DATE});
@@ -770,6 +784,8 @@ private:
 		tryShouldFail<int64_t>({S_(""), 0, SQL_TINYINT});
 		tryShouldFail<int64_t>({S_(""), 0, SQL_SMALLINT});
 		tryShouldFail<int64_t>({S_(""), 0, SQL_INTEGER});
+		tryShouldFail<int64_t>({S_(""), 0, SQL_REAL});
+		tryShouldFail<int64_t>({S_(""), 0, SQL_DOUBLE});
 		tryShouldFail<int64_t>({S_(""), 0, SQL_VARBINARY});
 		tryShouldFail<int64_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<int64_t>({S_(""), 0, SQL_TYPE_DATE});
@@ -795,6 +811,8 @@ private:
 		tryShouldFail<bool>({S_(""), 0, SQL_SMALLINT});
 		tryShouldFail<bool>({S_(""), 0, SQL_INTEGER});
 		tryShouldFail<bool>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<bool>({S_(""), 0, SQL_REAL});
+		tryShouldFail<bool>({S_(""), 0, SQL_DOUBLE});
 		tryShouldFail<bool>({S_(""), 0, SQL_VARBINARY});
 		tryShouldFail<bool>({S_(""), 0, SQL_TYPE_DATE});
 		tryShouldFail<bool>({S_(""), 0, SQL_TYPE_TIMESTAMP});
@@ -812,6 +830,8 @@ private:
 		tryShouldFail<ormDate_t>({S_(""), 0, SQL_SMALLINT});
 		tryShouldFail<ormDate_t>({S_(""), 0, SQL_INTEGER});
 		tryShouldFail<ormDate_t>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<ormDate_t>({S_(""), 0, SQL_REAL});
+		tryShouldFail<ormDate_t>({S_(""), 0, SQL_DOUBLE});
 		tryShouldFail<ormDate_t>({S_(""), 0, SQL_VARBINARY});
 		tryShouldFail<ormDate_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<ormDate_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
@@ -830,6 +850,8 @@ private:
 		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_SMALLINT});
 		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_INTEGER});
 		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_REAL});
+		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_DOUBLE});
 		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_VARBINARY});
 		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_TYPE_DATE});
