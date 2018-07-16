@@ -133,6 +133,7 @@ public:
 
 	bool isHex() const noexcept { return checkValue<isHex>(); }
 	bool isOct() const noexcept { return checkValue<isOct>(); }
+	int_t fromInt() const noexcept { return *this; }
 
 	operator int_t() const noexcept
 	{
