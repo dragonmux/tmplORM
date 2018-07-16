@@ -233,23 +233,38 @@ namespace tmplORM
 				uint64_t data4;
 			};
 
+			inline bool operator ==(const guid_t &a, const guid_t &b) noexcept
+			{
+				return a.data1 == b.data1 && a.data2 == b.data2 &&
+					a.data3 == b.data3 && a.data4 == b.data4;
+			}
+
 			struct ormUUID_t final
 			{
 			private:
 				/*! @brief union for storing UUIDs - all data must be kept in Big Endian form. */
 				guid_t _uuid;
+				friend bool operator ==(const ormUUID_t &a, const ormUUID_t &b) noexcept;
 
 			public:
 				constexpr ormUUID_t() noexcept : _uuid() { }
-				ormUUID_t(const guid_t &guid, const bool needsSwap = false) noexcept : _uuid()
+				ormUUID_t(const guid_t &guid, const bool needsSwap = false) noexcept : _uuid{guid}
 				{
-					_uuid = guid;
 					if (needsSwap)
 					{
 						swapBytes(_uuid.data1);
 						swapBytes(_uuid.data2);
 						swapBytes(_uuid.data3);
 					}
+				}
+
+				ormUUID_t(const uint32_t a, const uint16_t b, const uint16_t c, const uint16_t d,
+					const uint64_t e) noexcept : _uuid{a, b, c, d | uint64_t(e << 16)}
+				{
+					swapBytes(_uuid.data1);
+					swapBytes(_uuid.data2);
+					swapBytes(_uuid.data3);
+					swapBytes(reinterpret_cast<uint16_t &>(_uuid.data4));
 				}
 
 				const uint8_t *asBuffer() const noexcept { return reinterpret_cast<const uint8_t *>(&_uuid); }
@@ -278,6 +293,8 @@ namespace tmplORM
 					return nullptr;
 				}
 			};
+
+			inline bool operator ==(const ormUUID_t &a, const ormUUID_t &b) noexcept { return a._uuid == b._uuid; }
 		}
 	}
 }
