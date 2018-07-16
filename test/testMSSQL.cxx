@@ -421,12 +421,13 @@ private:
 		assertFalse(result.next());
 
 		result = testClient->query("SELECT [EntryID], [Int64], [Int32], [Int16], [Int8], "
-			"[Bool], [String]"/*, [Text]*/", [Float], [Double], [Date], [DateTime] FROM [TypeTest];");
+			"[Bool], [String]"/*, [Text]*/", [Float], [Double], [Date], [DateTime], [UUID] "
+			"FROM [TypeTest];");
 		if (testClient->error() != tSQLExecErrorType_t::ok)
 			printError("Query", testClient->error());
 		assertTrue(result.valid());
 		assertEqual(result.numRows(), 0);
-		assertEqual(result.numFields(), 11);
+		assertEqual(result.numFields(), 12);
 
 		ormDateTime_t dateTime = typeData.dateTime;
 		// Apply MSSQL rounding..
@@ -444,6 +445,8 @@ private:
 		assertEqual(result[8], typeData.decimalD);
 		assertTrue(result[9].asDate() == typeData.date);
 		assertTrue(result[10].asDateTime() == dateTime);
+		const auto &uuid = result[11];
+		//printf("%08X-%04X-%04X-%04X-%012X", 
 		assertFalse(result.next());
 	}
 	catch (const tSQLValueError_t &error)
@@ -802,6 +805,9 @@ private:
 		tryOk<int64_t>({S_<int64_t>(i64(-9223372036854775807)), 9, SQL_BIGINT}, i64(-9223372036854775807));
 		tryOk<int64_t>({S_<int64_t>(i64(-9223372036854775807) - 1), 9, SQL_BIGINT}, i64(-9223372036854775807) - 1);
 	}
+
+	//float
+	//double
 
 	void testBool()
 	{
