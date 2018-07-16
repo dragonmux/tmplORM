@@ -352,11 +352,14 @@ namespace tmplORM
 			using parentType_t::operator ==;
 			using parentType_t::operator !=;
 
+			constexpr uuid_t() noexcept : parentType_t{} { }
+			uuid_t(const ormUUID_t _value) noexcept : parentType_t{} { value(_value); }
+			//operator ormUUID_t() const noexcept { return uuid(); }
 			void operator =(const char *const _value) noexcept { value(ormUUID_t(_value)); }
 			void guid(const ormUUID_t &_value) noexcept { value(_value); }
-			ormUUID_t guid() const noexcept { return value(); }
+			ormUUID_t guid() const noexcept { return *this; }
 			void uuid(const ormUUID_t &_value) noexcept { value(_value); }
-			ormUUID_t uuid() const noexcept { return value(); }
+			ormUUID_t uuid() const noexcept { return *this; }
 			void value(const char *const _value) noexcept { value(ormUUID_t(_value)); }
 		};
 
