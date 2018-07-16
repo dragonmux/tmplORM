@@ -273,6 +273,12 @@ namespace tmplORM
 					_uuid.data4 |= uint64_t(toInt_t<uint16_t>(uuid, 4).fromHex()) << 32;
 					_uuid.data4 |= toInt_t<uint32_t>(uuid + 4, 8).fromHex();
 				}
+
+				std::unique_ptr<char []> asString() const noexcept
+				{
+					//
+					return nullptr;
+				}
 			};
 		}
 	}
