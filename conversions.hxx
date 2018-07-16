@@ -200,4 +200,7 @@ inline void swapBytes(uint64_t &val) noexcept
 		((val & 0xFF000000) << 8) | ((val & 0xFF0000) << 24) | ((val & 0xFF00) << 40) | ((val & 0xFF) << 56);
 }
 
+inline char asHex(const uint8_t value) noexcept
+	{ return value < 10 ? value + '0' : value + 'A' - 10; }
+
 #endif /*tmplORM_CONVERSIONS__HXX*/
