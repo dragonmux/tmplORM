@@ -23,6 +23,8 @@ namespace tmplORM
 				uint16_t _month;
 				uint16_t _day;
 
+				friend bool operator ==(const ormDate_t &a, const ormDate_t &b) noexcept;
+
 			public:
 				constexpr ormDate_t() noexcept : _year(0), _month(0), _day(0) { }
 				constexpr ormDate_t(const uint16_t year, const uint16_t month, const uint16_t day) noexcept :
@@ -43,11 +45,11 @@ namespace tmplORM
 					date += 3;
 					_day = toInt_t<uint16_t>(date, 2);
 				}
-
-				bool operator ==(const ormDate_t &date) const noexcept
-					{ return _year == date._year && _month == date._month && _day == date._day; }
-				bool operator !=(const ormDate_t &date) const noexcept { return !(*this == date); }
 			};
+
+			inline bool operator ==(const ormDate_t &a, const ormDate_t &b) noexcept
+				{ return a._year == b._year && a._month == b._month && a._day == b._day; }
+			inline bool operator !=(const ormDate_t &a, const ormDate_t &b) noexcept { return !(a == b); }
 
 			namespace chrono
 			{
@@ -144,13 +146,8 @@ namespace tmplORM
 					*/
 					size_t power10(const size_t power) noexcept
 						{ return power ? power10(power - 1) * 10 : 1; }
-					/*size_t power10(const size_t power) const noexcept
-					{
-						size_t ret = 1;
-						for (size_t i = 0; i < power; ++i)
-							ret *= 10;
-						return ret;
-					}*/
+
+					friend bool operator ==(const ormDateTime_t &a, const ormDateTime_t &b) noexcept;
 
 				public:
 					constexpr ormDateTime_t() noexcept : ormDate_t(), _hour(0), _minute(0), _second(0), _nanoSecond(0) { }
@@ -214,18 +211,19 @@ namespace tmplORM
 					}
 					ormDateTime_t(const timePoint_t &point) noexcept :
 						ormDateTime_t{point.time_since_epoch()} { }
-
-					bool operator ==(const ormDateTime_t &dateTime) const noexcept
-						{ return ormDate_t(*this) == dateTime && _hour == dateTime._hour && _minute == dateTime._minute &&
-							_second == dateTime._second && _nanoSecond == dateTime._nanoSecond; }
-					bool operator !=(const ormDateTime_t &dateTime) const noexcept { return !(*this == dateTime); }
 				};
+
+				inline bool operator ==(const ormDateTime_t &a, const ormDateTime_t &b) noexcept
+					{ return ormDate_t(a) == ormDate_t(b) && a._hour == b._hour && a._minute == b._minute &&
+						a._second == b._second && a._nanoSecond == b._nanoSecond; }
 			}
 
 			using chrono::ormDateTime_t;
+			using chrono::operator ==;
 
-			inline bool operator ==(const ormDate_t &a, const ormDateTime_t &b) noexcept { return a == ormDate_t(b); }
-			inline bool operator ==(const ormDateTime_t &a, const ormDate_t &b) noexcept { return ormDate_t(a) == b; }
+			inline bool operator !=(const ormDateTime_t &a, const ormDateTime_t &b) noexcept { return !(a == b); }
+			//inline bool operator ==(const ormDate_t &a, const ormDateTime_t &b) noexcept { return a == ormDate_t(b); }
+			inline bool operator ==(const ormDateTime_t &a, const ormDate_t &b) noexcept { return ormDate_t{a} == b; }
 
 			struct guid_t final
 			{
