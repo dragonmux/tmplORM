@@ -380,11 +380,20 @@ private:
 		tSQLResult_t result;
 		assertFalse(result.valid());
 
+		// Set up our UUID value.
+		const auto now = systemClock_t::now().time_since_epoch();
+		const uint64_t time = durationIn<milliseconds>(now);
+		const auto nanoSeconds = (now - milliseconds{time}).count();
+		typeData.uuid.value(ormUUID_t{uint32_t(time), uint16_t(time >> 32),
+			uint16_t(0x1000 | ((time >> 48) & 0x0FFF)),
+			uint16_t((nanoSeconds >> 14) | 0x8000), uint64_t{0x123456789ABC}});
+
 		tSQLQuery_t query = testClient->prepare(
 			"INSERT INTO [TypeTest] ([Int64], [Int32], [Int16], [Int8], "
-			"[Bool], [String]"/*, [Text]*/", [Float], [Double], [Date], [DateTime]) "
-			"OUTPUT INSERTED.[EntryID] VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, "//"?, "
-			"?);", 10
+			"[Bool], [String]"/*, [Text]*/", [Float], [Double], [Date], "
+			"[DateTime], [UUID]) "
+			"OUTPUT INSERTED.[EntryID] VALUES (?, ?, ?, ?, ?, ?, ?, ?, "//"?, "
+			"?, ?, ?);", 11
 		);
 		assertTrue(query.valid());
 		query.bind(0, typeData.int64.value(), fieldLength(typeData.int64));
@@ -410,6 +419,8 @@ private:
 		query.bind(8/*9*/, typeData.date.value(), fieldLength(typeData.date));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 		query.bind(9/*10*/, typeData.dateTime.value(), fieldLength(typeData.dateTime));
+		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
+		query.bind(10/*14*/, typeData.uuid.value(), fieldLength(typeData.uuid));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 		result = query.execute();
 		if (testClient->error() != tSQLExecErrorType_t::ok)
@@ -448,9 +459,8 @@ private:
 		assertEqual(result[7].asFloat(), typeData.decimalF);
 		assertEqual(result[8], typeData.decimalD);
 		assertTrue(result[9].asDate() == typeData.date);
-		assertTrue(result[10].asDateTime() == dateTime);
-		const auto &uuid = result[11];
-		//printf("%08X-%04X-%04X-%04X-%012X", 
+		assertTrue(result[10] == dateTime);
+		assertTrue(result[11] == typeData.uuid);
 		assertFalse(result.next());
 	}
 	catch (const tSQLValueError_t &error)
