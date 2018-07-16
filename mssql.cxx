@@ -411,7 +411,6 @@ ormUUID_t tSQLValue_t::asUUID() const
 {
 	if (isNull() || type != SQL_GUID)
 		throw tSQLValueError_t(tSQLErrorType_t::uuidError);
-	//auto guid = reinterpret<SQLGUID>(data);
 	auto guid = reinterpret<guid_t>(data);
 	return {guid, true};
 }
