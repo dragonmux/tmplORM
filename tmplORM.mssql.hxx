@@ -124,12 +124,10 @@ namespace tmplORM
 
 				void *operator ()(const ormUUID_t &value, managedPtr_t<void> &paramStorage) const noexcept
 				{
-					SQLGUID guid;
-					guid.Data1 = value.data1();
-					guid.Data2 = value.data2();
-					guid.Data3 = value.data3();
-					// std::copy uses (from_begin, from_end, to) syntax.
-					std::copy(value.data4(), value.data4() + 8, guid.Data4);
+					SQLGUID guid = *reinterpret_cast<const SQLGUID *>(value.asBuffer());
+					swapBytes(guid.Data1);
+					swapBytes(guid.Data2);
+					swapBytes(guid.Data3);
 					paramStorage = makeManaged<SQLGUID>(guid);
 					return paramStorage.get();
 				}
