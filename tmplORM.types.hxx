@@ -289,8 +289,18 @@ namespace tmplORM
 
 				std::unique_ptr<char []> asString() const noexcept
 				{
-					//
-					return nullptr;
+					auto str = makeUnique<char []>(36);
+					if (!str)
+						return nullptr;
+					for (uint8_t i{0}, j{0}; i < 16; ++i)
+					{
+						const uint8_t value = asBuffer()[i];
+						if (i == 4 || i == 6 || i == 8 || i == 10)
+							str[j++] = '-';
+						str[j++] = asHex(value >> 4);
+						str[j++] = asHex(value & 0x0F);
+					}
+					return str;
 				}
 			};
 
