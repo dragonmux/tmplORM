@@ -386,7 +386,7 @@ private:
 		const auto nanoSeconds = (now - milliseconds{time}).count();
 		typeData.uuid.value(ormUUID_t{uint32_t(time), uint16_t(time >> 32),
 			uint16_t(0x1000 | ((time >> 48) & 0x0FFF)),
-			uint16_t((nanoSeconds >> 14) | 0x8000), uint64_t{0x123456789ABC}});
+			uint16_t((nanoSeconds >> 14) | 0x8000), swapBytes(uint64_t{0x123456789ABCU}) >> 16});
 
 		tSQLQuery_t query = testClient->prepare(
 			"INSERT INTO [TypeTest] ([Int64], [Int32], [Int16], [Int8], "
