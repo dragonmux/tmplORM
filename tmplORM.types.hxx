@@ -259,12 +259,12 @@ namespace tmplORM
 				}
 
 				ormUUID_t(const uint32_t a, const uint16_t b, const uint16_t c, const uint16_t d,
-					const uint64_t e) noexcept : _uuid{a, b, c, d | uint64_t(e << 16)}
+					const uint64_t e) noexcept : _uuid{a, b, c, uint64_t(e << 16)}
 				{
 					swapBytes(_uuid.data1);
 					swapBytes(_uuid.data2);
 					swapBytes(_uuid.data3);
-					swapBytes(reinterpret_cast<uint16_t &>(_uuid.data4));
+					_uuid.data4 |= swapBytes(d);
 				}
 
 				const uint8_t *asBuffer() const noexcept { return reinterpret_cast<const uint8_t *>(&_uuid); }
