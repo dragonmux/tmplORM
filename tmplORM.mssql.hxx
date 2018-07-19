@@ -156,11 +156,8 @@ namespace tmplORM
 			template<> constexpr int16_t bindScale<ormDateTime_t>() noexcept { return 7; }
 			//template<> constexpr int16_t bindScale<ormTime_t>() noexcept { return 7; }
 
-			/*template<typename T> void bindDebug(const T &, const fieldLength_t &) noexcept { }
-			template<typename T> void bindDebug(const char *value, const fieldLength_t &length) noexcept
-				{ printf("%s => %u vs %u\n", value, strlen(value), bindDigits<T>(length.second)); }*/
-
-			template<typename T> void tSQLQuery_t::bind(const size_t index, const T &value, const fieldLength_t length) noexcept
+			template<typename T> void tSQLQuery_t::bind(const size_t index, const T &value,
+				const fieldLength_t length) noexcept
 			{
 				const int16_t dataType = bind_t<T>::typeC;
 				const int16_t odbcDataType = bind_t<T>::typeODBC;
@@ -170,12 +167,13 @@ namespace tmplORM
 				if (dataType == SQL_C_BINARY)
 					dataLengths[index] = dataLen;
 
-				//bindDebug<T>(value, length);
-				error(SQLBindParameter(queryHandle, index + 1, SQL_PARAM_INPUT, dataType, odbcDataType, bindDigits<T>(length.second),
-					bindScale<T>(), bindValue_<T>{}(value, paramStorage[index]), dataLen, lenPtr));
+				error(SQLBindParameter(queryHandle, index + 1, SQL_PARAM_INPUT, dataType, odbcDataType,
+					bindDigits<T>(length.second), bindScale<T>(), bindValue_<T>{}(value, paramStorage[index]),
+					dataLen, lenPtr));
 			}
 
-			template<typename T> void tSQLQuery_t::bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept
+			template<typename T> void tSQLQuery_t::bind(const size_t index, const nullptr_t,
+				const fieldLength_t length) noexcept
 			{
 				const int16_t dataType = bind_t<T>::typeC;
 				const int16_t odbcDataType = bind_t<T>::typeODBC;

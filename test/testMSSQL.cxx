@@ -195,7 +195,7 @@ private:
 			"[Double] FLOAT NOT NULL, "
 			"[Date] DATE NOT NULL, "
 			"[DateTime] DATETIME2 NOT NULL, "
-			"[UUID] UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID());"
+			"[UUID] UNIQUEIDENTIFIER NOT NULL);"
 		);
 		if (!result.valid())
 			printError("Query", testClient->error());
