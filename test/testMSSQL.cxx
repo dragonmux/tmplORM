@@ -407,9 +407,7 @@ private:
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 		query.bind(5, typeData.string.value(), fieldLength(typeData.string));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
-		puts("Binding parameter 7");
 		query.bind(6, typeData.text.value(), fieldLength(typeData.text));
-		printError("Bind", testClient->error());
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
 		query.bind(7, typeData.decimalF.value(), fieldLength(typeData.decimalF));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
@@ -455,7 +453,7 @@ private:
 		assertTrue(bool{result[5]} == typeData.boolean);
 		assertEqual(result[6].asString(false).get(), typeData.string);
 		assertEqual(result[7].asString(false).get(), typeData.text);
-		assertEqual(result[9].asFloat(), typeData.decimalF);
+		assertEqual(result[8].asFloat(), typeData.decimalF);
 		assertEqual(result[9], typeData.decimalD);
 		assertTrue(result[10].asDate() == typeData.date);
 		assertTrue(result[11] == dateTime);
