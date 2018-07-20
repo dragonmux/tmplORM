@@ -184,7 +184,7 @@ public:
 struct tmplORM_API tSQLQuery_t final
 {
 private:
-	const tSQLClient_t *const client;
+	const tSQLClient_t *client;
 	void *queryHandle;
 	size_t numParams;
 	fixedVector_t<managedPtr_t<void>> paramStorage;
