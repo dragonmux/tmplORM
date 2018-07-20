@@ -854,8 +854,51 @@ private:
 		tryOk<int64_t>({S_<int64_t>(i64(-9223372036854775807) - 1), 9, SQL_BIGINT}, i64(-9223372036854775807) - 1);
 	}
 
-	//float
-	//double
+	void testFloat()
+	{
+		constexpr float infPos = std::numeric_limits<float>::infinity(),
+			infNeg = -std::numeric_limits<float>::infinity();
+		tryIsNull<float>({nullptr, 0, SQL_REAL});
+		tryShouldFail<float>({S_(""), 0, SQL_VARCHAR});
+		tryShouldFail<float>({S_(""), 0, SQL_TINYINT});
+		tryShouldFail<float>({S_(""), 0, SQL_SMALLINT});
+		tryShouldFail<float>({S_(""), 0, SQL_INTEGER});
+		tryShouldFail<float>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<float>({S_(""), 0, SQL_DOUBLE});
+		tryShouldFail<float>({S_(""), 0, SQL_VARBINARY});
+		tryShouldFail<float>({S_(""), 0, SQL_BIT});
+		tryShouldFail<float>({S_(""), 0, SQL_TYPE_DATE});
+		tryShouldFail<float>({S_(""), 0, SQL_TYPE_TIMESTAMP});
+		tryShouldFail<float>({S_(""), 0, SQL_GUID});
+		tryOk<float>({S_<float>(0.0), 5, SQL_REAL}, 0.0);
+		tryOk<float>({S_<float>(infPos), 5, SQL_REAL}, infPos);
+		tryOk<float>({S_<float>(infNeg), 5, SQL_REAL}, infNeg);
+		tryOk<float>({S_(""), 0, SQL_REAL}, 0);
+		tryOk<float>({S_(""), 1, SQL_REAL}, 0);
+	}
+
+	void testDouble()
+	{
+		constexpr double infPos = std::numeric_limits<double>::infinity(),
+			infNeg = -std::numeric_limits<double>::infinity();
+		tryIsNull<double>({nullptr, 0, SQL_DOUBLE});
+		tryShouldFail<double>({S_(""), 0, SQL_VARCHAR});
+		tryShouldFail<double>({S_(""), 0, SQL_TINYINT});
+		tryShouldFail<double>({S_(""), 0, SQL_SMALLINT});
+		tryShouldFail<double>({S_(""), 0, SQL_INTEGER});
+		tryShouldFail<double>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<double>({S_(""), 0, SQL_REAL});
+		tryShouldFail<double>({S_(""), 0, SQL_VARBINARY});
+		tryShouldFail<double>({S_(""), 0, SQL_BIT});
+		tryShouldFail<double>({S_(""), 0, SQL_TYPE_DATE});
+		tryShouldFail<double>({S_(""), 0, SQL_TYPE_TIMESTAMP});
+		tryShouldFail<double>({S_(""), 0, SQL_GUID});
+		tryOk<double>({S_<double>(0.0), 9, SQL_DOUBLE}, 0.0);
+		tryOk<double>({S_<double>(infPos), 9, SQL_DOUBLE}, infPos);
+		tryOk<double>({S_<double>(infNeg), 9, SQL_DOUBLE}, infNeg);
+		tryOk<double>({S_(""), 0, SQL_DOUBLE}, 0);
+		tryOk<double>({S_(""), 1, SQL_DOUBLE}, 0);
+	}
 
 	void testBool()
 	{
@@ -973,6 +1016,8 @@ public:
 		CXX_TEST(testInt32)
 		CXX_TEST(testUint64)
 		CXX_TEST(testInt64)
+		CXX_TEST(testFloat)
+		CXX_TEST(testDouble)
 		CXX_TEST(testBool)
 		CXX_TEST(testDate)
 		CXX_TEST(testDateTime)
