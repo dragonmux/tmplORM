@@ -561,8 +561,9 @@ private:
 		return static_cast<char *>(memcpy(ret, str, len + 1));
 	}
 
-	template<typename T, typename = typename std::enable_if<std::is_integral<T>::value ||
-		std::is_same<T, SQL_DATE_STRUCT>::value || std::is_same<T, SQL_TIMESTAMP_STRUCT>::value>::type>
+	template<typename T, typename = typename std::enable_if<std::is_fundamental<T>::value ||
+		std::is_same<T, SQL_DATE_STRUCT>::value || std::is_same<T, SQL_TIMESTAMP_STRUCT>::value ||
+		std::is_same<T, SQLGUID>::value>::type>
 		char *S_(const T value) noexcept
 	{
 		constexpr size_t len = sizeof(T);
@@ -585,6 +586,8 @@ private:
 	void checkValue(const ormDate_t &var, const ormDate_t &expected)
 		{ assertTrue(var == expected); }
 	void checkValue(const ormDateTime_t &var, const ormDateTime_t &expected)
+		{ assertTrue(var == expected); }
+	void checkValue(const ormUUID_t &var, const ormUUID_t &expected)
 		{ assertTrue(var == expected); }
 
 	template<typename T> T tryOkConversion(const tSQLValue_t &value)
@@ -637,6 +640,12 @@ private:
 		tryIsNull<int32_t>({});
 		tryIsNull<uint64_t>({});
 		tryIsNull<int64_t>({});
+		tryIsNull<float>({});
+		tryIsNull<double>({});
+		tryIsNull<bool>({});
+		tryIsNull<ormDate_t>({});
+		tryIsNull<ormDateTime_t>({});
+		tryIsNull<ormUUID_t>({});
 	}
 
 	void testString()
@@ -670,6 +679,7 @@ private:
 		tryShouldFail<uint8_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<uint8_t>({S_(""), 0, SQL_TYPE_DATE});
 		tryShouldFail<uint8_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
+		tryShouldFail<uint8_t>({S_(""), 0, SQL_GUID});
 		tryOk<uint8_t>({S_<uint8_t>(128), 2, SQL_TINYINT}, 128);
 		tryOk<uint8_t>({S_<uint8_t>(255), 2, SQL_TINYINT}, 255);
 		tryOk<uint8_t>({S_(""), 1, SQL_TINYINT}, 0);
@@ -689,6 +699,7 @@ private:
 		tryShouldFail<int8_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<int8_t>({S_(""), 0, SQL_TYPE_DATE});
 		tryShouldFail<int8_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
+		tryShouldFail<int8_t>({S_(""), 0, SQL_GUID});
 		tryOk<int8_t>({S_<int8_t>(127), 2, SQL_TINYINT}, 127);
 		tryOk<int8_t>({S_(""), 1, SQL_TINYINT}, 0);
 		tryOk<int8_t>({S_(""), 0, SQL_TINYINT}, 0);
@@ -710,6 +721,7 @@ private:
 		tryShouldFail<uint16_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<uint16_t>({S_(""), 0, SQL_TYPE_DATE});
 		tryShouldFail<uint16_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
+		tryShouldFail<uint16_t>({S_(""), 0, SQL_GUID});
 		tryOk<uint16_t>({S_<uint16_t>(128), 3, SQL_SMALLINT}, 128);
 		tryOk<uint16_t>({S_<uint16_t>(255), 3, SQL_SMALLINT}, 255);
 		tryOk<uint16_t>({S_<uint16_t>(32768), 3, SQL_SMALLINT}, 32768);
@@ -731,6 +743,7 @@ private:
 		tryShouldFail<int16_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<int16_t>({S_(""), 0, SQL_TYPE_DATE});
 		tryShouldFail<int16_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
+		tryShouldFail<int16_t>({S_(""), 0, SQL_GUID});
 		tryOk<int16_t>({S_<int16_t>(127), 3, SQL_SMALLINT}, 127);
 		tryOk<int16_t>({S_<int16_t>(32767), 3, SQL_SMALLINT}, 32767);
 		tryOk<int16_t>({S_(""), 1, SQL_SMALLINT}, 0);
@@ -753,6 +766,7 @@ private:
 		tryShouldFail<uint32_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<uint32_t>({S_(""), 0, SQL_TYPE_DATE});
 		tryShouldFail<uint32_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
+		tryShouldFail<uint32_t>({S_(""), 0, SQL_GUID});
 		tryOk<uint32_t>({S_<uint32_t>(128), 5, SQL_INTEGER}, 128);
 		tryOk<uint32_t>({S_<uint32_t>(255), 5, SQL_INTEGER}, 255);
 		tryOk<uint32_t>({S_<uint32_t>(32768), 5, SQL_INTEGER}, 32768);
@@ -776,6 +790,7 @@ private:
 		tryShouldFail<int32_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<int32_t>({S_(""), 0, SQL_TYPE_DATE});
 		tryShouldFail<int32_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
+		tryShouldFail<int32_t>({S_(""), 0, SQL_GUID});
 		tryOk<int32_t>({S_<int32_t>(127), 5, SQL_INTEGER}, 127);
 		tryOk<int32_t>({S_<int32_t>(32767), 5, SQL_INTEGER}, 32767);
 		tryOk<int32_t>({S_<int32_t>(2147483647), 5, SQL_INTEGER}, 2147483647);
@@ -799,6 +814,7 @@ private:
 		tryShouldFail<uint64_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<uint64_t>({S_(""), 0, SQL_TYPE_DATE});
 		tryShouldFail<uint64_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
+		tryShouldFail<uint64_t>({S_(""), 0, SQL_GUID});
 		tryOk<uint64_t>({S_<uint64_t>(128), 9, SQL_BIGINT}, 128);
 		tryOk<uint64_t>({S_<uint64_t>(255), 9, SQL_BIGINT}, 255);
 		tryOk<uint64_t>({S_<uint64_t>(32768), 9, SQL_BIGINT}, 32768);
@@ -824,6 +840,7 @@ private:
 		tryShouldFail<int64_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<int64_t>({S_(""), 0, SQL_TYPE_DATE});
 		tryShouldFail<int64_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
+		tryShouldFail<int64_t>({S_(""), 0, SQL_GUID});
 		tryOk<int64_t>({S_<int64_t>(127), 9, SQL_BIGINT}, 127);
 		tryOk<int64_t>({S_<int64_t>(32767), 9, SQL_BIGINT}, 32767);
 		tryOk<int64_t>({S_<int64_t>(2147483647), 9, SQL_BIGINT}, 2147483647);
@@ -853,6 +870,7 @@ private:
 		tryShouldFail<bool>({S_(""), 0, SQL_VARBINARY});
 		tryShouldFail<bool>({S_(""), 0, SQL_TYPE_DATE});
 		tryShouldFail<bool>({S_(""), 0, SQL_TYPE_TIMESTAMP});
+		tryShouldFail<bool>({S_(""), 0, SQL_GUID});
 		tryOk<bool>({S_<bool>(false), 2, SQL_BIT}, false);
 		tryOk<bool>({S_<bool>(true), 2, SQL_BIT}, true);
 		tryOk<bool>({S_(""), 0, SQL_BIT}, false);
@@ -872,6 +890,7 @@ private:
 		tryShouldFail<ormDate_t>({S_(""), 0, SQL_VARBINARY});
 		tryShouldFail<ormDate_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<ormDate_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
+		tryShouldFail<ormDate_t>({S_(""), 0, SQL_GUID});
 		tryOk<ormDate_t>({S_<SQL_DATE_STRUCT>({}), 7, SQL_TYPE_DATE}, {});
 		tryOk<ormDate_t>({S_<SQL_DATE_STRUCT>(asSQLType(ormDate_t{now})), 7, SQL_TYPE_DATE}, now);
 		tryShouldFail<ormDate_t>({S_(""), 0, SQL_TYPE_DATE});
@@ -892,10 +911,28 @@ private:
 		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_VARBINARY});
 		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_BIT});
 		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_TYPE_DATE});
+		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_GUID});
 		tryOk<ormDateTime_t>({S_<SQL_TIMESTAMP_STRUCT>({}), 17, SQL_TYPE_TIMESTAMP}, {});
 		tryOk<ormDateTime_t>({S_<SQL_TIMESTAMP_STRUCT>(asSQLType(now)), 17, SQL_TYPE_TIMESTAMP}, now);
 		tryShouldFail<ormDateTime_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
 		tryShouldFail<ormDateTime_t>({S_(""), 1, SQL_TYPE_TIMESTAMP});
+	}
+
+	void testUUID()
+	{
+		tryIsNull<ormUUID_t>({nullptr, 0, SQL_GUID});
+		tryShouldFail<ormUUID_t>({S_(""), 0, SQL_VARCHAR});
+		tryShouldFail<ormUUID_t>({S_(""), 0, SQL_TINYINT});
+		tryShouldFail<ormUUID_t>({S_(""), 0, SQL_SMALLINT});
+		tryShouldFail<ormUUID_t>({S_(""), 0, SQL_INTEGER});
+		tryShouldFail<ormUUID_t>({S_(""), 0, SQL_BIGINT});
+		tryShouldFail<ormUUID_t>({S_(""), 0, SQL_REAL});
+		tryShouldFail<ormUUID_t>({S_(""), 0, SQL_DOUBLE});
+		tryShouldFail<ormUUID_t>({S_(""), 0, SQL_VARBINARY});
+		tryShouldFail<ormUUID_t>({S_(""), 0, SQL_BIT});
+		tryShouldFail<ormUUID_t>({S_(""), 0, SQL_TYPE_DATE});
+		tryShouldFail<ormUUID_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
+		tryOk<ormUUID_t>({S_<SQLGUID>({}), 33, SQL_GUID}, {});
 	}
 
 	void testError()
@@ -939,6 +976,7 @@ public:
 		CXX_TEST(testBool)
 		CXX_TEST(testDate)
 		CXX_TEST(testDateTime)
+		CXX_TEST(testUUID)
 		CXX_TEST(testError)
 	}
 };
