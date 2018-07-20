@@ -466,6 +466,25 @@ private:
 		fail("Exception thrown while converting value");
 	}
 
+	void testBadQuery()
+	{
+		assertNotNull(testClient);
+		assertTrue(testClient->valid());
+		tSQLQuery_t query;
+		assertFalse(query.valid());
+		tSQLResult_t result;
+		assertFalse(result.valid());
+
+		query = testClient->prepare(nullptr, 0);
+		assertFalse(query.valid());
+
+		query = testClient->prepare("SELECT `Bad` FROM [tmplORM];", 0);
+		assertTrue(query.valid());
+		result = query.execute();
+		assertFalse(result.valid());
+		assertFalse(testClient->error() == tSQLExecErrorType_t::ok);
+	}
+
 	void testDestroyDB()
 	{
 		assertNotNull(testClient);
@@ -522,6 +541,7 @@ public:
 		CXX_TEST(testResult)
 		CXX_TEST(testTransact)
 		CXX_TEST(testBind)
+		CXX_TEST(testBadQuery)
 		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
 		CXX_TEST(testError)
