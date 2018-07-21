@@ -347,7 +347,7 @@ private:
 
 	template<typename T> T tryOkConversion(const mySQLValue_t &value)
 	{
-		try { return value; }
+		try { return T(value); }
 		catch (const mySQLValueError_t &error)
 			{ fail(error.error()); }
 		return {};
@@ -357,7 +357,7 @@ private:
 	{
 		try
 		{
-			T v = value;
+			T v(value);
 			printf("Conversion for %s: ", typeid(T).name());
 			fail("Conversion succeeded (expected to fail)");
 		}
