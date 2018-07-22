@@ -622,6 +622,29 @@ public:
 		tryShouldFail<int64_t>({"1-27", 5, MYSQL_TYPE_LONGLONG});
 	}
 
+	void testBool()
+	{
+		tryIsNull<bool>({nullptr, 0, MYSQL_TYPE_BIT});
+		tryIsNull<bool>({"", 0, MYSQL_TYPE_NULL});
+		tryShouldFail<bool>({"", 0, MYSQL_TYPE_VARCHAR});
+		tryShouldFail<bool>({"", 0, MYSQL_TYPE_TINY});
+		tryShouldFail<bool>({"", 0, MYSQL_TYPE_SHORT});
+		tryShouldFail<bool>({"", 0, MYSQL_TYPE_LONG});
+		tryShouldFail<bool>({"", 0, MYSQL_TYPE_LONGLONG});
+		tryShouldFail<bool>({"", 0, MYSQL_TYPE_BLOB});
+		tryShouldFail<bool>({"", 0, MYSQL_TYPE_DATE});
+		tryShouldFail<bool>({"", 0, MYSQL_TYPE_DATETIME});
+		tryOk<bool>({"true", 5, MYSQL_TYPE_BIT}, true);
+		tryOk<bool>({"false", 6, MYSQL_TYPE_BIT}, false);
+		tryOk<bool>({"", 1, MYSQL_TYPE_BIT}, 0);
+		tryOk<bool>({"", 0, MYSQL_TYPE_BIT}, 0);
+		tryShouldFail<bool>({"-1", 3, MYSQL_TYPE_BIT});
+		tryShouldFail<bool>({"a", 2, MYSQL_TYPE_BIT});
+		tryShouldFail<bool>({"256", 4, MYSQL_TYPE_BIT});
+		tryShouldFail<bool>({"1023", 5, MYSQL_TYPE_BIT});
+		tryShouldFail<bool>({"1-27", 5, MYSQL_TYPE_BIT});
+	}
+
 	void testDate()
 	{
 		auto nowString = formatString("%04u-%02u-%02u", now.year(), now.month(), now.day());
@@ -698,6 +721,7 @@ public:
 		CXX_TEST(testInt32)
 		CXX_TEST(testUint64)
 		CXX_TEST(testInt64)
+		CXX_TEST(testBool)
 		CXX_TEST(testDate)
 		CXX_TEST(testDateTime)
 		CXX_TEST(testError)
