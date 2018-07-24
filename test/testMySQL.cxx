@@ -352,6 +352,97 @@ private:
 		// TODO: Continue this test to pull back real data and play.. needs the rest of the type written first.
 	}
 
+	void testBind() try
+	{
+		assertNotNull(testClient);
+		assertTrue(testClient->valid());
+		bool execResult{false};
+		assertFalse(execResult);
+
+		// Set up our UUID value.
+		const auto now = systemClock_t::now().time_since_epoch();
+		const uint64_t time = durationIn<milliseconds>(now);
+		const auto nanoSeconds = (now - milliseconds{time}).count();
+		typeData.uuid.value(ormUUID_t{uint32_t(time), uint16_t(time >> 32),
+			uint16_t(0x1000 | ((time >> 48) & 0x0FFF)),
+			uint16_t((nanoSeconds >> 14) | 0x8000), swapBytes(uint64_t{0x123456789ABCU}) >> 16});
+
+		mySQLPreparedQuery_t query = testClient->prepare(
+			"INSERT INTO `TypeTest` (`Int64`, `Int32`, `Int16`, `Int8`, `Bool`, "
+			"`String`, `Text`, `Float`, `Double`, `Date`, `DateTime`, `UUID`) "
+			"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", 12
+		);
+		assertTrue(query.valid());
+		query.bind(0, typeData.int64.value(), fieldLength(typeData.int64));
+		assertEqual(testClient->errorNum(), 0);
+		query.bind(1, typeData.int32.value(), fieldLength(typeData.int32));
+		assertEqual(testClient->errorNum(), 0);
+		query.bind(2, typeData.int16.value(), fieldLength(typeData.int16));
+		assertEqual(testClient->errorNum(), 0);
+		query.bind(3, typeData.int8.value(), fieldLength(typeData.int8));
+		assertEqual(testClient->errorNum(), 0);
+		query.bind(4, typeData.boolean.value(), fieldLength(typeData.boolean));
+		assertEqual(testClient->errorNum(), 0);
+		query.bind(5, typeData.string.value(), fieldLength(typeData.string));
+		assertEqual(testClient->errorNum(), 0);
+		query.bind(6, typeData.text.value(), fieldLength(typeData.text));
+		assertEqual(testClient->errorNum(), 0);
+		query.bind(7, typeData.decimalF.value(), fieldLength(typeData.decimalF));
+		assertEqual(testClient->errorNum(), 0);
+		query.bind(8, typeData.decimalD.value(), fieldLength(typeData.decimalD));
+		assertEqual(testClient->errorNum(), 0);
+		query.bind(9, typeData.date.value(), fieldLength(typeData.date));
+		assertEqual(testClient->errorNum(), 0);
+		query.bind(10, typeData.dateTime.value(), fieldLength(typeData.dateTime));
+		assertEqual(testClient->errorNum(), 0);
+		query.bind(11, typeData.uuid.value(), fieldLength(typeData.uuid));
+		assertEqual(testClient->errorNum(), 0);
+
+		execResult = query.execute();
+		if (!execResult)
+			printError("Prepared exec", query);
+		assertTrue(execResult);
+		typeData.entryID = query.rowID();
+		assertEqual(typeData.entryID, 1);
+
+		execResult = testClient->query("SELECT `EntryID`, `Int64`, `Int32`, `Int16`, `Int8`, "
+			"`Bool`, `String`, `Text`, `Float`, `Double`, `Date`, `DateTime`, `UUID` "
+			"FROM `TypeTest`;");
+		if (!execResult)
+			printError("Query", *testClient);
+		assertTrue(execResult);
+		const mySQLResult_t result = testClient->queryResult();
+		assertTrue(result.valid());
+		assertEqual(result.numRows(), 1);
+		mySQLRow_t row = result.resultRows();
+		assertTrue(row.valid());
+		assertEqual(row.numFields(), 13);
+
+		ormDateTime_t dateTime = typeData.dateTime;
+		// MySQL doesn't store this part of the ormDateTime_t..
+		dateTime.nanoSecond(0);
+
+		assertEqual(row[0], typeData.entryID);
+		assertEqual(row[1], typeData.int64);
+		assertEqual(row[2], typeData.int32);
+		assertEqual(row[3], typeData.int16);
+		assertEqual(row[4], typeData.int8);
+		assertTrue(bool{row[5]} == typeData.boolean);
+		assertEqual(row[6].asString().get(), typeData.string);
+		assertEqual(row[7].asString().get(), typeData.text);
+		//assertEqual(row[8].asFloat(), typeData.decimalF);
+		//assertEqual(row[9], typeData.decimalD);
+		assertTrue(row[10].asDate() == typeData.date);
+		assertTrue(row[11] == dateTime);
+		assertTrue(row[12] == typeData.uuid);
+		assertFalse(row.next());
+	}
+	catch (const mySQLValueError_t &error)
+	{
+		puts(error.error());
+		fail("Exception thrown while converting value");
+	}
+
 	void testDestroyDB()
 	{
 		assertNotNull(testClient);
@@ -390,6 +481,7 @@ public:
 		CXX_TEST(testPreparedQuery)
 		CXX_TEST(testResult)
 		CXX_TEST(testPreparedResult)
+		CXX_TEST(testBind)
 		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
 	}
