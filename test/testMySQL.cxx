@@ -185,12 +185,37 @@ private:
 	{
 		assertNotNull(testClient);
 		assertTrue(testClient->valid());
-		const bool result = testClient->query(
+		bool result{false};
+		assertFalse(result);
+
+		result = testClient->query(
 			"CREATE TABLE `tmplORM` ("
 			"`EntryID` INT NOT NULL PRIMARY KEY AUTO_INCREMENT, "
 			"`Name` VARCHAR(50) NOT NULL, "
 			"`Value` INT NULL, "
 			"`When` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP"
+			") CHARACTER SET utf8;"
+		);
+		if (!result)
+			printError("Query", *testClient);
+		assertTrue(result);
+		assertEqual(testClient->errorNum(), 0);
+
+		result = testClient->query(
+			"CREATE TABLE `TypeTest` ("
+			"`EntryID` INT NOT NULL PRIMARY KEY AUTO_INCREMENT, "
+			"`Int64` BIGINT NOT NULL, "
+			"`Int32` INT NOT NULL, "
+			"`Int16` SMALLINT NOT NULL, "
+			"`Int8` TINYINT NOT NULL, "
+			"`Bool` BIT NOT NULL, "
+			"`String` VARCHAR(50) NOT NULL, "
+			"`Text` TEXT NOT NULL, "
+			"`Float` FLOAT NOT NULL, "
+			"`Double` DOUBLE NOT NULL, "
+			"`Date` DATE NOT NULL, "
+			"`DateTime` DATETIME NOT NULL, "
+			"`UUID` CHAR(32) NOT NULL"
 			") CHARACTER SET utf8;"
 		);
 		if (!result)
