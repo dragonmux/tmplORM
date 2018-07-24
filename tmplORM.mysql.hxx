@@ -48,7 +48,7 @@ namespace tmplORM
 		template<> struct bind_t<int32_t> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_LONG; };
 		template<> struct bind_t<int64_t> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_LONGLONG; };
 		//
-		template<> struct bind_t<bool> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_BIT; };
+		template<> struct bind_t<bool> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_TINY; };
 		template<> struct bind_t<float> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_FLOAT; };
 		template<> struct bind_t<double> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_DOUBLE; };
 		template<> struct bind_t<char *> { constexpr static const mySQLFieldType_t value = MYSQL_TYPE_VAR_STRING; };
