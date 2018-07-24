@@ -7,7 +7,7 @@
  * @internal
  * @file
  * @author Rachel Mant
- * @date 2016-2017
+ * @date 2016-2018
  * @brief C++ MySQL driver abstraction layer for handling client connections and query datasets
  */
 
@@ -238,6 +238,16 @@ bool mySQLPreparedQuery_t::execute() noexcept
 	return executed;
 }
 
+/*!
+ * @brief MySQL calls can result in an error outside this driver layer, this allows you to know what that error is if something fails
+ * @returns The current MySQL errno error number code
+ */
+uint32_t mySQLPreparedQuery_t::errorNum() const noexcept { return valid() ? mysql_stmt_errno(query) : 0; }
+/*!
+ * @brief MySQL calls can result in an error outside this driver layer, this allows you to know the human readable error string
+ * @returns The current MySQL error string
+ */
+const char *mySQLPreparedQuery_t::error() const noexcept { return valid() ? mysql_stmt_error(query) : nullptr; }
 /*! @brief Returns the ID of a freshly inserted row for this prepared query, or 0 otherwise */
 uint64_t mySQLPreparedQuery_t::rowID() const noexcept { return executed ? mysql_stmt_insert_id(query) : 0; }
 mySQLPreparedResult_t mySQLPreparedQuery_t::queryResult(const size_t columnCount) const noexcept
@@ -444,7 +454,9 @@ bool mySQLValue_t::asBool(const uint8_t bit) const
 
 /*!
  * @internal
- * @brief Performs a checked string to integer conversion - that is, any issues are checked for and the errorType returned.
+ * @brief Performs a checked string to integer conversion
+ * @details Any issues are checked for and, if found the errorType returned,
+ *     otherwise the converted value is returned.
  * @param data The string to convert
  * @param len The length of the string to convert
  * @returns The converted integer, or errorType on error.

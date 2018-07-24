@@ -12,7 +12,7 @@
 /*!
  * @file
  * @author Rachel Mant
- * @date 2016-2017
+ * @date 2016-2018
  * @brief Defines the interface to the MSSQL (Transact-SQL) abstraction layer
  */
 

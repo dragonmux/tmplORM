@@ -4,6 +4,14 @@
 #include "mssql.hxx"
 #include "string.hxx"
 
+/*!
+ * @internal
+ * @file
+ * @author Rachel Mant
+ * @date 2016-2018
+ * @brief C++ MSSQL/T-SQL driver abstraction layer for handling client connections and query datasets
+ */
+
 // We'd use <locale> here with its std::codecvt/std::wstring_convert functionality, however
 // this causes many numerous reallocations (which can fail and throw), heap fragmentation,
 // and general slowness when we already know the bounds of our string.
