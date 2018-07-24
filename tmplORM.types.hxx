@@ -268,6 +268,7 @@ namespace tmplORM
 				}
 
 				const uint8_t *asBuffer() const noexcept { return reinterpret_cast<const uint8_t *>(&_uuid); }
+				uint8_t *asBuffer() noexcept { return reinterpret_cast<uint8_t *>(&_uuid); }
 				constexpr uint32_t data1() const noexcept { return _uuid.data1; }
 				constexpr uint16_t data2() const noexcept { return _uuid.data2; }
 				constexpr uint16_t data3() const noexcept { return _uuid.data3; }
@@ -294,9 +295,25 @@ namespace tmplORM
 						return nullptr;
 					for (uint8_t i{0}, j{0}; i < 16; ++i)
 					{
+						// This works because internally we keep things big endian
 						const uint8_t value = asBuffer()[i];
 						if (i == 4 || i == 6 || i == 8 || i == 10)
 							str[j++] = '-';
+						str[j++] = asHex(value >> 4);
+						str[j++] = asHex(value & 0x0F);
+					}
+					return str;
+				}
+
+				std::unique_ptr<char []> asPackedString() const noexcept
+				{
+					auto str = makeUnique<char []>(32);
+					if (!str)
+						return nullptr;
+					for (uint8_t i{0}, j{0}; i < 16; ++i)
+					{
+						// This works because internally we keep things big endian
+						const uint8_t value = asBuffer()[i];
 						str[j++] = asHex(value >> 4);
 						str[j++] = asHex(value & 0x0F);
 					}
