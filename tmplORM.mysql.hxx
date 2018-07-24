@@ -26,8 +26,8 @@ namespace tmplORM
 		template<typename> struct stringType_t { using value = typestring<>; };
 		template<> struct stringType_t<int8_t> { using value = ts("TINYINT"); };
 		template<> struct stringType_t<uint8_t> { using value = ts("TINYINT UNSIGNED"); };
-		template<> struct stringType_t<int16_t> { using value = ts("SHORT"); };
-		template<> struct stringType_t<uint16_t> { using value = ts("SHORT UNSIGNED"); };
+		template<> struct stringType_t<int16_t> { using value = ts("SMALLINT"); };
+		template<> struct stringType_t<uint16_t> { using value = ts("SMALLINT UNSIGNED"); };
 		template<> struct stringType_t<int32_t> { using value = ts("INT"); };
 		template<> struct stringType_t<uint32_t> { using value = ts("INT UNSIGNED"); };
 		template<> struct stringType_t<int64_t> { using value = ts("BIGINT"); };
@@ -137,7 +137,7 @@ namespace tmplORM
 					if (!storage)
 						return false;
 					param.buffer = storage->data();
-					param.buffer_length = storage->size();
+					param.buffer_length = uuid.size();
 					paramStorage = std::move(storage);
 					return true;
 				}

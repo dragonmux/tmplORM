@@ -47,7 +47,7 @@ public:
 			"`Phone` VARCHAR(24) NULL, `Fax` VARCHAR(24) NULL, `HomePage`  NULL) CHARACTER SET utf8;");
 		assertEqual(createTable(product), "CREATE TABLE IF NOT EXISTS `Products` (`ProductID` INT PRIMARY KEY AUTO_INCREMENT NOT NULL, "
 			"`ProductName` VARCHAR(40) NOT NULL, `SupplierID` INT NULL, `CategoryID` INT NULL, `QuantityPerUnit` VARCHAR(20) NULL, "
-			"`UnitsInStock` SHORT NULL, `UnitsOnOrder` SHORT NULL, `ReorderLevel` SHORT NULL, `Discontinued` BIT(1) NOT NULL) CHARACTER SET utf8;");
+			"`UnitsInStock` SMALLINT NULL, `UnitsOnOrder` SMALLINT NULL, `ReorderLevel` SMALLINT NULL, `Discontinued` BIT(1) NOT NULL) CHARACTER SET utf8;");
 		assertEqual(createTable(customer), "CREATE TABLE IF NOT EXISTS `Customers` (`CustomerID` VARCHAR(5) PRIMARY KEY NOT NULL, "
 			"`CompanyName` VARCHAR(40) NOT NULL, `ContactName` VARCHAR(30) NULL, `ContactTitle` VARCHAR(30) NULL, `Address` VARCHAR(60) NULL, "
 			"`City` VARCHAR(15) NULL, `Region` VARCHAR(15) NULL, `PostalCode` VARCHAR(10) NULL, `Country` VARCHAR(15) NULL, "
