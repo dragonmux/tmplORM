@@ -92,6 +92,13 @@ private:
 		printf("%s failed (%u): %s\n", prefix, errorNum, errorStr);
 	}
 
+	void printError(const char *prefix, const mySQLPreparedQuery_t &query)
+	{
+		const auto errorStr = query.error();
+		const auto errorNum = query.errorNum();
+		printf("%s failed (%u): %s\n", prefix, errorNum, errorStr);
+	}
+
 	void testInvalid()
 	{
 		mySQLClient_t testClient;
@@ -209,7 +216,7 @@ private:
 		assertEqual(testClient->errorNum(), 0);
 		result = query.execute();
 		if (!result)
-			printError("Prepared exec", *testClient);
+			printError("Prepared exec", query);
 		assertTrue(result);
 
 		testData[0].entryID = query.rowID();
@@ -226,7 +233,7 @@ private:
 		assertEqual(testClient->errorNum(), 0);
 		result = query.execute();
 		if (!result)
-			printError("Prepared exec", *testClient);
+			printError("Prepared exec", query);
 		assertTrue(result);
 
 		testData[1].entryID = query.rowID();
@@ -302,7 +309,7 @@ private:
 		assertEqual(testClient->errorNum(), 0);
 		const bool queryResult = query.execute();
 		if (!queryResult)
-			printError("Prepared exec", *testClient);
+			printError("Prepared exec", query);
 		assertTrue(queryResult);
 
 		mySQLPreparedResult_t result = query.queryResult(4);
