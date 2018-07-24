@@ -802,15 +802,11 @@ public:
 		tryShouldFail<bool>({"", 0, MYSQL_TYPE_BLOB});
 		tryShouldFail<bool>({"", 0, MYSQL_TYPE_DATE});
 		tryShouldFail<bool>({"", 0, MYSQL_TYPE_DATETIME});
-		tryOk<bool>({"true", 5, MYSQL_TYPE_BIT}, true);
-		tryOk<bool>({"false", 6, MYSQL_TYPE_BIT}, false);
+		tryShouldFail<bool>({"", 0, MYSQL_TYPE_STRING});
+		tryOk<bool>({"\x01", 2, MYSQL_TYPE_BIT}, true);
+		tryOk<bool>({"\x00", 2, MYSQL_TYPE_BIT}, false);
 		tryOk<bool>({"", 1, MYSQL_TYPE_BIT}, 0);
 		tryOk<bool>({"", 0, MYSQL_TYPE_BIT}, 0);
-		tryShouldFail<bool>({"-1", 3, MYSQL_TYPE_BIT});
-		tryShouldFail<bool>({"a", 2, MYSQL_TYPE_BIT});
-		tryShouldFail<bool>({"256", 4, MYSQL_TYPE_BIT});
-		tryShouldFail<bool>({"1023", 5, MYSQL_TYPE_BIT});
-		tryShouldFail<bool>({"1-27", 5, MYSQL_TYPE_BIT});
 	}
 
 	void testDate()
