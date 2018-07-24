@@ -64,7 +64,8 @@ std::array<data_t, 2> testData
 	data_t{0, "dave", nullptr, {}}
 };
 
-type_t typeData{
+type_t typeData
+{
 	0, i64(9223372036854775807), 2147483647,
 	32767, 127, true, "This is a string",
 	"This is some text", 2.125, 5.325, ormDate_t{2018, 07, 04},
@@ -963,6 +964,28 @@ private:
 
 	void testUUID()
 	{
+		// Set up our UUID value.
+		const auto now = systemClock_t::now().time_since_epoch();
+		const uint64_t time = durationIn<milliseconds>(now);
+		const auto nanoSeconds = (now - milliseconds{time}).count();
+
+		const ormUUID_t uuidORM
+		{
+			uint32_t(time), uint16_t(time >> 32),
+			uint16_t(0x1000 | ((time >> 48) & 0x0FFF)),
+			uint16_t((nanoSeconds >> 14) | 0x8000), swapBytes(uint64_t{0x123456789ABCU}) >> 16
+		};
+		const SQLGUID uuidSQL
+		{
+			uint32_t(time), uint16_t(time >> 32),
+			uint16_t(0x1000 | ((time >> 48) & 0x0FFF)),
+			{
+				uint8_t(0x80 | uint8_t(nanoSeconds >> 22)),
+				uint8_t(nanoSeconds >> 14), 0x12,
+				0x34, 0x56, 0x78, 0x9A, 0xBC
+			}
+		};
+
 		tryIsNull<ormUUID_t>({nullptr, 0, SQL_GUID});
 		tryShouldFail<ormUUID_t>({S_(""), 0, SQL_VARCHAR});
 		tryShouldFail<ormUUID_t>({S_(""), 0, SQL_TINYINT});
@@ -976,6 +999,7 @@ private:
 		tryShouldFail<ormUUID_t>({S_(""), 0, SQL_TYPE_DATE});
 		tryShouldFail<ormUUID_t>({S_(""), 0, SQL_TYPE_TIMESTAMP});
 		tryOk<ormUUID_t>({S_<SQLGUID>({}), 33, SQL_GUID}, {});
+		tryOk<ormUUID_t>({S_<SQLGUID>(uuidSQL), 33, SQL_GUID}, uuidORM);
 	}
 
 	void testError()
