@@ -21,10 +21,12 @@ using irqus::typestring;
 using tmplORM::mysql::fieldLength;
 using tmplORM::types::baseTypes::ormDateTime_t;
 
+using systemClock_t = std::chrono::system_clock;
 #define u64(n)		UINT64_C(n)
 #define i64(n)		INT64_C(n)
+using std::chrono::milliseconds;
+using tmplORM::types::chrono::durationIn;
 
-using systemClock_t = std::chrono::system_clock;
 std::unique_ptr<mySQLClient_t> testClient{};
 constString_t host, username, password;
 
@@ -39,10 +41,36 @@ struct data_t
 	tmplORM::types::dateTime_t<typestring<>> when;
 };
 
+struct type_t
+{
+	tmplORM::types::int32_t<typestring<>> entryID;
+	tmplORM::types::int64_t<typestring<>> int64;
+	tmplORM::types::int32_t<typestring<>> int32;
+	tmplORM::types::int16_t<typestring<>> int16;
+	tmplORM::types::int8_t<typestring<>> int8;
+	tmplORM::types::bool_t<typestring<>> boolean;
+	tmplORM::types::unicode_t<typestring<>, 50> string;
+	tmplORM::types::unicodeText_t<typestring<>> text;
+	tmplORM::types::float_t<typestring<>> decimalF;
+	tmplORM::types::double_t<typestring<>> decimalD;
+	tmplORM::types::date_t<typestring<>> date;
+	tmplORM::types::dateTime_t<typestring<>> dateTime;
+	tmplORM::types::uuid_t<typestring<>> uuid;
+};
+
 std::array<data_t, 2> testData
 {
 	data_t{0, "kevin", 50, {}},
 	data_t{0, "dave", nullptr, {}}
+};
+
+type_t typeData
+{
+	0, i64(9223372036854775807), 2147483647,
+	32767, 127, true, "This is a string",
+	"This is some text", 2.125, 5.325, ormDate_t{2018, 07, 04},
+	ormDateTime_t{2018, 07, 04, 12, 34, 56, 789012345},
+	ormUUID_t{}
 };
 
 bool haveEnvironment() noexcept
