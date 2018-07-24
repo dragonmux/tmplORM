@@ -231,9 +231,9 @@ bool mySQLPreparedQuery_t::execute() noexcept
 {
 	if (!executed && valid())
 	{
-		if (params.haveData())
-			mysql_stmt_bind_param(query, params.data());
-		executed = mysql_stmt_execute(query) == 0;
+		if (params.haveData() && mysql_stmt_bind_param(query, params.data()))
+			return false;
+		executed = !mysql_stmt_execute(query);
 	}
 	return executed;
 }
