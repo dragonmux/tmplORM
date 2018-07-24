@@ -474,15 +474,15 @@ template<typename T, mySQLErrorType_t errorType> valueOrError_t<T, mySQLValueErr
 		if (sign && i == 0)
 			continue;
 		else if (!isNumber(data[i]))
-			return mySQLValueError_t(errorType);
+			return mySQLValueError_t{errorType};
 		num *= 10;
 		if ((num / 10) < preNum)
-			return mySQLValueError_t(errorType);
+			return mySQLValueError_t{errorType};
 		preNum = num;
 		num += data[i] - '0';
 	}
 	if (num < preNum)
-		return mySQLValueError_t(errorType);
+		return mySQLValueError_t{errorType};
 	else if (sign)
 		return -T(num);
 	return T(num);
@@ -606,6 +606,42 @@ ormDateTime_t mySQLValue_t::asDateTime() const
 	return {data};
 }
 
+/*!
+ * @internal
+ * @brief Performs a checked fixed-length string to UUID conversion
+ * @details Any issues are checked for and if found, a mySQLValueError_t returned,
+ *     otherwise the converted value is returned.
+ * @param uuid The string containing the UUID to convert
+ * @returns The converted UUID, or a mySQLValueError_t on error.
+ */
+valueOrError_t<ormUUID_t, mySQLValueError_t> checkedConvertUUID(const char *const uuid) noexcept
+{
+	ormUUID_t result{};
+	uint8_t *const buffer = result.asBuffer();
+	for (uint8_t i{0}; i < 16; ++i)
+	{
+		toInt_t<uint8_t> value{uuid + (i << 1), 2};
+		if (value.isHex())
+			buffer[i] = value.fromHex();
+		else
+			return mySQLValueError_t{mySQLErrorType_t::uuidError};
+	}
+	return result;
+}
+
+/*!
+ * @throws mySQLValueError_t
+ */
+ormUUID_t mySQLValue_t::asUUID() const
+{
+	if (isNull() || type != MYSQL_TYPE_STRING || len != 32)
+		throw mySQLValueError_t(mySQLErrorType_t::dateTimeError);
+	auto uuid = checkedConvertUUID(data);
+	if (uuid.isError())
+		throw uuid.error();
+	return uuid;
+}
+
 const char *mySQLValueError_t::error() const noexcept
 {
 	switch (errorType)
@@ -638,8 +674,8 @@ const char *mySQLValueError_t::error() const noexcept
 			return "Error converting value to a date quantity";
 		case mySQLErrorType_t::dateTimeError:
 			return "Error converting value to a date and time quantity";
-		//case mySQLErrorType_t::uuidError:
-		//	return "Error converting value to a UUID";
+		case mySQLErrorType_t::uuidError:
+			return "Error converting value to a UUID";
 	}
 	return "An unknown error occured";
 }

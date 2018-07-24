@@ -11,7 +11,7 @@
 /*!
  * @file
  * @author Rachel Mant
- * @date 2016-2017
+ * @date 2016-2018
  * @brief Defines the interface to the MySQL abstraction layer
  */
 
@@ -57,6 +57,7 @@ public:
 	int64_t asInt64() const;
 	ormDate_t asDate() const;
 	ormDateTime_t asDateTime() const;
+	ormUUID_t asUUID() const;
 
 	/*! @brief Auto-converter for strings */
 	operator std::unique_ptr<char []>() const { return asString(); }
@@ -84,6 +85,8 @@ public:
 	operator ormDate_t() const { return asDate(); }
 	/*! @brief Auto-converter for ormDateTime_t's */
 	operator ormDateTime_t() const { return asDateTime(); }
+	/*! @brief Auto-converter for ormUUID_t's */
+	operator ormUUID_t() const { return asUUID(); }
 
 	/*! @brief Deleted copy constructor for mySQLValue_t as wrapped values are not copyable */
 	mySQLValue_t(const mySQLValue_t &) = delete;
@@ -245,6 +248,8 @@ public:
 	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept { params.bindIn(index, value, length); }
 	template<typename T> void bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept { params.bindIn<T>(index, nullptr, length); }
 	mySQLPreparedResult_t queryResult(const size_t columnCount) const noexcept;
+	uint32_t errorNum() const noexcept;
+	const char *error() const noexcept;
 
 	/*! @brief Deleted copy constructor for mySQLPreparedQuery_t as prepared queries are not copyable */
 	mySQLPreparedQuery_t(const mySQLPreparedQuery_t &) = delete;
@@ -293,7 +298,8 @@ enum class mySQLErrorType_t : uint8_t
 	uint16Error, int16Error,
 	uint32Error, int32Error,
 	uint64Error, int64Error,
-	dateError, dateTimeError
+	dateError, dateTimeError,
+	uuidError
 };
 
 struct tmplORM_API mySQLValueError_t final
