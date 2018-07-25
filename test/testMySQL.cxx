@@ -880,9 +880,11 @@ public:
 		tryShouldFail<ormUUID_t>({"", 0, MYSQL_TYPE_DATETIME});
 		tryShouldFail<ormUUID_t>({"", 0, MYSQL_TYPE_BIT});
 		tryOk<ormUUID_t>({"00000000000000000000000000000000", 32, MYSQL_TYPE_STRING}, {});
+		tryOk<ormUUID_t>({"FFFFFFFF000000000000000000000000", 32, MYSQL_TYPE_STRING}, {0xFFFFFFFF, 0, 0, 0, 0});
 		tryOk<ormUUID_t>({uuidString.get(), 32, MYSQL_TYPE_STRING}, uuid);
 		tryShouldFail<ormUUID_t>({"", 0, MYSQL_TYPE_STRING});
 		tryShouldFail<ormUUID_t>({"", 1, MYSQL_TYPE_STRING});
+		tryShouldFail<ormUUID_t>({"G0000000000000000000000000000000", 32, MYSQL_TYPE_STRING});
 	}
 
 	void testError()
