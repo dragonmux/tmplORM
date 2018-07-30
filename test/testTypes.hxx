@@ -13,6 +13,7 @@ namespace types
 {
 	void testDateTime(testsuit &suite);
 	void testDate(testsuit &suite);
+	void testUUID(testsuit &suite);
 }
 
 #endif /*TEST_TYPES__HXX*/

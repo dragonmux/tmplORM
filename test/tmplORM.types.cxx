@@ -148,4 +148,8 @@ namespace types
 	void testDate(testsuit &suite)
 	{
 	}
+
+	void testUUID(testsuit &suite)
+	{
+	}
 }
