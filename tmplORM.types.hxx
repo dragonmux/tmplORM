@@ -26,9 +26,9 @@ namespace tmplORM
 				friend bool operator ==(const ormDate_t &a, const ormDate_t &b) noexcept;
 
 			public:
-				constexpr ormDate_t() noexcept : _year(0), _month(0), _day(0) { }
+				constexpr ormDate_t() noexcept : _year{0}, _month{0}, _day{0} { }
 				constexpr ormDate_t(const uint16_t year, const uint16_t month, const uint16_t day) noexcept :
-					_year(year), _month(month), _day(day) { }
+					_year{year}, _month{month}, _day{day} { }
 
 				constexpr uint16_t year() const noexcept { return _year; }
 				void year(const uint16_t year) noexcept { _year = year; }
@@ -37,7 +37,7 @@ namespace tmplORM
 				constexpr uint16_t day() const noexcept { return _day; }
 				void day(const uint16_t day) noexcept { _day = day; }
 
-				ormDate_t(const char *date) noexcept : ormDate_t()
+				ormDate_t(const char *date) noexcept : ormDate_t{}
 				{
 					_year = toInt_t<uint16_t>(date, 4);
 					date += 5;
@@ -50,6 +50,62 @@ namespace tmplORM
 			inline bool operator ==(const ormDate_t &a, const ormDate_t &b) noexcept
 				{ return a._year == b._year && a._month == b._month && a._day == b._day; }
 			inline bool operator !=(const ormDate_t &a, const ormDate_t &b) noexcept { return !(a == b); }
+
+			struct ormTime_t
+			{
+			protected:
+				uint16_t _hour;
+				uint16_t _minute;
+				uint16_t _second;
+				uint32_t _nanoSecond;
+
+				/*!
+				* @brief Raise 10 to the power of power.
+				* @note This is intentionally limited to positive natural numbers.
+				*/
+				size_t power10(const size_t power) noexcept
+					{ return power ? power10(power - 1) * 10 : 1; }
+
+				friend bool operator ==(const ormTime_t &a, const ormTime_t &b) noexcept;
+
+			public:
+				constexpr ormTime_t() noexcept : _hour(0), _minute(0), _second(0), _nanoSecond(0) { }
+				constexpr ormTime_t(const uint16_t hour, const uint16_t minute, const uint16_t second,
+					const uint32_t nanoSecond) noexcept : _hour{hour}, _minute{minute},
+					_second{second}, _nanoSecond{nanoSecond} { }
+
+				constexpr uint16_t hour() const noexcept { return _hour; }
+				void hour(const uint16_t hour) noexcept { _hour = hour; }
+				constexpr uint16_t minute() const noexcept { return _minute; }
+				void minute(const uint16_t minute) noexcept { _minute = minute; }
+				constexpr uint16_t second() const noexcept { return _second; }
+				void second(const uint16_t second) noexcept { _second = second; }
+				constexpr uint32_t nanoSecond() const noexcept { return _nanoSecond; }
+				void nanoSecond(const uint32_t nanoSecond) noexcept { _nanoSecond = nanoSecond; }
+
+				ormTime_t(const char *time) noexcept : ormTime_t{}
+				{
+					_hour = toInt_t<uint16_t>(time, 2);
+					time += 3;
+					_minute = toInt_t<uint16_t>(time, 2);
+					time += 3;
+					_second = toInt_t<uint16_t>(time, 2);
+					time += 2;
+					if (time[0] == 0)
+						return;
+					++time;
+					toInt_t<uint64_t> nanoSeconds(time);
+					if (nanoSeconds.length() <= 9)
+						_nanoSecond = nanoSeconds * power10(9 - nanoSeconds.length());
+					else
+						_nanoSecond = nanoSeconds / power10(nanoSeconds.length() - 9);
+				}
+			};
+
+			inline bool operator ==(const ormTime_t &a, const ormTime_t &b) noexcept
+				{ return a._hour == b._hour && a._minute == b._minute &&
+						a._second == b._second && a._nanoSecond == b._nanoSecond; }
+			inline bool operator !=(const ormTime_t &a, const ormTime_t &b) noexcept { return !(a == b); }
 
 			namespace chrono
 			{
@@ -86,13 +142,9 @@ namespace tmplORM
 					{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 				}};
 
-				struct ormDateTime_t final : public ormDate_t
+				struct ormDateTime_t final : public ormDate_t, ormTime_t
 				{
 				private:
-					uint16_t _hour;
-					uint16_t _minute;
-					uint16_t _second;
-					uint32_t _nanoSecond;
 
 					void display() const noexcept { printf("%04u-%02u-%02u %02u:%02u:%02u.%u\n", _year, _month, _day, _hour, _minute, _second, _nanoSecond); }
 
@@ -140,48 +192,14 @@ namespace tmplORM
 						return i + 1;
 					}
 
-					/*!
-					* @brief Raise 10 to the power of power.
-					* @note This is intentionally limited to positive natural numbers.
-					*/
-					size_t power10(const size_t power) noexcept
-						{ return power ? power10(power - 1) * 10 : 1; }
-
 					friend bool operator ==(const ormDateTime_t &a, const ormDateTime_t &b) noexcept;
 
 				public:
-					constexpr ormDateTime_t() noexcept : ormDate_t(), _hour(0), _minute(0), _second(0), _nanoSecond(0) { }
+					constexpr ormDateTime_t() noexcept : ormDate_t{}, ormTime_t{} { }
 					constexpr ormDateTime_t(const uint16_t year, const uint16_t month, const uint16_t day,
 						const uint16_t hour, const uint16_t minute, const uint16_t second, const uint32_t nanoSecond) noexcept :
-						ormDate_t(year, month, day), _hour(hour), _minute(minute), _second(second), _nanoSecond(nanoSecond) { }
-
-					constexpr uint16_t hour() const noexcept { return _hour; }
-					void hour(const uint16_t hour) noexcept { _hour = hour; }
-					constexpr uint16_t minute() const noexcept { return _minute; }
-					void minute(const uint16_t minute) noexcept { _minute = minute; }
-					constexpr uint16_t second() const noexcept { return _second; }
-					void second(const uint16_t second) noexcept { _second = second; }
-					constexpr uint32_t nanoSecond() const noexcept { return _nanoSecond; }
-					void nanoSecond(const uint32_t nanoSecond) noexcept { _nanoSecond = nanoSecond; }
-
-					ormDateTime_t(const char *dateTime) noexcept : ormDate_t(dateTime), _hour(0), _minute(0), _second(0), _nanoSecond(0)
-					{
-						dateTime += 11;
-						_hour = toInt_t<uint16_t>(dateTime, 2);
-						dateTime += 3;
-						_minute = toInt_t<uint16_t>(dateTime, 2);
-						dateTime += 3;
-						_second = toInt_t<uint16_t>(dateTime, 2);
-						dateTime += 2;
-						if (dateTime[0] == 0)
-							return;
-						++dateTime;
-						toInt_t<uint64_t> nanoSeconds(dateTime);
-						if (nanoSeconds.length() <= 9)
-							_nanoSecond = nanoSeconds * power10(9 - nanoSeconds.length());
-						else
-							_nanoSecond = nanoSeconds / power10(nanoSeconds.length() - 9);
-					}
+						ormDate_t{year, month, day}, ormTime_t{hour, minute, second, nanoSecond} { }
+					ormDateTime_t(const char *dateTime) noexcept : ormDate_t{dateTime}, ormTime_t{dateTime + 11} { }
 
 					ormDateTime_t(const systemTime_t time) noexcept : ormDateTime_t{}
 					{
@@ -214,8 +232,7 @@ namespace tmplORM
 				};
 
 				inline bool operator ==(const ormDateTime_t &a, const ormDateTime_t &b) noexcept
-					{ return ormDate_t(a) == ormDate_t(b) && a._hour == b._hour && a._minute == b._minute &&
-						a._second == b._second && a._nanoSecond == b._nanoSecond; }
+					{ return ormDate_t(a) == ormDate_t(b) && ormTime_t(a) == ormTime_t(b); }
 			}
 
 			using chrono::ormDateTime_t;
