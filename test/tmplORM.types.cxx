@@ -103,9 +103,24 @@ namespace types
 	using date_t = tmplORM::types::date_t<typestring<>>;
 	using time_t = tmplORM::types::time_t<typestring<>>;
 	using dateTime_t = tmplORM::types::dateTime_t<typestring<>>;
+	using uuid_t = tmplORM::types::uuid_t<typestring<>>;
 	using namespace tmplORM::types::baseTypes;
 
+	using std::chrono::milliseconds;
+	using tmplORM::types::chrono::durationIn;
+
 	const auto now = ormDateTime_t{systemClock_t::now()};
+
+	const auto timeUUID = []() -> ormUUID_t
+	{
+		// Set up our UUID value.
+		const auto now = systemClock_t::now().time_since_epoch();
+		const uint64_t time = durationIn<milliseconds>(now);
+		const auto nanoSeconds = (now - milliseconds{time}).count();
+		return {uint32_t(time), uint16_t(time >> 32),
+			uint16_t(0x1000 | ((time >> 48) & 0x0FFF)),
+			uint16_t((nanoSeconds >> 14) | 0x8000), swapBytes(uint64_t{0x123456789ABCU}) >> 16};
+	}();
 
 	void testDate(testsuit &suite)
 	{
@@ -248,5 +263,31 @@ namespace types
 
 	void testUUID(testsuit &suite)
 	{
+		suite.assertEqual(sizeof(uint64_t), 8);
+
+		uuid_t uuid;
+		const ormUUID_t a = uuid.value();
+		suite.assertEqual(a.data1(), 0);
+		suite.assertEqual(a.data2(), 0);
+		suite.assertEqual(a.data3(), 0);
+		suite.assertEqual(a.data4(), "\x00\x00\x00\x00\x00\x00\x00\x00", 8);
+
+		uuid.value(timeUUID);
+		suite.assertTrue(uuid.value() == timeUUID);
+		suite.assertTrue(uuid.uuid() == timeUUID);
+
+		uuid = ormUUID_t{};
+		const ormUUID_t b = uuid;
+		suite.assertEqual(b.data1(), 0);
+		suite.assertEqual(b.data2(), 0);
+		suite.assertEqual(b.data3(), 0);
+		suite.assertEqual(b.data4(), "\x00\x00\x00\x00\x00\x00\x00\x00", 8);
+
+		uuid = timeUUID;
+		uuid = {};
+		suite.assertEqual(b.data1(), 0);
+		suite.assertEqual(b.data2(), 0);
+		suite.assertEqual(b.data3(), 0);
+		suite.assertEqual(b.data4(), "\x00\x00\x00\x00\x00\x00\x00\x00", 8);
 	}
 }
