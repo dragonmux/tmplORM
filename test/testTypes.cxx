@@ -12,6 +12,7 @@ private:
 	void testDate() { types::testDate(*this); }
 	void testTime() { types::testTime(*this); }
 	void testDateTime() { types::testDateTime(*this); }
+	void testUUID() { types::testUUID(*this); }
 
 public:
 	void registerTests() final override
@@ -24,6 +25,7 @@ public:
 		CXX_TEST(testDate)
 		CXX_TEST(testTime)
 		CXX_TEST(testDateTime)
+		CXX_TEST(testUUID)
 	}
 };
 
