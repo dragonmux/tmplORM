@@ -65,7 +65,7 @@ namespace dateTime
 		const auto now = systemClock_t::now();
 		const ormDateTime_t a{now};
 
-		const time_t time = systemClock_t::to_time_t(now);
+		const ::time_t time = systemClock_t::to_time_t(now);
 		const tm local = *gmtime(&time);
 
 		suite.assertEqual(a.year(), local.tm_year + 1900);
@@ -100,11 +100,50 @@ namespace dateTime
 namespace types
 {
 	using irqus::typestring;
-	using dateTime_t = tmplORM::types::dateTime_t<typestring<>>;
 	using date_t = tmplORM::types::date_t<typestring<>>;
+	using time_t = tmplORM::types::time_t<typestring<>>;
+	using dateTime_t = tmplORM::types::dateTime_t<typestring<>>;
 	using namespace tmplORM::types::baseTypes;
 
 	const auto now = ormDateTime_t{systemClock_t::now()};
+
+	void testDate(testsuit &suite)
+	{
+		date_t date;
+		const ormDate_t a = date.value();
+		suite.assertEqual(a.year(), 0);
+		suite.assertEqual(a.month(), 0);
+		suite.assertEqual(a.day(), 0);
+
+		date.value(now);
+		suite.assertTrue(date.value() == now);
+		suite.assertTrue(date.date() == now);
+
+		date = ormDate_t{};
+		const ormDate_t b = date;
+		suite.assertEqual(b.year(), 0);
+		suite.assertEqual(b.month(), 0);
+		suite.assertEqual(b.day(), 0);
+
+		date = "2018-07-04";
+		const ormDate_t c = date;
+		suite.assertEqual(c.year(), 2018);
+		suite.assertEqual(c.month(), 07);
+		suite.assertEqual(c.day(), 04);
+
+		date = {};
+		const ormDate_t d = date;
+		suite.assertEqual(d.year(), 0);
+		suite.assertEqual(d.month(), 0);
+		suite.assertEqual(d.day(), 0);
+
+		date.value(now);
+		date = nullptr;
+		const ormDate_t e = date;
+		suite.assertEqual(e.year(), 0);
+		suite.assertEqual(e.month(), 0);
+		suite.assertEqual(e.day(), 0);
+	}
 
 	void testDateTime(testsuit &suite)
 	{
@@ -143,10 +182,25 @@ namespace types
 		suite.assertEqual(c.nanoSecond(), 789012345);
 
 		dateTime = {};
-	}
+		const ormDateTime_t d = dateTime;
+		suite.assertEqual(d.year(), 0);
+		suite.assertEqual(d.month(), 0);
+		suite.assertEqual(d.day(), 0);
+		suite.assertEqual(d.hour(), 0);
+		suite.assertEqual(d.minute(), 0);
+		suite.assertEqual(d.second(), 0);
+		suite.assertEqual(d.nanoSecond(), 0);
 
-	void testDate(testsuit &suite)
-	{
+		dateTime.value(now);
+		dateTime = nullptr;
+		const ormDateTime_t e = dateTime;
+		suite.assertEqual(e.year(), 0);
+		suite.assertEqual(e.month(), 0);
+		suite.assertEqual(e.day(), 0);
+		suite.assertEqual(e.hour(), 0);
+		suite.assertEqual(e.minute(), 0);
+		suite.assertEqual(e.second(), 0);
+		suite.assertEqual(e.nanoSecond(), 0);
 	}
 
 	void testUUID(testsuit &suite)

@@ -9,8 +9,8 @@ private:
 	void testFromSystemTime() { dateTime::testFromSystemTime(*this); }
 	void testWrapper() { dateTime::testWrapper(*this); }
 
-	void testDateTime() { types::testDateTime(*this); }
 	void testDate() { types::testDate(*this); }
+	void testDateTime() { types::testDateTime(*this); }
 
 public:
 	void registerTests() final override
@@ -19,8 +19,9 @@ public:
 		CXX_TEST(testFromString)
 		CXX_TEST(testFromSystemTime)
 		CXX_TEST(testWrapper)
-		CXX_TEST(testDateTime)
+
 		CXX_TEST(testDate)
+		CXX_TEST(testDateTime)
 	}
 };
 
