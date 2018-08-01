@@ -243,27 +243,75 @@ namespace tmplORM
 			using std::ratio;
 			using namespace std::chrono;
 
-			struct _dateTime_t
+			struct _time_t
 			{
 			public:
 				using duration_t = typename system_clock::duration;
 
 			private:
-				uint16_t _year;
-				uint16_t _month;
-				uint16_t _day;
 				duration_t _time;
 
 			public:
-				constexpr _dateTime_t() noexcept : _year(0), _month(0), _day(0), _time() { }
-				_dateTime_t(const uint16_t year, const uint16_t month, const uint16_t day, const duration_t &time) noexcept :
-					_year{year}, _month{month}, _day{day}, _time{time} { }
-				_dateTime_t(const uint16_t year, const uint16_t month, const uint16_t day) noexcept :
-					_year{year}, _month{month}, _day{day}, _time{} { }
+				constexpr _time_t() noexcept : _time{} { }
+				constexpr _time_t(const duration_t &time) noexcept : _time{time} { }
+				constexpr const duration_t &time() const noexcept { return _time; }
+			};
+
+			struct _date_t
+			{
+			private:
+				uint16_t _year;
+				uint16_t _month;
+				uint16_t _day;
+
+			public:
+				constexpr _date_t() noexcept : _year{0}, _month{0}, _day{0} { }
+				constexpr _date_t(const uint16_t year, const uint16_t month, const uint16_t day) noexcept :
+					_year{year}, _month{month}, _day{day} { }
 				constexpr uint16_t year() const noexcept { return _year; }
 				constexpr uint16_t month() const noexcept { return _month; }
 				constexpr uint16_t day() const noexcept { return _day; }
-				constexpr const duration_t &time() const noexcept { return _time; }
+			};
+
+			struct _dateTime_t : public _date_t, public _time_t
+			{
+			public:
+				constexpr _dateTime_t() noexcept : _date_t{}, _time_t{} { }
+				constexpr _dateTime_t(const uint16_t year, const uint16_t month, const uint16_t day,
+					const duration_t &time) noexcept : _date_t{year, month, day}, _time_t{time} { }
+				constexpr _dateTime_t(const uint16_t year, const uint16_t month, const uint16_t day) noexcept :
+					_date_t{year, month, day}, _time_t{} { }
+				constexpr _dateTime_t(const duration_t &time) noexcept : _date_t{}, _time_t{time} { }
+			};
+
+			template<typename _fieldName> struct date_t : public type_t<_fieldName, _date_t>
+			{
+			private:
+				using parentType_t = type_t<_fieldName, _date_t>;
+
+			public:
+				using type = ormDate_t;
+				constexpr date_t() noexcept : parentType_t{} { }
+				date_t(const ormDate_t _value) noexcept : parentType_t{} { value(_value); }
+				operator ormDate_t() const noexcept { return date(); }
+				void operator =(const date_t &_value) noexcept { value(_value.value()); }
+				void operator =(const char *const _value) noexcept { value(_value); }
+				void operator =(const ormDate_t &_value) noexcept { value(_value); }
+				void operator =(ormDate_t &&_value) noexcept { value(_value); }
+				void date(const ormDate_t &_value) noexcept { value(_value); }
+				ormDate_t date() const noexcept { return value(); }
+				void value(const char *const _value) noexcept
+					{ _value ? value(ormDate_t{_value}) : value(ormDate_t{}); }
+
+				ormDate_t value() const noexcept
+				{
+					const _date_t _value = parentType_t::value();
+					return {_value.year(), _value.month(), _value.day()};
+				}
+
+				void value(const ormDate_t &_value) noexcept
+					{ parentType_t::value({_value.year(), _value.month(), _value.day()}); }
+				void value(const ormDateTime_t &_value) noexcept { value(ormDate_t{_value}); }
 			};
 
 			template<typename _fieldName> struct dateTime_t : public type_t<_fieldName, _dateTime_t>
@@ -276,12 +324,14 @@ namespace tmplORM
 				constexpr dateTime_t() noexcept : parentType_t{} {}
 				dateTime_t(const ormDateTime_t _value) noexcept : parentType_t{} { value(_value); }
 				operator ormDateTime_t() const noexcept { return dateTime(); }
+				void operator =(const dateTime_t &_value) noexcept { value(_value.value()); }
 				void operator =(const char *const _value) noexcept { value(_value); }
 				void operator =(const ormDateTime_t &_value) noexcept { value(_value); }
 				void operator =(ormDateTime_t &&_value) noexcept { value(_value); }
 				void dateTime(const ormDateTime_t &_value) noexcept { value(_value); }
 				ormDateTime_t dateTime() const noexcept { return value(); }
-				void value(const char *const _value) noexcept { _value ? value(ormDateTime_t{_value}) : value(ormDateTime_t{}); }
+				void value(const char *const _value) noexcept
+					{ _value ? value(ormDateTime_t{_value}) : value(ormDateTime_t{}); }
 
 				ormDateTime_t value() const noexcept
 				{
@@ -308,36 +358,10 @@ namespace tmplORM
 						duration_cast<typename _dateTime_t::duration_t>(time)});
 				}
 			};
-
-			template<typename _fieldName> struct date_t : public type_t<_fieldName, _dateTime_t>
-			{
-			private:
-				using parentType_t = type_t<_fieldName, _dateTime_t>;
-
-			public:
-				using type = ormDate_t;
-				constexpr date_t() noexcept : parentType_t{} { }
-				date_t(const ormDate_t _value) noexcept : parentType_t{} { value(_value); }
-				operator ormDate_t() const noexcept { return date(); }
-				void operator =(const char *const _value) noexcept { value(ormDate_t(_value)); }
-				void operator =(const ormDate_t &_value) noexcept { value(_value); }
-				void operator =(ormDate_t &&_value) noexcept { value(_value); }
-				void date(const ormDate_t &_value) noexcept { value(_value); }
-				ormDate_t date() const noexcept { return value(); }
-				void value(const char *const _value) noexcept { value(ormDate_t(_value)); }
-
-				ormDate_t value() const noexcept
-				{
-					const _dateTime_t _value = parentType_t::value();
-					return {_value.year(), _value.month(), _value.day()};
-				}
-
-				void value(const ormDate_t &_value) noexcept
-					{ parentType_t::value({_value.year(), _value.month(), _value.day()}); }
-			};
 		}
-		using dateTimeTypes::dateTime_t;
+
 		using dateTimeTypes::date_t;
+		using dateTimeTypes::dateTime_t;
 
 		template<typename _fieldName> struct uuid_t : public type_t<_fieldName, ormUUID_t>
 		{
