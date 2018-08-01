@@ -145,6 +145,49 @@ namespace types
 		suite.assertEqual(e.day(), 0);
 	}
 
+	void testTime(testsuit &suite)
+	{
+		time_t time;
+		const ormTime_t a = time.value();
+		suite.assertEqual(a.hour(), 0);
+		suite.assertEqual(a.minute(), 0);
+		suite.assertEqual(a.second(), 0);
+		suite.assertEqual(a.nanoSecond(), 0);
+
+		time.value(now);
+		suite.assertTrue(time.value() == now);
+		suite.assertTrue(time.time() == now);
+
+		time = ormTime_t{};
+		const ormTime_t b = time;
+		suite.assertEqual(b.hour(), 0);
+		suite.assertEqual(b.minute(), 0);
+		suite.assertEqual(b.second(), 0);
+		suite.assertEqual(b.nanoSecond(), 0);
+
+		time = "12:34:56:789012345";
+		const ormTime_t c = time;
+		suite.assertEqual(c.hour(), 12);
+		suite.assertEqual(c.minute(), 34);
+		suite.assertEqual(c.second(), 56);
+		suite.assertEqual(c.nanoSecond(), 789012345);
+
+		time = {};
+		const ormTime_t d = time;
+		suite.assertEqual(d.hour(), 0);
+		suite.assertEqual(d.minute(), 0);
+		suite.assertEqual(d.second(), 0);
+		suite.assertEqual(d.nanoSecond(), 0);
+
+		time.value(now);
+		time = nullptr;
+		const ormTime_t e = time;
+		suite.assertEqual(e.hour(), 0);
+		suite.assertEqual(e.minute(), 0);
+		suite.assertEqual(e.second(), 0);
+		suite.assertEqual(e.nanoSecond(), 0);
+	}
+
 	void testDateTime(testsuit &suite)
 	{
 		dateTime_t dateTime;

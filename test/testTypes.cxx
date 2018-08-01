@@ -10,6 +10,7 @@ private:
 	void testWrapper() { dateTime::testWrapper(*this); }
 
 	void testDate() { types::testDate(*this); }
+	void testTime() { types::testTime(*this); }
 	void testDateTime() { types::testDateTime(*this); }
 
 public:
@@ -21,6 +22,7 @@ public:
 		CXX_TEST(testWrapper)
 
 		CXX_TEST(testDate)
+		CXX_TEST(testTime)
 		CXX_TEST(testDateTime)
 	}
 };

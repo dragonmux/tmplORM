@@ -12,6 +12,7 @@ namespace dateTime
 namespace types
 {
 	void testDate(testsuit &suite);
+	void testTime(testsuit &suite);
 	void testDateTime(testsuit &suite);
 	void testUUID(testsuit &suite);
 }
