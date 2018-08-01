@@ -152,7 +152,7 @@ namespace types
 		suite.assertEqual(d.month(), 0);
 		suite.assertEqual(d.day(), 0);
 
-		date.value(now);
+		date= now;
 		date = nullptr;
 		const ormDate_t e = date;
 		suite.assertEqual(e.year(), 0);
@@ -194,7 +194,7 @@ namespace types
 		suite.assertEqual(d.second(), 0);
 		suite.assertEqual(d.nanoSecond(), 0);
 
-		time.value(now);
+		time = now;
 		time = nullptr;
 		const ormTime_t e = time;
 		suite.assertEqual(e.hour(), 0);
@@ -249,7 +249,7 @@ namespace types
 		suite.assertEqual(d.second(), 0);
 		suite.assertEqual(d.nanoSecond(), 0);
 
-		dateTime.value(now);
+		dateTime = now;
 		dateTime = nullptr;
 		const ormDateTime_t e = dateTime;
 		suite.assertEqual(e.year(), 0);
