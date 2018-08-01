@@ -314,6 +314,51 @@ namespace tmplORM
 				void value(const ormDateTime_t &_value) noexcept { value(ormDate_t{_value}); }
 			};
 
+			template<typename _fieldName> struct time_t : public type_t<_fieldName, _time_t>
+			{
+			private:
+				using parentType_t = type_t<_fieldName, _time_t>;
+
+			public:
+				using type = ormTime_t;
+				constexpr time_t() noexcept : parentType_t{} { }
+				time_t(const ormTime_t _value) noexcept : parentType_t{} { value(_value); }
+				operator ormTime_t() const noexcept { return time(); }
+				void operator =(const time_t &_value) noexcept { value(_value.value()); }
+				void operator =(const char *const _value) noexcept { value(_value); }
+				void operator =(const ormTime_t &_value) noexcept { value(_value); }
+				void operator =(ormTime_t &&_value) noexcept { value(_value); }
+				void time(const ormTime_t &_value) noexcept { value(_value); }
+				ormTime_t time() const noexcept { return value(); }
+				void value(const char *const _value) noexcept
+					{ _value ? value(ormTime_t{_value}) : value(ormTime_t{}); }
+
+				ormTime_t value() const noexcept
+				{
+					const _time_t _value = parentType_t::value();
+					_time_t::duration_t time{_value.time()};
+					const auto hour = duration_cast<hours>(time);
+					time -= hour;
+					const auto minute = duration_cast<minutes>(time);
+					time -= minute;
+					const auto second = duration_cast<seconds>(time);
+					time -= second;
+					return {uint16_t(hour.count()), uint16_t(minute.count()),
+						uint16_t(second.count()), uint32_t(time.count())};
+				}
+
+				void value(const ormTime_t &_value) noexcept
+				{
+					nanoseconds time(_value.nanoSecond());
+					time += seconds(_value.second());
+					time += minutes(_value.minute());
+					time += hours(_value.hour());
+					parentType_t::value({duration_cast<typename _time_t::duration_t>(time)});
+				}
+
+				void value(const ormDateTime_t &_value) noexcept { value(ormTime_t{_value}); }
+			};
+
 			template<typename _fieldName> struct dateTime_t : public type_t<_fieldName, _dateTime_t>
 			{
 			private:
@@ -361,6 +406,7 @@ namespace tmplORM
 		}
 
 		using dateTimeTypes::date_t;
+		using dateTimeTypes::time_t;
 		using dateTimeTypes::dateTime_t;
 
 		template<typename _fieldName> struct uuid_t : public type_t<_fieldName, ormUUID_t>

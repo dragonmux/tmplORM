@@ -241,6 +241,7 @@ namespace tmplORM
 			inline bool operator !=(const ormDateTime_t &a, const ormDateTime_t &b) noexcept { return !(a == b); }
 			//inline bool operator ==(const ormDate_t &a, const ormDateTime_t &b) noexcept { return a == ormDate_t(b); }
 			inline bool operator ==(const ormDateTime_t &a, const ormDate_t &b) noexcept { return ormDate_t{a} == b; }
+			inline bool operator ==(const ormDateTime_t &a, const ormTime_t &b) noexcept { return ormTime_t{a} == b; }
 
 			struct guid_t final
 			{
