@@ -1,0 +1,14 @@
+image: Visual Studio 2017
+
+install:
+  - ps: |
+      if ($env:COVERAGE -eq 1) {
+        export _COV=$COVERAGE;
+        unset COVERAGE;
+      }
+
+environment:
+  COVERAGE: 1
+servies:
+  - mysql
+  - mssql2017
