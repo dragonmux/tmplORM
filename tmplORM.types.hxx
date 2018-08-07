@@ -192,6 +192,7 @@ namespace tmplORM
 						return i + 1;
 					}
 
+					void tzCompute(const systemTime_t &time);
 					friend bool operator ==(const ormDateTime_t &a, const ormDateTime_t &b) noexcept;
 
 				public:
@@ -218,6 +219,7 @@ namespace tmplORM
 						rem -= seconds{_second};
 						_nanoSecond = durationIn<nanoseconds>(rem);
 
+						tzCompute(time);
 						/*tzset();
 						const time_t value = systemClock_t::to_time_t(timePoint_t{time});
 						tm timeZone{};
