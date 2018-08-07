@@ -24,6 +24,7 @@ public:
 	operator int32_t() const noexcept { return fd; }
 	bool operator ==(const int32_t fd_) const noexcept { return fd == fd_; }
 	void swap(fd_t &fd_) noexcept { std::swap(fd, fd_.fd); }
+	bool valid() const noexcept { return fd != -1; }
 
 	ssize_t write(const void *const bufferPtr, const size_t valueLen) const noexcept
 		{ return ::write(fd, bufferPtr, valueLen); }
@@ -31,7 +32,7 @@ public:
 	struct ::stat stat() const noexcept
 	{
 		struct ::stat fileStat{};
-		if (!fstat(fd, &fileStat))
+		if (!::fstat(fd, &fileStat))
 			return fileStat;
 		return {};
 	}
@@ -57,6 +58,14 @@ public:
 		{ return read(&value, sizeof(T)); }
 	template<typename T, size_t N> bool read(std::array<T, N> &value) const noexcept
 		{ return read(value.data(), sizeof(T) * N); }
+	template<typename T> bool read(std::unique_ptr<T> &value) const noexcept
+		{ return read(value.get(), sizeof(T)); }
+	template<typename T> bool read(std::unique_ptr<T []> &value, const size_t valueCount) const noexcept
+		{ return read(value.get(), sizeof(T) * valueCount); }
+
+	bool seek(const off_t amount, int32_t where) const noexcept
+		{ return ::lseek(fd, amount, where) != -1; }
+	off_t tell() const noexcept { return ::lseek(fd, 0, SEEK_CUR); }
 
 	fd_t(const fd_t &) = delete;
 	fd_t &operator =(const fd_t &) = delete;
