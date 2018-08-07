@@ -135,6 +135,15 @@ size_t safeAnd(const size_t a, const size_t b) noexcept
 	return a & b;
 }
 
+inline void badRead() noexcept
+{
+	printf("Something went wrong.. %d: %s\n", errno, strerror(errno));
+	transitions = nullptr;
+	typeIndexes = nullptr;
+	types = nullptr;
+	leaps = nullptr;
+}
+
 void tzReadFile(const char *const file)
 {
 	fd_t fd{};
@@ -210,6 +219,6 @@ void tzInit()
 
 void ormDateTime_t::tzCompute(const systemTime_t &time)
 {
-	if (tzInitialised)
+	if (!tzInitialised)
 		tzInit();
 }
