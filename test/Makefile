@@ -39,7 +39,7 @@ testMySQLMapper.so testMySQL.so: CRUNCHMAKE += $(shell mysql_config --include --
 testMSSQL.so: CRUNCHMAKE += -lodbc
 testConversions.so: O_FILE = conversions.o
 testFixedVector.so: O_FILE = fixedVector.o
-testTypes.so: O_FILE = tmplORM.types.o
+testTypes.so: O_FILE = tmplORM.types.o ../string.o ../tmplORM.types.o
 testMSSQL.so: constString.hxx
 testConversions.so: conversions.o
 testFixedVector.so: fixedVector.o
