@@ -93,6 +93,48 @@ inline int64_t asInt64(const char *const value) noexcept
 inline int32_t asInt64(const std::array<char, 8> &value) noexcept
 	{ return asInt64(value.data()); }
 
+size_t safeMul(const size_t a, const size_t b) noexcept
+{
+	// If we have an error value on the left, return our error value.
+	if (a == sizeMax || b == sizeMax)
+		return sizeMax;
+	// This could also use a mul-only method that computes part of the Karatsuba decomposition
+	// and determines from the halved-size result if the multiplied value sets bits above the
+	// max for the type - we only need to know z2. eg, for sizeof(size_t) == 8:
+	// size_t c = (a >> 32) * (b >> 32); if (c) return sizeMax
+	else if (a && (sizeMax / a) < b)
+		return sizeMax;
+	return a * b;
+}
+
+size_t safeAdd(const size_t a, const size_t b) noexcept
+{
+	// If we have an error value on the left, return our error value.
+	if (a == sizeMax || b == sizeMax)
+		return sizeMax;
+	// Do the top-end addition, and if it produces a value that exceeds 2 bits of storage..
+	// overflow would occur and we return sizeMax
+	else if ((a >> (sizeBits - 1)) + (b >> (sizeBits - 1)) > 3)
+		return sizeMax;
+	return a + b;
+}
+
+size_t safeSub(const size_t a, const size_t b) noexcept
+{
+	// If we have an error value on the left, return our error value.
+	if (a == sizeMax || b == sizeMax || a < b)
+		return sizeMax;
+	return a - b;
+}
+
+size_t safeAnd(const size_t a, const size_t b) noexcept
+{
+	// If we have an error value on the left, return our error value.
+	if (a == sizeMax || b == sizeMax)
+		return sizeMax;
+	return a & b;
+}
+
 void tzReadFile(const char *const file)
 {
 	fd_t fd{};
