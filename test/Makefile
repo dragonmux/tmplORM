@@ -33,8 +33,8 @@ $(DEPS):
 	$(call run-cmd,cxx,$(CFLAGS))
 
 testString.so: O_FILE = ../string.o
-testMySQL.so: O_FILE = ../mysql.o ../string.o
-testMSSQL.so: O_FILE = ../mssql.o ../string.o
+testMySQL.so: O_FILE = ../mysql.o ../string.o ../tmplORM.types.o
+testMSSQL.so: O_FILE = ../mssql.o ../string.o ../tmplORM.types.o
 testMySQLMapper.so testMySQL.so: CRUNCHMAKE += $(shell mysql_config --include --libs)
 testMSSQL.so: CRUNCHMAKE += -lodbc
 testConversions.so: O_FILE = conversions.o
