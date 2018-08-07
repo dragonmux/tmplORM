@@ -23,8 +23,8 @@ H = mysql.hxx mssql.hxx tmplORM.hxx tmplORM.mysql.hxx tmplORM.mssql.hxx tmplORM.
 	tmplORM.extern.hxx conversions.hxx fixedVector.hxx string.hxx managedPtr.hxx
 GCH = tmplORM.gch tmplORM.mysql.gch tmplORM.mssql.gch
 VERMAJ = .0
-VERMIN = $(VERMAJ).0
-VERREV = $(VERMIN).1
+VERMIN = $(VERMAJ).1
+VERREV = $(VERMIN).0
 VER = $(VERREV)
 SO = libtmplORM.so
 PC = tmplORM.pc
