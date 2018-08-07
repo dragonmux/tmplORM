@@ -62,6 +62,37 @@ std::unique_ptr<leap_t []> leaps{};
 #define TZDEFAULT "localtime"
 static bool tzInitialised = false;
 
+template<typename T> constexpr int signBit() noexcept
+	{ return std::numeric_limits<typename std::make_signed<T>::type>::digits; }
+constexpr size_t sizeMax = std::numeric_limits<size_t>::max();
+constexpr uint8_t sizeBits = std::numeric_limits<size_t>::digits - 1;
+
+inline int32_t asInt32(const uint8_t *const value) noexcept
+{
+	int32_t result{};
+	if (sizeof(int32_t) != 4 && value[0] >> signBit<char>())
+		result = -1 & ~0xFFFFFFFF;
+	result |= (int32_t{value[0]} << 24) | (int32_t{value[1]} << 16) |
+		(int32_t{value[2]} << 8) | int32_t{value[3]};
+	return result;
+}
+inline int32_t asInt32(const std::array<char, 4> &value) noexcept
+	{ return asInt32(reinterpret_cast<const uint8_t *>(value.data())); }
+
+inline int64_t asInt64(const char *const value) noexcept
+{
+	int64_t result{};
+	if (sizeof(int64_t) != 8 && value[0] >> signBit<char>())
+		result = -1 & ~0xFFFFFFFFFFFFFFFF;
+	result |= (int64_t{value[0]} << 56) | (int64_t{value[1]} << 48) |
+		(int64_t{value[2]} << 40) | (int64_t{value[3]} << 32) |
+		(int64_t{value[4]} << 24) | (int64_t{value[5]} << 16) |
+		(int64_t{value[6]} << 8) | int64_t{value[7]};
+	return result;
+}
+inline int32_t asInt64(const std::array<char, 8> &value) noexcept
+	{ return asInt64(value.data()); }
+
 void tzReadFile(const char *const file)
 {
 	fd_t fd{};
