@@ -1,4 +1,6 @@
 #include <stdint.h>
+#include <errno.h>
+#include <string.h>
 #include <array>
 #include <chrono>
 #include <tmplORM.types.hxx>
@@ -20,6 +22,21 @@ struct tzHead_t
 	std::array<char, 4> charCount;
 };
 
+struct ttInfo_t
+{
+	int32_t offset;
+	uint8_t isDst;
+	uint8_t idx;
+	uint8_t isStd;
+	uint8_t isGmt;
+};
+
+struct leap_t
+{
+	time_t transition;
+	long change;
+};
+
 enum class tzType_t { J0, J1, M };
 
 struct tzRule_t
@@ -34,7 +51,11 @@ struct tzRule_t
 };
 
 std::array<tzRule_t, 2> tzRules{};
+size_t transitionsCount{}, typesCount{}, leapsCount{};
 std::unique_ptr<time_t []> transitions{};
+std::unique_ptr<char []> typeIndexes{};
+std::unique_ptr<ttInfo_t []> types{};
+std::unique_ptr<leap_t []> leaps{};
 
 // TODO: fixme.
 #define TZDIR "/usr/share/zoneinfo"
@@ -43,11 +64,10 @@ static bool tzInitialised = false;
 
 void tzReadFile(const char *const file)
 {
-	static_assert(sizeof(time_t) == 4 || sizeof(time_t) == 8, "time_t not a valid size");
 	fd_t fd{};
+	uint8_t width = 4;
 
-	//transitions = nullptr;
-
+	static_assert(sizeof(time_t) == 4 || sizeof(time_t) == 8, "time_t not a valid size");
 	if (file[0] != '/')
 	{
 		const char *dir = getenv("TZDIR");
