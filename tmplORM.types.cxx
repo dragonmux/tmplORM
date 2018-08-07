@@ -200,6 +200,50 @@ void tzReadFile(const char *const file)
 		else if (!readHeader())
 			return;
 	}
+	size_t dataOffset = fd.tell();
+	size_t totalSize{safeMul(transitionsCount, sizeof(time_t) + 1)};
+	//totalSize = safeAnd(safeAdd(totalSize, alignof(ttInfo_t) - 1), ~(alignof(ttInfo_t) - 1));
+	if (totalSize >= sizeMax - dataOffset)
+		return;
+	const size_t typesOffset = totalSize + dataOffset;
+	totalSize = safeAdd(safeMul(typesCount, sizeof(ttInfo_t)), totalSize);
+	totalSize = safeAdd(totalSize, charCount);
+	//totalSize = safeAnd(safeAdd(totalSize, alignof(leap_t) - 1), ~(alignof(leap_t) - 1));
+	if (totalSize >= sizeMax - dataOffset)
+		return;
+	const size_t leapsOffset = totalSize + dataOffset;
+	totalSize = safeAdd(safeMul(leapsCount, sizeof(leap_t)), totalSize);
+
+	size_t tzSpecLen{};
+	if (sizeof(time_t) == 8 && width == 8)
+	{
+		const off_t rem = fileStat.st_size - fd.tell();
+		if (rem < 0)
+			return;
+		tzSpecLen = safeAdd(safeAdd(safeMul(transitionsCount, 9),
+			safeMul(typesCount, 6)), charCount);
+		tzSpecLen = safeSub(rem, tzSpecLen);
+		tzSpecLen = safeSub(tzSpecLen, safeMul(leapsCount, 12));
+		tzSpecLen = safeSub(tzSpecLen, isStdCount);
+		tzSpecLen = safeSub(tzSpecLen, isGmtCount + 1);
+		if (tzSpecLen == 0 || tzSpecLen == sizeMax)
+			return;
+	}
+	if (safeAdd(totalSize, tzSpecLen) == sizeMax)
+		return;
+	transitions = makeUnique<time_t []>(transitionsCount);
+	typeIndexes = makeUnique<char []>(transitionsCount);
+	types = makeUnique<ttInfo_t []>(typesCount);
+	leaps = makeUnique<leap_t []>(leapsCount);
+	if (!transitions || !typeIndexes || !types || !leaps)
+		return badRead();
+	else if (!fd.read(transitions, transitionsCount) ||
+		!fd.read(typeIndexes, transitionsCount))
+		return badRead();
+	else if (!fd.seek(typesOffset, SEEK_SET) || !fd.read(types, typesCount))
+		return badRead();
+	else if (!fd.seek(leapsOffset, SEEK_SET) || !fd.read(leaps, leapsCount))
+		return badRead();
 
 	tzInitialised = true;
 }
