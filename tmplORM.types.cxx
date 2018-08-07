@@ -154,13 +154,43 @@ void tzReadFile(const char *const file)
 	else
 		fd = {file, O_RDONLY | O_CLOEXEC};
 
+	if (!fd.valid())
+		return;
 	const auto fileStat = fd.stat();
 	if (fileStat.st_size == 0)
 		return;
 
-	tzHead_t header;
-	if (!fd.read(header) || header.magic != tzMagic)
+	size_t charCount{}, isStdCount{}, isGmtCount{};
+	int8_t version{};
+	auto readHeader = [&]() noexcept -> bool
+	{
+		tzHead_t header;
+		if (!fd.read(header) || header.magic != tzMagic)
+			return false;
+		transitionsCount = asInt32(header.timeCount);
+		typesCount = asInt32(header.typeCount);
+		charCount = asInt32(header.charCount);
+		leapsCount = asInt32(header.leapCount);
+		isStdCount = asInt32(header.ttIsStdCount);
+		isGmtCount = asInt32(header.ttIsGmtCount);
+		if (isStdCount > typesCount || isGmtCount > typesCount)
+			return false;
+		version = header.version;
+		return true;
+	};
+
+	if (!readHeader())
 		return;
+	else if (sizeof(time_t) == 8 && version)
+	{
+		width = 8;
+		const size_t toSkip = transitionsCount * 5 + typesCount * 6 +
+			charCount + leapsCount * 8 + isStdCount + isGmtCount;
+		if (!fd.seek(toSkip, SEEK_CUR))
+			return;
+		else if (!readHeader())
+			return;
+	}
 
 	tzInitialised = true;
 }
