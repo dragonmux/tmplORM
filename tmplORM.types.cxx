@@ -77,10 +77,14 @@ inline int32_t asInt32(const uint8_t *const value) noexcept
 		(int32_t{value[2]} << 8) | int32_t{value[3]};
 	return result;
 }
+inline int32_t asInt32(const char *const value) noexcept
+	{ return asInt32(reinterpret_cast<const uint8_t *>(value)); }
 inline int32_t asInt32(const std::array<char, 4> &value) noexcept
-	{ return asInt32(reinterpret_cast<const uint8_t *>(value.data())); }
+	{ return asInt32(value.data()); }
+inline int32_t asInt32(const std::array<uint8_t, 4> &value) noexcept
+	{ return asInt32(value.data()); }
 
-inline int64_t asInt64(const char *const value) noexcept
+inline int64_t asInt64(const uint8_t *const value) noexcept
 {
 	int64_t result{};
 	if (sizeof(int64_t) != 8 && value[0] >> signBit<char>())
@@ -91,8 +95,16 @@ inline int64_t asInt64(const char *const value) noexcept
 		(int64_t{value[6]} << 8) | int64_t{value[7]};
 	return result;
 }
-inline int32_t asInt64(const std::array<char, 8> &value) noexcept
-	{ return asInt64(value.data()); }
+inline int64_t asInt64(const char *const value) noexcept
+	{ return asInt64(reinterpret_cast<const uint8_t *>(value)); }
+
+inline int64_t asInt64(const char *const value, const size_t width) noexcept
+{
+	if (width == 8)
+		return asInt64(value);
+	else
+		return asInt32(value);
+}
 
 size_t safeMul(const size_t a, const size_t b) noexcept
 {
