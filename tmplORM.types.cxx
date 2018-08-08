@@ -334,29 +334,22 @@ void tzReadFile(const char *const file)
 	}
 	else if (sizeof(time_t) == 4 && width == 8)
 		return;
-	size_t dataOffset = fd.tell();
-	size_t totalSize{safeMul(transitionsCount, sizeof(time_t) + 1)};
-	totalSize = safeAdd(safeMul(typesCount, sizeof(ttInfo_t)), totalSize);
-	totalSize = safeAdd(totalSize, charCount);
-	totalSize = safeAdd(safeMul(leapsCount, sizeof(leap_t)), totalSize);
 
+	const size_t totalSize{safeAdd(safeMul(transitionsCount, width + 1), safeMul(typesCount, 6),
+		charCount, safeMul(leapsCount, 8), isStdCount, isGmtCount)};
+	if (totalSize == sizeMax)
+		return;
 	size_t tzSpecLen{};
 	if (sizeof(time_t) == 8 && width == 8)
 	{
 		const off_t rem = fileStat.st_size - fd.tell();
 		if (rem < 0)
 			return;
-		tzSpecLen = safeAdd(safeAdd(safeMul(transitionsCount, 9),
-			safeMul(typesCount, 6)), charCount);
-		tzSpecLen = safeSub(rem, tzSpecLen);
-		tzSpecLen = safeSub(tzSpecLen, safeMul(leapsCount, 12));
-		tzSpecLen = safeSub(tzSpecLen, isStdCount);
-		tzSpecLen = safeSub(tzSpecLen, isGmtCount + 1);
+		tzSpecLen = safeSub(rem, totalSize, 1);
 		if (tzSpecLen == 0 || tzSpecLen == sizeMax)
 			return;
 	}
-	if (safeAdd(totalSize, tzSpecLen) == sizeMax)
-		return;
+
 	transitions = makeUnique<time_t []>(transitionsCount);
 	typeIndexes = makeUnique<uint8_t []>(transitionsCount);
 	types = makeUnique<ttInfo_t []>(typesCount);
