@@ -2,12 +2,22 @@
 #include <crunch++.h>
 #include <tmplORM.types.cxx>
 
+std::unique_ptr<char []> currentWorkDir() noexcept
+{
+	const char *cwd = getcwd(nullptr, 0);
+	if (!cwd)
+		return nullptr;
+	return stringDup(cwd);
+}
+
 class testDateTime_t final : public testsuit
 {
 private:
 	void testReadExtended()
 	{
-		assertEqual(setenv("TZDIR", getenv("PWD"), true), 0);
+		auto cwd = currentWorkDir();
+		assertNotNull(cwd);
+		assertEqual(setenv("TZDIR", cwd.get(), true), 0);
 
 		tzReadFile("data/GMT_BST.timezone");
 		assertNotNull(transitions);
