@@ -26,15 +26,15 @@ struct ttInfo_t
 {
 	int32_t offset;
 	uint8_t isDst;
-	uint8_t idx;
-	uint8_t isStd;
-	uint8_t isGmt;
+	uint8_t index;
+	bool isStd;
+	bool isGmt;
 };
 
 struct leap_t
 {
 	time_t transition;
-	long change;
+	int32_t change;
 };
 
 enum class tzType_t { J0, J1, M };
@@ -53,8 +53,9 @@ struct tzRule_t
 std::array<tzRule_t, 2> tzRules{};
 size_t transitionsCount{}, typesCount{}, leapsCount{};
 std::unique_ptr<time_t []> transitions{};
-std::unique_ptr<char []> typeIndexes{};
+std::unique_ptr<uint8_t []> typeIndexes{};
 std::unique_ptr<ttInfo_t []> types{};
+std::unique_ptr<char []> zoneNames{};
 std::unique_ptr<leap_t []> leaps{};
 
 // TODO: fixme.
