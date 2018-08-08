@@ -58,6 +58,8 @@ struct tzString_t
 };
 
 std::array<tzRule_t, 2> tzRules{};
+std::array<const char *, 2> tzName{};
+
 size_t transitionsCount{}, typesCount{}, leapsCount{};
 std::unique_ptr<time_t []> transitions{};
 std::unique_ptr<uint8_t []> typeIndexes{};
@@ -330,6 +332,44 @@ char *tzString(const char *string, const size_t length) noexcept
 }
 char *tzString(const char *string) noexcept { return tzString(string, strlen(string)); }
 
+bool registerZones(const size_t charCount) noexcept
+{
+	zoneNames[charCount] = 0;
+	for (size_t i{}; i < transitionsCount; ++i)
+		if (tzString(&zoneNames[types[i].index]) == nullptr)
+			return false;
+	return true;
+}
+
+bool findZoneNames() noexcept
+{
+	tzName[0] = nullptr;
+	tzName[1] = nullptr;
+	for (size_t i{transitionsCount}; i > 0; )
+	{
+		const uint8_t type = typeIndexes[--i];
+		const bool isDst = types[type].isDst;
+
+		if (!tzName[isDst])
+		{
+			tzName[isDst] = tzString(&zoneNames[types[type].index]);
+			if (tzName[!isDst])
+				break;
+		}
+	}
+	if (!tzName[0])
+	{
+		if (typesCount != 1)
+			return false;
+		tzName[0] = tzString(zoneNames.get());
+		if (!tzName[0])
+			return false;
+	}
+	if (!tzName[1])
+		tzName[1] = tzName[0];
+	return true;
+}
+
 void tzReadFile(const char *const file)
 {
 	uint8_t width = 4;
@@ -406,6 +446,9 @@ void tzReadFile(const char *const file)
 		return badRead();
 
 	readTzSpec(fd, tzSpecLen, version);
+	if (!registerZones(charCount) ||
+		!findZoneNames())
+		return badRead();
 }
 
 void tzInit()
