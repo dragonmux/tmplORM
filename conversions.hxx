@@ -202,7 +202,7 @@ inline void swapBytes(uint64_t &val) noexcept
 
 template<typename T> inline T swapBytes(const T &a) noexcept
 {
-	T result{a};
+	typename std::make_unsigned<T>::type result(a);
 	swapBytes(result);
 	return result;
 }
