@@ -132,6 +132,9 @@ size_t safeAdd(const size_t a, const size_t b) noexcept
 	return a + b;
 }
 
+template<typename ...values_t> size_t safeAdd(const size_t a, const size_t b, values_t &&...values) noexcept
+	{ return safeAdd(safeAdd(a, b), values...); }
+
 size_t safeSub(const size_t a, const size_t b) noexcept
 {
 	// If we have an error value on the left, return our error value.
@@ -139,6 +142,9 @@ size_t safeSub(const size_t a, const size_t b) noexcept
 		return sizeMax;
 	return a - b;
 }
+
+template<typename ...values_t> size_t safeSub(const size_t a, const size_t b, values_t &&...values) noexcept
+	{ return safeSub(safeSub(a, b), values...); }
 
 size_t safeAnd(const size_t a, const size_t b) noexcept
 {
