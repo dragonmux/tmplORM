@@ -262,13 +262,11 @@ void tzReadFile(const char *const file)
 		return;
 	else if (sizeof(time_t) == 8 && version)
 	{
+		const size_t toSkip{safeAdd(safeMul(transitionsCount, 5), safeMul(typesCount, 6),
+			charCount, safeMul(leapsCount, 8), isStdCount, isGmtCount)};
+		if (toSkip == sizeMax || !fd.seek(toSkip, SEEK_CUR) || !readHeader())
+			return;
 		width = 8;
-		const size_t toSkip = transitionsCount * 5 + typesCount * 6 +
-			charCount + leapsCount * 8 + isStdCount + isGmtCount;
-		if (!fd.seek(toSkip, SEEK_CUR))
-			return;
-		else if (!readHeader())
-			return;
 	}
 	size_t dataOffset = fd.tell();
 	size_t totalSize{safeMul(transitionsCount, sizeof(time_t) + 1)};
