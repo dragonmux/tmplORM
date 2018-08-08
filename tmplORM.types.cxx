@@ -50,6 +50,13 @@ struct tzRule_t
 	int32_t computedFor;
 };
 
+struct tzString_t
+{
+	size_t length;
+	std::unique_ptr<char []> data;
+	std::unique_ptr<tzString_t> next;
+};
+
 std::array<tzRule_t, 2> tzRules{};
 size_t transitionsCount{}, typesCount{}, leapsCount{};
 std::unique_ptr<time_t []> transitions{};
@@ -58,6 +65,7 @@ std::unique_ptr<ttInfo_t []> types{};
 std::unique_ptr<char []> zoneNames{};
 std::unique_ptr<leap_t []> leaps{};
 std::unique_ptr<char []> tzSpec{};
+std::unique_ptr<tzString_t> tzStringList{};
 
 // TODO: fixme.
 #define TZDIR "/usr/share/zoneinfo"
@@ -290,6 +298,37 @@ void readTzSpec(const fd_t &fd, const size_t tzSpecLen, const size_t version) no
 	if (tzSpec && !tzSpec[0])
 		tzSpec = nullptr;
 }
+
+char *tzString(const char *string, const size_t length) noexcept
+{
+	tzString_t *last{};
+	for (tzString_t *value = tzStringList.get(); value; value = value->next.get())
+	{
+		last = value;
+		if (length <= value->length)
+		{
+			char *const data = &value->data[value->length - length];
+			if (memcmp(string, data, length) == 0)
+				return data;
+		}
+	}
+
+	auto value = makeUnique<tzString_t>();
+	if (!value)
+		return nullptr;
+	value->data = makeUnique<char []>(length + 1);
+	if (!value->data)
+		return nullptr;
+	char *const result = value->data.get();
+	memcpy(result, string, length);
+	result[length] = 0;
+	value->length = length;
+	value->next = nullptr;
+	if (last)
+		last->next = std::move(value);
+	return result;
+}
+char *tzString(const char *string) noexcept { return tzString(string, strlen(string)); }
 
 void tzReadFile(const char *const file)
 {
