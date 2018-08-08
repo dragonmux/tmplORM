@@ -160,15 +160,12 @@ inline void badRead() noexcept
 	transitions = nullptr;
 	typeIndexes = nullptr;
 	types = nullptr;
+	zoneNames = nullptr;
 	leaps = nullptr;
 }
 
-void tzReadFile(const char *const file)
+fd_t tzOpenFile(const char *const file)
 {
-	fd_t fd{};
-	uint8_t width = 4;
-
-	static_assert(sizeof(time_t) == 4 || sizeof(time_t) == 8, "time_t not a valid size");
 	if (file[0] != '/')
 	{
 		const char *dir = getenv("TZDIR");
@@ -176,12 +173,18 @@ void tzReadFile(const char *const file)
 			dir = TZDIR;
 		auto fileName = formatString("%s/%s", dir, file);
 		if (!fileName)
-			return;
-		fd = {fileName.get(), O_RDONLY | O_CLOEXEC};
+			return {};
+		return {fileName.get(), O_RDONLY | O_CLOEXEC};
 	}
-	else
-		fd = {file, O_RDONLY | O_CLOEXEC};
+	return {file, O_RDONLY | O_CLOEXEC};
+}
 
+void tzReadFile(const char *const file)
+{
+	uint8_t width = 4;
+
+	static_assert(sizeof(time_t) == 4 || sizeof(time_t) == 8, "time_t not a valid size");
+	fd_t fd{tzOpenFile(file)};
 	if (!fd.valid())
 		return;
 	const auto fileStat = fd.stat();
