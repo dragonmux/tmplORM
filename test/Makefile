@@ -13,7 +13,8 @@ ifeq ($(strip $(COVERAGE)), 1)
 endif
 CRUNCH = crunch++
 
-TESTS = testString.so testMSSQL.so testMySQL.so testMSSQLMapper.so testMySQLMapper.so testConversions.so testFixedVector.so testTypes.so
+TESTS = testString.so testMSSQL.so testMySQL.so testMSSQLMapper.so testMySQLMapper.so testConversions.so \
+	testFixedVector.so testTypes.so testDateTime.so
 O = conversions.o fixedVector.o tmplORM.types.o
 GCH = models.gch
 DEPS = ../.dep/test
@@ -40,6 +41,7 @@ testMSSQL.so: CRUNCHMAKE += -lodbc
 testConversions.so: O_FILE = conversions.o
 testFixedVector.so: O_FILE = fixedVector.o
 testTypes.so: O_FILE = tmplORM.types.o ../string.o ../tmplORM.types.o
+testDateTime.so: O_FILE = ../string.o
 testMSSQL.so: constString.hxx
 testConversions.so: conversions.o
 testFixedVector.so: fixedVector.o
