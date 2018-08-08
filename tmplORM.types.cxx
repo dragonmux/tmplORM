@@ -57,6 +57,7 @@ std::unique_ptr<uint8_t []> typeIndexes{};
 std::unique_ptr<ttInfo_t []> types{};
 std::unique_ptr<char []> zoneNames{};
 std::unique_ptr<leap_t []> leaps{};
+std::unique_ptr<char []> tzSpec{};
 
 // TODO: fixme.
 #define TZDIR "/usr/share/zoneinfo"
@@ -268,6 +269,28 @@ bool readIsGmt(const fd_t &fd, const size_t isGmtCount) noexcept
 	return true;
 }
 
+void readTzSpec(const fd_t &fd, const size_t tzSpecLen, const size_t version) noexcept
+{
+	if (sizeof(time_t) == 8 && tzSpecLen)
+	{
+		char junk;
+		if (!fd.read(junk) || junk != '\n' ||
+			!fd.read(tzSpec, tzSpecLen - 1))
+			tzSpec = nullptr;
+		else
+			tzSpec[tzSpecLen] = 0;
+	}
+	else if (sizeof(time_t) == 4 && version)
+	{
+		/*tzHead_t header;
+		if (!fd.read(header) || header.magic != tzMagic)
+			return badRead();*/
+		puts("This mode is not implemented");
+	}
+	if (tzSpec && !tzSpec[0])
+		tzSpec = nullptr;
+}
+
 void tzReadFile(const char *const file)
 {
 	uint8_t width = 4;
@@ -339,8 +362,9 @@ void tzReadFile(const char *const file)
 	types = makeUnique<ttInfo_t []>(typesCount);
 	zoneNames = makeUnique<char []>(charCount + 1);
 	leaps = makeUnique<leap_t []>(leapsCount);
+	tzSpec = tzSpecLen ? makeUnique<char []>(tzSpecLen) : nullptr;
 	if (!transitions || !typeIndexes || !types ||
-		!zoneNames || !leaps ||
+		!zoneNames || !leaps || (tzSpecLen && !tzSpec) ||
 		!readTransitions(fd, width) ||
 		!readTypes(fd, charCount) ||
 		!fd.read(zoneNames, charCount) ||
@@ -349,7 +373,7 @@ void tzReadFile(const char *const file)
 		!readIsGmt(fd, isGmtCount))
 		return badRead();
 
-	tzInitialised = true;
+	readTzSpec(fd, tzSpecLen, version);
 }
 
 void tzInit()
@@ -363,6 +387,7 @@ void tzInit()
 		++tz;
 
 	tzReadFile(tz);
+	tzInitialised = true;
 }
 
 void ormDateTime_t::tzCompute(const systemTime_t &time)
