@@ -244,6 +244,30 @@ bool readLeaps(const fd_t &fd, const size_t width) noexcept
 	return true;
 }
 
+bool readIsStd(const fd_t &fd, const size_t isStdCount) noexcept
+{
+	for (size_t i{}; i < typesCount; ++i)
+	{
+		int8_t value{};
+		if (i < isStdCount && !fd.read(value))
+			return false;
+		types[i].isStd = bool(value);
+	}
+	return true;
+}
+
+bool readIsGmt(const fd_t &fd, const size_t isGmtCount) noexcept
+{
+	for (size_t i{}; i < typesCount; ++i)
+	{
+		int8_t value{};
+		if (i < isGmtCount && !fd.read(value))
+			return false;
+		types[i].isGmt = bool(value);
+	}
+	return true;
+}
+
 void tzReadFile(const char *const file)
 {
 	uint8_t width = 4;
@@ -320,7 +344,9 @@ void tzReadFile(const char *const file)
 		!readTransitions(fd, width) ||
 		!readTypes(fd, charCount) ||
 		!fd.read(zoneNames, charCount) ||
-		!readLeaps(fd, width))
+		!readLeaps(fd, width) ||
+		!readIsStd(fd, isStdCount) ||
+		!readIsGmt(fd, isGmtCount))
 		return badRead();
 
 	tzInitialised = true;
