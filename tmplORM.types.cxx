@@ -179,6 +179,36 @@ fd_t tzOpenFile(const char *const file)
 	return {file, O_RDONLY | O_CLOEXEC};
 }
 
+bool readTransitions(const fd_t &fd, const size_t width) noexcept
+{
+	if (!fd.read(transitions.get(), transitionsCount * width) ||
+		!fd.read(typeIndexes, transitionsCount))
+		return false;
+
+	const char *const buffer = reinterpret_cast<char *>(transitions.get());
+	if (sizeof(time_t) == 8)
+	{
+		for (size_t i{transitionsCount}; i > 0; )
+		{
+			size_t index = --i;
+			transitions[index] = asInt64(buffer + (i * width), width);
+			if (typeIndexes[i] >= typesCount)
+				return false;
+		}
+	}
+	else if (width == 4)
+	{
+		for (size_t i{transitionsCount}; i > 0; )
+		{
+			size_t index = --i;
+			transitions[index] = asInt32(buffer + (i * width));
+			if (typeIndexes[i] >= typesCount)
+				return false;
+		}
+	}
+	return true;
+}
+
 void tzReadFile(const char *const file)
 {
 	uint8_t width = 4;
@@ -254,8 +284,9 @@ void tzReadFile(const char *const file)
 	if (safeAdd(totalSize, tzSpecLen) == sizeMax)
 		return;
 	transitions = makeUnique<time_t []>(transitionsCount);
-	typeIndexes = makeUnique<char []>(transitionsCount);
+	typeIndexes = makeUnique<uint8_t []>(transitionsCount);
 	types = makeUnique<ttInfo_t []>(typesCount);
+	zoneNames = makeUnique<char []>(charCount + 1);
 	leaps = makeUnique<leap_t []>(leapsCount);
 	if (!transitions || !typeIndexes || !types || !leaps)
 		return badRead();
