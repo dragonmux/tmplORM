@@ -209,6 +209,24 @@ bool readTransitions(const fd_t &fd, const size_t width) noexcept
 	return true;
 }
 
+bool readTypes(const fd_t &fd, const size_t charCount) noexcept
+{
+	for (size_t i{}; i < typesCount; ++i)
+	{
+		std::array<uint8_t, 4> offset;
+		uint8_t value;
+
+		if (!fd.read(offset) || !fd.read(value) || value > 1)
+			return false;
+		types[i].isDst = value;
+		if (!fd.read(value) || value > charCount)
+			return false;
+		types[i].index = value;
+		types[i].offset = asInt32(offset);
+	}
+	return true;
+}
+
 void tzReadFile(const char *const file)
 {
 	uint8_t width = 4;
