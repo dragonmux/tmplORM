@@ -328,6 +328,8 @@ char *tzString(const char *string, const size_t length) noexcept
 	value->next = nullptr;
 	if (last)
 		last->next = std::move(value);
+	else
+		tzStringList = std::move(value);
 	return result;
 }
 char *tzString(const char *string) noexcept { return tzString(string, strlen(string)); }
@@ -336,7 +338,7 @@ bool registerZones(const size_t charCount) noexcept
 {
 	zoneNames[charCount] = 0;
 	for (size_t i{}; i < transitionsCount; ++i)
-		if (tzString(&zoneNames[types[i].index]) == nullptr)
+		if (!tzString(&zoneNames[types[i].index]))
 			return false;
 	return true;
 }
