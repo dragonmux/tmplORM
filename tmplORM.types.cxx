@@ -227,6 +227,23 @@ bool readTypes(const fd_t &fd, const size_t charCount) noexcept
 	return true;
 }
 
+bool readLeaps(const fd_t &fd, const size_t width) noexcept
+{
+	char buffer[8];
+	for (size_t i{}; i < leapsCount; ++i)
+	{
+		if (!fd.read(buffer, width) ||
+			!fd.read(leaps[i].change))
+			return false;
+		else if (sizeof(time_t) == 8)
+			leaps[i].transition = asInt64(buffer, width);
+		else
+			leaps[i].transition = asInt32(buffer);
+		swapBytes(leaps[i].change);
+	}
+	return true;
+}
+
 void tzReadFile(const char *const file)
 {
 	uint8_t width = 4;
@@ -274,9 +291,6 @@ void tzReadFile(const char *const file)
 	size_t totalSize{safeMul(transitionsCount, sizeof(time_t) + 1)};
 	totalSize = safeAdd(safeMul(typesCount, sizeof(ttInfo_t)), totalSize);
 	totalSize = safeAdd(totalSize, charCount);
-	if (totalSize >= sizeMax - dataOffset)
-		return;
-	const size_t leapsOffset = totalSize + dataOffset;
 	totalSize = safeAdd(safeMul(leapsCount, sizeof(leap_t)), totalSize);
 
 	size_t tzSpecLen{};
@@ -304,11 +318,9 @@ void tzReadFile(const char *const file)
 	if (!transitions || !typeIndexes || !types ||
 		!zoneNames || !leaps ||
 		!readTransitions(fd, width) ||
-		!readTypes(fd, charCount))
-		return badRead();
-	else if (!fd.seek(typesOffset, SEEK_SET) || !fd.read(types, typesCount))
-		return badRead();
-	else if (!fd.seek(leapsOffset, SEEK_SET) || !fd.read(leaps, leapsCount))
+		!readTypes(fd, charCount) ||
+		!fd.read(zoneNames, charCount) ||
+		!readLeaps(fd, width))
 		return badRead();
 
 	tzInitialised = true;
