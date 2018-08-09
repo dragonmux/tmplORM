@@ -59,6 +59,10 @@ struct tzString_t
 
 //std::array<tzRule_t, 2> tzRules{};
 static std::array<const char *, 2> tzName{};
+static int32_t ruleStdOffset{};
+static int32_t ruleDstOffset{};
+static bool isDaylight;
+static int32_t timeZone;
 static bool tzInitialised{false};
 
 static size_t transitionsCount{}, typesCount{}, leapsCount{};
@@ -376,6 +380,38 @@ bool findZoneNames() noexcept
 	return true;
 }
 
+void computeRules() noexcept
+{
+	if (!transitionsCount)
+		ruleStdOffset = ruleDstOffset = types[0].offset;
+	else
+	{
+		bool stdSet{false}, dstSet{false};
+		ruleStdOffset = 0;
+		ruleDstOffset = 0;
+		for (size_t i{transitionsCount}; i > 0;)
+		{
+			--i;
+			if (!stdSet && !types[typeIndexes[i]].isDst)
+			{
+				ruleStdOffset = types[typeIndexes[i]].offset;
+				stdSet = true;
+			}
+			else if (!dstSet && types[typeIndexes[i]].isDst)
+			{
+				ruleDstOffset = types[typeIndexes[i]].offset;
+				dstSet = true;
+			}
+			if (stdSet && dstSet)
+				break;
+		}
+		if (!dstSet)
+			ruleDstOffset = ruleStdOffset;
+	}
+	isDaylight = ruleStdOffset != ruleDstOffset;
+	timeZone = -ruleStdOffset;
+}
+
 bool tzReadFile(const char *const file) noexcept
 {
 	uint8_t width = 4;
@@ -455,6 +491,7 @@ bool tzReadFile(const char *const file) noexcept
 	if (!registerZones(charCount) ||
 		!findZoneNames())
 		return badRead();
+	computeRules();
 	return tzInitialised = true;
 }
 
@@ -468,7 +505,12 @@ void tzInit() noexcept
 	else if (tz[0] == ':')
 		++tz;
 
-	tzReadFile(tz);
+	if (tzReadFile(tz))
+		return;
+	isDaylight = false;
+	timeZone = 0;
+	tzName[0] = tzString("UTC");
+	tzName[1] = tzName[1];
 	tzInitialised = true;
 }
 
