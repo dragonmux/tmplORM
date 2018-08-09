@@ -8,6 +8,8 @@
 #include <fcntl.h>
 #include <utility>
 
+using stat_t = struct stat;
+
 struct fd_t final
 {
 private:
@@ -29,9 +31,9 @@ public:
 	ssize_t write(const void *const bufferPtr, const size_t valueLen) const noexcept
 		{ return ::write(fd, bufferPtr, valueLen); }
 
-	struct ::stat stat() const noexcept
+	stat_t stat() const noexcept
 	{
-		struct ::stat fileStat{};
+		stat_t fileStat{};
 		if (!::fstat(fd, &fileStat))
 			return fileStat;
 		return {};
