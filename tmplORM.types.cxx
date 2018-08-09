@@ -557,6 +557,38 @@ size_t searchFor(const time_t time) noexcept
 	return high;
 }
 
+void computeRules(size_t &i) noexcept
+{
+	const uint8_t type = typeIndexes[--i];
+	tzName[types[type].isDst] = tzString(&zoneNames[types[type].index]);
+	for (size_t j{i}; j < transitionsCount; ++j)
+	{
+		uint8_t type = typeIndexes[j];
+		const bool isDst = types[type].isDst;
+		if (!tzName[isDst])
+		{
+			tzName[isDst] = tzString(&zoneNames[types[type].index]);
+			if (tzName[!isDst])
+				break;
+		}
+	}
+	if (!tzName[0])
+		tzName[0] = tzName[1];
+	i = type;
+}
+
+int32_t computeOffset(const size_t index) noexcept
+{
+	const auto &info = types[index];
+	isDaylight = ruleStdOffset != ruleDstOffset;
+	timezone = -ruleStdOffset;
+	if (!tzName[0])
+		tzName[0] = tzString(zoneNames);
+	if (!tzName[1])
+		tzName[1] = tzName[0];
+	return info.offset;
+}
+
 void ormDateTime_t::tzCompute(const systemTime_t &time)
 {
 	if (!tzInitialised)
