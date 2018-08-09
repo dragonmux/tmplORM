@@ -145,6 +145,12 @@ namespace tmplORM
 				struct ormDateTime_t final : public ormDate_t, ormTime_t
 				{
 				private:
+					struct timezone_t
+					{
+						int32_t offset;
+						int32_t leapCorrection;
+						size_t leapCount;
+					};
 
 					void display() const noexcept { printf("%04u-%02u-%02u %02u:%02u:%02u.%u\n", _year, _month, _day, _hour, _minute, _second, _nanoSecond); }
 
@@ -218,14 +224,6 @@ namespace tmplORM
 						_second = durationIn<seconds>(rem);
 						rem -= seconds{_second};
 						_nanoSecond = durationIn<nanoseconds>(rem);
-
-						tzCompute(time);
-						/*tzset();
-						const time_t value = systemClock_t::to_time_t(timePoint_t{time});
-						tm timeZone{};
-						timeZone.tm_year = _year - 1900;
-						__tz_compute(value, &timeZone, true);
-						printf("Offset: %u\n", timeZone.tm_gmtoff);*/
 
 						//display();
 					}
