@@ -40,19 +40,6 @@ struct leap_t
 	int32_t change;
 };
 
-enum class tzType_t { J0, J1, M };
-
-struct tzRule_t
-{
-	std::unique_ptr<char []> name;
-	tzType_t type;
-	uint16_t m, n, d;
-	int32_t secs;
-	int64_t offset;
-	time_t change;
-	int32_t computedFor;
-};
-
 struct tzString_t
 {
 	size_t length;
@@ -60,7 +47,6 @@ struct tzString_t
 	std::unique_ptr<tzString_t> next;
 };
 
-//std::array<tzRule_t, 2> tzRules{};
 static std::array<const char *, 2> tzName{};
 static int32_t ruleStdOffset{};
 static int32_t ruleDstOffset{};
