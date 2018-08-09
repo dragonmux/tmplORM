@@ -198,7 +198,7 @@ namespace tmplORM
 						return i + 1;
 					}
 
-					void tzCompute(const systemTime_t &time);
+					timezone_t tzCompute(const systemTime_t &time);
 					friend bool operator ==(const ormDateTime_t &a, const ormDateTime_t &b) noexcept;
 
 				public:

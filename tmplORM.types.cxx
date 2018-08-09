@@ -594,7 +594,7 @@ int32_t computeOffset(const size_t index) noexcept
 	return info.offset;
 }
 
-void ormDateTime_t::tzCompute(const systemTime_t &time)
+ormDateTime_t::timezone_t ormDateTime_t::tzCompute(const systemTime_t &time)
 {
 	if (!tzInitialised)
 		tzInit();
@@ -632,4 +632,25 @@ void ormDateTime_t::tzCompute(const systemTime_t &time)
 		computeRules(i);
 	}
 	timezone_t result{computeOffset(i), 0, 0};
+	i = leapsCount;
+	do
+	{
+		if (!i)
+			return result;
+		--i;
+	}
+	while (timeSecs < leaps[i].transition);
+	result.leapCorrection = leaps[i].change;
+	if (timeSecs == leaps[i].transition && ((!i && leaps[i].change > 0) ||
+		leaps[i].change > leaps[i - 1].change))
+	{
+		while (i > 0 && leaps[i].transition == leaps[i - 1].transition + 1 &&
+			leaps[i].change == leaps[i - 1].change + 1)
+		{
+			++result.leapCount;
+			--i;
+		}
+		++result.leapCount;
+	}
+	return result;
 }
