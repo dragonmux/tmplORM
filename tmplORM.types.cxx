@@ -514,6 +514,49 @@ void tzInit() noexcept
 	tzInitialised = true;
 }
 
+size_t searchFor(const time_t time) noexcept
+{
+	size_t low{0}, high{transitionsCount - 1};
+	size_t i{(transitions[high] - time) / halfYear};
+	// If we have a reasonable guess for i, tune low and high to reduce the search space if possible.
+	if (i < transitionsCount)
+	{
+		i = transitionsCount - i - 1;
+		if (time < transitions[i])
+		{
+			// Although, if we're within 10 entries anyway.. just do a naive search
+			if (i < 10 || time >= transitions[i - 10])
+			{
+				while (time < transitions[--i])
+					continue;
+				return i;
+			}
+			high = i - 10;
+		}
+		else
+		{
+			// Although, if we're within 10 entries anyway.. just do a naive search
+			if (i + 10 >= transitionsCount || time < transitions[i + 10])
+			{
+				while (time >= transitions[i])
+					++i;
+				return i;
+			}
+			low = i + 10;
+		}
+	}
+
+	while (low + 1 < high)
+	{
+		i = (low + high) / 2;
+		if (time < transitions[i])
+			high = i;
+		else
+			low = i;
+	}
+	return high;
+}
+
 void ormDateTime_t::tzCompute(const systemTime_t &time)
 {
 	if (!tzInitialised)
