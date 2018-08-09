@@ -7,6 +7,9 @@
 #include <fd.hxx>
 
 using tmplORM::types::baseTypes::ormDateTime_t;
+using tmplORM::types::baseTypes::chrono::durationIn;
+using tmplORM::types::baseTypes::chrono::seconds;
+using tmplORM::types::baseTypes::chrono::operator ""_y;
 
 constexpr static std::array<char, 4> tzMagic{{'T', 'Z', 'i', 'f'}};
 struct tzHead_t
@@ -77,6 +80,7 @@ static std::unique_ptr<tzString_t> tzStringList{};
 // TODO: fixme.
 #define TZDIR "/usr/share/zoneinfo"
 #define TZDEFAULT "localtime"
+constexpr static size_t halfYear = durationIn<seconds>(1_y) / 2;
 
 template<typename T> constexpr int signBit() noexcept
 	{ return std::numeric_limits<typename std::make_signed<T>::type>::digits; }
