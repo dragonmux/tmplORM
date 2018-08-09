@@ -57,22 +57,22 @@ struct tzString_t
 	std::unique_ptr<tzString_t> next;
 };
 
-std::array<tzRule_t, 2> tzRules{};
-std::array<const char *, 2> tzName{};
+//std::array<tzRule_t, 2> tzRules{};
+static std::array<const char *, 2> tzName{};
+static bool tzInitialised{false};
 
-size_t transitionsCount{}, typesCount{}, leapsCount{};
-std::unique_ptr<time_t []> transitions{};
-std::unique_ptr<uint8_t []> typeIndexes{};
-std::unique_ptr<ttInfo_t []> types{};
-std::unique_ptr<char []> zoneNames{};
-std::unique_ptr<leap_t []> leaps{};
-std::unique_ptr<char []> tzSpec{};
-std::unique_ptr<tzString_t> tzStringList{};
+static size_t transitionsCount{}, typesCount{}, leapsCount{};
+static std::unique_ptr<time_t []> transitions{};
+static std::unique_ptr<uint8_t []> typeIndexes{};
+static std::unique_ptr<ttInfo_t []> types{};
+static std::unique_ptr<char []> zoneNames{};
+static std::unique_ptr<leap_t []> leaps{};
+static std::unique_ptr<char []> tzSpec{};
+static std::unique_ptr<tzString_t> tzStringList{};
 
 // TODO: fixme.
 #define TZDIR "/usr/share/zoneinfo"
 #define TZDEFAULT "localtime"
-static bool tzInitialised = false;
 
 template<typename T> constexpr int signBit() noexcept
 	{ return std::numeric_limits<typename std::make_signed<T>::type>::digits; }
