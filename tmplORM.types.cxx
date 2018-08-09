@@ -165,17 +165,21 @@ size_t safeAnd(const size_t a, const size_t b) noexcept
 	return a & b;
 }
 
-inline void badRead() noexcept
+inline bool badRead() noexcept
 {
 	printf("Something went wrong.. %d: %s\n", errno, strerror(errno));
 	transitions = nullptr;
+	transitionsCount = 0;
 	typeIndexes = nullptr;
 	types = nullptr;
+	typesCount = 0;
 	zoneNames = nullptr;
 	leaps = nullptr;
+	leapsCount = 0;
+	return false;
 }
 
-fd_t tzOpenFile(const char *const file)
+fd_t tzOpenFile(const char *const file) noexcept
 {
 	if (file[0] != '/')
 	{
@@ -372,17 +376,17 @@ bool findZoneNames() noexcept
 	return true;
 }
 
-void tzReadFile(const char *const file)
+bool tzReadFile(const char *const file) noexcept
 {
 	uint8_t width = 4;
 
 	static_assert(sizeof(time_t) == 4 || sizeof(time_t) == 8, "time_t not a valid size");
 	fd_t fd{tzOpenFile(file)};
 	if (!fd.valid())
-		return;
+		return false;
 	const auto fileStat = fd.stat();
 	if (fileStat.st_size == 0)
-		return;
+		return false;
 
 	size_t charCount{}, isStdCount{}, isGmtCount{};
 	int8_t version{};
@@ -404,31 +408,31 @@ void tzReadFile(const char *const file)
 	};
 
 	if (!readHeader())
-		return;
+		return false;
 	else if (sizeof(time_t) == 8 && version)
 	{
 		const size_t toSkip{safeAdd(safeMul(transitionsCount, 5), safeMul(typesCount, 6),
 			charCount, safeMul(leapsCount, 8), isStdCount, isGmtCount)};
 		if (toSkip == sizeMax || !fd.seek(toSkip, SEEK_CUR) || !readHeader())
-			return;
+			return false;
 		width = 8;
 	}
 	else if (sizeof(time_t) == 4 && width == 8)
-		return;
+		return false;
 
 	const size_t totalSize{safeAdd(safeMul(transitionsCount, width + 1), safeMul(typesCount, 6),
 		charCount, safeMul(leapsCount, 8), isStdCount, isGmtCount)};
 	if (totalSize == sizeMax)
-		return;
+		return false;
 	size_t tzSpecLen{};
 	if (sizeof(time_t) == 8 && width == 8)
 	{
 		const off_t rem = fileStat.st_size - fd.tell();
 		if (rem < 0)
-			return;
+			return false;
 		tzSpecLen = safeSub(rem, totalSize, 1);
 		if (tzSpecLen == 0 || tzSpecLen == sizeMax)
-			return;
+			return false;
 	}
 
 	transitions = makeUnique<time_t []>(transitionsCount);
@@ -451,9 +455,10 @@ void tzReadFile(const char *const file)
 	if (!registerZones(charCount) ||
 		!findZoneNames())
 		return badRead();
+	return tzInitialised = true;
 }
 
-void tzInit()
+void tzInit() noexcept
 {
 	const char *tz = getenv("TZ");
 	if (!tz)
