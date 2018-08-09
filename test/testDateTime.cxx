@@ -19,7 +19,7 @@ private:
 		assertNotNull(cwd);
 		assertEqual(setenv("TZDIR", cwd.get(), true), 0);
 
-		tzReadFile("data/GMT_BST.timezone");
+		assertTrue(tzReadFile("data/GMT_BST.timezone"));
 		assertNotNull(transitions);
 		assertNotNull(typeIndexes);
 		assertNotNull(types);
