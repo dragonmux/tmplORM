@@ -341,6 +341,7 @@ char *tzString(const char *string, const size_t length) noexcept
 	return result;
 }
 char *tzString(const char *string) noexcept { return tzString(string, strlen(string)); }
+char *tzString(const std::unique_ptr<char []> &string) noexcept { return tzString(string.get()); }
 
 bool registerZones(const size_t charCount) noexcept
 {
@@ -593,4 +594,38 @@ void ormDateTime_t::tzCompute(const systemTime_t &time)
 {
 	if (!tzInitialised)
 		tzInit();
+
+	const time_t timeSecs{systemClock_t::to_time_t(timePoint_t{time})};
+	size_t i{0};
+	tzName[0] = nullptr;
+	tzName[1] = nullptr;
+	if (!transitionsCount || timeSecs < transitions[0])
+	{
+		for (; i < typesCount && ::types[i].isDst; ++i)
+		{
+			if (!tzName[1])
+				tzName[1] = tzString(&zoneNames[::types[i].index]);
+		}
+		if (i == typesCount)
+			tzName[0] = tzString(&zoneNames[::types[i = 0].index]);
+		for (size_t j{i}; j < typesCount && !tzName[1]; ++j)
+		{
+			if (::types[j].isDst)
+				tzName[1] = tzString(&zoneNames[::types[j].index]);
+		}
+	}
+	else if (timeSecs >= transitions[transitionsCount - 1])
+	{
+		if (!tzSpec)
+		{
+			i = transitionsCount;
+			computeRules(i);
+		}
+	}
+	else
+	{
+		i = searchFor(timeSecs);
+		computeRules(i);
+	}
+	timezone_t result{computeOffset(i), 0, 0};
 }
