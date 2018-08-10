@@ -1,6 +1,9 @@
 #include <stdlib.h>
+#include <time.h>
 #include <crunch++.h>
 #include <tmplORM.types.cxx>
+
+using systemClock_t = std::chrono::system_clock;
 
 std::unique_ptr<char []> currentWorkDir() noexcept
 {
@@ -33,10 +36,26 @@ private:
 		assertEqual(tzName[1], "BST");
 	}
 
+	void testConversion()
+	{
+		const auto now{systemClock_t::now()};
+		const auto nowSecs{systemClock_t::to_time_t(now)};
+		const auto localTime{*localtime(&nowSecs)};
+		const ormDateTime_t ormTime{now};
+
+		assertEqual(ormTime.year(), localTime.tm_year + 1900);
+		assertEqual(ormTime.month(), localTime.tm_mon + 1);
+		assertEqual(ormTime.day(), localTime.tm_mday);
+		assertEqual(ormTime.hour(), localTime.tm_hour);
+		assertEqual(ormTime.minute(), localTime.tm_min);
+		assertEqual(ormTime.second(), localTime.tm_sec);
+	}
+
 public:
 	void registerTests() final override
 	{
 		CXX_TEST(testReadExtended)
+		CXX_TEST(testConversion)
 	}
 };
 
