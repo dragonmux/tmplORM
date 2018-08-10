@@ -545,12 +545,12 @@ size_t searchFor(const time_t time) noexcept
 		else
 			low = i;
 	}
-	return high;
+	return low;
 }
 
 void computeRules(size_t &i) noexcept
 {
-	const uint8_t type = typeIndexes[--i];
+	const uint8_t type = typeIndexes[i];
 	tzName[types[type].isDst] = tzString(&zoneNames[types[type].index]);
 	for (size_t j{i + 1}; j < transitionsCount; ++j)
 	{
@@ -608,8 +608,12 @@ ormDateTime_t::timezone_t ormDateTime_t::tzCompute(const systemTime_t &time)
 	{
 		if (!tzSpec)
 		{
-			i = transitionsCount;
+			i = transitionsCount - 1;
 			computeRules(i);
+		}
+		else
+		{
+			// TODO: implement TZ string parser/decoder
 		}
 	}
 	else
