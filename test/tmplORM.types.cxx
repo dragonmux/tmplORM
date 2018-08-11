@@ -66,7 +66,7 @@ namespace dateTime
 		const ormDateTime_t a{now};
 
 		const ::time_t time = systemClock_t::to_time_t(now);
-		const tm local = *gmtime(&time);
+		const tm local = *localtime(&time);
 
 		suite.assertEqual(a.year(), local.tm_year + 1900);
 		suite.assertEqual(a.month(), local.tm_mon + 1);
