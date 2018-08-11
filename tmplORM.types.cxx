@@ -161,7 +161,6 @@ size_t safeAnd(const size_t a, const size_t b) noexcept
 
 inline bool badRead() noexcept
 {
-	printf("Something went wrong.. %d: %s\n", errno, strerror(errno));
 	transitions = nullptr;
 	transitionsCount = 0;
 	typeIndexes = nullptr;
@@ -414,6 +413,9 @@ bool tzReadFile(const char *const file) noexcept
 	const auto fileStat = fd.stat();
 	if (fileStat.st_size == 0)
 		return false;
+	// This is normally used to reset state after an error, however
+	// this is not to deal with an error but to ensure good state when entering this function
+	badRead();
 
 	size_t charCount{}, isStdCount{}, isGmtCount{};
 	int8_t version{};
