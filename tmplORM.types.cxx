@@ -572,6 +572,8 @@ void computeRules(size_t &i) noexcept
 
 int32_t computeOffset(const size_t index) noexcept
 {
+	if (!typesCount)
+		return 0;
 	const auto &info = types[index];
 	isDaylight = ruleStdOffset != ruleDstOffset;
 	timezone = -ruleStdOffset;
@@ -598,7 +600,7 @@ ormDateTime_t::timezone_t ormDateTime_t::tzCompute(const systemTime_t &time)
 			if (!tzName[1])
 				tzName[1] = tzString(&zoneNames[::types[i].index]);
 		}
-		if (i == typesCount)
+		if (typesCount && i == typesCount)
 			tzName[0] = tzString(&zoneNames[::types[i = 0].index]);
 		for (size_t j{i}; j < typesCount && !tzName[1]; ++j)
 		{
