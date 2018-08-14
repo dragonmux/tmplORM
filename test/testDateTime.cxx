@@ -23,6 +23,7 @@ private:
 		assertEqual(setenv("TZDIR", cwd.get(), true), 0);
 
 		assertTrue(tzReadFile("data/GMT_BST.timezone"));
+		assertEqual(unsetenv("TZDIR"), 0);
 		assertTrue(tzInitialised);
 		tzInitialised = false;
 		assertNotNull(transitions);
