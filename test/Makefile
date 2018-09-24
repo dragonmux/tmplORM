@@ -9,7 +9,7 @@ ifeq ($(BUILD_VERBOSE), 0)
 	CRUNCHMAKE += -q
 endif
 ifeq ($(strip $(COVERAGE)), 1)
-	CRUNCHMAKE += -lgcov
+	CRUNCHMAKE += --coverage
 endif
 CRUNCH = crunch++
 
