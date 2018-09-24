@@ -20,7 +20,7 @@ GCH = models.gch
 DEPS = ../.dep/test
 
 quiet_cmd_crunchMake = -n
-cmd_crunchMake = $(CRUNCHMAKE) $(addprefix -o,$(O_FILE)) $(2)
+cmd_crunchMake = $(CRUNCHMAKE) $(O_FILE) $(2)
 quiet_cmd_crunch = -n
 cmd_crunch = $(CRUNCH) $(2)
 
