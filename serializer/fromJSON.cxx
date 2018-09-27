@@ -64,11 +64,12 @@ bool fromJSON_t::validateProducts(const jsonAtom_t &productsAtom) const noexcept
 			return false;
 
 		const jsonString_t &productName = product["productName"];
-		const jsonString_t &quantityPerUnit = product["quantityPerUnit"];
-		if (productName.len() > 40 || quantityPerUnit.len() > 20 ||
+		if (productName.len() > 40 ||
 			!validateID(product["productID"]) ||
 			!validateIfInt<validateID>(product["supplierID"]) ||
-			!validateIfInt<validateID>(product["categoryID"]))
+			!validateIfInt<validateID>(product["categoryID"]) ||
+			(typeIs<JSON_TYPE_STRING>(product["quantityPerUnit"]) &&
+			product["quantityPerUnit"].asStringRef().len() > 20))
 			return false;
 	}
 	return true;
@@ -76,5 +77,56 @@ bool fromJSON_t::validateProducts(const jsonAtom_t &productsAtom) const noexcept
 
 bool fromJSON_t::validateCustomers(const jsonAtom_t &customersAtom) const noexcept
 {
+	if (!typeIs<JSON_TYPE_ARRAY>(customersAtom))
+		return false;
+	const jsonArray_t &customers = customersAtom;
+	for (const auto &customerAtom : customers)
+	{
+		if (!typeIs<JSON_TYPE_OBJECT>(*customerAtom))
+			return false;
+		const jsonObject_t &customer = *customerAtom;
+
+		if (!customer.exists("customerID") || !customer.exists("companyName") ||
+			!customer.exists("contactName") || !customer.exists("contactTitle") ||
+			!customer.exists("address") || !customer.exists("city") ||
+			!customer.exists("region") || !customer.exists("postalCode") ||
+			!customer.exists("country") || !customer.exists("phone") ||
+			!customer.exists("fax") ||
+			!typeIs<JSON_TYPE_STRING>(customer["customerID"]) ||
+			!typeIs<JSON_TYPE_STRING>(customer["companyName"]) ||
+			!typeIsOrNull<JSON_TYPE_STRING>(customer["contactName"]) ||
+			!typeIsOrNull<JSON_TYPE_STRING>(customer["contactTitle"]) ||
+			!typeIsOrNull<JSON_TYPE_STRING>(customer["address"]) ||
+			!typeIsOrNull<JSON_TYPE_STRING>(customer["city"]) ||
+			!typeIsOrNull<JSON_TYPE_STRING>(customer["region"]) ||
+			!typeIsOrNull<JSON_TYPE_STRING>(customer["postalCode"]) ||
+			!typeIsOrNull<JSON_TYPE_STRING>(customer["country"]) ||
+			!typeIsOrNull<JSON_TYPE_STRING>(customer["phone"]) ||
+			!typeIsOrNull<JSON_TYPE_STRING>(customer["fax"]))
+			return false;
+
+		const jsonString_t &customerID = customer["customerID"];
+		const jsonString_t &companyName = customer["companyName"];
+		if (customerID.len() > 5 || companyName.len() > 40 ||
+			(typeIs<JSON_TYPE_STRING>(customer["contactName"]) &&
+			customer["contactName"].asStringRef().len() > 30) ||
+			(typeIs<JSON_TYPE_STRING>(customer["contactTitle"]) &&
+			customer["contactTitle"].asStringRef().len() > 30) ||
+			(typeIs<JSON_TYPE_STRING>(customer["address"]) &&
+			customer["address"].asStringRef().len() > 60) ||
+			(typeIs<JSON_TYPE_STRING>(customer["city"]) &&
+			customer["city"].asStringRef().len() > 15) ||
+			(typeIs<JSON_TYPE_STRING>(customer["region"]) &&
+			customer["region"].asStringRef().len() > 15) ||
+			(typeIs<JSON_TYPE_STRING>(customer["postalCode"]) &&
+			customer["postalCode"].asStringRef().len() > 10) ||
+			(typeIs<JSON_TYPE_STRING>(customer["country"]) &&
+			customer["country"].asStringRef().len() > 15) ||
+			(typeIs<JSON_TYPE_STRING>(customer["phone"]) &&
+			customer["phone"].asStringRef().len() > 24) ||
+			(typeIs<JSON_TYPE_STRING>(customer["fax"]) &&
+			customer["fax"].asStringRef().len() > 24))
+			return false;
+	}
 	return true;
 }
