@@ -2,6 +2,7 @@
 #include "helpers.hxx"
 
 using namespace rSON;
+using tmplORM::modelFromJSON;
 
 bool isIn(const char *const value, const char *const _value) noexcept { return strcmp(value, _value) == 0; }
 template<typename... Values> bool isIn(const char *const value, const char *const _value, Values ...values) noexcept
@@ -129,4 +130,16 @@ bool fromJSON_t::validateCustomers(const jsonAtom_t &customersAtom) const noexce
 			return false;
 	}
 	return true;
+}
+
+fixedVector_t<customer_t> fromJSON_t::customers() const noexcept
+{
+	const jsonObject_t &data = *rootAtom;
+	const jsonArray_t &jsonCustomers = data["customers"];
+	fixedVector_t<customer_t> dbCustomers(jsonCustomers.count());
+	if (!dbCustomers.valid())
+		return {};
+	for (size_t i = 0; i < jsonCustomers.count(); ++i)
+		dbCustomers[i] = modelFromJSON<customer_t>(jsonCustomers[i]);
+	return dbCustomers;
 }
