@@ -605,9 +605,9 @@ namespace tmplORM
 		template<typename A, typename B> constexpr bool typestrcmp() noexcept { return std::is_same<A, B>::value; }
 
 		template<bool, typename fieldName, typename... fields> struct fieldIndex__t;
-		template<typename name, typename fieldName, typename T> constexpr bool isFieldsName(const type_t<fieldName, T> &) noexcept
-			{ return typestrcmp<name, fieldName>(); }
 		template<typename name, typename fieldName, typename T> constexpr bool isFieldsName(const alias_t<fieldName, T> &) noexcept
+			{ return typestrcmp<name, fieldName>(); }
+		template<typename name, typename fieldName, typename T> constexpr bool isFieldsName(const type_t<fieldName, T> &) noexcept
 			{ return typestrcmp<name, fieldName>(); }
 		template<typename fieldName, typename field, typename... fields>
 			using fieldIndex_ = fieldIndex__t<isFieldsName<fieldName>(field()), fieldName, fields...>;
