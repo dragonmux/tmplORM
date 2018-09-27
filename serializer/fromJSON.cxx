@@ -76,6 +76,25 @@ bool fromJSON_t::validateProducts(const jsonAtom_t &productsAtom) const noexcept
 	return true;
 }
 
+fixedVector_t<product_t> fromJSON_t::products() const noexcept
+{
+	const jsonObject_t &data = *rootAtom;
+	const jsonArray_t &jsonProducts = data["products"];
+	fixedVector_t<product_t> dbProducts(jsonProducts.count());
+	if (!dbProducts.valid())
+		return {};
+
+	for (size_t i = 0; i < jsonProducts.count(); ++i)
+	{
+		jsonObject_t &jsonProduct = jsonProducts[i];
+		product_t dbProduct;
+		dbProduct[ts_("ProductID")] = jsonProduct["productID"];
+		dbProduct[ts_("ProductName")] = jsonProduct["productName"];
+		dbProducts[i] = std::move(dbProduct);
+	}
+	return dbProducts;
+}
+
 bool fromJSON_t::validateCustomers(const jsonAtom_t &customersAtom) const noexcept
 {
 	if (!typeIs<JSON_TYPE_ARRAY>(customersAtom))
