@@ -42,6 +42,19 @@
 		"utility": "cpp",
 		"codecvt": "cpp",
 		"*.ic": "cpp",
-		"*.ipp": "cpp"
+		"*.ipp": "cpp",
+		"vector": "cpp",
+		"unordered_map": "cpp",
+		"fstream": "cpp",
+		"iostream": "cpp",
+		"istream": "cpp",
+		"ostream": "cpp",
+		"sstream": "cpp",
+		"streambuf": "cpp",
+		"bitset": "cpp",
+		"deque": "cpp",
+		"numeric": "cpp",
+		"cinttypes": "cpp",
+		"cerrno": "cpp"
 	}
 }
