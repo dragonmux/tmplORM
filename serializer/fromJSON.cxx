@@ -1,4 +1,5 @@
 #include "fromJSON.hxx"
+#include "toJSON.hxx"
 #include "helpers.hxx"
 
 using namespace rSON;
