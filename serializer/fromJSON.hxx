@@ -36,39 +36,36 @@ namespace tmplORM
 		using tmplORM::types::alias_t;
 		using tmplORM::utils::lowerCamelCase_t;
 
-		template<typename...> struct populateFromJSON_t;
-		template<> struct populateFromJSON_t<>
-			{ template<typename T> static void populate(T &, const jsonObject_t &) { } };
-
-		template<typename field_t, typename... fields_t> struct populateFromJSON_t<field_t, fields_t...>
+		template<typename model_t> struct modelFromJSON_t
 		{
-			template<typename model_t, typename fieldName, typename T> static void populateField(model_t &model,
+			template<typename fieldName, typename T> static void populateField(model_t &model,
 				const jsonObject_t &data, const alias_t<fieldName, T> &)
-				{ model[fieldName()] = data[lowerCamelCase<fieldName>::value]; }
+				{ model[fieldName()] = data[lowerCamelCase_t<fieldName>::value]; }
 
-			template<typename model_t, typename fieldName, typename T> static void populateField(model_t &model,
+			template<typename fieldName, typename T> static void populateField(model_t &model,
 				const jsonObject_t &data, const type_t<fieldName, T> &)
-				{ model[fieldName()] = data[lowerCamelCase<fieldName>::value]; }
+				{ model[fieldName()] = data[lowerCamelCase_t<fieldName>::value]; }
 
-			template<typename T> static void populate(T &model, const jsonObject_t &data)
+			template<typename field_t> static void populate(model_t &model, const jsonObject_t &data)
+				{ populateField(model, data, field_t()); }
+
+			template<typename field_t, typename field__t, typename... fields_t> static void populate(
+				model_t &model, const jsonObject_t &data)
 			{
-				populateField(model, data, field_t());
-				populateFromJSON_t<fields_t...>::populate(model, data);
+				populate<field_t>(model, data);
+				populate<field__t, fields_t...>(model, data);
 			}
-		};
 
-		template<typename T, typename... fields_t> struct modelFromJSON_t
-		{
-			static T convert(const jsonObject_t &object)
+			template<typename... fields_t> static model_t convert(const jsonObject_t &object)
 			{
-				T model{};
-				populateFromJSON_t<fields_t...>::populate(model, object);
+				model_t model{};
+				populate<fields_t...>(model, object);
 				return std::move(model);
 			}
 		};
 
 		template<typename T, typename tableName, typename... fields_t> T modelFromJSON(const jsonObject_t &object,
-			const model_t<tableName, fields_t...> &) { return modelFromJSON_t<T, fields_t...>::convert(object); }
+			const model_t<tableName, fields_t...> &) { return modelFromJSON_t<T>::template convert<fields_t...>(object); }
 	}
 
 	template<typename T> T modelFromJSON(const jsonObject_t &data)
