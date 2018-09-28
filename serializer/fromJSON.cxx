@@ -162,3 +162,10 @@ fixedVector_t<customer_t> fromJSON_t::customers() const noexcept
 		dbCustomers[i] = modelFromJSON<customer_t>(jsonCustomers[i]);
 	return dbCustomers;
 }
+
+void customers(fixedVector_t<customer_t> &dbCustomers)
+{
+	jsonArray_t jsonCustomers{};
+	for (const auto &dbCustomer : dbCustomers)
+		jsonCustomers.add(modelToJSON(dbCustomer).release());
+}
