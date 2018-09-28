@@ -34,10 +34,7 @@ namespace tmplORM
 	{
 		using tmplORM::types::type_t;
 		using tmplORM::types::alias_t;
-		using tmplORM::common::toString;
-
-		template<typename value> struct lowerCamelCase : toString<value> { };
-		//template<char... C> struct lowerCamelCase<typestring<C...>> { };
+		using tmplORM::utils::lowerCamelCase_t;
 
 		template<typename...> struct populateFromJSON_t;
 		template<> struct populateFromJSON_t<>
