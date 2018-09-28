@@ -650,6 +650,49 @@ namespace tmplORM
 		};
 	}
 	using common::session_t;
+
+	namespace utils
+	{
+		using tmplORM::common::toString;
+
+		constexpr bool isLowerCase(const char x) noexcept { return x >= 'a' && x <= 'z'; }
+		constexpr bool isUpperCase(const char x) noexcept { return x >= 'A' && x <= 'Z'; }
+		constexpr char toLower(const char x) noexcept { return isUpperCase(x) ? x + 0x20 : x; }
+		constexpr char toUpper(const char x) noexcept { return isLowerCase(x) ? x - 0x20 : x; }
+		constexpr bool isUnderscore(const char x) noexcept { return x == '_'; }
+
+		template<char...> struct isUpperCase__t;
+		template<char x, char... C> struct isUpperCase__t<x, C...>
+			{ constexpr static bool value = isUpperCase(x) && isUpperCase__t<C...>::value; };
+		template<> struct isUpperCase__t<> { constexpr static bool value = true; };
+
+		template<typename> struct isUpperCase_t;
+		template<char... C> struct isUpperCase_t<typestring<C...>>
+			{ constexpr static bool value = isUpperCase__t<C...>::value; };
+
+		template<char...> struct hasUnderscore_t;
+		template<char x, char... C> struct hasUnderscore_t<x, C...>
+			{ constexpr static bool value = isUnderscore(x) || hasUnderscore_t<C...>::value; };
+		template<> struct hasUnderscore_t<> { constexpr static bool value = false; };
+
+		template<char...> struct removeUnderscore_t;
+		template<char x, char... C> struct removeUnderscore_t<'_', x, C...>
+			{ using value = tycat<typestring<toUpper(x)>, typename removeUnderscore_t<C...>::value>; };
+		template<char x, char... C> struct removeUnderscore_t<x, C...>
+			{ using value = tycat<typestring<toLower(x)>, typename removeUnderscore_t<C...>::value>; };
+		template<> struct removeUnderscore_t<> { using value = typestring<>; };
+
+		template<bool, char...> struct toLowerCamelCase_t;
+		template<char... C> struct toLowerCamelCase_t<true, C...> :
+			toString<typename removeUnderscore_t<C...>::value> { };
+		template<char x, char... C> struct toLowerCamelCase_t<false, x, C...> :
+			toString<typestring<toLower(x), C...>> { };
+
+		template<typename value, bool = !isUpperCase_t<value>::value> struct lowerCamelCase_t;
+		template<char... C> struct lowerCamelCase_t<typestring<C...>, false> : toString<typestring<C...>> { };
+		template<char... C> struct lowerCamelCase_t<typestring<C...>, true> :
+			toLowerCamelCase_t<hasUnderscore_t<C...>::value, C...> { };
+	}
 }
 
 #endif /*tmplORM__HXX*/
