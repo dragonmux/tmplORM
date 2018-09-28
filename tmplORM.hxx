@@ -53,7 +53,13 @@ namespace tmplORM
 	public:
 		const std::tuple<Fields...> &fields() const noexcept { return _fields; }
 		std::tuple<Fields...> &fields() noexcept { return _fields; }
-		template<char... C> auto operator [](const typestring<C...> &) noexcept -> fieldType<typestring<C...>, Fields...> &
+
+		template<char... C> auto operator [](const typestring<C...> &) noexcept ->
+			fieldType<typestring<C...>, Fields...> &
+			{ return std::get<fieldIndex<typestring<C...>, Fields...>::index>(_fields); }
+
+		template<char... C> auto operator [](const typestring<C...> &) const noexcept ->
+			const fieldType<typestring<C...>, Fields...> &
 			{ return std::get<fieldIndex<typestring<C...>, Fields...>::index>(_fields); }
 	};
 
