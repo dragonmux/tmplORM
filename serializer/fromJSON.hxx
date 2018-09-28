@@ -1,30 +1,11 @@
-#ifndef FROM_JSON__HXX
-#define FROM_JSON__HXX
+#ifndef tmplORM_FROM_JSON__HXX
+#define tmplORM_FROM_JSON__HXX
 
-#include <rSON.h>
 #include <memory>
-#include <fixedVector.hxx>
 #include <tmplORM.hxx>
+#include <fixedVector.hxx>
 #include <models.hxx>
-
-////
-using rSON::stream_t;
-using jsonAtom_t = rSON::JSONAtom;
-using jsonObject_t = rSON::JSONObject;
-using jsonArray_t = rSON::JSONArray;
-using jsonString_t = rSON::JSONString;
-
-struct json_t
-{
-protected:
-	std::unique_ptr<jsonAtom_t> rootAtom;
-
-	json_t(stream_t &json) noexcept;
-};
-
-using rSON::typeIs;
-using rSON::typeIsOrNull;
-////
+#include "json.hxx"
 
 using namespace models;
 
@@ -97,4 +78,4 @@ namespace tmplORM
 		{ return tmplORM::json::modelFromJSON<T>(data, T()); }
 }
 
-#endif /*FROM_JSON__HXX*/
+#endif /*tmplORM_FROM_JSON__HXX*/

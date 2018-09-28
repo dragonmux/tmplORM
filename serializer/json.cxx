@@ -1,4 +1,4 @@
-#include "internal.hxx"
+#include "json.hxx"
 
 using namespace rSON;
 
