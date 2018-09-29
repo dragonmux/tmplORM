@@ -4,6 +4,7 @@
 #include <memory>
 #include <tmplORM.hxx>
 #include <fixedVector.hxx>
+#include <string.hxx>
 #include "json.hxx"
 
 namespace tmplORM
@@ -68,7 +69,7 @@ namespace tmplORM
 		template<typename fieldName, size_t N> struct makeAtom_t<unicode_t<fieldName, N>>
 		{
 			static std::unique_ptr<jsonString_t> from(const unicode_t<fieldName, N> &value)
-				{ return makeUnique<jsonString_t>(value.value()); }
+				{ return makeUnique<jsonString_t>(stringDup(value.value()).release()); }
 		};
 
 		template<typename model_t> struct modelToJSON_t
