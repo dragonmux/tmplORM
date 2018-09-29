@@ -11,6 +11,8 @@ namespace tmplORM
 	namespace json
 	{
 		using tmplORM::types::type_t;
+		using tmplORM::types::primary_t;
+		using tmplORM::types::autoInc_t;
 		using tmplORM::types::alias_t;
 		using tmplORM::types::nullable_t;
 		using tmplORM::types::unicode_t;
@@ -28,6 +30,18 @@ namespace tmplORM
 		template<typename> struct makeAtom_t;
 		template<typename field_t, typename value_t> std::unique_ptr<jsonAtom_t> makeAtom(const value_t &value)
 			{ return makeAtom_t<field_t>::from(value); }
+
+		template<typename T> struct makeAtom_t<primary_t<T>>
+		{
+			static std::unique_ptr<jsonAtom_t> from(const primary_t<T> &value)
+				{ return makeAtom_t<T>::from(value); }
+		};
+
+		template<typename T> struct makeAtom_t<autoInc_t<T>>
+		{
+			static std::unique_ptr<jsonAtom_t> from(const autoInc_t<T> &value)
+				{ return makeAtom_t<T>::from(value); }
+		};
 
 		template<typename T> struct makeAtom_t<nullable_t<T>>
 		{
