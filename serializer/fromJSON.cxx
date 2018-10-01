@@ -42,7 +42,7 @@ bool fromJSON_t::validateProducts(const jsonAtom_t &productsAtom) const noexcept
 	if (!typeIs<JSON_TYPE_ARRAY>(productsAtom))
 		return false;
 	const jsonArray_t &products = productsAtom;
-	for (const auto productAtom : products)
+	for (const auto &productAtom : products)
 	{
 		if (!typeIs<JSON_TYPE_OBJECT>(*productAtom))
 			return false;
