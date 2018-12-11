@@ -16,8 +16,13 @@ namespace tmplORM
 		using tmplORM::types::autoInc_t;
 		using tmplORM::types::alias_t;
 		using tmplORM::types::nullable_t;
+		using tmplORM::types::jsonNullable_t;
 		using tmplORM::types::unicode_t;
 		using tmplORM::types::unicodeText_t;
+		using tmplORM::types::date_t;
+		using tmplORM::types::time_t;
+		using tmplORM::types::dateTime_t;
+		using tmplORM::types::uuid_t;
 		using tmplORM::utils::lowerCamelCase_t;
 		using tmplORM::utils::isInteger;
 		using tmplORM::utils::isFloatingPoint;
@@ -49,10 +54,62 @@ namespace tmplORM
 			}
 		};
 
+		template<typename T> struct makeAtom_t<jsonNullable_t<T>>
+		{
+			static std::unique_ptr<jsonAtom_t> from(const jsonNullable_t<T> &value)
+			{
+				if (value.isNull())
+					return makeUnique<jsonNull_t>();
+				return makeAtom_t<T>::from(value);
+			}
+		};
+
+		template<typename fieldName> struct makeAtom_t<date_t<fieldName>>
+		{
+			static std::unique_ptr<jsonString_t> from(const date_t<fieldName> &value)
+				{ return makeUnique<jsonString_t>(value.date().asString().release()); }
+		};
+
+		template<typename fieldName> struct makeAtom_t<dateTime_t<fieldName>>
+		{
+			static std::unique_ptr<jsonString_t> from(const dateTime_t<fieldName> &value)
+				{ return makeUnique<jsonString_t>(value.dateTime().asString().release()); }
+		};
+
+		template<typename fieldName> struct makeAtom_t<time_t<fieldName>>
+		{
+			static std::unique_ptr<jsonString_t> from(const time_t<fieldName> &value)
+				{ return makeUnique<jsonString_t>(value.time()); }
+		};
+
+		template<typename fieldName> struct makeAtom_t<uuid_t<fieldName>>
+		{
+			static std::unique_ptr<jsonString_t> from(const uuid_t<fieldName> &value)
+				{ return makeUnique<jsonString_t>(value.uuid().asString().release()); }
+		};
+
 		template<typename fieldName, typename T> struct makeAtom_t<type_t<fieldName, T>>
 		{
 			static std::unique_ptr<jsonBool_t> from(const type_t<fieldName, bool> &value)
 				{ return makeUnique<jsonBool_t>(value.value()); }
+
+			/*template<typename U, bool = isInteger<U>::value, bool = isFloatingPoint<U>::value>
+				struct makeNumeric_t;
+
+			template<typename U> struct makeNumeric_t<U, true, false>
+			{
+				static std::unique_ptr<jsonInt_t> from(const type_t<fieldName, U> &value)
+					{ return makeUnique<jsonInt_t>(value.value()); }
+			};
+
+			template<typename U> struct makeNumeric_t<U, false, true>
+			{
+				static std::unique_ptr<jsonFloat_t> from(const type_t<fieldName, U> &value)
+					{ return makeUnique<jsonFloat_t>(value.value()); }
+			};
+
+			static std::unique_ptr<jsonAtom_t> from(const type_t<fieldName, T> &value)
+				{ return makeNumeric_t<T>::from(value); }*/
 
 			static std::unique_ptr<jsonInt_t> from(const type_t<fieldName, enableIf<isInteger<T>::value, T>> &value)
 				{ return makeUnique<jsonInt_t>(value.value()); }
@@ -64,6 +121,12 @@ namespace tmplORM
 		template<typename fieldName, size_t N> struct makeAtom_t<unicode_t<fieldName, N>>
 		{
 			static std::unique_ptr<jsonString_t> from(const unicode_t<fieldName, N> &value)
+				{ return makeUnique<jsonString_t>(stringDup(value.value()).release()); }
+		};
+
+		template<typename fieldName> struct makeAtom_t<unicodeText_t<fieldName>>
+		{
+			static std::unique_ptr<jsonString_t> from(const unicodeText_t<fieldName> &value)
 				{ return makeUnique<jsonString_t>(stringDup(value.value()).release()); }
 		};
 
