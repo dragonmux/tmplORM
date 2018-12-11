@@ -14,6 +14,7 @@ using jsonBool_t = rSON::JSONBool;
 using jsonInt_t = rSON::JSONInt;
 using jsonFloat_t = rSON::JSONFloat;
 using jsonString_t = rSON::JSONString;
+using jsonAtomType_t = rSON::JSONAtomType;
 
 struct json_t
 {
