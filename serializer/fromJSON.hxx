@@ -79,6 +79,20 @@ namespace tmplORM
 		template<typename T, typename tableName, typename... fields_t> T modelFromJSON(const jsonObject_t &object,
 			const model_t<tableName, fields_t...> &) { return modelFromJSON_t<T>::template convert<fields_t...>(object); }
 
+		template<typename> struct atomType_t {};
+		template<> struct atomType_t<int8_t> { constexpr static jsonAtomType_t value = rSON::JSON_TYPE_INT; };
+		template<> struct atomType_t<uint8_t> { constexpr static jsonAtomType_t value = rSON::JSON_TYPE_INT; };
+		template<> struct atomType_t<int16_t> { constexpr static jsonAtomType_t value = rSON::JSON_TYPE_INT; };
+		template<> struct atomType_t<uint16_t> { constexpr static jsonAtomType_t value = rSON::JSON_TYPE_INT; };
+		template<> struct atomType_t<int32_t> { constexpr static jsonAtomType_t value = rSON::JSON_TYPE_INT; };
+		template<> struct atomType_t<uint32_t> { constexpr static jsonAtomType_t value = rSON::JSON_TYPE_INT; };
+		template<> struct atomType_t<int64_t> { constexpr static jsonAtomType_t value = rSON::JSON_TYPE_INT; };
+		template<> struct atomType_t<uint64_t> { constexpr static jsonAtomType_t value = rSON::JSON_TYPE_INT; };
+		template<> struct atomType_t<bool> { constexpr static jsonAtomType_t value = rSON::JSON_TYPE_BOOL; };
+		template<> struct atomType_t<float> { constexpr static jsonAtomType_t value = rSON::JSON_TYPE_FLOAT; };
+		template<> struct atomType_t<double> { constexpr static jsonAtomType_t value = rSON::JSON_TYPE_FLOAT; };
+		template<> struct atomType_t<void *> { constexpr static jsonAtomType_t value = rSON::JSON_TYPE_STRING; };
+
 		template<typename T> static bool typeIs(const jsonAtom_t &value) noexcept { return rSON::typeIs<T>(value); }
 
 		template<typename field_t> struct dataType_t;
@@ -112,7 +126,7 @@ namespace tmplORM
 				const uuid_t<fieldName> &) noexcept
 				{ return typeIs<rSON::JSON_TYPE_STRING>(value) && validateUUID(value); }
 			template<typename fieldName, typename T> static bool validate_(const jsonAtom_t &value,
-				const type_t<fieldName, T> &) noexcept { return true; }
+				const type_t<fieldName, T> &) noexcept { return typeIs<atomType_t<T>::value>(value); }
 			template<typename fieldName> static bool validate_(const jsonAtom_t &value,
 				const unicodeText_t<fieldName> &) noexcept { return typeIs<rSON::JSON_TYPE_STRING>(value); }
 			template<typename fieldName, size_t length> static bool validate_(const jsonAtom_t &value,
