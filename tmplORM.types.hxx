@@ -39,11 +39,32 @@ namespace tmplORM
 
 				ormDate_t(const char *date) noexcept : ormDate_t{}
 				{
-					_year = toInt_t<uint16_t>(date, 4);
+					_year = toInt_t<uint16_t>{date, 4};
 					date += 5;
-					_month = toInt_t<uint16_t>(date, 2);
+					_month = toInt_t<uint16_t>{date, 2};
 					date += 3;
-					_day = toInt_t<uint16_t>(date, 2);
+					_day = toInt_t<uint16_t>{date, 2};
+				}
+
+				std::unique_ptr<char []> asString() const noexcept
+				{
+					fromInt_t<uint16_t, uint16_t> year{_year};
+					fromInt_t<uint16_t, uint16_t> month{_month};
+					fromInt_t<uint16_t, uint16_t> day{_day};
+
+					auto str = makeUnique<char []>(year.length() + month.length() + day.length());
+					if (!str)
+						return nullptr;
+
+					uint16_t offset = 0;
+					year.formatTo(str.get() + offset);
+					offset += year.length();
+					str[offset - 1] = '-';
+					month.formatTo(str.get() + offset);
+					offset += month.length();
+					str[offset - 1] = '-';
+					day.formatTo(str.get() + offset);
+					return str;
 				}
 			};
 
@@ -231,6 +252,27 @@ namespace tmplORM
 					}
 					ormDateTime_t(const timePoint_t &point) noexcept :
 						ormDateTime_t{point.time_since_epoch()} { }
+
+					std::unique_ptr<char []> asString() const noexcept
+					{
+						fromInt_t<uint16_t, uint16_t> year{_year};
+						fromInt_t<uint16_t, uint16_t> month{_month};
+						fromInt_t<uint16_t, uint16_t> day{_day};
+
+						auto str = makeUnique<char []>(year.length() + month.length() + day.length());
+						if (!str)
+							return nullptr;
+
+						uint16_t offset = 0;
+						year.formatTo(str.get() + offset);
+						offset += year.length();
+						str[offset - 1] = '-';
+						month.formatTo(str.get() + offset);
+						offset += month.length();
+						str[offset - 1] = '-';
+						day.formatTo(str.get() + offset);
+						return str;
+					}
 				};
 
 				inline bool operator ==(const ormDateTime_t &a, const ormDateTime_t &b) noexcept
