@@ -21,7 +21,7 @@ bool fromJSON_t::validate() const noexcept
 	jsonObject_t &data = *rootAtom;
 	for (const auto key : data.keys())
 	{
-		if (!isIn(key, "products", "customers"))
+		if (!isIn(key, "products", "customers", "employees"))
 			return false;
 	}
 
@@ -31,7 +31,8 @@ bool fromJSON_t::validate() const noexcept
 
 	// Validate secondary (optional) keys
    	if ((data.exists("products") && !validateProducts(data["products"])) ||
-   		(data.exists("customers") && !validateCustomers(data["customers"])))
+		(data.exists("customers") && !validateCustomers(data["customers"])) ||
+		(data.exists("employees") && !validateEmployees(data["employees"])))
    		return false;
 
    	return true;
@@ -100,4 +101,39 @@ void customers(fixedVector_t<customer_t> &dbCustomers)
 	jsonArray_t jsonCustomers{};
 	for (const auto &dbCustomer : dbCustomers)
 		jsonCustomers.add(modelToJSON(dbCustomer).release());
+}
+
+bool fromJSON_t::validateEmployees(const jsonAtom_t &employeesAtom) const noexcept
+{
+	if (!typeIs<JSON_TYPE_ARRAY>(employeesAtom))
+		return false;
+	const jsonArray_t &employees = employeesAtom;
+	for (const auto &employeeAtom : employees)
+	{
+		if (!typeIs<JSON_TYPE_OBJECT>(*employeeAtom))
+			return false;
+		const jsonObject_t &employee = *employeeAtom;
+		if (!isValidJSON<employee_t>(employee))
+			return false;
+	}
+	return true;
+}
+
+fixedVector_t<employee_t> fromJSON_t::employees() const noexcept
+{
+	const jsonObject_t &data = *rootAtom;
+	const jsonArray_t &jsonEmployees = data["employees"];
+	fixedVector_t<employee_t> dbEmployees(jsonEmployees.count());
+	if (!dbEmployees.valid())
+		return {};
+	for (size_t i = 0; i < jsonEmployees.count(); ++i)
+		dbEmployees[i] = modelFromJSON<employee_t>(jsonEmployees[i]);
+	return dbEmployees;
+}
+
+void employees(fixedVector_t<employee_t> &dbEmployees)
+{
+	jsonArray_t jsonEmployees{};
+	for (const auto &dbEmployee : dbEmployees)
+		jsonEmployees.add(modelToJSON(dbEmployee).release());
 }
