@@ -81,10 +81,27 @@ namespace tmplORM
 
 		template<typename T> static bool typeIs(const jsonAtom_t &value) noexcept { return rSON::typeIs<T>(value); }
 
+		template<typename field_t> struct dataType_t;
+		template<typename field_t> struct validatePrimary_t
+		{
+			template<typename T> static bool unwrap(const jsonAtom_t &value, const autoInc_t<T> &) noexcept
+				{ return unwrap(value, T{}); }
+			template<typename fieldName, typename T, typename = enableIf<isInteger<T>::value>>
+				static bool unwrap(const jsonAtom_t &value, const type_t<fieldName, T> &) noexcept
+				{ return dataType_t<type_t<fieldName, T>>::validate(value) && validateID(value); }
+			template<typename T> static bool unwrap(const jsonAtom_t &value, const T &) noexcept
+				{ return dataType_t<T>::validate(value); }
+
+			static bool check(const jsonAtom_t &value) noexcept
+				{ return unwrap(value, field_t{}); }
+		};
+
 		template<typename field_t> struct dataType_t
 		{
 			template<typename T> static bool validate_(const jsonAtom_t &value, const nullable_t<T> &) noexcept
 				{ return typeIs<rSON::JSON_TYPE_NULL>(value) || dataType_t<T>::validate(value); }
+			template<typename T> static bool validate_(const jsonAtom_t &value, const primary_t<T> &) noexcept
+				{ return validatePrimary_t<T>::check(value); }
 			template<typename fieldName> static bool validate_(const jsonAtom_t &value,
 				const date_t<fieldName> &) noexcept
 				{ return typeIs<rSON::JSON_TYPE_STRING>(value) && validateDate(value); }
