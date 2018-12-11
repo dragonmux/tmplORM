@@ -19,14 +19,9 @@ namespace tmplORM
 		using tmplORM::types::unicode_t;
 		using tmplORM::types::unicodeText_t;
 		using tmplORM::utils::lowerCamelCase_t;
-
-		template<typename> struct isBoolean : public std::false_type { };
-		template<> struct isBoolean<bool> : public std::true_type { };
-		template<typename T> using isIntegral = std::is_integral<T>;
-		template<typename T> using isInteger = std::integral_constant<bool,
-			!isBoolean<T>::value && isIntegral<T>::value>;
-		template<typename T> using isFloatingPoint = std::is_floating_point<T>;
-		template<bool B, typename T = void> using enableIf = typename std::enable_if<B, T>::type;
+		using tmplORM::utils::isInteger;
+		using tmplORM::utils::isFloatingPoint;
+		using tmplORM::utils::enableIf;
 
 		template<typename> struct makeAtom_t;
 		template<typename field_t, typename value_t> std::unique_ptr<jsonAtom_t> makeAtom(const value_t &value)

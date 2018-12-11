@@ -698,6 +698,14 @@ namespace tmplORM
 		template<char... C> struct lowerCamelCase_t<typestring<C...>, false> : toString<typestring<C...>> { };
 		template<char... C> struct lowerCamelCase_t<typestring<C...>, true> :
 			toLowerCamelCase_t<hasUnderscore_t<C...>::value, C...> { };
+
+		template<typename> struct isBoolean : public std::false_type { };
+		template<> struct isBoolean<bool> : public std::true_type { };
+		template<typename T> using isIntegral = std::is_integral<T>;
+		template<typename T> using isInteger = std::integral_constant<bool,
+			!isBoolean<T>::value && isIntegral<T>::value>;
+		template<typename T> using isFloatingPoint = std::is_floating_point<T>;
+		template<bool B, typename T = void> using enableIf = typename std::enable_if<B, T>::type;
 	}
 }
 
