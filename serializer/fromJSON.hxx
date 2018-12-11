@@ -78,10 +78,55 @@ namespace tmplORM
 
 		template<typename T, typename tableName, typename... fields_t> T modelFromJSON(const jsonObject_t &object,
 			const model_t<tableName, fields_t...> &) { return modelFromJSON_t<T>::template convert<fields_t...>(object); }
+
+		template<typename T> static bool typeIs(const jsonAtom_t &value) noexcept { return rSON::typeIs<T>(value); }
+
+		template<typename field_t> struct dataType_t
+		{
+			template<typename T> static bool validate_(const jsonAtom_t &value, const nullable_t<T> &) noexcept
+				{ return typeIs<rSON::JSON_TYPE_NULL>(value) || dataType_t<T>::validate(value); }
+			template<typename fieldName> static bool validate_(const jsonAtom_t &value,
+				const date_t<fieldName> &) noexcept
+				{ return typeIs<rSON::JSON_TYPE_STRING>(value) && validateDate(value); }
+			template<typename fieldName> static bool validate_(const jsonAtom_t &value,
+				const dateTime_t<fieldName> &) noexcept
+				{ return typeIs<rSON::JSON_TYPE_STRING>(value) && validateDateTime(value); }
+			template<typename fieldName> static bool validate_(const jsonAtom_t &value,
+				const uuid_t<fieldName> &) noexcept
+				{ return typeIs<rSON::JSON_TYPE_STRING>(value) && validateUUID(value); }
+			template<typename fieldName, typename T> static bool validate_(const jsonAtom_t &value,
+				const type_t<fieldName, T> &) noexcept { return true; }
+			template<typename fieldName> static bool validate_(const jsonAtom_t &value,
+				const unicodeText_t<fieldName> &) noexcept { return typeIs<rSON::JSON_TYPE_STRING>(value); }
+			template<typename fieldName, size_t length> static bool validate_(const jsonAtom_t &value,
+				const unicode_t<fieldName, length> &) noexcept
+				{ return typeIs<rSON::JSON_TYPE_STRING>(value) && value.asStringRef().len() <= length; }
+
+			static bool validate(const jsonAtom_t &value) noexcept { return validate_(value, field_t{}); }
+		};
+
+		template<typename field_t, typename fieldName, typename T> bool validateField(const jsonObject_t &data,
+			const type_t<fieldName, T> &) noexcept
+		{
+			using name = lowerCamelCase_t<fieldName>;
+			if (!data.exists(name::value))
+				return false;
+			const jsonAtom_t &field = data[name::value];
+			return dataType_t<field_t>::validate(field);
+		}
+
+		template<typename field_t> bool validate(const jsonObject_t &object)
+			{ return validateField<field_t>(object, field_t{}); }
+		template<typename field_t, typename field__t, typename... fields_t> bool validate(const jsonObject_t &object)
+			{ return validate<field_t>(object) && validate<field__t, fields_t...>(object); }
+		template<typename tableName, typename... fields_t> bool isValidJSON(const jsonObject_t &object,
+			const model_t<tableName, fields_t...> &) { return validate<fields_t...>(object); }
 	}
 
 	template<typename T> T modelFromJSON(const jsonObject_t &data)
-		{ return tmplORM::json::modelFromJSON<T>(data, T()); }
+		{ return tmplORM::json::modelFromJSON<T>(data, T{}); }
+	template<typename T> bool isValidJSON(const jsonObject_t &data)
+		{ return tmplORM::json::isValidJSON(data, T{}); }
 }
 
 #endif /*tmplORM_FROM_JSON__HXX*/
