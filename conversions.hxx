@@ -88,6 +88,9 @@ public:
 		std::unique_ptr<char []> number = *this;
 		return number.release();
 	}
+
+	uint8_t length() const noexcept { return digits(_value) + 1; }
+	void formatTo(char *const buffer) const noexcept { format(buffer); }
 };
 
 template<typename int_t> struct toInt_t
