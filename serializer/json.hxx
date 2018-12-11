@@ -1,6 +1,7 @@
 #ifndef tmplORM_JSON__HXX
 #define tmplORM_JSON__HXX
 
+#include <tmplORM.hxx>
 #include <rSON.h>
 
 using rSON::stream_t;

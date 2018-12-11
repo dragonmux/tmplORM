@@ -6,6 +6,7 @@
 #include <fixedVector.hxx>
 #include <models.hxx>
 #include "json.hxx"
+#include "helpers.hxx"
 
 using namespace models;
 
@@ -33,21 +34,32 @@ namespace tmplORM
 	namespace json
 	{
 		using tmplORM::types::type_t;
+		using tmplORM::types::primary_t;
+		using tmplORM::types::autoInc_t;
 		using tmplORM::types::alias_t;
+		using tmplORM::types::nullable_t;
+		using tmplORM::types::unicode_t;
+		using tmplORM::types::unicodeText_t;
+		using tmplORM::types::date_t;
+		using tmplORM::types::time_t;
+		using tmplORM::types::dateTime_t;
+		using tmplORM::types::uuid_t;
 		using tmplORM::utils::lowerCamelCase_t;
+		using tmplORM::utils::isInteger;
+		using tmplORM::utils::enableIf;
 
 		template<typename model_t> struct modelFromJSON_t
 		{
 			template<typename fieldName, typename T> static void populateField(model_t &model,
 				const jsonObject_t &data, const alias_t<fieldName, T> &)
-				{ model[fieldName()] = data[lowerCamelCase_t<fieldName>::value]; }
+				{ model[fieldName{}] = data[lowerCamelCase_t<fieldName>::value]; }
 
 			template<typename fieldName, typename T> static void populateField(model_t &model,
 				const jsonObject_t &data, const type_t<fieldName, T> &)
-				{ model[fieldName()] = data[lowerCamelCase_t<fieldName>::value]; }
+				{ model[fieldName{}] = data[lowerCamelCase_t<fieldName>::value]; }
 
 			template<typename field_t> static void populate(model_t &model, const jsonObject_t &data)
-				{ populateField(model, data, field_t()); }
+				{ populateField(model, data, field_t{}); }
 
 			template<typename field_t, typename field__t, typename... fields_t> static void populate(
 				model_t &model, const jsonObject_t &data)
