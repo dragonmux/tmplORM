@@ -122,6 +122,32 @@ namespace tmplORM
 					else
 						_nanoSecond = nanoSeconds / power10(nanoSeconds.length() - 9);
 				}
+
+				std::unique_ptr<char []> asString() const noexcept
+				{
+					fromInt_t<uint16_t, uint16_t> hour{_hour};
+					fromInt_t<uint16_t, uint16_t> minute{_minute};
+					fromInt_t<uint16_t, uint16_t> second{_second};
+					fromInt_t<uint64_t, uint64_t> nanoSecond{_nanoSecond};
+
+					auto str = makeUnique<char []>(hour.length() + minute.length() +
+						second.length() + nanoSecond.fractionLength(9));
+					if (!str)
+						return nullptr;
+
+					uint16_t offset = 0;
+					hour.formatTo(str.get() + offset);
+					offset += hour.length();
+					str[offset - 1] = ':';
+					minute.formatTo(str.get() + offset);
+					offset += minute.length();
+					str[offset - 1] = ':';
+					second.formatTo(str.get() + offset);
+					offset += second.length();
+					str[offset - 1] = '.';
+					nanoSecond.formatFractionTo(9, str.get() + offset);
+					return str;
+				}
 			};
 
 			inline bool operator ==(const ormTime_t &a, const ormTime_t &b) noexcept
@@ -259,8 +285,13 @@ namespace tmplORM
 						fromInt_t<uint16_t, uint16_t> year{_year};
 						fromInt_t<uint16_t, uint16_t> month{_month};
 						fromInt_t<uint16_t, uint16_t> day{_day};
+						fromInt_t<uint16_t, uint16_t> hour{_hour};
+						fromInt_t<uint16_t, uint16_t> minute{_minute};
+						fromInt_t<uint16_t, uint16_t> second{_second};
+						fromInt_t<uint64_t, uint64_t> nanoSecond{_nanoSecond};
 
-						auto str = makeUnique<char []>(year.length() + month.length() + day.length());
+						auto str = makeUnique<char []>(year.length() + month.length() + day.length() +
+							hour.length() + minute.length() + second.length() + nanoSecond.fractionLength(9));
 						if (!str)
 							return nullptr;
 
@@ -272,6 +303,18 @@ namespace tmplORM
 						offset += month.length();
 						str[offset - 1] = '-';
 						day.formatTo(str.get() + offset);
+						offset += day.length();
+						str[offset - 1] = 'T';
+						hour.formatTo(str.get() + offset);
+						offset += hour.length();
+						str[offset - 1] = ':';
+						minute.formatTo(str.get() + offset);
+						offset += minute.length();
+						str[offset - 1] = ':';
+						second.formatTo(str.get() + offset);
+						offset += second.length();
+						str[offset - 1] = '.';
+						nanoSecond.formatFractionTo(9, str.get() + offset);
 						return str;
 					}
 				};
