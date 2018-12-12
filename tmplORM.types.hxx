@@ -1,6 +1,7 @@
 #ifndef tmplORM_TYPES__HXX
 #define tmplORM_TYPES__HXX
 
+#include <cinttypes>
 #include <conversions.hxx>
 
 /*!
@@ -78,7 +79,7 @@ namespace tmplORM
 				uint16_t _hour;
 				uint16_t _minute;
 				uint16_t _second;
-				uint32_t _nanoSecond;
+				uint64_t _nanoSecond;
 
 				/*!
 				* @brief Raise 10 to the power of power.
@@ -92,7 +93,7 @@ namespace tmplORM
 			public:
 				constexpr ormTime_t() noexcept : _hour(0), _minute(0), _second(0), _nanoSecond(0) { }
 				constexpr ormTime_t(const uint16_t hour, const uint16_t minute, const uint16_t second,
-					const uint32_t nanoSecond) noexcept : _hour{hour}, _minute{minute},
+					const uint64_t nanoSecond) noexcept : _hour{hour}, _minute{minute},
 					_second{second}, _nanoSecond{nanoSecond} { }
 
 				constexpr uint16_t hour() const noexcept { return _hour; }
@@ -101,8 +102,8 @@ namespace tmplORM
 				void minute(const uint16_t minute) noexcept { _minute = minute; }
 				constexpr uint16_t second() const noexcept { return _second; }
 				void second(const uint16_t second) noexcept { _second = second; }
-				constexpr uint32_t nanoSecond() const noexcept { return _nanoSecond; }
-				void nanoSecond(const uint32_t nanoSecond) noexcept { _nanoSecond = nanoSecond; }
+				constexpr uint64_t nanoSecond() const noexcept { return _nanoSecond; }
+				void nanoSecond(const uint64_t nanoSecond) noexcept { _nanoSecond = nanoSecond; }
 
 				ormTime_t(const char *time) noexcept : ormTime_t{}
 				{
@@ -173,7 +174,7 @@ namespace tmplORM
 						size_t leapCount;
 					};
 
-					void display() const noexcept { printf("%04u-%02u-%02u %02u:%02u:%02u.%u\n", _year, _month, _day, _hour, _minute, _second, _nanoSecond); }
+					void display() const noexcept { printf("%04u-%02u-%02u %02u:%02u:%02u.%" PRIu64 "\n", _year, _month, _day, _hour, _minute, _second, _nanoSecond); }
 
 					constexpr bool isLeap(const rep_t year) const noexcept
 						{ return (year % 4) == 0 && ((year % 100) != 0 || (year % 400) == 0); }
@@ -225,7 +226,7 @@ namespace tmplORM
 				public:
 					constexpr ormDateTime_t() noexcept : ormDate_t{}, ormTime_t{} { }
 					constexpr ormDateTime_t(const uint16_t year, const uint16_t month, const uint16_t day,
-						const uint16_t hour, const uint16_t minute, const uint16_t second, const uint32_t nanoSecond) noexcept :
+						const uint16_t hour, const uint16_t minute, const uint16_t second, const uint64_t nanoSecond) noexcept :
 						ormDate_t{year, month, day}, ormTime_t{hour, minute, second, nanoSecond} { }
 					ormDateTime_t(const char *dateTime) noexcept : ormDate_t{dateTime}, ormTime_t{dateTime + 11} { }
 
