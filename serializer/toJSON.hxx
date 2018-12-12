@@ -93,7 +93,8 @@ namespace tmplORM
 			static std::unique_ptr<jsonBool_t> from(const type_t<fieldName, bool> &value)
 				{ return makeUnique<jsonBool_t>(value.value()); }
 
-			/*template<typename U, bool = isInteger<U>::value, bool = isFloatingPoint<U>::value>
+#if 1
+			template<typename U, bool = isInteger<U>::value, bool = isFloatingPoint<U>::value>
 				struct makeNumeric_t;
 
 			template<typename U> struct makeNumeric_t<U, true, false>
@@ -109,13 +110,14 @@ namespace tmplORM
 			};
 
 			static std::unique_ptr<jsonAtom_t> from(const type_t<fieldName, T> &value)
-				{ return makeNumeric_t<T>::from(value); }*/
-
+				{ return makeNumeric_t<T>::from(value); }
+#else
 			static std::unique_ptr<jsonInt_t> from(const type_t<fieldName, enableIf<isInteger<T>::value, T>> &value)
 				{ return makeUnique<jsonInt_t>(value.value()); }
 
 			static std::unique_ptr<jsonFloat_t> from(const type_t<fieldName,
 				enableIf<isFloatingPoint<T>::value, T>> &value) { return makeUnique<jsonFloat_t>(value.value()); }
+#endif
 		};
 
 		template<typename fieldName, size_t N> struct makeAtom_t<unicode_t<fieldName, N>>
