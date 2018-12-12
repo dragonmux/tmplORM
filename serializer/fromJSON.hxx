@@ -160,6 +160,16 @@ namespace tmplORM
 		{ return tmplORM::json::modelFromJSON<T>(data, T{}); }
 	template<typename T> bool isValidJSON(const jsonObject_t &data)
 		{ return tmplORM::json::isValidJSON(data, T{}); }
+
+	template<typename T> fixedVector_t<T> modelArrayFromJSON(const jsonArray_t &jsonData)
+	{
+		fixedVector_t<T> dbData(jsonData.count());
+		if (!dbData.valid())
+			return {};
+		for (size_t i = 0; i < jsonData.count(); ++i)
+			dbData[i] = modelFromJSON<T>(jsonData[i]);
+		return dbData;
+	}
 }
 
 #endif /*tmplORM_FROM_JSON__HXX*/

@@ -59,13 +59,7 @@ bool fromJSON_t::validateProducts(const jsonAtom_t &productsAtom) const noexcept
 fixedVector_t<product_t> fromJSON_t::products() const noexcept
 {
 	const jsonObject_t &data = *rootAtom;
-	const jsonArray_t &jsonProducts = data["products"];
-	fixedVector_t<product_t> dbProducts(jsonProducts.count());
-	if (!dbProducts.valid())
-		return {};
-	for (size_t i = 0; i < jsonProducts.count(); ++i)
-		dbProducts[i] = modelFromJSON<product_t>(jsonProducts[i]);
-	return dbProducts;
+	return modelArrayFromJSON<product_t>(data["products"]);
 }
 
 bool fromJSON_t::validateCustomers(const jsonAtom_t &customersAtom) const noexcept
