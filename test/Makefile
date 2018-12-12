@@ -1,9 +1,9 @@
 include ../Makefile.inc
 
-CFLAGS_EXTRA = -I.. -MMD -MF ../.dep/test/$*.d
+CFLAGS_EXTRA = -I.. -MMD -MF ../.dep/test/$*.d $(shell pkg-config --cflags rSON)
 CFLAGS = -c $(OPTIM_FLAGS) -Wall -Wextra -pedantic -std=c++11 $(CFLAGS_EXTRA) -o $@ $<
 
-CRUNCHMAKE = crunchMake -I.. -z defs
+CRUNCHMAKE = crunchMake -I.. -z defs $(shell pkg-config --cflags --libs rSON)
 # $(shell pkg-config --cflags --libs crunch++ zlib)
 ifeq ($(BUILD_VERBOSE), 0)
 	CRUNCHMAKE += -q

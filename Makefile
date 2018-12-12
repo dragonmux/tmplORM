@@ -62,6 +62,7 @@ $(SO): $(O)
 %.gch: %.hxx
 	$(call run-cmd,cxx,$(CFLAGS))
 
+buildCheck: LIBS += $(shell pkg-config --cflags --libs rSON)
 buildCheck: buildCheck.o
 	$(call run-cmd,ccld,$(OPTIM_FLAGS) $(O) $(LIBS) -o $@ buildCheck.o)
 
