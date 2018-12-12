@@ -39,6 +39,15 @@ private:
 		return calcDigits(number);
 	}
 
+	constexpr size_t power10(const size_t power) const noexcept
+		{ return power ? power10(power - 1) * 10 : 1; }
+
+	uint8_t zeros(const int_t number) const noexcept
+	{
+		const int_t num = number / 10;
+		return (num * 10 == number ? 1 + zeros(num) : 0);
+	}
+
 	[[gnu::noinline]] uint_t process(const uint_t number, char *const buffer, const uint8_t digits, const size_t index) const noexcept
 	{
 		if (number < 10)
@@ -71,6 +80,21 @@ private:
 			process(uint_t(number), buffer);
 	}
 
+	void formatFraction(const uint8_t maxDigits, char *const buffer) const noexcept
+	{
+		const uint8_t digits_ = digits();
+		if (digits_ > maxDigits)
+			process(_value - ((_value / power10(maxDigits)) * power10(maxDigits)), buffer, maxDigits - 1, 0);
+		else
+		{
+			const uint8_t trailingZeros_ = trailingZeros();
+			const uint8_t leadingZeros = maxDigits - digits_;
+			for (uint8_t i{0}; i < leadingZeros; ++i)
+				buffer[i] = '0';
+			process(_value / power10(trailingZeros_), buffer + leadingZeros, digits_ - trailingZeros_ - 1, 0);
+		}
+	}
+
 public:
 	constexpr fromInt_t(const valueType_t &value) noexcept : _value(value) { }
 
@@ -89,8 +113,30 @@ public:
 		return number.release();
 	}
 
-	uint8_t length() const noexcept { return digits(_value) + 1; }
+	uint8_t digits() const noexcept { return digits(_value); }
+	uint8_t length() const noexcept { return digits() + 1; }
 	void formatTo(char *const buffer) const noexcept { format(buffer); }
+
+	std::unique_ptr<char []> formatFraction(const uint8_t maxDigits) const noexcept
+	{
+		auto number = makeUnique<char []>(fractionLength(maxDigits));
+		if (!number)
+			return nullptr;
+		formatFraction(maxDigits, number.get());
+		return number;
+	}
+
+	uint8_t fractionDigits(const uint8_t maxDigits) const noexcept
+	{
+		const uint8_t digits_ = digits();
+		if (digits_ > maxDigits)
+			return maxDigits;
+		return (maxDigits - digits_) + (digits_ - trailingZeros());
+	}
+
+	uint8_t trailingZeros() const noexcept { return _value ? zeros(_value) : 0; }
+	uint8_t fractionLength(const uint8_t maxDigits) const noexcept { return fractionDigits(maxDigits) + 1; }
+	void formatFractionTo(const uint8_t maxDigits, char *const buffer) const noexcept { formatFraction(maxDigits, buffer); }
 };
 
 template<typename int_t> struct toInt_t
