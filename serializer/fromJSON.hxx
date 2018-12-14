@@ -57,6 +57,20 @@ namespace tmplORM
 		template<typename T, typename tableName, typename... fields_t> T modelFromJSON(const jsonObject_t &object,
 			const model_t<tableName, fields_t...> &) { return modelFromJSON_t<T>::template convert<fields_t...>(object); }
 
+		template<typename T> fixedVector_t<T> modelArrayFromJSONArr(const jsonArray_t &jsonData)
+		{
+			fixedVector_t<T> dbData(jsonData.count());
+			if (!dbData.valid())
+				return {};
+			for (size_t i = 0; i < jsonData.count(); ++i)
+				dbData[i] = modelFromJSON<T>(jsonData[i], T{});
+			return dbData;
+		}
+
+		template<typename T, typename tableName, typename... fields_t>
+			fixedVector_t<T> modelArrayFromJSONObj(const jsonObject_t &data, const model_t<tableName, fields_t...> &)
+			{ return modelArrayFromJSONArr<T>(data[lowerCamelCase_t<tableName>::value]); }
+
 		template<typename> struct atomType_t {};
 		template<> struct atomType_t<int8_t> { constexpr static jsonAtomType_t value = rSON::JSON_TYPE_INT; };
 		template<> struct atomType_t<uint8_t> { constexpr static jsonAtomType_t value = rSON::JSON_TYPE_INT; };
