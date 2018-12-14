@@ -168,8 +168,21 @@ namespace tmplORM
 		}
 	}
 
+	using tmplORM::json::jsonAtom_t;
+	using tmplORM::json::jsonArray_t;
+
 	template<typename T> std::unique_ptr<jsonAtom_t> modelToJSON(const T &model)
 		{ return tmplORM::json::modelToJSON(model); }
+
+	template<typename T> std::unique_ptr<jsonAtom_t> modelToJSON(const fixedVector_t<T> &modelData)
+	{
+		auto json = makeUnique<jsonArray_t>();
+		if (!json)
+			return nullptr;
+		for (const auto &item : modelData)
+			json->add(modelToJSON(item).release());
+		return json;
+	}
 }
 
 #endif /*tmplORM_TO_JSON__HXX*/
