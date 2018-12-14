@@ -26,7 +26,7 @@ public:
 };
 
 using namespace rSON;
-using tmplORM::modelFromJSON;
+using tmplORM::modelArrayFromJSONObj;
 
 bool isIn(const char *const value, const char *const _value) noexcept { return strcmp(value, _value) == 0; }
 template<typename... Values> bool isIn(const char *const value, const char *const _value, Values ...values) noexcept
@@ -86,16 +86,7 @@ bool fromJSON_t::validateCustomers(const jsonAtom_t &customersAtom) const noexce
 	{ return isValidJSONArray<customer_t>(customersAtom); }
 
 fixedVector_t<customer_t> fromJSON_t::customers() const noexcept
-{
-	const jsonObject_t &data = *rootAtom;
-	const jsonArray_t &jsonCustomers = data["customers"];
-	fixedVector_t<customer_t> dbCustomers(jsonCustomers.count());
-	if (!dbCustomers.valid())
-		return {};
-	for (size_t i = 0; i < jsonCustomers.count(); ++i)
-		dbCustomers[i] = modelFromJSON<customer_t>(jsonCustomers[i]);
-	return dbCustomers;
-}
+	{ return modelArrayFromJSONObj<customer_t>(*rootAtom); }
 
 void customers(fixedVector_t<customer_t> &dbCustomers)
 {
@@ -121,16 +112,7 @@ bool fromJSON_t::validateEmployees(const jsonAtom_t &employeesAtom) const noexce
 }
 
 fixedVector_t<employee_t> fromJSON_t::employees() const noexcept
-{
-	const jsonObject_t &data = *rootAtom;
-	const jsonArray_t &jsonEmployees = data["employees"];
-	fixedVector_t<employee_t> dbEmployees(jsonEmployees.count());
-	if (!dbEmployees.valid())
-		return {};
-	for (size_t i = 0; i < jsonEmployees.count(); ++i)
-		dbEmployees[i] = modelFromJSON<employee_t>(jsonEmployees[i]);
-	return dbEmployees;
-}
+	{ return modelArrayFromJSONObj<employee_t>(*rootAtom); }
 
 void employees(fixedVector_t<employee_t> &dbEmployees)
 {
