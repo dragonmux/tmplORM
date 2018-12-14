@@ -138,12 +138,13 @@ namespace tmplORM
 			return dataType_t<field_t>::validate(field);
 		}
 
-		template<typename field_t> bool validate(const jsonObject_t &object)
+		template<typename field_t> bool validate(const jsonObject_t &object) noexcept
 			{ return validateField<field_t>(object, field_t{}); }
-		template<typename field_t, typename field__t, typename... fields_t> bool validate(const jsonObject_t &object)
+		template<typename field_t, typename field__t, typename... fields_t>
+			bool validate(const jsonObject_t &object) noexcept
 			{ return validate<field_t>(object) && validate<field__t, fields_t...>(object); }
 		template<typename tableName, typename... fields_t> bool isValidJSON(const jsonObject_t &object,
-			const model_t<tableName, fields_t...> &) { return validate<fields_t...>(object); }
+			const model_t<tableName, fields_t...> &) noexcept { return validate<fields_t...>(object); }
 	}
 
 	template<typename T> T modelFromJSON(const jsonObject_t &data)
