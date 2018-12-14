@@ -80,26 +80,10 @@ bool fromJSON_t::validateProducts(const jsonAtom_t &productsAtom) const noexcept
 }
 
 fixedVector_t<product_t> fromJSON_t::products() const noexcept
-{
-	const jsonObject_t &data = *rootAtom;
-	return modelArrayFromJSON<product_t>(data["products"]);
-}
+	{ return modelArrayFromJSONObj<product_t>(*rootAtom); }
 
 bool fromJSON_t::validateCustomers(const jsonAtom_t &customersAtom) const noexcept
-{
-	if (!typeIs<JSON_TYPE_ARRAY>(customersAtom))
-		return false;
-	const jsonArray_t &customers = customersAtom;
-	for (const auto &customerAtom : customers)
-	{
-		if (!typeIs<JSON_TYPE_OBJECT>(*customerAtom))
-			return false;
-		const jsonObject_t &customer = *customerAtom;
-		if (!isValidJSON<customer_t>(customer))
-			return false;
-	}
-	return true;
-}
+	{ return isValidJSONArray<customer_t>(customersAtom); }
 
 fixedVector_t<customer_t> fromJSON_t::customers() const noexcept
 {
