@@ -136,7 +136,8 @@ public:
 
 	uint8_t trailingZeros() const noexcept { return _value ? zeros(_value) : 0; }
 	uint8_t fractionLength(const uint8_t maxDigits) const noexcept { return fractionDigits(maxDigits) + 1; }
-	void formatFractionTo(const uint8_t maxDigits, char *const buffer) const noexcept { formatFraction(maxDigits, buffer); }
+	void formatFractionTo(const uint8_t maxDigits, char *const buffer) const noexcept
+		{ formatFraction(maxDigits, buffer); }
 };
 
 template<typename int_t> struct toInt_t

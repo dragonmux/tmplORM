@@ -14,13 +14,15 @@ PREFIX ?= /usr
 LIBDIR ?= $(PREFIX)/lib
 PKGDIR = $(LIBDIR)/pkgconfig
 INCDIR = $(PREFIX)/include/tmplORM
+SER_INCDIR = $(INCDIR)/serializer
 
 TYPE_INCDIR = $(PREFIX)/include/typestring
 TYPE_H = typestring/typestring.hh
 
 O = string.o mysql.o mssql.o tmplORM.types.o
-H = mysql.hxx mssql.hxx tmplORM.hxx tmplORM.mysql.hxx tmplORM.mssql.hxx tmplORM.common.hxx tmplORM.types.hxx tmplORM.rSON.hxx \
+H = mysql.hxx mssql.hxx tmplORM.hxx tmplORM.mysql.hxx tmplORM.mssql.hxx tmplORM.common.hxx tmplORM.types.hxx \
 	tmplORM.extern.hxx conversions.hxx fixedVector.hxx string.hxx managedPtr.hxx
+H_SERIALIZER = json.hxx fromJSON.hxx toJSON.hxx helpers.hxx
 GCH = tmplORM.gch tmplORM.mysql.gch tmplORM.mssql.gch
 VERMAJ = .0
 VERMIN = $(VERMAJ).1
@@ -35,13 +37,14 @@ default: all
 
 all: $(DEPS) $(SO) $(GCH)
 
-$(DEPS) $(LIBDIR) $(PKGDIR) $(INCDIR) $(TYPE_INCDIR):
+$(DEPS) $(LIBDIR) $(PKGDIR) $(INCDIR) $(SER_INCDIR) $(TYPE_INCDIR):
 	$(call run-cmd,install_dir,$@)
 
-install: all $(LIBDIR) $(PKGDIR) $(INCDIR) $(TYPE_INCDIR) $(PC)
+install: all $(LIBDIR) $(PKGDIR) $(INCDIR) $(SER_INCDIR) $(TYPE_INCDIR) $(PC)
 	$(call run-cmd,install_file,$(addsuffix $(VER),$(SO)),$(LIBDIR))
 	$(call run-cmd,install_file,$(PC),$(PKGDIR))
 	$(call run-cmd,install_file,$(H),$(INCDIR))
+	$(call run-cmd,install_file,$(addprefix serializer/, $(H_SERIALIZER)),$(SER_INCDIR))
 	$(call run-cmd,install_file,$(TYPE_H),$(TYPE_INCDIR))
 	$(call run-cmd,ln,$(LIBDIR)/$(SO)$(VERREV),$(LIBDIR)/$(SO)$(VERMIN))
 	$(call run-cmd,ln,$(LIBDIR)/$(SO)$(VERMIN),$(LIBDIR)/$(SO)$(VERMAJ))
