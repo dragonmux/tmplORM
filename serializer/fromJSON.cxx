@@ -1,6 +1,29 @@
 #include "fromJSON.hxx"
 #include "toJSON.hxx"
-#include "helpers.hxx"
+#include <models.hxx>
+
+using namespace models;
+
+struct fromJSON_t final : public json_t
+{
+private:
+	bool validateProducts(const jsonAtom_t &productsAtom) const noexcept;
+	bool validateCustomers(const jsonAtom_t &customersAtom) const noexcept;
+	bool validateEmployees(const jsonAtom_t &employeesAtom) const noexcept;
+
+public:
+	fromJSON_t(stream_t &json) noexcept : json_t{json} { }
+	fromJSON_t(const fromJSON_t &) = delete;
+	fromJSON_t(fromJSON_t &&) = default;
+	fromJSON_t &operator =(const fromJSON_t &) = delete;
+	fromJSON_t &operator =(fromJSON_t &&) = default;
+
+	bool validate() const noexcept;
+
+	fixedVector_t<product_t> products() const noexcept;
+	fixedVector_t<customer_t> customers() const noexcept;
+	fixedVector_t<employee_t> employees() const noexcept;
+};
 
 using namespace rSON;
 using tmplORM::modelFromJSON;
