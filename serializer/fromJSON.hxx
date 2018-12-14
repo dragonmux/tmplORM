@@ -145,6 +145,19 @@ namespace tmplORM
 			{ return validate<field_t>(object) && validate<field__t, fields_t...>(object); }
 		template<typename tableName, typename... fields_t> bool isValidJSON(const jsonObject_t &object,
 			const model_t<tableName, fields_t...> &) noexcept { return validate<fields_t...>(object); }
+
+		template<typename T> bool isValidJSONArray(const jsonAtom_t &atom) noexcept
+		{
+			if (!typeIs<rSON::JSON_TYPE_ARRAY>(atom))
+				return false;
+			for (const auto &data : atom.asArrayRef())
+			{
+				if (!typeIs<rSON::JSON_TYPE_OBJECT>(*data) ||
+					!isValidJSON(*data, T{}))
+					return false;
+			}
+			return true;
+		}
 	}
 
 	template<typename T> T modelFromJSON(const jsonObject_t &data)
@@ -161,6 +174,8 @@ namespace tmplORM
 			dbData[i] = modelFromJSON<T>(jsonData[i]);
 		return dbData;
 	}
+	template<typename T> bool isValidJSONArray(const jsonAtom_t &atom) noexcept
+		{ return tmplORM::json::isValidJSONArray<T>(atom); }
 }
 
 #endif /*tmplORM_FROM_JSON__HXX*/
