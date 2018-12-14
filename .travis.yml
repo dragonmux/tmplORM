@@ -17,6 +17,10 @@ install:
   - git clone https://github.com/DX-MON/crunch.git DX-MON/crunch
   - cd DX-MON/crunch
   - sudo make install
+  - cd ../..
+  - git clone https://github.com/DX-MON/rSON.git DX-MON/rSON
+  - cd DX-MON/rSON
+  - sudo make install
   - popd
   - if [ -n "${_COV}" ]; then
       export COVERAGE=$_COV;
