@@ -76,6 +76,14 @@ inline bool validateDate(const jsonString_t &date) noexcept
 	return date.len() == 10 && std::regex_match(date.asString(), dateRegex);
 }
 
+inline bool validateTime(const jsonString_t &time) noexcept
+{
+	// This regex is not technically correct as it allows invalid times just fine,
+	// but it does ensure the time conforms to RFC3339 (International Date-Time, aka ISO 8601)
+	const auto timeRegex = std::regex("^[0-9]{2}:[0-9]{2}:[0-9]{2}.[0-9]+Z$");
+	return time.len() >= 11 && std::regex_match(time.asString(), timeRegex);
+}
+
 inline bool validateDateTime(const jsonString_t &dateTime) noexcept
 {
 	// This regex is not technically correct as it allows invalid dates and times just fine,
