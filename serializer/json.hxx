@@ -5,32 +5,44 @@
 #include <rSON.h>
 
 using rSON::stream_t;
-using jsonAtom_t = rSON::JSONAtom;
-using jsonObject_t = rSON::JSONObject;
-using jsonArray_t = rSON::JSONArray;
-using jsonString_t = rSON::JSONString;
-using jsonNull_t = rSON::JSONNull;
-using jsonBool_t = rSON::JSONBool;
-using jsonInt_t = rSON::JSONInt;
-using jsonFloat_t = rSON::JSONFloat;
-using jsonString_t = rSON::JSONString;
-using jsonAtomType_t = rSON::JSONAtomType;
+
+namespace tmplORM
+{
+	namespace json
+	{
+		using jsonAtom_t = rSON::JSONAtom;
+		using jsonObject_t = rSON::JSONObject;
+		using jsonArray_t = rSON::JSONArray;
+		using jsonString_t = rSON::JSONString;
+		using jsonNull_t = rSON::JSONNull;
+		using jsonBool_t = rSON::JSONBool;
+		using jsonInt_t = rSON::JSONInt;
+		using jsonFloat_t = rSON::JSONFloat;
+		using jsonString_t = rSON::JSONString;
+		using jsonAtomType_t = rSON::JSONAtomType;
+	}
+}
 
 struct json_t
 {
 protected:
-	std::unique_ptr<jsonAtom_t> rootAtom;
+	std::unique_ptr<tmplORM::json::jsonAtom_t> rootAtom;
 
 	json_t(stream_t &json) noexcept;
 };
 
-using rSON::typeIs;
-using rSON::typeIsOrNull;
-
 namespace tmplORM
 {
+	namespace json
+	{
+		using rSON::typeIs;
+		using rSON::typeIsOrNull;
+	}
+
 	namespace types
 	{
+		using tmplORM::json::jsonAtom_t;
+
 		namespace json
 		{
 			template<typename nullable_t, bool =
