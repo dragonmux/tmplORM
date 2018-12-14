@@ -160,20 +160,18 @@ namespace tmplORM
 		}
 	}
 
+	using tmplORM::json::jsonAtom_t;
+	using tmplORM::json::jsonObject_t;
+	using tmplORM::json::jsonArray_t;
+
 	template<typename T> T modelFromJSON(const jsonObject_t &data)
 		{ return tmplORM::json::modelFromJSON<T>(data, T{}); }
+	template<typename T> fixedVector_t<T> modelArrayFromJSONArr(const jsonArray_t &data)
+		{ return tmplORM::json::modelArrayFromJSONArr<T>(data); }
+	template<typename T> fixedVector_t<T> modelArrayFromJSONObj(const jsonObject_t &data)
+		{ return tmplORM::json::modelArrayFromJSONObj<T>(data, T{}); }
 	template<typename T> bool isValidJSON(const jsonObject_t &data)
 		{ return tmplORM::json::isValidJSON(data, T{}); }
-
-	template<typename T> fixedVector_t<T> modelArrayFromJSON(const jsonArray_t &jsonData)
-	{
-		fixedVector_t<T> dbData(jsonData.count());
-		if (!dbData.valid())
-			return {};
-		for (size_t i = 0; i < jsonData.count(); ++i)
-			dbData[i] = modelFromJSON<T>(jsonData[i]);
-		return dbData;
-	}
 	template<typename T> bool isValidJSONArray(const jsonAtom_t &atom) noexcept
 		{ return tmplORM::json::isValidJSONArray<T>(atom); }
 }
