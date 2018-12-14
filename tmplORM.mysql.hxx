@@ -308,7 +308,7 @@ namespace tmplORM
 			{
 				fixedVector_t<T> data;
 				using select = select_<tableName, fields_t...>;
-				if (!database.query(select::data))
+				if (!database.query(select::value))
 					throw mySQLValueError_t(mySQLErrorType_t::queryError);
 				mySQLResult_t result = database.queryResult();
 				if (!result.valid())
@@ -333,7 +333,7 @@ namespace tmplORM
 				// Generate the SELECT query with WHERE clause
 				using select = selectWhere_<tableName, where, fields_t...>;
 				// Now prepare that query abd bind data to the WHERE clause
-				mySQLPreparedQuery_t query{database.prepare(select::data, countCond_t<where>::count)};
+				mySQLPreparedQuery_t query{database.prepare(select::value, countCond_t<where>::count)};
 				bindCond<where, fields_t...>::bind(cond, query);
 				// Next, run the query
 				if (!query.execute())

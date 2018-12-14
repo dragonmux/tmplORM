@@ -105,6 +105,11 @@ namespace tmplORM
 				//_modified = true;
 			}
 
+			template<typename value_t, typename U = T> typename std::enable_if<std::is_same<U, bool>::value>::type
+				value(const value_t &newValue) noexcept { _value = bool(newValue); }
+			template<typename value_t, typename U = T> typename std::enable_if<std::is_same<U, bool>::value>::type
+				operator =(const value_t &newValue) noexcept { value(newValue); }
+
 			bool operator ==(const type_t<_fieldName, T> &value) const noexcept { return _value == value._value; }
 			bool operator !=(const type_t<_fieldName, T> &value) const noexcept { return _value != value._value; }
 
@@ -198,6 +203,7 @@ namespace tmplORM
 			constexpr unicode_t() noexcept : parentType_t{} { }
 			constexpr unicode_t(const type value) noexcept : parentType_t{value} { }
 			size_t length() const noexcept { return value() ? std::char_traits<char>::length(value()) : 0; }
+			void value(const std::unique_ptr<char []> &_value) noexcept { value(_value.get()); }
 		};
 
 		// Encodes as a TEXT type field (NTEXT for MSSQL)
@@ -217,6 +223,7 @@ namespace tmplORM
 			constexpr unicodeText_t() noexcept : parentType_t{} { }
 			constexpr unicodeText_t(const type value) noexcept : parentType_t{value} { }
 			size_t length() const noexcept { return value() ? std::char_traits<char>::length(value()) : 0; }
+			void value(const std::unique_ptr<char []> &_value) noexcept { value(_value.get()); }
 		};
 
 		template<typename _fieldName> using int64_t = type_t<_fieldName, std::int64_t>;
