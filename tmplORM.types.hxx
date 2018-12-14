@@ -131,7 +131,7 @@ namespace tmplORM
 					fromInt_t<uint64_t, uint64_t> nanoSecond{_nanoSecond};
 
 					auto str = makeUnique<char []>(hour.length() + minute.length() +
-						second.length() + nanoSecond.fractionLength(9));
+						second.length() + nanoSecond.fractionLength(9) + 1);
 					if (!str)
 						return nullptr;
 
@@ -146,6 +146,9 @@ namespace tmplORM
 					offset += second.length();
 					str[offset - 1] = '.';
 					nanoSecond.formatFractionTo(9, str.get() + offset);
+					offset += nanoSecond.fractionLength(9);
+					str[offset - 1] = 'Z';
+					str[offset] = 0;
 					return str;
 				}
 			};
@@ -290,7 +293,7 @@ namespace tmplORM
 						fromInt_t<uint16_t, uint16_t> second{_second};
 						fromInt_t<uint64_t, uint64_t> nanoSecond{_nanoSecond};
 
-						auto str = makeUnique<char []>(year.length() + month.length() + day.length() +
+						auto str = makeUnique<char []>(year.length() + month.length() + day.length() + 1 +
 							hour.length() + minute.length() + second.length() + nanoSecond.fractionLength(9));
 						if (!str)
 							return nullptr;
@@ -315,6 +318,9 @@ namespace tmplORM
 						offset += second.length();
 						str[offset - 1] = '.';
 						nanoSecond.formatFractionTo(9, str.get() + offset);
+						offset += nanoSecond.fractionLength(9);
+						str[offset - 1] = 'Z';
+						str[offset] = 0;
 						return str;
 					}
 				};
