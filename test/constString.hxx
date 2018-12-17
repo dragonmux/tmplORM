@@ -4,6 +4,7 @@
 #include <string>
 #include <cassert>
 #include <memory.h>
+#include <stddef.h>
 
 struct constString_t final
 {

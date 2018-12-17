@@ -123,8 +123,10 @@ namespace tmplORM
 		template<typename T> using isInteger = std::integral_constant<bool,
 			!isBoolean<T>::value && isIntegral<T>::value>;
 		template<typename T> using isFloatingPoint = std::is_floating_point<T>;
-		template<bool B, typename T = void> using enableIf = typename std::enable_if<B, T>::type;
 		template<typename T> using isNumeric = isInteger<T>;
+
+		template<bool B, typename T = void> using enableIf = typename std::enable_if<B, T>::type;
+		template<typename T, typename U> using isSame = std::is_same<T, U>;
 	}
 
 	namespace types
@@ -132,6 +134,7 @@ namespace tmplORM
 		using tmplORM::utils::isNumeric;
 		using tmplORM::utils::isBoolean;
 		using tmplORM::utils::enableIf;
+		using tmplORM::utils::isSame;
 
 		template<typename _fieldName, typename T> struct type_t
 		{
@@ -239,6 +242,16 @@ namespace tmplORM
 			type value() noexcept { return T::value(); }
 			void value(const type &_value) noexcept { _null = false; T::value(_value); }
 			operator const type() const noexcept { return _value(); }
+
+			template<typename U = type, typename = enableIf<isSame<U, const char *>::value>>
+				void operator =(const std::unique_ptr<char []> &_value) noexcept { value(_value.get()); }
+			template<typename U = type, typename = enableIf<isSame<U, const char *>::value>>
+				void operator =(std::unique_ptr<char []> &&_value) noexcept { value(_value.release()); }
+			template<typename U = type, typename = enableIf<isSame<U, const char *>::value>>
+				void value(const std::unique_ptr<char []> &_value) noexcept { value(_value.get()); }
+			// TODO: This is bad.. it works, but it leaks.
+			template<typename U = type, typename = enableIf<isSame<U, const char *>::value>>
+				void value(std::unique_ptr<char []> &&_value) noexcept { value(_value.release()); }
 		};
 
 		// Encodes as a VARCHAR type field (NVARCHAR for MSSQL)
