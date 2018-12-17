@@ -25,8 +25,7 @@ mssqlToJSON = executable(
 	'mssqlToJSON',
 	['mssqlToJSON.cxx'],
 	dependencies: [rSON, tmplORM],
-	install: true,
-	build_by_default: false
+	install: true
 )
 
 mysqlToJSON = executable(
