@@ -160,10 +160,10 @@ namespace tmplORM
 				//_modified = true;
 			}
 
-			template<typename value_t, typename U = T> typename std::enable_if<std::is_same<U, bool>::value>::type
-				value(const value_t &newValue) noexcept { _value = bool(newValue); }
-			template<typename value_t, typename U = T> typename std::enable_if<std::is_same<U, bool>::value>::type
-				operator =(const value_t &newValue) noexcept { value(newValue); }
+			template<typename value_t, typename U = T, typename = enableIf<isBoolean<U>::value>>
+				void value(const value_t &newValue) noexcept { _value = bool(newValue); }
+			template<typename value_t, typename U = T, typename = enableIf<isBoolean<U>::value>>
+				void operator =(const value_t &newValue) noexcept { value(newValue); }
 
 			bool operator ==(const type_t<_fieldName, T> &value) const noexcept { return _value == value._value; }
 			bool operator !=(const type_t<_fieldName, T> &value) const noexcept { return _value != value._value; }
