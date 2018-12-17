@@ -258,7 +258,12 @@ namespace tmplORM
 			constexpr unicode_t() noexcept : parentType_t{} { }
 			constexpr unicode_t(const type value) noexcept : parentType_t{value} { }
 			size_t length() const noexcept { return value() ? std::char_traits<char>::length(value()) : 0; }
+
+			void operator =(const std::unique_ptr<char []> &_value) noexcept { value(_value); }
+			void operator =(std::unique_ptr<char []> &&_value) noexcept { value(std::move(_value)); }
 			void value(const std::unique_ptr<char []> &_value) noexcept { value(_value.get()); }
+			// TODO: This is bad.. it works, but it leaks.
+			void value(std::unique_ptr<char []> &&_value) noexcept { value(_value.release()); }
 		};
 
 		// Encodes as a TEXT type field (NTEXT for MSSQL)
@@ -278,7 +283,12 @@ namespace tmplORM
 			constexpr unicodeText_t() noexcept : parentType_t{} { }
 			constexpr unicodeText_t(const type value) noexcept : parentType_t{value} { }
 			size_t length() const noexcept { return value() ? std::char_traits<char>::length(value()) : 0; }
+
+			void operator =(const std::unique_ptr<char []> &_value) noexcept { value(_value); }
+			void operator =(std::unique_ptr<char []> &&_value) noexcept { value(std::move(_value)); }
 			void value(const std::unique_ptr<char []> &_value) noexcept { value(_value.get()); }
+			// TODO: This is bad.. it works, but it leaks.
+			void value(std::unique_ptr<char []> &&_value) noexcept { value(_value.release()); }
 		};
 
 		template<typename _fieldName> using int64_t = type_t<_fieldName, std::int64_t>;
