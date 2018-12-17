@@ -33,10 +33,11 @@ namespace tmplORM
 		template<typename fieldName, typename... fields> using fieldIndex = fieldIndex_t<fieldName, fields...>;
 		template<typename fieldName, typename... fields> using fieldType = typename fieldType_t<fieldIndex<fieldName, fields...>::index, fields...>::type;
 
-		template<typename> struct isBoolean : std::false_type { };
-		template<> struct isBoolean<bool> : std::true_type { };
+		// This is strictly only required to work around a bug in MSVC++, however it turns out to be useful when writing the generator aliases per-engine.
+		template<typename> struct toString { };
+		template<char... C> struct toString<typestring<C...>> { static const char value[sizeof...(C) + 1]; };
+		template<char... C> const char toString<typestring<C...>>::value[sizeof...(C) + 1] = {C..., '\0'};
 
-		template<typename T> struct isNumeric : std::integral_constant<bool, std::is_integral<T>::value && !isBoolean<T>::value> { };
 	}
 	using common::fieldIndex;
 	using common::fieldType;
@@ -74,9 +75,63 @@ namespace tmplORM
 		constexpr static const size_t N = fields_t<Fields...>::N;
 	};
 
+	namespace utils
+	{
+		using tmplORM::common::toString;
+
+		constexpr bool isLowerCase(const char x) noexcept { return x >= 'a' && x <= 'z'; }
+		constexpr bool isUpperCase(const char x) noexcept { return x >= 'A' && x <= 'Z'; }
+		constexpr char toLower(const char x) noexcept { return isUpperCase(x) ? x + 0x20 : x; }
+		constexpr char toUpper(const char x) noexcept { return isLowerCase(x) ? x - 0x20 : x; }
+		constexpr bool isUnderscore(const char x) noexcept { return x == '_'; }
+
+		template<char...> struct isUpperCase__t;
+		template<char x, char... C> struct isUpperCase__t<x, C...>
+			{ constexpr static bool value = isUpperCase(x) && isUpperCase__t<C...>::value; };
+		template<> struct isUpperCase__t<> { constexpr static bool value = true; };
+
+		template<typename> struct isUpperCase_t;
+		template<char... C> struct isUpperCase_t<typestring<C...>>
+			{ constexpr static bool value = isUpperCase__t<C...>::value; };
+
+		template<char...> struct hasUnderscore_t;
+		template<char x, char... C> struct hasUnderscore_t<x, C...>
+			{ constexpr static bool value = isUnderscore(x) || hasUnderscore_t<C...>::value; };
+		template<> struct hasUnderscore_t<> { constexpr static bool value = false; };
+
+		template<char...> struct removeUnderscore_t;
+		template<char x, char... C> struct removeUnderscore_t<'_', x, C...>
+			{ using value = tycat<typestring<toUpper(x)>, typename removeUnderscore_t<C...>::value>; };
+		template<char x, char... C> struct removeUnderscore_t<x, C...>
+			{ using value = tycat<typestring<toLower(x)>, typename removeUnderscore_t<C...>::value>; };
+		template<> struct removeUnderscore_t<> { using value = typestring<>; };
+
+		template<bool, char...> struct toLowerCamelCase_t;
+		template<char... C> struct toLowerCamelCase_t<true, C...> :
+			toString<typename removeUnderscore_t<C...>::value> { };
+		template<char x, char... C> struct toLowerCamelCase_t<false, x, C...> :
+			toString<typestring<toLower(x), C...>> { };
+
+		template<typename value, bool = !isUpperCase_t<value>::value> struct lowerCamelCase_t;
+		template<char... C> struct lowerCamelCase_t<typestring<C...>, false> : toString<typestring<C...>> { };
+		template<char... C> struct lowerCamelCase_t<typestring<C...>, true> :
+			toLowerCamelCase_t<hasUnderscore_t<C...>::value, C...> { };
+
+		template<typename> struct isBoolean : public std::false_type { };
+		template<> struct isBoolean<bool> : public std::true_type { };
+		template<typename T> using isIntegral = std::is_integral<T>;
+		template<typename T> using isInteger = std::integral_constant<bool,
+			!isBoolean<T>::value && isIntegral<T>::value>;
+		template<typename T> using isFloatingPoint = std::is_floating_point<T>;
+		template<bool B, typename T = void> using enableIf = typename std::enable_if<B, T>::type;
+		template<typename T> using isNumeric = isInteger<T>;
+	}
+
 	namespace types
 	{
-		using common::isNumeric;
+		using tmplORM::utils::isNumeric;
+		using tmplORM::utils::isBoolean;
+		using tmplORM::utils::enableIf;
 
 		template<typename _fieldName, typename T> struct type_t
 		{
@@ -497,11 +552,6 @@ namespace tmplORM
 		using tmplORM::condition::where_t;
 		using tmplORM::condition::countCond;
 
-		// This is strictly only required to work around a bug in MSVC++, however it turns out to be useful when writing the generator aliases per-engine.
-		template<typename> struct toString { };
-		template<char... C> struct toString<typestring<C...>> { static const char value[sizeof...(C) + 1]; };
-		template<char... C> const char toString<typestring<C...>>::value[sizeof...(C) + 1] = {C..., '\0'};
-
 		namespace intConversion
 		{
 			template<size_t N> struct fromInt_t;
@@ -663,57 +713,6 @@ namespace tmplORM
 		};
 	}
 	using common::session_t;
-
-	namespace utils
-	{
-		using tmplORM::common::toString;
-
-		constexpr bool isLowerCase(const char x) noexcept { return x >= 'a' && x <= 'z'; }
-		constexpr bool isUpperCase(const char x) noexcept { return x >= 'A' && x <= 'Z'; }
-		constexpr char toLower(const char x) noexcept { return isUpperCase(x) ? x + 0x20 : x; }
-		constexpr char toUpper(const char x) noexcept { return isLowerCase(x) ? x - 0x20 : x; }
-		constexpr bool isUnderscore(const char x) noexcept { return x == '_'; }
-
-		template<char...> struct isUpperCase__t;
-		template<char x, char... C> struct isUpperCase__t<x, C...>
-			{ constexpr static bool value = isUpperCase(x) && isUpperCase__t<C...>::value; };
-		template<> struct isUpperCase__t<> { constexpr static bool value = true; };
-
-		template<typename> struct isUpperCase_t;
-		template<char... C> struct isUpperCase_t<typestring<C...>>
-			{ constexpr static bool value = isUpperCase__t<C...>::value; };
-
-		template<char...> struct hasUnderscore_t;
-		template<char x, char... C> struct hasUnderscore_t<x, C...>
-			{ constexpr static bool value = isUnderscore(x) || hasUnderscore_t<C...>::value; };
-		template<> struct hasUnderscore_t<> { constexpr static bool value = false; };
-
-		template<char...> struct removeUnderscore_t;
-		template<char x, char... C> struct removeUnderscore_t<'_', x, C...>
-			{ using value = tycat<typestring<toUpper(x)>, typename removeUnderscore_t<C...>::value>; };
-		template<char x, char... C> struct removeUnderscore_t<x, C...>
-			{ using value = tycat<typestring<toLower(x)>, typename removeUnderscore_t<C...>::value>; };
-		template<> struct removeUnderscore_t<> { using value = typestring<>; };
-
-		template<bool, char...> struct toLowerCamelCase_t;
-		template<char... C> struct toLowerCamelCase_t<true, C...> :
-			toString<typename removeUnderscore_t<C...>::value> { };
-		template<char x, char... C> struct toLowerCamelCase_t<false, x, C...> :
-			toString<typestring<toLower(x), C...>> { };
-
-		template<typename value, bool = !isUpperCase_t<value>::value> struct lowerCamelCase_t;
-		template<char... C> struct lowerCamelCase_t<typestring<C...>, false> : toString<typestring<C...>> { };
-		template<char... C> struct lowerCamelCase_t<typestring<C...>, true> :
-			toLowerCamelCase_t<hasUnderscore_t<C...>::value, C...> { };
-
-		template<typename> struct isBoolean : public std::false_type { };
-		template<> struct isBoolean<bool> : public std::true_type { };
-		template<typename T> using isIntegral = std::is_integral<T>;
-		template<typename T> using isInteger = std::integral_constant<bool,
-			!isBoolean<T>::value && isIntegral<T>::value>;
-		template<typename T> using isFloatingPoint = std::is_floating_point<T>;
-		template<bool B, typename T = void> using enableIf = typename std::enable_if<B, T>::type;
-	}
 }
 
 #endif /*tmplORM__HXX*/

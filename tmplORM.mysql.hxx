@@ -13,6 +13,7 @@ namespace tmplORM
 		using namespace tmplORM::common;
 		using namespace tmplORM::mysql::driver;
 		using namespace tmplORM::types::baseTypes;
+		using tmplORM::utils::isNumeric;
 
 		using tmplORM::types::type_t;
 		using tmplORM::types::unicode_t;
