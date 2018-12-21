@@ -24,7 +24,17 @@ inline namespace toJSON
 	template<typename session_t> void writeDataTo(const char *const file, session_t &session)
 	{
 		jsonObject_t data{};
+		data.add("categories", process<category_t>(session));
+		data.add("suppliers", process<supplier_t>(session));
+		data.add("products", process<product_t>(session));
 		data.add("customers", process<customer_t>(session));
+		data.add("shippers", process<shipper_t>(session));
+		data.add("regions", process<region_t>(session));
+		data.add("territories", process<territory_t>(session));
+		data.add("employees", process<employee_t>(session));
+		data.add("orders", process<order_t>(session));
+		data.add("demographics", process<demographic_t>(session));
+		data.add("customerDemographics", process<customerDemographic_t>(session));
 
 		fileStream_t jsonFile{file, O_RDWR | O_NOCTTY | O_CREAT | O_TRUNC, S_IREAD | S_IWUSR};
 		rSON::writeJSON(&data, jsonFile);
