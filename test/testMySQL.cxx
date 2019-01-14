@@ -430,8 +430,8 @@ private:
 		assertTrue(bool{row[5]} == typeData.boolean);
 		assertEqual(row[6].asString().get(), typeData.string);
 		assertEqual(row[7].asString().get(), typeData.text);
-		//assertEqual(row[8].asFloat(), typeData.decimalF);
-		//assertEqual(row[9], typeData.decimalD);
+		assertEqual(row[8].asFloat(), typeData.decimalF);
+		assertEqual(row[9], typeData.decimalD);
 		assertTrue(row[10].asDate() == typeData.date);
 		assertTrue(row[11] == dateTime);
 		assertTrue(row[12] == typeData.uuid);
@@ -902,6 +902,8 @@ public:
 		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::int32Error).error(), unknownError);
 		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::uint64Error).error(), unknownError);
 		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::int64Error).error(), unknownError);
+		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::floatError).error(), unknownError);
+		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::doubleError).error(), unknownError);
 		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::dateError).error(), unknownError);
 		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::dateTimeError).error(), unknownError);
 		assertNotEqual(mySQLValueError_t(mySQLErrorType_t::uuidError).error(), unknownError);
