@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <string>
 #include <tuple>
+#include <bitset>
 #include <memory>
 #include <new>
 #include <chrono>
@@ -524,6 +525,39 @@ namespace tmplORM
 			ormUUID_t uuid() const noexcept { return *this; }
 			void value(const char *const _value) noexcept
 				{ _value ? value(ormUUID_t{_value}) : value(ormUUID_t{}); }
+		};
+
+		template<typename _fieldName, size_t _length> struct bitset_t : public type_t<_fieldName, std::bitset<_length>>
+		{
+		private:
+			using parentType_t = type_t<_fieldName, std::bitset<_length>>;
+			static_assert(_length > 0, "Cannot have a 0-length bitset");
+			static_assert(_length <= 64, "Due to SQL limitations, cannot exceed a 64-length bitset");
+
+			template<size_t N> struct int_t
+			{
+				template<size_t length, typename = enableIf<N == 1>> static auto eval() -> bool;
+				template<size_t length, typename = enableIf<N >= 2 && N <= 8>> static auto eval() -> std::uint8_t;
+				template<size_t length, typename = enableIf<N >= 9 && N <= 16>> static auto eval() -> std::uint16_t;
+				template<size_t length, typename = enableIf<N >= 17 && N <= 32>> static auto eval() -> std::uint32_t;
+				template<size_t length, typename = enableIf<N >= 33 && N <= 64>> static auto eval() -> std::uint64_t;
+				using type = decltype(eval<N>());
+			};
+
+		public:
+			using type = typename parentType_t::type;
+			using intType = typename int_t<_length>::type;
+			using parentType_t::operator =;
+			using parentType_t::value;
+			using parentType_t::operator const type;
+			using parentType_t::operator ==;
+			using parentType_t::operator !=;
+
+			constexpr bitset_t() noexcept : parentType_t{} { }
+			bitset_t(const intType _value) noexcept : parentType_t{} { value(_value); }
+			void operator =(const intType _value) noexcept { value(_value); }
+			void value(const intType _value) noexcept { value(type{_value}); }
+			constexpr size_t length() const noexcept { return _length; }
 		};
 
 		// Convinience just in case you don't like using the stdint.h like types above.
