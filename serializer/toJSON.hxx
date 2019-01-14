@@ -139,7 +139,7 @@ namespace tmplORM
 		{
 			template<typename field_t, typename fieldName, typename T> static void populateField(
 				const model_t &model, jsonObject_t &data, const alias_t<fieldName, T> &)
-				{ data.add(lowerCamelCase_t<fieldName>::value, makeAtom<field_t>(model[fieldName()]).release()); }
+				{ data.add(lowerCamelCase_t<fieldName>::value, makeAtom<T>(model[fieldName()]).release()); }
 
 			template<typename field_t, typename fieldName, typename T> static void populateField(
 				const model_t &model, jsonObject_t &data, const type_t<fieldName, T> &)
