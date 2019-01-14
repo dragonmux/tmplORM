@@ -482,7 +482,7 @@ namespace tmplORM
 					time -= second;
 					return {_value.year(), _value.month(), _value.day(),
 						uint16_t(hour.count()), uint16_t(minute.count()),
-						uint16_t(second.count()), uint64_t(time.count())};
+						uint16_t(second.count()), uint32_t(time.count())};
 				}
 
 				void value(const ormDateTime_t &_value) noexcept
