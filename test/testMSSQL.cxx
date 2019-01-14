@@ -580,7 +580,7 @@ private:
 		{ return {int16_t(value.year()), value.month(), value.day()}; }
 	SQL_TIMESTAMP_STRUCT asSQLType(const ormDateTime_t value) noexcept
 		{ return {int16_t(value.year()), value.month(), value.day(),
-			value.hour(), value.minute(), value.second(), uint32_t(value.nanoSecond() / 100)}; }
+			value.hour(), value.minute(), value.second(), value.nanoSecond()}; }
 
 	template<typename T> void checkValue(const T &var, const T &expected)
 		{ assertEqual(var, expected); }
