@@ -119,10 +119,28 @@ inline namespace common
 	{
 		constexpr static size_t index = idx - 1;
 
-		template<typename result_t> static void bind(std::tuple<fields_t...> &fields, const result_t &result) noexcept
+		template<typename field_t, bool = field_t::nullable> struct value_t;
+
+		template<typename field_t> struct value_t<field_t, false>
+		{
+			template<typename result_t> static void assign(field_t &field, const result_t &result) { field = result; }
+		};
+
+		template<typename field_t> struct value_t<field_t, true>
+		{
+			template<typename result_t> static void assign(field_t &field, const result_t &result)
+			{
+				if (result.isNull())
+					field = nullptr;
+				else
+					field = result;
+			}
+		};
+
+		template<typename result_t> static void bind(std::tuple<fields_t...> &fields, const result_t &result)
 		{
 			bindSelect_t<index, fields_t...>::bind(fields, result);
-			std::get<index>(fields) = result[index];
+			value_t<typename fieldType_t<index, fields_t...>::type>::assign(std::get<index>(fields), result[index]);
 		}
 	};
 
