@@ -1,3 +1,4 @@
+#include <cmath>
 #include <string.h>
 #include "mysql.hxx"
 #include "value.hxx"
@@ -592,6 +593,20 @@ int64_t mySQLValue_t::asInt64() const
 	return num;
 }
 
+float mySQLValue_t::asFloat() const
+{
+	if (isNull() || type != MYSQL_TYPE_FLOAT)
+		throw mySQLValueError_t(mySQLErrorType_t::floatError);
+	return strtof(data, nullptr);
+}
+
+double mySQLValue_t::asDouble() const
+{
+	if (isNull() || type != MYSQL_TYPE_DOUBLE)
+		throw mySQLValueError_t(mySQLErrorType_t::doubleError);
+	return strtod(data, nullptr);
+}
+
 ormDate_t mySQLValue_t::asDate() const
 {
 	if (isNull() || type != MYSQL_TYPE_DATE || len != 10)
@@ -670,6 +685,10 @@ const char *mySQLValueError_t::error() const noexcept
 			return "Error converting value to an unsigned 64-bit integer";
 		case mySQLErrorType_t::int64Error:
 			return "Error converting value to a signed 64-bit integer";
+		case mySQLErrorType_t::floatError:
+			return "Error converting value to a binary32 floating point number";
+		case mySQLErrorType_t::doubleError:
+			return "Error converting value to a binary64 floating point number";
 		case mySQLErrorType_t::dateError:
 			return "Error converting value to a date quantity";
 		case mySQLErrorType_t::dateTimeError:
