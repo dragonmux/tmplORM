@@ -704,9 +704,9 @@ namespace tmplORM
 		template<typename fieldName, typename field, typename... fields> struct fieldIndex_t
 			{ constexpr static const size_t index = fieldIndex_<fieldName, field, fields...>::index; };
 
-		template<size_t N, typename field, typename... fields> struct fieldType_t
+		template<size_t N, typename, typename... fields> struct fieldType_t
 			{ using type = typename fieldType_t<N - 1, fields...>::type; };
-		template<typename field, typename... fields> struct fieldType_t<0, field, fields...> { typedef field type; };
+		template<typename field, typename... fields> struct fieldType_t<0, field, fields...> { using type = field; };
 		// .first is the valueLength, and .second is the declLength.
 		using fieldLength_t = std::pair<const size_t, const size_t>;
 
