@@ -279,9 +279,11 @@ namespace tmplORM
 
 			template<typename T, typename tableName, typename... fields_t> fixedVector_t<T> select(const model_t<tableName, fields_t...> &) noexcept
 			{
-				fixedVector_t<T> data;
 				using select = select_<tableName, fields_t...>;
 				tSQLResult_t result(database.query(select::value));
+				fixedVector_t<T> data{result.numRows()};
+				if (!data.valid())
+					return {};
 				for (size_t i = 0; i < result.numRows(); ++i, result.next())
 				{
 					T value;

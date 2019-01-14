@@ -296,7 +296,7 @@ namespace tmplORM
 			driver::mySQLClient_t database;
 
 		public:
-			session_t() noexcept : database() { }
+			session_t() noexcept : database{} { }
 			~session_t() noexcept { }
 
 			template<typename tableName, typename... fields> bool createTable(const model_t<tableName, fields...> &)
@@ -307,7 +307,6 @@ namespace tmplORM
 
 			template<typename T, typename tableName, typename... fields_t> fixedVector_t<T> select(const model_t<tableName, fields_t...> &)
 			{
-				fixedVector_t<T> data;
 				using select = select_<tableName, fields_t...>;
 				if (!database.query(select::value))
 					throw mySQLValueError_t(mySQLErrorType_t::queryError);
@@ -315,6 +314,9 @@ namespace tmplORM
 				if (!result.valid())
 					throw mySQLValueError_t(mySQLErrorType_t::queryError);
 				mySQLRow_t row = result.resultRows();
+				fixedVector_t<T> data{result.numRows()};
+				if (!data.valid())
+					return {};
 				for (size_t i = 0; i < result.numRows(); ++i, row.next())
 				{
 					T value;
@@ -330,7 +332,6 @@ namespace tmplORM
 
 			template<typename T, typename where, typename tableName, typename... fields_t> fixedVector_t<T> select(const model_t<tableName, fields_t...> &, const where &cond)
 			{
-				fixedVector_t<T> data;
 				// Generate the SELECT query with WHERE clause
 				using select = selectWhere_<tableName, where, fields_t...>;
 				// Now prepare that query abd bind data to the WHERE clause
@@ -343,6 +344,9 @@ namespace tmplORM
 				mySQLPreparedResult_t result = database.queryResult();
 				if (!result.valid())
 					throw mySQLValueError_t(mySQLErrorType_t::queryError);
+				fixedVector_t<T> data{result.numRows()};
+				if (!data.valid())
+					return {};
 				// For each result, bind a new T's fields to the columns in the query and pull the resulting data set back
 				// This is split into a pre-bind phase that does an initial call to ask for field lengths of variable length fields
 				// Then does an allocations and bind pass for the real call to ask for the data of all the fields
