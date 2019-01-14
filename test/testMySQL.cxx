@@ -105,7 +105,7 @@ private:
 		assertFalse(testClient.valid());
 		assertFalse(testClient.queryResult().valid());
 		assertEqual(testClient.errorNum(), 0);
-		assertNull(testClient.error());
+		assertEqual(testClient.error(), "");
 		mySQLPreparedQuery_t testQuery = testClient.prepare("", 0);
 		assertFalse(testQuery.valid());
 		assertFalse(testQuery.execute());
@@ -929,4 +929,4 @@ public:
 };
 
 CRUNCH_API void registerCXXTests() noexcept;
-void registerCXXTests() noexcept {registerTestClasses<testMySQLValue_t, testMySQL_t>(); }
+void registerCXXTests() noexcept { registerTestClasses<testMySQLValue_t, testMySQL_t>(); }

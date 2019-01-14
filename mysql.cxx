@@ -165,12 +165,12 @@ mySQLPreparedQuery_t mySQLClient_t::prepare(const char *const queryStmt, const s
  * @brief MySQL calls can result in an error outside this driver layer, this allows you to know what that error is if something fails
  * @returns The current MySQL errno error number code
  */
-uint32_t mySQLClient_t::errorNum() const noexcept { return valid() ? mysql_errno(con) : 0; }
+uint32_t mySQLClient_t::errorNum() const noexcept { return con ? mysql_errno(con) : 0; }
 /*!
  * @brief MySQL calls can result in an error outside this driver layer, this allows you to know the human readable error string
  * @returns The current MySQL error string
  */
-const char *mySQLClient_t::error() const noexcept { return valid() ? mysql_error(con) : nullptr; }
+const char *mySQLClient_t::error() const noexcept { return con ? mysql_error(con) : nullptr; }
 
 /*!
  * @internal
