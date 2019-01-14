@@ -422,6 +422,8 @@ namespace tmplORM
 				{ return database.connect(unixSocket, user, passwd); }
 			void disconnect() noexcept { database.disconnect(); }
 			bool selectDB(const char *const db) const noexcept { return database.selectDB(db); }
+			const char *error() const noexcept { return database.error(); }
+			uint32_t errorNum() const noexcept { return database.errorNum(); }
 		};
 	}
 	using mysql_t = mysql::session_t;
