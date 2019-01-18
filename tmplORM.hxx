@@ -437,7 +437,7 @@ namespace tmplORM
 					const auto second = duration_cast<seconds>(time);
 					time -= second;
 					return {uint16_t(hour.count()), uint16_t(minute.count()),
-						uint16_t(second.count()), uint64_t(time.count())};
+						uint16_t(second.count()), uint32_t(time.count())};
 				}
 
 				void value(const ormTime_t &_value) noexcept
