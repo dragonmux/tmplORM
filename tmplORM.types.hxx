@@ -2,6 +2,7 @@
 #define tmplORM_TYPES__HXX
 
 #include <conversions.hxx>
+#include <cstring>
 
 /*!
  * @file
@@ -112,10 +113,13 @@ namespace tmplORM
 					time += 3;
 					_second = toInt_t<uint16_t>(time, 2);
 					time += 2;
-					if (time[0] == 0)
+					// The strlen() check allows for 19 digits to follow. A uint64_t supports a maximum of
+					// 19 digits of any value + a 20th 0-or-1 digit. This provides a good ballance between
+					// support complexity and correctness.
+					if (time[0] == 0 || std::strlen(time) > 20)
 						return;
 					++time;
-					toInt_t<uint32_t> nanoSeconds(time);
+					toInt_t<uint64_t> nanoSeconds(time);
 					if (nanoSeconds.length() <= 9)
 						_nanoSecond = nanoSeconds * power10(9 - nanoSeconds.length());
 					else
