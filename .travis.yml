@@ -5,8 +5,8 @@ before_install:
   - export GCC="$GCC -m64 -fPIC -DPIC" GXX="$GXX -m64 -fPIC -DPIC"
   - sudo service mysql stop
   - source .travis-ci/msodbcsql17.sh
-  - wget http://launchpadlibrarian.net/174316120/unixodbc-dev_2.3.1-3_amd64.deb
-  - sudo dpkg -i unixodbc-dev_2.3.1-3_amd64.deb
+#  - wget http://launchpadlibrarian.net/174316120/unixodbc-dev_2.3.1-3_amd64.deb
+#  - sudo dpkg -i unixodbc-dev_2.3.1-3_amd64.deb
   - source .travis-ci/docker.sh
 install:
   - pushd $HOME/build
