@@ -153,7 +153,7 @@ namespace tmplORM
 			const T &value() const noexcept { return _value; }
 			T &value() noexcept { return _value; }
 			// Make the type behave like its' contained type..
-			operator const T() const noexcept { return _value; }
+			operator const T() noexcept { return _value; }
 			void operator =(const T &_value) noexcept { value(_value); }
 			//bool modified() const noexcept { return _modified; }
 			constexpr static bool nullable = false;
