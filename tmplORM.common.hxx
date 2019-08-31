@@ -1,3 +1,4 @@
+// lgtm[cpp/missing-header-guard]
 /*!
  * @file
  * @author Rachel Mant
