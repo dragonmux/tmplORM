@@ -309,15 +309,17 @@ enum class mySQLErrorType_t : uint8_t
 	uuidError
 };
 
-struct tmplORM_API mySQLValueError_t final
+struct tmplORM_API mySQLValueError_t final : std::exception
 {
 private:
 	mySQLErrorType_t errorType;
 
 public:
-	constexpr mySQLValueError_t() noexcept : errorType(mySQLErrorType_t::noError) { }
-	constexpr mySQLValueError_t(mySQLErrorType_t type) noexcept : errorType(type) { }
+	mySQLValueError_t() noexcept : errorType{mySQLErrorType_t::noError} { }
+	mySQLValueError_t(mySQLErrorType_t type) noexcept : errorType{type} { }
+	~mySQLValueError_t() noexcept = default;
 	const char *error() const noexcept;
+	const char *what() const noexcept { return error(); }
 
 	bool operator ==(const mySQLValueError_t &error) const noexcept { return errorType == error.errorType; }
 	bool operator !=(const mySQLValueError_t &error) const noexcept { return errorType != error.errorType; }

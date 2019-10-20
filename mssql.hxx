@@ -272,16 +272,17 @@ enum class tSQLErrorType_t : uint8_t
 	uuidError
 };
 
-struct tmplORM_API tSQLValueError_t final
+struct tmplORM_API tSQLValueError_t final : std::exception
 {
 private:
 	const tSQLErrorType_t errorType;
 
 public:
-	constexpr tSQLValueError_t() noexcept : errorType(tSQLErrorType_t::noError) { }
-	constexpr tSQLValueError_t(const tSQLErrorType_t type) noexcept : errorType(type) { }
-	~tSQLValueError_t() noexcept { }
+	tSQLValueError_t() noexcept : errorType{tSQLErrorType_t::noError} { }
+	tSQLValueError_t(const tSQLErrorType_t type) noexcept : errorType{type} { }
+	~tSQLValueError_t() noexcept = default;
 	const char *error() const noexcept;
+	const char *what() const noexcept { return error(); }
 
 	bool operator ==(const tSQLValueError_t &error) const noexcept { return errorType == error.errorType; }
 	bool operator !=(const tSQLValueError_t &error) const noexcept { return errorType != error.errorType; }
