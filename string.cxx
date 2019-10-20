@@ -32,8 +32,8 @@ std::unique_ptr<const char []> strNewDup(const char *const str) noexcept
 }
 
 inline bool isMultiValid() noexcept { return true; }
-template<typename... values_t> inline bool isMultiValid(const char c, values_t ...values) noexcept
-	{ return (c & 0xC0) == 0x80 && isMultiValid(values...); }
+template<typename... values_t> inline bool isMultiValid(const uint8_t c, values_t ...values) noexcept
+	{ return (c & 0xC0U) == 0x80U && isMultiValid(values...); }
 
 template<typename T, typename U = typename std::make_unsigned<T>::type>
 	inline U safeIndex(const T *const str, const size_t index, const size_t len) noexcept
@@ -51,27 +51,27 @@ size_t countUnits(const char *const str) noexcept
 	size_t count = 0;
 	for (size_t i = 0; i < len; ++i)
 	{
-		const char byteA = str[i];
+		const auto byteA = safeIndex(str, i, len);
 		// Multiple code unit encoded character?
-		if (byteA & 0x80)
+		if (byteA & 0x80U)
 		{
-			const char byteB = safeIndex(str, ++i, len);
-			if ((byteA & 0x60) == 0x40)
+			const auto byteB = safeIndex(str, ++i, len);
+			if ((byteA & 0x60U) == 0x40U)
 			{
 				// 2 code units.. check that the second unit is valid and return 0 if not.
 				if (!isMultiValid(byteB))
 					return 0;
 			}
-			else if ((byteA & 0x70) == 0x60)
+			else if ((byteA & 0x70U) == 0x60U)
 			{
 				// 3 code units.. check that the second and third units are valid and return 0 if not
 				if (!isMultiValid(byteB, safeIndex(str, ++i, len)))
 					return 0;
 				// (needs re-commenting)
-				else if ((byteA & 0x0F) == 0x0D && (byteB & 0x20))
+				else if ((byteA & 0x0FU) == 0x0DU && (byteB & 0x20U))
 					return 0;
 			}
-			else if ((byteA & 0x78) == 0x70)
+			else if ((byteA & 0x78U) == 0x70U)
 			{
 				// 4 code units.. check that the second, third and fourth unit is valid
 				if (!isMultiValid(byteB, safeIndex(str, i + 1, len), safeIndex(str, i + 2, len)))
@@ -93,12 +93,12 @@ size_t countUnits(const char16_t *const str) noexcept
 	size_t count = 0;
 	for (size_t i = 0; i < len; ++i)
 	{
-		const char16_t uintA = str[i];
-		if ((uintA & 0xFE00) == 0xD800)
+		const auto uintA = safeIndex(str, i, len);
+		if ((uintA & 0xFE00U) == 0xD800U)
 		{
-			const char16_t uintB = safeIndex(str, ++i, len);
+			const auto uintB = safeIndex(str, ++i, len);
 			// Ok, should be a surrogate. Check validity..
-			if ((uintB & 0xFE00) != 0xDC00)
+			if ((uintB & 0xFE00U) != 0xDC00U)
 				return 0;
 			// Guaranteed this is 4-byte.
 			count += 3;
@@ -107,10 +107,10 @@ size_t countUnits(const char16_t *const str) noexcept
 		{
 			// Nope.. well.. let's do the checks then.
 			// If we have a value more than 0x007F, we're guaranteed multi-byte.
-			if (uintA > 0x007F)
+			if (uintA > 0x007FU)
 				++count;
 			// If we're also above 0x07FF, it's 3-byte.
-			if (uintA > 0x07FF)
+			if (uintA > 0x07FFU)
 				++count;
 		}
 		++count;
@@ -127,27 +127,28 @@ utf16_t utf16::convert(const char *const str) noexcept
 		return nullptr;
 	for (size_t i = 0, j = 0; i < lenUTF8; ++i, ++j)
 	{
-		const char byteA = str[i];
-		if (byteA & 0x80)
+		const auto byteA = safeIndex(str, i, lenUTF8);
+		if (byteA & 0x80U)
 		{
-			const char byteB = safeIndex(str, ++i, lenUTF8);
-			if ((byteA & 0x60) == 0x40)
-				result[j] = (char16_t(byteA & 0x1F) << 6) | char16_t(byteB & 0x3F);
-			else if ((byteA & 0x70) == 0x60)
+			const auto byteB = safeIndex(str, ++i, lenUTF8);
+			if ((byteA & 0x60U) == 0x40U)
+				result[j] = char16_t((byteA & 0x1FU) << 6U) | char16_t(byteB & 0x3FU);
+			else if ((byteA & 0x70U) == 0x60U)
 			{
-				const char byteC = safeIndex(str, ++i, lenUTF8);
-				result[j] = (char16_t(byteA & 0x0F) << 12) | (char16_t(byteB & 0x3F) << 6) | char16_t(byteC & 0x3F);
+				const auto byteC = safeIndex(str, ++i, lenUTF8);
+				result[j] = char16_t(uint16_t((byteA & 0x0FU) << 12U) | uint16_t((byteB & 0x3FU) << 6U) | (byteC & 0x3FU));
 			}
 			else
 			{
-				const char byteC = safeIndex(str, ++i, lenUTF8);
-				const char byteD = safeIndex(str, ++i, lenUTF8);
+				const auto byteC = safeIndex(str, ++i, lenUTF8);
+				const auto byteD = safeIndex(str, ++i, lenUTF8);
 				// First, collect the upper 11 bits into a value..
-				const char16_t upper = (char16_t(byteA & 0x07) << 8) | (char16_t(byteB & 0x3F) << 2) | (char16_t(byteC & 0x30) >> 4);
+				const auto upper = uint16_t(uint8_t(byteA & 0x07U) << 8U) | uint16_t(uint8_t(byteB & 0x3FU) << 2U) |
+					uint16_t(uint8_t(byteC & 0x30U) >> 4U);
 				// Then take off the (0x010000 >> 10) value, and generate the first part of the surrogate pair
-				result[j] = char16_t(0xD800) | (upper - 0x0040);
+				result[j] = char16_t(0xD800U | (upper - 0x0040U));
 				// Then collect together the lower 10 bits and generate the second part of the surrogate pair
-				result[++j] = char16_t(0xDC00) | (char16_t(byteC & 0x0F) << 6) | char16_t(byteD & 0x3F);
+				result[++j] = char16_t(0xDC00U | uint16_t((byteC & 0x0FU) << 6U) | (byteD & 0x3FU));
 			}
 		}
 		else
@@ -165,34 +166,34 @@ utf8_t utf16::convert(const char16_t *const str) noexcept
 		return nullptr;
 	for (size_t i = 0, j = 0; i < lenUTF16; ++i, ++j)
 	{
-		const char16_t uintA = str[i];
+		const auto uintA = safeIndex(str, i, lenUTF16);
 		// Surrogate pair?
-		if ((uintA & 0xFE00) == 0xD800)
+		if ((uintA & 0xFE00U) == 0xD800U)
 		{
 			// Recover the upper 10 (11) bits from the first surrogate pair.
-			const char16_t upper = (uintA & 0x03FF) + 0x0040;
+			const auto upper = (uintA & 0x03FFU) + 0x0040U;
 			// Recover the lower 10 bits from the second surrogate pair.
-			const char16_t lower = safeIndex(str, ++i, lenUTF16) & 0x03FF;
+			const auto lower = safeIndex(str, ++i, lenUTF16) & 0x03FFU;
 
-			result[j] = char(0xF0) | (char(upper >> 8) & 0x07);
-			result[++j] = char(0x80) | (char(upper >> 2) & 0x3F);
-			result[++j] = char(0x80) | (char(upper << 4) & 0x30) | (char(lower >> 6) & 0x0F);
-			result[++j] = char(0x80) | char(lower & 0x3F);
+			result[j] = char(0xF0U | (uint8_t(upper >> 8U) & 0x07U));
+			result[++j] = char(0x80U | (uint8_t(upper >> 2U) & 0x3FU));
+			result[++j] = char(0x80U | (uint8_t(upper << 4U) & 0x30U) | (uint8_t(lower >> 6U) & 0x0FU));
+			result[++j] = char(0x80U | (lower & 0x3FU));
 		}
 		else
 		{
-			if (uintA <= 0x007F)
+			if (uintA <= 0x007FU)
 				result[j] = char(uintA);
-			else if (uintA <= 0x07FF)
+			else if (uintA <= 0x07FFU)
 			{
-				result[j] = char(0xC0) | (char(uintA >> 6) & 0x1F);
-				result[++j] = char(0x80) | char(uintA & 0x3F);
+				result[j] = char(0xC0U | (uint8_t(uintA >> 6U) & 0x1FU));
+				result[++j] = char(0x80U | uint8_t(uintA & 0x3FU));
 			}
 			else
 			{
-				result[j] = char(0xE0) | (char(uintA >> 12) & 0x0F);
-				result[++j] = char(0x80) | (char(uintA >> 6) & 0x3F);
-				result[++j] = char(0x80) | char(uintA & 0x3F);
+				result[j] = char(0xE0U | (uint8_t(uintA >> 12U) & 0x0FU));
+				result[++j] = char(0x80U | (uint8_t(uintA >> 6U) & 0x3FU));
+				result[++j] = char(0x80U | (uintA & 0x3FU));
 			}
 		}
 	}
