@@ -235,19 +235,19 @@ public:
 
 inline void swapBytes(uint16_t &val) noexcept
 {
-	val = ((val >> 8) & 0xFF) | ((val & 0xFF) << 8);
+	val = (uint16_t(val >> 8U) & 0xFFU) | uint16_t((val & 0xFFU) << 8U);
 }
 
 inline void swapBytes(uint32_t &val) noexcept
 {
-	val = ((val >> 24) & 0xFF) | ((val >> 8) & 0xFF00) |
-		((val & 0xFF00) << 8) | ((val & 0xFF) << 24);
+	val = (uint32_t(val >> 24U) & 0xFFU) | (uint32_t(val >> 8U) & 0xFF00U) |
+		uint32_t((val & 0xFF00U) << 8U) | uint32_t((val & 0xFFU) << 24U);
 }
 
 inline void swapBytes(uint64_t &val) noexcept
 {
-	val = ((val >> 56) & 0xFF) | ((val >> 40) & 0xFF00) | ((val >> 24) & 0xFF0000) | ((val >> 8) & 0xFF000000) |
-		((val & 0xFF000000) << 8) | ((val & 0xFF0000) << 24) | ((val & 0xFF00) << 40) | ((val & 0xFF) << 56);
+	val = (uint64_t(val >> 56U) & 0xFFU) | (uint64_t(val >> 40U) & 0xFF00U) | (uint64_t(val >> 24U) & 0xFF0000U) | (uint64_t(val >> 8U) & 0xFF000000U) |
+		uint64_t((val & 0xFF000000U) << 8U) | uint64_t((val & 0xFF0000U) << 24U) | uint64_t((val & 0xFF00U) << 40U) | uint64_t((val & 0xFFU) << 56U);
 }
 
 template<typename T> inline T swapBytes(const T &a) noexcept
