@@ -1,6 +1,6 @@
-#include <stdint.h>
-#include <errno.h>
-#include <string.h>
+#include <cstdint>
+#include <cerrno>
+#include <cstring>
 #include <array>
 #include <chrono>
 #include <tmplORM.types.hxx>
@@ -17,12 +17,12 @@ struct tzHead_t
 	std::array<char, 4> magic;
 	char version;
 	std::array<char, 15> reserved;
-	std::array<char, 4> ttIsGmtCount;
-	std::array<char, 4> ttIsStdCount;
-	std::array<char, 4> leapCount;
-	std::array<char, 4> timeCount;
-	std::array<char, 4> typeCount;
-	std::array<char, 4> charCount;
+	std::array<uint8_t, 4> ttIsGmtCount;
+	std::array<uint8_t, 4> ttIsStdCount;
+	std::array<uint8_t, 4> leapCount;
+	std::array<uint8_t, 4> timeCount;
+	std::array<uint8_t, 4> typeCount;
+	std::array<uint8_t, 4> charCount;
 };
 
 struct ttInfo_t
@@ -66,7 +66,7 @@ static std::unique_ptr<tzString_t> tzStringList{};
 // TODO: fixme.
 #define TZDIR "/usr/share/zoneinfo"
 #define TZDEFAULT "localtime"
-constexpr static size_t halfYear = durationIn<seconds>(1_y) / 2;
+constexpr size_t halfYear = durationIn<seconds>(1_y) / 2;
 
 template<typename T> constexpr size_t signBit() noexcept
 	{ return std::numeric_limits<typename std::make_signed<T>::type>::digits; }
@@ -82,10 +82,6 @@ inline int32_t asInt32(const uint8_t *const value) noexcept
 		uint32_t(value[2] << 8U) | value[3];
 	return result;
 }
-inline int32_t asInt32(const char *const value) noexcept
-	{ return asInt32(reinterpret_cast<const uint8_t *>(value)); }
-inline int32_t asInt32(const std::array<char, 4> &value) noexcept
-	{ return asInt32(value.data()); }
 inline int32_t asInt32(const std::array<uint8_t, 4> &value) noexcept
 	{ return asInt32(value.data()); }
 
@@ -100,10 +96,8 @@ inline int64_t asInt64(const uint8_t *const value) noexcept
 		(uint64_t(value[6]) << 8U) | uint64_t(value[7]);
 	return result;
 }
-inline int64_t asInt64(const char *const value) noexcept
-	{ return asInt64(reinterpret_cast<const uint8_t *>(value)); }
 
-inline int64_t asInt64(const char *const value, const size_t width) noexcept
+inline int64_t asInt64(const uint8_t *const value, const size_t width) noexcept
 {
 	if (width == 8)
 		return asInt64(value);
@@ -193,12 +187,12 @@ bool readTransitions(const fd_t &fd, const size_t width) noexcept
 		!fd.read(typeIndexes, transitionsCount))
 		return false;
 
-	const char *const buffer = reinterpret_cast<char *>(transitions.get());
+	const uint8_t *const buffer = reinterpret_cast<uint8_t *>(transitions.get());
 	if (sizeof(time_t) == 8)
 	{
 		for (size_t i{transitionsCount}; i > 0; )
 		{
-			size_t index = --i;
+			const size_t index = --i;
 			transitions[index] = asInt64(buffer + (i * width), width);
 			if (typeIndexes[i] >= typesCount)
 				return false;
@@ -237,7 +231,7 @@ bool readTypes(const fd_t &fd, const size_t charCount) noexcept
 
 bool readLeaps(const fd_t &fd, const size_t width) noexcept
 {
-	char buffer[8];
+	uint8_t buffer[8];
 	for (size_t i{}; i < leapsCount; ++i)
 	{
 		if (!fd.read(buffer, width) ||
