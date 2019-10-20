@@ -34,10 +34,13 @@ std::unique_ptr<const char []> vaFormatString(const char *format, va_list args) 
 
 std::unique_ptr<char []> stringDup(const char *const str) noexcept
 {
-	auto ret = makeUnique<char []>(strlen(str) + 1);
+	if (!str)
+		return nullptr;
+	const size_t length = strlen(str) + 1;
+	auto ret = makeUnique<char []>(length);
 	if (!ret)
 		return nullptr;
-	strcpy(ret.get(), str);
+	memcpy(ret.get(), str, length);
 	return ret;
 }
 
