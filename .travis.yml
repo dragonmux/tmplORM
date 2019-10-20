@@ -1,0 +1,182 @@
+language: cpp
+sudo: required
+
+before_install:
+  - export GCC="$GCC -m64 -fPIC -DPIC" GXX="$GXX -m64 -fPIC -DPIC"
+  - sudo service mysql stop
+  - source .travis-ci/msodbcsql17.sh
+#  - wget http://launchpadlibrarian.net/174316120/unixodbc-dev_2.3.1-3_amd64.deb
+#  - sudo dpkg -i unixodbc-dev_2.3.1-3_amd64.deb
+  - source .travis-ci/docker.sh
+install:
+  - pushd $HOME/build
+  - if [ $COVERAGE -eq 1 ]; then
+      export _COV=$COVERAGE;
+      unset COVERAGE;
+    fi
+  - git clone https://github.com/DX-MON/crunch.git DX-MON/crunch
+  - cd DX-MON/crunch
+  - sudo make install
+  - cd ../..
+  - git clone https://github.com/DX-MON/rSON.git DX-MON/rSON
+  - cd DX-MON/rSON
+  - sudo make install
+  - popd
+  - if [ -n "${_COV}" ]; then
+      export COVERAGE=$_COV;
+      unset _COV;
+    fi
+  - make
+script:
+  - make buildCheck
+  - make -C test
+  - make -C test check
+after_success:
+  - if [ "$COVERAGE" == "1" ]; then
+      ./buildCheck;
+      bash <(curl -s https://codecov.io/bash) -x $GCOV;
+    fi
+after_script:
+  - docker stop $MSSQL_CONTAINER
+  - docker stop $MYSQL_CONTAINER
+
+matrix:
+  include:
+    #- compiler: clang-3.8
+    #  env: GCC=clang-3.8 GXX=clang++-3.8 COVERAGE=0
+    #  addons:
+    #    apt:
+    #      sources:
+    #        - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.8 main'
+    #          key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
+    #        - ubuntu-toolchain-r-test
+    #      packages:
+    #        - gcc-4.9
+    #        - g++-4.9
+    #        - clang-3.8
+    #        - libmysqlclient-dev
+    #- compiler: clang-3.9
+    #  env: GCC=clang-3.9 GXX=clang++-3.9 COVERAGE=0
+    #  addons:
+    #    apt:
+    #      sources:
+    #        - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.9 main'
+    #          key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
+    #        - ubuntu-toolchain-r-test
+    #      packages:
+    #        - gcc-4.9
+    #        - g++-4.9
+    #        - clang-3.9
+    #        - libmysqlclient-dev
+    #- compiler: clang-4.0
+    #  env: GCC=clang-4.0 GXX=clang++-4.0 COVERAGE=0
+    #  addons:
+    #    apt:
+    #      sources:
+    #        - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-4.0 main'
+    #          key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
+    #        - ubuntu-toolchain-r-test
+    #      packages:
+    #        - gcc-4.9
+    #        - g++-4.9
+    #        - clang-4.0
+    #        - libmysqlclient-dev
+    #- compiler: clang-5.0
+    #  env: GCC=clang-5.0 GXX=clang++-5.0 COVERAGE=0
+    #  addons:
+    #    apt:
+    #      sources:
+    #        - sourceline: 'deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-5.0 main'
+    #          key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
+    #        - ubuntu-toolchain-r-test
+    #      packages:
+    #        - gcc-4.9
+    #        - g++-4.9
+    #        - clang-5.0
+    #        - libmysqlclient-dev
+    - compiler: gcc-5
+      env: GCC=gcc-5 GXX=g++-5 COVERAGE=0
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-5
+            - g++-5
+            - libmysqlclient-dev
+    - compiler: gcc-5
+      env: GCC=gcc-5 GXX=g++-5 GCOV=gcov-5
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-5
+            - g++-5
+            - libmysqlclient-dev
+    - compiler: gcc-6
+      env: GCC=gcc-6 GXX=g++-6 COVERAGE=0
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-6
+            - g++-6
+            - libmysqlclient-dev
+    - compiler: gcc-6
+      env: GCC=gcc-6 GXX=g++-6 GCOV=gcov-6
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-6
+            - g++-6
+            - libmysqlclient-dev
+    - compiler: gcc-7
+      env: GCC=gcc-7 GXX=g++-7 COVERAGE=0
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-7
+            - g++-7
+            - libmysqlclient-dev
+    - compiler: gcc-7
+      env: GCC=gcc-7 GXX=g++-7 GCOV=gcov-7
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-7
+            - g++-7
+            - libmysqlclient-dev
+    - compiler: gcc-8
+      env: GCC=gcc-8 GXX=g++-8 COVERAGE=0
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-8
+            - g++-8
+            - libmysqlclient-dev
+    - compiler: gcc-8
+      env: GCC=gcc-8 GXX=g++-8 GCOV=gcov-8
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-8
+            - g++-8
+            - libmysqlclient-dev
+
+env:
+  global:
+    - COVERAGE=1
+services:
+  - docker

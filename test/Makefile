@@ -1,37 +1,59 @@
 include ../Makefile.inc
 
-CFLAGS_EXTRA = -I..
+CFLAGS_EXTRA = -I.. -MMD -MF ../.dep/test/$*.d $(shell pkg-config --cflags rSON)
 CFLAGS = -c $(OPTIM_FLAGS) -Wall -Wextra -pedantic -std=c++11 $(CFLAGS_EXTRA) -o $@ $<
 
-CRUNCHMAKE = crunchMake -I..
+CRUNCHMAKE = crunchMake -I.. -z defs $(shell pkg-config --cflags --libs rSON)
 # $(shell pkg-config --cflags --libs crunch++ zlib)
 ifeq ($(BUILD_VERBOSE), 0)
 	CRUNCHMAKE += -q
 endif
+ifeq ($(strip $(COVERAGE)), 1)
+	CRUNCHMAKE += --coverage
+endif
 CRUNCH = crunch++
 
-TESTS = testMSSQLMapper.so testMySQLMapper.so
+TESTS = testString.so testMSSQL.so testMySQL.so testMSSQLMapper.so testMySQLMapper.so testConversions.so \
+	testFixedVector.so testTypes.so testDateTime.so
+O = conversions.o fixedVector.o tmplORM.types.o
 GCH = models.gch
+DEPS = ../.dep/test
 
 quiet_cmd_crunchMake = -n
-cmd_crunchMake = $(CRUNCHMAKE) $(addprefix -o,$(O_FILE)) $(2)
+cmd_crunchMake = $(CRUNCHMAKE) $(O_FILE) $(2)
 quiet_cmd_crunch = -n
 cmd_crunch = $(CRUNCH) $(2)
 
 default: all
+all: $(GCH) $(DEPS) $(TESTS)
 
-all: $(GCH) $(TESTS)
+$(DEPS):
+	$(call run-cmd,install_dir,$@)
 
-%.gch: %.hxx
+%.gch: %.hxx | $(DEPS)
 	$(call run-cmd,cxx,$(CFLAGS))
 
-#testMySQL.so: O_FILE = ../mysql.o
-#testMSSQL.so: O_FILE = ../mssql.o
-#testMySQL.so
-testMySQLMapper.so: CRUNCHMAKE += $(shell mysql_config --cflags --libs)
+testString.so: O_FILE = ../string.o
+testMySQL.so: O_FILE = ../mysql.o ../string.o ../tmplORM.types.o
+testMSSQL.so: O_FILE = ../mssql.o ../string.o ../tmplORM.types.o
+testMySQLMapper.so testMySQL.so: CRUNCHMAKE += $(shell mysql_config --include --libs)
+testMSSQL.so: CRUNCHMAKE += -lodbc
+testConversions.so: O_FILE = conversions.o
+testFixedVector.so: O_FILE = fixedVector.o
+testTypes.so: O_FILE = tmplORM.types.o ../string.o ../tmplORM.types.o
+testDateTime.so: O_FILE = ../string.o
+testMSSQL.so: constString.hxx
+testConversions.so: conversions.o
+testFixedVector.so: fixedVector.o
+testTypes.so: tmplORM.types.o
+%.so: $(O_FILE)
 #$(TESTS): $(subst .so,.cxx,$@)
 %.so: %.cxx
 	$(call run-cmd,crunchMake,$(subst .so,.cxx,$@))
+
+$(O): CFLAGS_EXTRA += -I. $(shell pkg-config --cflags crunch++)
+%.o: %.cxx | $(DEPS)
+	$(call run-cmd,cxx,$(CFLAGS))
 
 check: all
 	$(call run-cmd,crunch,$(subst .so,,$(TESTS)))
@@ -42,4 +64,4 @@ clean:
 
 .PHONY: default all check clean
 .SUFIXES: .cxx .hxx .so .o
-#-include .dep/*.d
+-include .dep/test/*.d

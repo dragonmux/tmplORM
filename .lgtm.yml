@@ -1,0 +1,11 @@
+extraction:
+  cpp:
+    prepare:
+      packages:
+        - libmysqlclient-dev
+        - unixodbc-dev
+    index:
+      build_command:
+        - export GCC="gcc -fPIC -DPIC" GXX="g++ -fPIC -DPIC"
+        - make
+        - make buildCheck

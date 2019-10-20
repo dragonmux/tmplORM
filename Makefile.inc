@@ -7,6 +7,9 @@ endif
 ifndef BUILD_VERBOSE
 	BUILD_VERBOSE = 0
 endif
+ifeq ($(strip $(COVERAGE)), 1)
+	DEBUG = 1
+endif
 
 MAKEFLAGS += -w
 
@@ -50,6 +53,8 @@ quiet_cmd_install_file = " INSTALL $(2) => $(3)"
 cmd_install_file = $(INSTALL_FILE) $(2) $(3)
 quiet_cmd_install_bin = " INSTALL $(2) => $(3)"
 cmd_install_bin = $(INSTALL_BIN) $(2) $(3)
+quiet_cmd_sed = " GEN   $(3)"
+cmd_sed = $(SED) $(2) > $(3)
 quiet_cmd_ldconfig = " LDCONFIG"
 cmd_ldconfig = ldconfig
 
@@ -81,20 +86,21 @@ GCC ?= gcc
 GXX ?= g++
 ifeq ($(strip $(DEBUG)), 1)
 	OPTIM_FLAGS = -ggdb
-	GCC_FLAGS = 
-else
-	GCC_VER = $(shell gcc -dumpversion | cut -d . -f 1)
-	ifeq ($(shell if [ $(GCC_VER) -ge 4 ]; then echo 1; else echo 0; fi), 1)
+	ifeq ($(strip $(COVERAGE)), 1)
+		OPTIM_FLAGS += -O0 -g --coverage -fno-elide-constructors -fno-default-inline
 		GCC_FLAGS = -fvisibility=hidden -fvisibility-inlines-hidden
 	else
-		GCC_FLAGS = 
+		GCC_FLAGS =
 	endif
+else
+	GCC_VER = $(shell gcc -dumpversion | cut -d . -f 1)
+	GCC_FLAGS = -fvisibility=hidden -fvisibility-inlines-hidden
 	OPTIM_FLAGS = -O2
 	DEBUG = 0
 endif
 
-ifeq ($(strip $(TEST)), 1)
-	OPTIM_FLAGS += -fprofile-arcs -ftest-coverage
+ifeq ($(shell if [ $(GCC_VER) -lt 4 ]; then echo 1; else echo 0; fi), 1)
+	$(error You must use a GCC or Clang supporting at least the GCC 4 interface)
 endif
 
 CC = $(GCC) $(GCC_FLAGS)
