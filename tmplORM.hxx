@@ -226,9 +226,9 @@ namespace tmplORM
 			using T::operator !=;
 			constexpr static bool nullable = true;
 
-			constexpr nullable_t() noexcept : T(), _null(true) { }
-			constexpr nullable_t(const nullptr_t) noexcept : nullable_t() { }
-			constexpr nullable_t(const type &value) noexcept : T(value), _null(false) { }
+			constexpr nullable_t() noexcept : T{}, _null{true} { }
+			constexpr nullable_t(const nullptr_t) noexcept : nullable_t{} { }
+			constexpr nullable_t(const type &value) noexcept : T{value}, _null{false} { }
 			bool isNull() const noexcept { return _null; }
 
 			void value(const nullptr_t) noexcept

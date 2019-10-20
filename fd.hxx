@@ -1,7 +1,7 @@
 #ifndef FD__HXX
 #define FD__HXX
 
-#include <stdint.h>
+#include <cstdint>
 #include <cstddef>
 #include <unistd.h>
 #include <sys/types.h>
@@ -33,7 +33,7 @@ public:
 	constexpr fd_t(const int32_t fd_) noexcept : fd{fd_}, eof{false} { }
 	fd_t(const char *const file, const int flags, const mode_t mode = 0) noexcept :
 		fd{::open(file, flags, mode)}, eof{false} { }
-	fd_t(fd_t &&fd_) : fd_t{} { swap(fd_); }
+	fd_t(fd_t &&fd_) noexcept : fd_t{} { swap(fd_); }
 	~fd_t() noexcept { if (fd != -1) close(fd); }
 	void operator =(fd_t &&fd_) noexcept { swap(fd_); }
 	operator int32_t() const noexcept WARN_UNUSED { return fd; }
