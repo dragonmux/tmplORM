@@ -14,13 +14,14 @@ struct utf16_t final
 {
 private:
 	std::unique_ptr<char16_t []> str;
-	constexpr utf16_t() noexcept : str() { }
+	constexpr utf16_t() noexcept = default;
 
 public:
-	constexpr utf16_t(const std::nullptr_t) noexcept : str() { }
-	utf16_t(std::unique_ptr<char16_t []> &_str) noexcept : str(std::move(_str)) { }
-	utf16_t(std::unique_ptr<char16_t []> &&_str) noexcept : str(std::move(_str)) { }
-	utf16_t(utf16_t &&_str) noexcept : str(std::move(_str.str)) { }
+	constexpr utf16_t(const std::nullptr_t) noexcept : str{} { }
+	utf16_t(std::unique_ptr<char16_t []> &_str) noexcept : str{std::move(_str)} { }
+	utf16_t(std::unique_ptr<char16_t []> &&_str) noexcept : str{std::move(_str)} { }
+	utf16_t(utf16_t &&_str) noexcept : str{std::move(_str.str)} { }
+	~utf16_t() noexcept = default;
 	utf16_t &operator =(utf16_t &&_str) noexcept { str = std::move(_str.str); return *this; }
 	operator const std::unique_ptr<char16_t[]> &() const noexcept { return str; }
 	operator const char16_t *() const noexcept { return str.get(); }
@@ -28,21 +29,23 @@ public:
 	operator const uint16_t *() const noexcept { return reinterpret_cast<uint16_t *const>(str.get()); }
 	operator uint16_t *() const noexcept { return reinterpret_cast<uint16_t *const>(str.get()); }
 	explicit operator bool() const noexcept { return bool(str); }
+
+	utf16_t(const utf16_t &) = delete;
+	utf16_t &operator =(const utf16_t &) = delete;
 };
 
 struct utf8_t final
 {
 private:
 	std::unique_ptr<char []> str;
-	constexpr utf8_t() noexcept : str() { }
-	utf8_t(const utf8_t &) = delete;
-	utf8_t &operator =(const utf8_t &) = delete;
+	constexpr utf8_t() noexcept = default;
 
 public:
-	constexpr utf8_t(const std::nullptr_t) noexcept : str() { }
-	utf8_t(std::unique_ptr<char []> &_str) noexcept : str(std::move(_str)) { }
-	utf8_t(std::unique_ptr<char []> &&_str) noexcept : str(std::move(_str)) { }
-	utf8_t(utf8_t &&_str) noexcept : str(std::move(_str.str)) { }
+	constexpr utf8_t(const std::nullptr_t) noexcept : str{} { }
+	utf8_t(std::unique_ptr<char []> &_str) noexcept : str{std::move(_str)} { }
+	utf8_t(std::unique_ptr<char []> &&_str) noexcept : str{std::move(_str)} { }
+	utf8_t(utf8_t &&_str) noexcept : str{std::move(_str.str)} { }
+	~utf8_t() noexcept = default;
 	utf8_t &operator =(utf8_t &&_str) noexcept { str = std::move(_str.str); return *this; }
 	operator const std::unique_ptr<char []> &() const noexcept { return str; }
 	operator const char *() const noexcept { return str.get(); }
@@ -50,6 +53,9 @@ public:
 	operator const uint8_t *() const noexcept { return reinterpret_cast<uint8_t *const>(str.get()); }
 	operator uint8_t *() const noexcept { return reinterpret_cast<uint8_t *const>(str.get()); }
 	explicit operator bool() const noexcept { return bool(str); }
+
+	utf8_t(const utf8_t &) = delete;
+	utf8_t &operator =(const utf8_t &) = delete;
 };
 
 struct utf16 final
