@@ -68,7 +68,7 @@ static std::unique_ptr<tzString_t> tzStringList{};
 #define TZDEFAULT "localtime"
 constexpr static size_t halfYear = durationIn<seconds>(1_y) / 2;
 
-template<typename T> constexpr int signBit() noexcept
+template<typename T> constexpr size_t signBit() noexcept
 	{ return std::numeric_limits<typename std::make_signed<T>::type>::digits; }
 constexpr size_t sizeMax = std::numeric_limits<size_t>::max();
 constexpr uint8_t sizeBits = std::numeric_limits<size_t>::digits - 1;
@@ -77,9 +77,9 @@ inline int32_t asInt32(const uint8_t *const value) noexcept
 {
 	int32_t result{};
 	if (sizeof(int32_t) != 4 && value[0] >> signBit<char>())
-		result = -1 & ~0xFFFFFFFF;
-	result |= (int32_t{value[0]} << 24) | (int32_t{value[1]} << 16) |
-		(int32_t{value[2]} << 8) | int32_t{value[3]};
+		result = int32_t(uint32_t(-1) & ~0xFFFFFFFFU);
+	result |= uint32_t(value[0] << 24U) | uint32_t(value[1] << 16U) |
+		uint32_t(value[2] << 8U) | value[3];
 	return result;
 }
 inline int32_t asInt32(const char *const value) noexcept
@@ -93,11 +93,11 @@ inline int64_t asInt64(const uint8_t *const value) noexcept
 {
 	int64_t result{};
 	if (sizeof(int64_t) != 8 && value[0] >> signBit<char>())
-		result = -1 & ~0xFFFFFFFFFFFFFFFF;
-	result |= (int64_t{value[0]} << 56) | (int64_t{value[1]} << 48) |
-		(int64_t{value[2]} << 40) | (int64_t{value[3]} << 32) |
-		(int64_t{value[4]} << 24) | (int64_t{value[5]} << 16) |
-		(int64_t{value[6]} << 8) | int64_t{value[7]};
+		result = int64_t(uint64_t(-1) & ~0xFFFFFFFFFFFFFFFFU);
+	result |= (uint64_t(value[0]) << 56U) | (uint64_t(value[1]) << 48U) |
+		(uint64_t(value[2]) << 40U) | (uint64_t(value[3]) << 32U) |
+		(uint64_t(value[4]) << 24U) | (uint64_t(value[5]) << 16U) |
+		(uint64_t(value[6]) << 8U) | uint64_t(value[7]);
 	return result;
 }
 inline int64_t asInt64(const char *const value) noexcept
@@ -132,7 +132,7 @@ size_t safeAdd(const size_t a, const size_t b) noexcept
 		return sizeMax;
 	// Do the top-end addition, and if it produces a value that exceeds 2 bits of storage..
 	// overflow would occur and we return sizeMax
-	else if ((a >> (sizeBits - 1)) + (b >> (sizeBits - 1)) > 3)
+	else if ((a >> uint8_t(sizeBits - 1)) + (b >> uint8_t(sizeBits - 1)) > 3)
 		return sizeMax;
 	return a + b;
 }
@@ -221,8 +221,8 @@ bool readTypes(const fd_t &fd, const size_t charCount) noexcept
 {
 	for (size_t i{}; i < typesCount; ++i)
 	{
-		std::array<uint8_t, 4> offset;
-		uint8_t value;
+		std::array<uint8_t, 4> offset{};
+		uint8_t value{};
 
 		if (!fd.read(offset) || !fd.read(value) || value > 1)
 			return false;
@@ -421,7 +421,7 @@ bool tzReadFile(const char *const file) noexcept
 	int8_t version{};
 	auto readHeader = [&]() noexcept -> bool
 	{
-		tzHead_t header;
+		tzHead_t header{};
 		if (!fd.read(header) || header.magic != tzMagic)
 			return false;
 		transitionsCount = asInt32(header.timeCount);
