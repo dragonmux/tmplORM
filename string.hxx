@@ -76,7 +76,7 @@ public:
 struct utf16 final
 {
 private:
-	constexpr utf16() noexcept { }
+	constexpr utf16() noexcept = default;
 
 public:
 	static utf16_t convert(const char *const str) noexcept;

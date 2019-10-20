@@ -359,7 +359,7 @@ void mySQLRow_t::fetch() noexcept
 	{
 		if (!fieldTypes)
 		{
-			const_cast<uint32_t &>(fields) = mysql_num_fields(result);
+			fields = mysql_num_fields(result);
 			if (fields)
 				fieldTypes = makeUnique<mySQLFieldType_t []>(fields);
 			if (!fieldTypes)

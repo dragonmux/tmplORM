@@ -1,7 +1,7 @@
 #ifndef MYSQL__HXX
 #define MYSQL__HXX
 
-#include <stdint.h>
+#include <cstdint>
 #include <mysql.h>
 #include <utility>
 #include "fixedVector.hxx"
@@ -107,7 +107,7 @@ struct tmplORM_API mySQLRow_t final
 private:
 	MYSQL_RES *const result;
 	MYSQL_ROW row;
-	const uint32_t fields;
+	uint32_t fields;
 	sql_ulong_t *rowLengths;
 	// fixedVector_t?
 	std::unique_ptr<mySQLFieldType_t []> fieldTypes;
