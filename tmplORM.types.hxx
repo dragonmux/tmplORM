@@ -329,7 +329,10 @@ namespace tmplORM
 				};
 
 				inline bool operator ==(const ormDateTime_t &a, const ormDateTime_t &b) noexcept
-					{ return ormDate_t(a) == ormDate_t(b) && ormTime_t(a) == ormTime_t(b); }
+				{
+					return static_cast<const ormDate_t &>(a) == static_cast<const ormDate_t &>(b) &&
+						static_cast<const ormTime_t &>(a) == static_cast<const ormTime_t &>(b);
+				}
 			}
 
 			using chrono::ormDateTime_t;
@@ -337,8 +340,8 @@ namespace tmplORM
 
 			inline bool operator !=(const ormDateTime_t &a, const ormDateTime_t &b) noexcept { return !(a == b); }
 			//inline bool operator ==(const ormDate_t &a, const ormDateTime_t &b) noexcept { return a == ormDate_t(b); }
-			inline bool operator ==(const ormDateTime_t &a, const ormDate_t &b) noexcept { return ormDate_t{a} == b; }
-			inline bool operator ==(const ormDateTime_t &a, const ormTime_t &b) noexcept { return ormTime_t{a} == b; }
+			inline bool operator ==(const ormDateTime_t &a, const ormDate_t &b) noexcept { return static_cast<const ormDate_t &>(a) == b; }
+			inline bool operator ==(const ormDateTime_t &a, const ormTime_t &b) noexcept { return static_cast<const ormTime_t &>(a) == b; }
 
 			struct guid_t final
 			{
