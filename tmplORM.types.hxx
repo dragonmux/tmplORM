@@ -377,7 +377,7 @@ namespace tmplORM
 				}
 
 				ormUUID_t(const uint32_t a, const uint16_t b, const uint16_t c, const uint16_t d,
-					const uint64_t e) noexcept : _uuid{a, b, c, uint64_t(e << 16)}
+					const uint64_t e) noexcept : _uuid{a, b, c, uint64_t(e << 16U)}
 				{
 					swapBytes(_uuid.data1);
 					swapBytes(_uuid.data2);
@@ -400,9 +400,9 @@ namespace tmplORM
 					uuid += 5;
 					_uuid.data3 = toInt_t<uint16_t>(uuid, 4).fromHex();
 					uuid += 5;
-					_uuid.data4 = uint64_t(toInt_t<uint16_t>(uuid, 4).fromHex()) << 48;
+					_uuid.data4 = uint64_t(toInt_t<uint16_t>(uuid, 4).fromHex()) << 48U;
 					uuid += 5;
-					_uuid.data4 |= uint64_t(toInt_t<uint16_t>(uuid, 4).fromHex()) << 32;
+					_uuid.data4 |= uint64_t(toInt_t<uint16_t>(uuid, 4).fromHex()) << 32U;
 					_uuid.data4 |= toInt_t<uint32_t>(uuid + 4, 8).fromHex();
 				}
 
@@ -417,8 +417,8 @@ namespace tmplORM
 						const uint8_t value = asBuffer()[i];
 						if (i == 4 || i == 6 || i == 8 || i == 10)
 							str[j++] = '-';
-						str[j++] = asHex(value >> 4);
-						str[j++] = asHex(value & 0x0F);
+						str[j++] = asHex(value >> 4U);
+						str[j++] = asHex(value & 0x0FU);
 					}
 					return str;
 				}
@@ -432,8 +432,8 @@ namespace tmplORM
 					{
 						// This works because internally we keep things big endian
 						const uint8_t value = asBuffer()[i];
-						str[j++] = asHex(value >> 4);
-						str[j++] = asHex(value & 0x0F);
+						str[j++] = asHex(value >> 4U);
+						str[j++] = asHex(value & 0x0FU);
 					}
 					return str;
 				}
