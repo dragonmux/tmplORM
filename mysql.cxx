@@ -449,8 +449,8 @@ bool mySQLValue_t::asBool(const uint8_t bit) const
 {
 	if (isNull() || type != MYSQL_TYPE_BIT || bit >= 64)
 		throw mySQLValueError_t(mySQLErrorType_t::boolError);
-	const char byte = data[bit >> 3];
-	return byte & (1 << (bit & 7));
+	const auto byte = uint8_t(data[bit >> 3U]);
+	return byte & (1U << uint8_t(bit & 7U));
 }
 
 /*!

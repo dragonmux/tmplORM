@@ -136,7 +136,7 @@ size_t countUnits(const char16_t *const str) noexcept
 			count += 3;
 		}
 		// It is invalid to encounter a floating secondary surrogate
-		else if ((uintA & 0xFE00) == 0xDC00)
+		else if ((uintA & 0xFE00U) == 0xDC00U)
 			return 0;
 		else
 		{
