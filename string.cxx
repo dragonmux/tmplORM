@@ -1,6 +1,7 @@
 #include "string.hxx"
 #include <cstring>
 #include <new>
+#include <limits>
 
 std::unique_ptr<const char []> formatString(const char *format, ...) noexcept
 {
@@ -13,7 +14,7 @@ std::unique_ptr<const char []> formatString(const char *format, ...) noexcept
 
 std::unique_ptr<const char []> vaFormatString(const char *format, va_list args) noexcept
 {
-	const size_t len = vsnprintf(NULL, 0, format, args) + 1;
+	const size_t len = vsnprintf(nullptr, 0, format, args) + 1;
 	auto ret = makeUnique<char []>(len);
 	if (!ret)
 		return nullptr;
@@ -34,11 +35,14 @@ inline bool isMultiValid() noexcept { return true; }
 template<typename... values_t> inline bool isMultiValid(const char c, values_t ...values) noexcept
 	{ return (c & 0xC0) == 0x80 && isMultiValid(values...); }
 
-template<typename T> inline T safeIndex(const T *const str, const size_t index, const size_t len) noexcept
+template<typename T, typename U = typename std::make_unsigned<T>::type>
+	inline U safeIndex(const T *const str, const size_t index, const size_t len) noexcept
 {
 	if (index >= len)
-		return -1;
-	return str[index];
+		return std::numeric_limits<U>::max();
+	U result{};
+	memcpy(&result, &str[index], sizeof(T));
+	return result;
 }
 
 size_t countUnits(const char *const str) noexcept
