@@ -26,7 +26,7 @@ using std::endl;
 
 uint16_t getColumns()
 {
-	struct winsize win;
+	struct winsize win{};
 	ioctl(STDIN_FILENO, TIOCGWINSZ, &win);
 	return (win.ws_col == 0 ? 80 : win.ws_col);
 }
@@ -38,7 +38,7 @@ void echoFail() noexcept { cout << SET_COL(COL) BRACKET "[" FAILURE " FAIL " BRA
 #else
 uint16_t getColumns()
 {
-	CONSOLE_SCREEN_BUFFER_INFO window;
+	CONSOLE_SCREEN_BUFFER_INFO window{};
 	GetConsoleScreenBufferInfo(console, &window);
 	return window.dwSize.X;
 }
@@ -47,7 +47,7 @@ uint16_t getColumns()
 
 void echoPass()
 {
-	CONSOLE_SCREEN_BUFFER_INFO cursor;
+	CONSOLE_SCREEN_BUFFER_INFO cursor{};
 	GetConsoleScreenBufferInfo(console, &cursor);
 	cursor.dwCursorPosition.Y--;
 	cursor.dwCursorPosition.X = COL;
@@ -64,7 +64,7 @@ void echoPass()
 
 void echoFail()
 {
-	CONSOLE_SCREEN_BUFFER_INFO cursor;
+	CONSOLE_SCREEN_BUFFER_INFO cursor{};
 	GetConsoleScreenBufferInfo(console, &cursor);
 	cursor.dwCursorPosition.Y--;
 	cursor.dwCursorPosition.X = COL;
