@@ -1,5 +1,5 @@
 #include <cmath>
-#include <string.h>
+#include <cstring>
 #include "mysql.hxx"
 #include "value.hxx"
 #include "string.hxx"
@@ -277,9 +277,9 @@ void mySQLPreparedResult_t::fetchColumn(const size_t index) const noexcept
 	mysql_stmt_fetch_column(query, columns.data() + index, index, 0);
 }
 
-mySQLBind_t::mySQLBind_t(mySQLBind_t &&binds) noexcept : mySQLBind_t() { *this = std::move(binds); }
+mySQLBind_t::mySQLBind_t(mySQLBind_t &&binds) noexcept : mySQLBind_t{} { *this = std::move(binds); }
 
-mySQLBind_t::mySQLBind_t(const size_t paramsCount) noexcept : params(paramsCount), paramStorage(paramsCount), numParams(paramsCount)
+mySQLBind_t::mySQLBind_t(const size_t paramsCount) noexcept : params{paramsCount}, paramStorage{paramsCount}, numParams{paramsCount}
 {
 	if (!params.valid())
 		return;
@@ -323,7 +323,7 @@ mySQLResult_t &mySQLResult_t::operator =(mySQLResult_t &&res) noexcept { std::sw
 /*! @brief Returns the number of rows this result object represents, or 0 if this is an invalid result object */
 uint64_t mySQLResult_t::numRows() const noexcept { return valid() ? mysql_num_rows(result) : 0; }
 /*! @brief Creates a row object representing result rows for this result object */
-mySQLRow_t mySQLResult_t::resultRows() const noexcept { return valid() ? mySQLRow_t(result) : mySQLRow_t(); }
+mySQLRow_t mySQLResult_t::resultRows() const noexcept { return valid() ? mySQLRow_t{result} : mySQLRow_t{}; }
 /*!
  * @internal
  * @brief Constructor for the result rows from a MySQL query
@@ -392,8 +392,8 @@ bool mySQLRow_t::next() noexcept
 mySQLValue_t mySQLRow_t::operator [](const uint32_t idx) const noexcept
 {
 	if (!valid() || idx >= fields)
-		return mySQLValue_t();
-	return mySQLValue_t(row[idx], rowLengths[idx], fieldTypes[idx]);
+		return {};
+	return {row[idx], rowLengths[idx], fieldTypes[idx]};
 }
 
 /*! @internal @brief Returns a boolean indicating if the given character is a number of not */
@@ -632,7 +632,7 @@ valueOrError_t<ormUUID_t, mySQLValueError_t> checkedConvertUUID(const char *cons
 	uint8_t *const buffer = result.asBuffer();
 	for (uint8_t i{0}; i < 16; ++i)
 	{
-		toInt_t<uint8_t> value{uuid + (i << 1), 2};
+		toInt_t<uint8_t> value{uuid + (i << 1U), 2};
 		if (value.isHex())
 			buffer[i] = value.fromHex();
 		else
