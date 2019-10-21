@@ -22,7 +22,7 @@ namespace tmplORM
 		namespace driver
 		{
 using std::nullptr_t;
-typedef unsigned long sql_ulong_t;
+using sql_ulong_t = unsigned long;
 #define MySQL_FORMAT_ARGS(n, m) __attribute__((format(printf, n, m)))
 using mySQLFieldType_t = enum enum_field_types;
 using namespace tmplORM::types::baseTypes;

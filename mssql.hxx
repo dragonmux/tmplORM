@@ -1,7 +1,7 @@
 #ifndef MSSQL__HXX
 #define MSSQL__HXX
 
-#include <stdint.h>
+#include <cstdint>
 #include <array>
 #include <memory>
 #include <utility>
