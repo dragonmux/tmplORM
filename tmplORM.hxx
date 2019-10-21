@@ -764,6 +764,8 @@ namespace tmplORM
 		public:
 			session_t() noexcept = default;
 			~session_t() noexcept = default;
+			session_t(session_t &&) noexcept = default;
+			session_t &operator =(session_t &&) noexcept = default;
 
 			template<typename... models> bool createTable() { return collect(session.template createTable(models())...); }
 			template<typename model> fixedVector_t<model> select() { return session.template select<model>(model()); }
@@ -779,6 +781,10 @@ namespace tmplORM
 			template<typename... models> bool deleteTable() { return collect(session.template deleteTable(models())...); }
 
 			api_t &inner() noexcept { return session; }
+			const api_t &inner() const noexcept { return session; }
+
+			session_t(const session_t &) = delete;
+			session_t &operator =(const session_t &) = delete;
 		};
 	}
 	using common::session_t;
