@@ -210,7 +210,7 @@ public:
 				return {};
 			else if (hex >= 'a' && hex <= 'f')
 				hex -= 0x20;
-			value <<= 4;
+			value <<= 4U;
 			hex -= 0x30;
 			if (hex > 9)
 				hex -= 0x07;
@@ -226,7 +226,7 @@ public:
 		{
 			if (!isOct(_value[i]))
 				return {};
-			value <<= 3;
+			value <<= 3U;
 			value += _value[i] - 0x30;
 		}
 		return value;
