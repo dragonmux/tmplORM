@@ -750,8 +750,8 @@ namespace tmplORM
 			api_t session;
 
 		public:
-			session_t() noexcept : session() { }
-			~session_t() noexcept { }
+			session_t() noexcept = default;
+			~session_t() noexcept = default;
 
 			template<typename... models> bool createTable() { return collect(session.template createTable(models())...); }
 			template<typename model> fixedVector_t<model> select() { return session.template select<model>(model()); }
