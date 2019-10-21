@@ -153,7 +153,7 @@ namespace tmplORM
 			const T &value() const noexcept { return _value; }
 			T &value() noexcept { return _value; }
 			// Make the type behave like its' contained type..
-			operator const T() noexcept { return _value; }
+			operator T() const noexcept { return _value; }
 			void operator =(const T &_value) noexcept { value(_value); }
 			//bool modified() const noexcept { return _modified; }
 			constexpr static bool nullable = false;
@@ -182,7 +182,7 @@ namespace tmplORM
 			static_assert(isNumeric<type>::value, "Cannot create automatically incrementing field from non-numeric base type");
 			using T::operator =;
 			using T::value;
-			using T::operator const type;
+			using T::operator type;
 			using T::operator ==;
 			using T::operator !=;
 		};
@@ -193,7 +193,7 @@ namespace tmplORM
 			using type = typename T::type;
 			using T::operator =;
 			using T::value;
-			using T::operator const type;
+			using T::operator type;
 			using T::operator ==;
 			using T::operator !=;
 		};
@@ -204,7 +204,7 @@ namespace tmplORM
 			using type = typename T::type;
 			using T::operator =;
 			using T::value;
-			using T::operator const type;
+			using T::operator type;
 			using T::operator ==;
 			using T::operator !=;
 		};
@@ -242,7 +242,7 @@ namespace tmplORM
 			const type value() const noexcept { return _value(); }
 			type value() noexcept { return T::value(); }
 			void value(const type &_value) noexcept { _null = false; T::value(_value); }
-			operator const type() const noexcept { return _value(); }
+			operator type() const noexcept { return _value(); }
 
 			template<typename U = type, typename = enableIf<isSame<U, const char *>::value>>
 				void operator =(const std::unique_ptr<char []> &_value) noexcept { value(_value.get()); }
@@ -265,7 +265,7 @@ namespace tmplORM
 			using type = typename parentType_t::type;
 			using parentType_t::operator =;
 			using parentType_t::value;
-			using parentType_t::operator const type;
+			using parentType_t::operator type;
 			using parentType_t::operator ==;
 			using parentType_t::operator !=;
 
@@ -290,7 +290,7 @@ namespace tmplORM
 			using type = typename parentType_t::type;
 			using parentType_t::operator =;
 			using parentType_t::value;
-			using parentType_t::operator const type;
+			using parentType_t::operator type;
 			using parentType_t::operator ==;
 			using parentType_t::operator !=;
 
@@ -511,7 +511,7 @@ namespace tmplORM
 			using type = typename parentType_t::type;
 			using parentType_t::operator =;
 			using parentType_t::value;
-			using parentType_t::operator const type;
+			using parentType_t::operator type;
 			using parentType_t::operator ==;
 			using parentType_t::operator !=;
 
@@ -549,7 +549,7 @@ namespace tmplORM
 			using intType = typename int_t<_length>::type;
 			using parentType_t::operator =;
 			using parentType_t::value;
-			using parentType_t::operator const type;
+			using parentType_t::operator type;
 			using parentType_t::operator ==;
 			using parentType_t::operator !=;
 
