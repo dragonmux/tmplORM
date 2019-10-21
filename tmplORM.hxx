@@ -215,10 +215,10 @@ namespace tmplORM
 		private:
 			bool _null;
 
-			template<typename value_t = typename T::type> typename std::enable_if<std::is_same<value_t, typename T::type>::value && !std::is_pointer<value_t>::value, const value_t>::type
+			template<typename value_t = typename T::type> typename std::enable_if<std::is_same<value_t, typename T::type>::value && !std::is_pointer<value_t>::value, value_t>::type
 				_value() const noexcept { return T::value(); }
 			template<typename value_t = typename T::type> typename std::enable_if<std::is_same<value_t, typename T::type>::value && std::is_pointer<value_t>::value, const value_t>::type
-				_value() const noexcept { return const_cast<value_t>(T::value()); }
+				_value() const noexcept { return T::value(); }
 
 		public:
 			using type = typename T::type;
