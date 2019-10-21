@@ -27,6 +27,9 @@ using systemClock_t = std::chrono::system_clock;
 using std::chrono::milliseconds;
 using tmplORM::types::chrono::durationIn;
 
+std::string operator ""_s(const char *str, size_t len) noexcept
+	{ return {str, len}; }
+
 std::unique_ptr<tSQLClient_t> testClient{};
 constString_t driver, host, username, password;
 
@@ -651,12 +654,7 @@ private:
 
 	void testString()
 	{
-		static const std::array<char, 23> testData =
-		{
-			'T', 'h', 'i', 's', ' ', 'i', 's', ' ',
-			'\x00', '\xFF', ' ', 'o', 'n', 'l', 'y', ' ',
-			'a', ' ', 't', 'e', 's', 't', '\0'
-		};
+		const auto testData = "This is \x00\xFF only a test"_s;
 		auto value = tSQLValue_t{nullptr, 0, SQL_VARCHAR};
 		assertTrue(value.isNull());
 		tryFailConversion<std::unique_ptr<char []>>(value);
