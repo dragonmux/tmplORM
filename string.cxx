@@ -21,7 +21,7 @@ std::unique_ptr<const char []> formatString(const char *format, ...) noexcept
 
 std::unique_ptr<const char []> vaFormatString(const char *format, va_list args) noexcept
 {
-	va_list lenArgs;
+	va_list lenArgs{};
 	va_copy(lenArgs, args);
 	const size_t len = vsnprintf(nullptr, 0, format, lenArgs) + 1;
 	va_end(lenArgs);

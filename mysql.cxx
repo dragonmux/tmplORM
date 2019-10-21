@@ -75,9 +75,6 @@ mySQLClient_t::~mySQLClient_t() noexcept
 	}
 }
 
-/*! @brief "Copies" a MySQL client connection container reference over another */
-mySQLClient_t &mySQLClient_t::operator =(const mySQLClient_t &) noexcept { return *this; }
-
 /*!
  * @brief Creates a client connection based on a TCP/IP connection
  * @param host The host string of the server housing the MySQL instance to connect to

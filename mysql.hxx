@@ -40,7 +40,7 @@ public:
 	constexpr mySQLValue_t() noexcept : data(nullptr), len(0), type(MYSQL_TYPE_NULL) { }
 	mySQLValue_t(const char *const _data, const uint64_t _len, const mySQLFieldType_t _type) noexcept;
 	mySQLValue_t(mySQLValue_t &&value) noexcept : mySQLValue_t() { swap(value); }
-	~mySQLValue_t() noexcept { }
+	~mySQLValue_t() noexcept = default;
 	void operator =(mySQLValue_t &&value) noexcept { swap(value); }
 	void swap(mySQLValue_t &value) noexcept;
 
@@ -274,7 +274,8 @@ public:
 	mySQLClient_t() noexcept;
 	mySQLClient_t(const mySQLClient_t &) noexcept;
 	~mySQLClient_t() noexcept;
-	mySQLClient_t &operator =(const mySQLClient_t &) noexcept;
+	/*! @brief "Copies" a MySQL client connection container reference over another */
+	mySQLClient_t &operator =(const mySQLClient_t &) noexcept = default;
 	/*!
 	 * @brief Call to determine if this client connection container is valid
 	 * @returns true if the object is valid, false otherwise
