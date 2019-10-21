@@ -385,9 +385,13 @@ namespace tmplORM
 			public:
 				using type = ormDate_t;
 				constexpr date_t() noexcept : parentType_t{} { }
+				date_t(const date_t &value) noexcept : parentType_t{value._value} { }
+				date_t(date_t &&value) noexcept : parentType_t{value._value} { }
 				date_t(const ormDate_t _value) noexcept : parentType_t{} { value(_value); }
+				~date_t() noexcept = default;
 				operator ormDate_t() const noexcept { return date(); }
-				void operator =(const date_t &_value) noexcept { value(_value.value()); }
+				void operator =(const date_t &value) noexcept { parentType_t::_value = value._value; }
+				void operator =(date_t &&value) noexcept { parentType_t::_value = value._value; }
 				void operator =(const char *const _value) noexcept { value(_value); }
 				void operator =(const ormDate_t &_value) noexcept { value(_value); }
 				void operator =(ormDate_t &&_value) noexcept { value(_value); }
@@ -415,9 +419,13 @@ namespace tmplORM
 			public:
 				using type = ormTime_t;
 				constexpr time_t() noexcept : parentType_t{} { }
+				time_t(const time_t &value) noexcept : parentType_t{value._value} { }
+				time_t(time_t &&value) noexcept : parentType_t{value._value} { }
 				time_t(const ormTime_t _value) noexcept : parentType_t{} { value(_value); }
+				~time_t() noexcept = default;
 				operator ormTime_t() const noexcept { return time(); }
-				void operator =(const time_t &_value) noexcept { value(_value.value()); }
+				void operator =(const time_t &value) noexcept { parentType_t::_value = value._value; }
+				void operator =(time_t &&value) noexcept { parentType_t::_value = value._value; }
 				void operator =(const char *const _value) noexcept { value(_value); }
 				void operator =(const ormTime_t &_value) noexcept { value(_value); }
 				void operator =(ormTime_t &&_value) noexcept { value(_value); }
@@ -460,9 +468,13 @@ namespace tmplORM
 			public:
 				using type = ormDateTime_t;
 				constexpr dateTime_t() noexcept : parentType_t{} {}
+				dateTime_t(const dateTime_t &value) noexcept : parentType_t{value._value} { }
+				dateTime_t(dateTime_t &&value) noexcept : parentType_t{value._value} { }
 				dateTime_t(const ormDateTime_t _value) noexcept : parentType_t{} { value(_value); }
+				~dateTime_t() noexcept = default;
 				operator ormDateTime_t() const noexcept { return dateTime(); }
-				void operator =(const dateTime_t &_value) noexcept { value(_value.value()); }
+				void operator =(const dateTime_t &value) noexcept { parentType_t::_value = value._value; }
+				void operator =(dateTime_t &&value) noexcept { parentType_t::_value = value._value; }
 				void operator =(const char *const _value) noexcept { value(_value); }
 				void operator =(const ormDateTime_t &_value) noexcept { value(_value); }
 				void operator =(ormDateTime_t &&_value) noexcept { value(_value); }
