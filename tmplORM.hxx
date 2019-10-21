@@ -404,7 +404,7 @@ namespace tmplORM
 
 				void value(const ormDate_t &_value) noexcept
 					{ parentType_t::value({_value.year(), _value.month(), _value.day()}); }
-				void value(const ormDateTime_t &_value) noexcept { value(ormDate_t{_value}); }
+				void value(const ormDateTime_t &_value) noexcept { value(static_cast<const ormDate_t &>(_value)); }
 			};
 
 			template<typename _fieldName> struct time_t : public type_t<_fieldName, _time_t>
@@ -449,7 +449,7 @@ namespace tmplORM
 					parentType_t::value({duration_cast<typename _time_t::duration_t>(time)});
 				}
 
-				void value(const ormDateTime_t &_value) noexcept { value(ormTime_t{_value}); }
+				void value(const ormDateTime_t &_value) noexcept { value(static_cast<const ormTime_t &>(_value)); }
 			};
 
 			template<typename _fieldName> struct dateTime_t : public type_t<_fieldName, _dateTime_t>
