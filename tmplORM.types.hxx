@@ -169,10 +169,10 @@ namespace tmplORM
 				template<typename rep_t, typename period_t>
 					using duration_t = std::chrono::duration<rep_t, period_t>;
 				template<typename target_t, typename source_t>
-				constexpr target_t durationAs(const source_t &d)
+				constexpr target_t durationAs(const source_t &d) noexcept
 					{ return std::chrono::duration_cast<target_t>(d); }
 				template<typename target_t, typename source_t>
-				constexpr typename target_t::rep durationIn(const source_t &d)
+				constexpr typename target_t::rep durationIn(const source_t &d) noexcept
 					{ return durationAs<target_t>(d).count(); }
 				template<std::intmax_t num, std::intmax_t denom = 1>
 					using ratio_t = std::ratio<num, denom>;
