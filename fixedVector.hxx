@@ -63,6 +63,7 @@ public:
 	constexpr fixedVector_t() noexcept : _data(), _length(0) { }
 	fixedVector_t(const size_t length) noexcept : _data(length ? new (std::nothrow) T[length]() : nullptr), _length(length) { }
 	fixedVector_t(fixedVector_t &&vec) noexcept : fixedVector_t() { swap(vec); }
+	~fixedVector_t() noexcept = default;
 	fixedVector_t &operator =(fixedVector_t &&vec) noexcept { swap(vec); return *this; }
 
 	size_t length() const noexcept { return _length; }
