@@ -10,6 +10,10 @@ namespace dateTime
 	using namespace tmplORM::types::baseTypes;
 	using namespace tmplORM::types::dateTimeTypes;
 
+	std::string operator ""_s(const char *str, size_t len) noexcept
+		{ return {str, len}; }
+	const auto dateTimeStr = "2018-07-04T01:23:45.678901234Z"_s;
+
 	void testCtor(testsuit &suite)
 	{
 		const ormDateTime_t a;
@@ -75,6 +79,13 @@ namespace dateTime
 		suite.assertEqual(a.minute(), local.tm_min);
 		suite.assertEqual(a.second(), local.tm_sec);
 		suite.assertEqual(a.nanoSecond(), (now.time_since_epoch() - seconds{time}).count());
+	}
+
+	void testAsString(testsuit &suite)
+	{
+		const ormDateTime_t dateTime{2018, 07, 04, 01, 23, 45, 678901234};
+		const auto asString = dateTime.asString();
+		printf("Formatted %s as %s\n", dateTimeStr.data(), asString.get());
 	}
 
 	void testWrapper(testsuit &suite)

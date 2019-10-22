@@ -6,6 +6,7 @@ namespace dateTime
 	void testCtor(testsuit &suite);
 	void testFromString(testsuit &suite);
 	void testFromSystemTime(testsuit &suite);
+	void testAsString(testsuit &suite);
 	void testWrapper(testsuit &suite);
 }
 

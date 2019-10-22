@@ -7,6 +7,7 @@ private:
 	void testCtor() { dateTime::testCtor(*this); }
 	void testFromString() { dateTime::testFromString(*this); }
 	void testFromSystemTime() { dateTime::testFromSystemTime(*this); }
+	void testAsString() { dateTime::testAsString(*this); }
 	void testWrapper() { dateTime::testWrapper(*this); }
 
 public:
@@ -15,6 +16,7 @@ public:
 		CXX_TEST(testCtor)
 		CXX_TEST(testFromString)
 		CXX_TEST(testFromSystemTime)
+		CXX_TEST(testAsString)
 		CXX_TEST(testWrapper)
 	}
 };
