@@ -9,6 +9,19 @@ private:
 	void testFromSystemTime() { dateTime::testFromSystemTime(*this); }
 	void testWrapper() { dateTime::testWrapper(*this); }
 
+public:
+	void registerTests() final override
+	{
+		CXX_TEST(testCtor)
+		CXX_TEST(testFromString)
+		CXX_TEST(testFromSystemTime)
+		CXX_TEST(testWrapper)
+	}
+};
+
+class testTypes_t final : public testsuit
+{
+private:
 	void testDate() { types::testDate(*this); }
 	void testTime() { types::testTime(*this); }
 	void testDateTime() { types::testDateTime(*this); }
@@ -17,11 +30,6 @@ private:
 public:
 	void registerTests() final override
 	{
-		CXX_TEST(testCtor)
-		CXX_TEST(testFromString)
-		CXX_TEST(testFromSystemTime)
-		CXX_TEST(testWrapper)
-
 		CXX_TEST(testDate)
 		CXX_TEST(testTime)
 		CXX_TEST(testDateTime)
@@ -32,5 +40,5 @@ public:
 CRUNCH_API void registerCXXTests() noexcept;
 void registerCXXTests() noexcept
 {
-	registerTestClasses<testDateTime_t>();
+	registerTestClasses<testDateTime_t, testTypes_t>();
 }
