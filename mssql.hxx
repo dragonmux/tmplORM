@@ -49,7 +49,7 @@ public:
 	tSQLExecError_t() noexcept : _error(tSQLExecErrorType_t::ok), _state{{}}, _message() { }
 	tSQLExecError_t(const tSQLExecErrorType_t error, const int16_t handleType, void *const handle) noexcept;
 	tSQLExecError_t(tSQLExecError_t &&err) noexcept : tSQLExecError_t() { *this = std::move(err); }
-	~tSQLExecError_t() noexcept { }
+	~tSQLExecError_t() noexcept = default;
 	void operator =(tSQLExecError_t &&err) noexcept;
 
 	const char *error() const noexcept;
@@ -78,7 +78,7 @@ public:
 	tSQLValue_t() noexcept : data(), length(0), type(0) { }
 	tSQLValue_t(const void *const _data, const uint64_t _length, const int16_t _type) noexcept;
 	tSQLValue_t(tSQLValue_t &&value) noexcept : tSQLValue_t() { *this = std::move(value); }
-	~tSQLValue_t() noexcept { }
+	~tSQLValue_t() noexcept = default;
 	void operator =(tSQLValue_t &&value) noexcept;
 
 	bool isNull() const noexcept { return !data; }
