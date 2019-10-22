@@ -105,7 +105,7 @@ inline void swap(mySQLValue_t &x, mySQLValue_t &y) noexcept { x.swap(y); }
 struct tmplORM_API mySQLRow_t final
 {
 private:
-	MYSQL_RES *const result;
+	MYSQL_RES *result;
 	MYSQL_ROW row;
 	uint32_t fields;
 	sql_ulong_t *rowLengths;
@@ -119,8 +119,9 @@ private:
 public:
 	/*! @brief Default constructor for row objects, constructing invalid row objects by default */
 	mySQLRow_t() noexcept : result(nullptr), row(nullptr), fields(0), rowLengths(nullptr), fieldTypes() { }
-	mySQLRow_t(mySQLRow_t &&row) noexcept;
+	mySQLRow_t(mySQLRow_t &&row) noexcept : mySQLRow_t{} { swap(row); }
 	~mySQLRow_t() noexcept;
+	void operator =(mySQLRow_t &&row) noexcept { swap(row); }
 	/*!
 	 * @brief Call to determine if this row object is valid
 	 * @returns true if the object is valid, false otherwise
@@ -129,12 +130,15 @@ public:
 	uint32_t numFields() const noexcept;
 	bool next() noexcept;
 	mySQLValue_t operator [](const uint32_t idx) const noexcept;
+	void swap(mySQLRow_t &row) noexcept;
 
 	/*! @brief Deleted copy constructor for mySQLRow_t as rows are not copyable */
 	mySQLRow_t(const mySQLRow_t &) = delete;
 	/*! @brief Deleted copy assignment operator for mySQLRow_t as rows are not copyable */
 	mySQLRow_t &operator =(const mySQLRow_t &) = delete;
 };
+
+inline void swap(mySQLRow_t &a, mySQLRow_t &b) noexcept { a.swap(b); }
 
 struct tmplORM_API mySQLResult_t final
 {

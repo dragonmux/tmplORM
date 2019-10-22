@@ -331,13 +331,14 @@ mySQLRow_t mySQLResult_t::resultRows() const noexcept { return valid() ? mySQLRo
  */
 mySQLRow_t::mySQLRow_t(MYSQL_RES *res) noexcept : result(res), row(nullptr), fields(0), rowLengths(nullptr) { fetch(); }
 
-/*! @brief Move constructs a result rows object for a MySQL query */
-mySQLRow_t::mySQLRow_t(mySQLRow_t &&r) noexcept : result(r.result), row(nullptr), fields(r.fields), rowLengths(nullptr), fieldTypes(std::move(r.fieldTypes))
+/*! @brief Swaps the contents of a result rows object with another for a MySQL query */
+void mySQLRow_t::swap(mySQLRow_t &r) noexcept
 {
+	std::swap(result, r.result);
 	std::swap(row, r.row);
-	// set r.fields = 0?
-	//const_cast<uint32_t &>(r.fields) = 0;
+	std::swap(fields, r.fields);
 	std::swap(rowLengths, r.rowLengths);
+	std::swap(fieldTypes, r.fieldTypes);
 }
 
 /*!
