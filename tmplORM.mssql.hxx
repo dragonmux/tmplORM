@@ -93,7 +93,7 @@ namespace tmplORM
 			template<bool> struct bindValue_t
 			{
 				template<typename T> void *operator ()(const T &val, managedPtr_t<void> &) const noexcept
-					{ return const_cast<T *>(&val); }
+					{ return const_cast<T *>(&val); } // NOLINT(cppcoreguidelines-pro-type-const-cast)
 
 				void *operator ()(const ormDate_t &value, managedPtr_t<void> &paramStorage) const noexcept
 				{
@@ -137,7 +137,7 @@ namespace tmplORM
 			template<> struct bindValue_t<true>
 			{
 				template<typename T> void *operator ()(const T *const val, managedPtr_t<void> &) const noexcept
-					{ return const_cast<T *>(val); }
+					{ return const_cast<T *>(val); } // NOLINT(cppcoreguidelines-pro-type-const-cast)
 			};
 
 			template<typename T> using bindValue_ = bindValue_t<std::is_pointer<T>::value>;
