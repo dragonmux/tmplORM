@@ -26,9 +26,9 @@ public:
 	reference operator *() const noexcept { return data[index]; }
 	pointer operator ->() const noexcept { return data + index; }
 	boundedIterator_t &operator ++() noexcept { if (index < max) ++index; return *this; }
-	boundedIterator_t operator ++(int) noexcept { if (index < max) return {data, index++, max}; return *this; }
+	const boundedIterator_t operator ++(int) noexcept { if (index < max) return {data, index++, max}; return *this; }
 	boundedIterator_t &operator --() noexcept { if (index > 0) --index; return *this; }
-	boundedIterator_t operator --(int) noexcept { if (index > 0) return {data, index--, max}; return *this; }
+	const boundedIterator_t operator --(int) noexcept { if (index > 0) return {data, index--, max}; return *this; }
 	reference operator [](const size_t n) const noexcept { return *(*this + n); }
 	boundedIterator_t &operator +=(const size_t n) noexcept { (index + n) < max && (index + n) >= index ? index += n : index = max; return *this; }
 	boundedIterator_t operator +(const size_t n) const noexcept { return boundedIterator_t{*this} += n; }
