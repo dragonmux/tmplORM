@@ -269,8 +269,8 @@ namespace tmplORM
 			driver::tSQLClient_t database;
 
 		public:
-			session_t() noexcept : database() { }
-			~session_t() noexcept { }
+			session_t() noexcept = default;
+			~session_t() noexcept = default;
 
 			template<typename tableName, typename... fields> bool createTable(const model_t<tableName, fields...> &)
 			{

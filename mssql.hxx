@@ -192,7 +192,7 @@ private:
 	mutable bool executed;
 
 protected:
-	tSQLQuery_t(const tSQLClient_t *const _client, void *handle, const char *const queryStmt, const size_t paramsCount) noexcept;
+	tSQLQuery_t(const tSQLClient_t *const parent, void *handle, const char *const queryStmt, const size_t paramsCount) noexcept;
 	bool error(const int16_t err) const noexcept;
 	friend struct tSQLClient_t;
 
