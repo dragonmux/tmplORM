@@ -5,8 +5,6 @@ before_install:
   - export GCC="$GCC -m64 -fPIC -DPIC" GXX="$GXX -m64 -fPIC -DPIC"
   - sudo service mysql stop
   - source .travis-ci/msodbcsql17.sh
-#  - wget http://launchpadlibrarian.net/174316120/unixodbc-dev_2.3.1-3_amd64.deb
-#  - sudo dpkg -i unixodbc-dev_2.3.1-3_amd64.deb
   - source .travis-ci/docker.sh
 install:
   - pushd $HOME/build
@@ -65,6 +63,7 @@ jobs:
             - gcc-5
             - g++-5
             - libmysqlclient-dev
+      arch: amd64
     - compiler: gcc-5
       env: GCC=gcc-5 GXX=g++-5 GCOV=gcov-5
       addons:
@@ -75,6 +74,7 @@ jobs:
             - gcc-5
             - g++-5
             - libmysqlclient-dev
+      arch: amd64
     - compiler: gcc-6
       env: GCC=gcc-6 GXX=g++-6 COVERAGE=0
       addons:
@@ -85,6 +85,7 @@ jobs:
             - gcc-6
             - g++-6
             - libmysqlclient-dev
+      arch: amd64
     - compiler: gcc-6
       env: GCC=gcc-6 GXX=g++-6 GCOV=gcov-6
       addons:
@@ -95,6 +96,7 @@ jobs:
             - gcc-6
             - g++-6
             - libmysqlclient-dev
+      arch: amd64
     - compiler: gcc-7
       env: GCC=gcc-7 GXX=g++-7 COVERAGE=0
       addons:
@@ -105,6 +107,7 @@ jobs:
             - gcc-7
             - g++-7
             - libmysqlclient-dev
+      arch: amd64
     - compiler: gcc-7
       env: GCC=gcc-7 GXX=g++-7 GCOV=gcov-7
       addons:
@@ -115,6 +118,7 @@ jobs:
             - gcc-7
             - g++-7
             - libmysqlclient-dev
+      arch: amd64
     - compiler: gcc-8
       env: GCC=gcc-8 GXX=g++-8 COVERAGE=0
       addons:
@@ -125,6 +129,7 @@ jobs:
             - gcc-8
             - g++-8
             - libmysqlclient-dev
+      arch: amd64
     - compiler: gcc-8
       env: GCC=gcc-8 GXX=g++-8 GCOV=gcov-8
       addons:
@@ -135,6 +140,7 @@ jobs:
             - gcc-8
             - g++-8
             - libmysqlclient-dev
+      arch: amd64
     - compiler: gcc-9
       env: GCC=gcc-9 GXX=g++-9 COVERAGE=0
       addons:
@@ -145,6 +151,7 @@ jobs:
             - gcc-9
             - g++-9
             - libmysqlclient-dev
+      arch: amd64
     - compiler: gcc-9
       env: GCC=gcc-9 GXX=g++-9 GCOV=gcov-9
       addons:
