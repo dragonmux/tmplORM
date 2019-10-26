@@ -56,7 +56,7 @@ $(O): CFLAGS_EXTRA += -I. $(shell pkg-config --cflags crunch++)
 	$(call run-cmd,cxx,$(CFLAGS))
 
 check: all
-	$(call run-cmd,crunch,$(subst .so,,$(TESTS)))
+	$(call run-cmd,crunch,$(subst .so,,$(TESTS) $(O)))
 
 clean:
 	$(call run-cmd,rm,tests,$(TESTS) $(GCH))
