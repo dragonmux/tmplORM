@@ -4,14 +4,13 @@
 #include "testTypes.hxx"
 
 using systemClock_t = std::chrono::system_clock;
+std::string operator ""_s(const char *str, size_t len) noexcept
+	{ return {str, len}; }
 
 namespace dateTime
 {
 	using namespace tmplORM::types::baseTypes;
 	using namespace tmplORM::types::dateTimeTypes;
-
-	std::string operator ""_s(const char *str, size_t len) noexcept
-		{ return {str, len}; }
 	const auto dateTimeStr = "2018-07-04T01:23:45.678901234Z"_s;
 
 	void testCtor(testsuit &suite)
@@ -105,6 +104,75 @@ namespace dateTime
 		suite.assertEqual(c.month(), 07);
 		suite.assertEqual(c.day(), 04);
 		suite.assertEqual(c.time().count(), 1234567890);
+	}
+}
+
+namespace date
+{
+	using namespace tmplORM::types::baseTypes;
+	using namespace tmplORM::types::dateTimeTypes;
+	const auto dateStr = "2018-07-04"_s;
+
+	void testCtor(testsuit &suite)
+	{
+		const ormDate_t a;
+		suite.assertEqual(a.year(), 0);
+		suite.assertEqual(a.month(), 0);
+		suite.assertEqual(a.day(), 0);
+
+		const ormDate_t b{2018, 07, 04};
+		suite.assertEqual(b.year(), 2018);
+		suite.assertEqual(b.month(), 07);
+		suite.assertEqual(b.day(), 04);
+	}
+
+	void testFromString(testsuit &suite)
+	{
+		const ormDate_t a{"2018-07-04"};
+		suite.assertEqual(a.year(), 2018);
+		suite.assertEqual(a.month(), 07);
+		suite.assertEqual(a.day(), 04);
+		const ormDate_t b{"2018-07-04 12:34:45.6789"};
+		suite.assertEqual(b.year(), 2018);
+		suite.assertEqual(b.month(), 07);
+		suite.assertEqual(b.day(), 04);
+	}
+
+	void testFromSystemTime(testsuit &suite)
+	{
+		using seconds = std::chrono::seconds;
+		const auto now = systemClock_t::now();
+		const ormDateTime_t a{now};
+
+		const ::time_t time = systemClock_t::to_time_t(now);
+		const tm local = *localtime(&time);
+
+		suite.assertEqual(a.year(), local.tm_year + 1900);
+		suite.assertEqual(a.month(), local.tm_mon + 1);
+		suite.assertEqual(a.day(), local.tm_mday);
+		suite.assertEqual(a.hour(), local.tm_hour);
+		suite.assertEqual(a.minute(), local.tm_min);
+		suite.assertEqual(a.second(), local.tm_sec);
+		suite.assertEqual(a.nanoSecond(), (now.time_since_epoch() - seconds{time}).count());
+	}
+
+	void testAsString(testsuit &suite)
+	{
+		const ormDate_t date{2018, 07, 04};
+		const auto asString = date.asString();
+		suite.assertEqual(asString.get(), dateStr.data(), dateStr.size());
+	}
+
+	void testWrapper(testsuit &suite)
+	{
+		const _date_t a;
+		suite.assertEqual(a.year(), 0);
+		suite.assertEqual(a.month(), 0);
+		suite.assertEqual(a.day(), 0);
+		const _date_t b{2018, 07, 04};
+		suite.assertEqual(b.year(), 2018);
+		suite.assertEqual(b.month(), 07);
+		suite.assertEqual(b.day(), 04);
 	}
 }
 

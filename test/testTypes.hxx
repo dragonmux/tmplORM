@@ -10,6 +10,14 @@ namespace dateTime
 	void testWrapper(testsuit &suite);
 }
 
+namespace date
+{
+	void testCtor(testsuit &suite);
+	void testFromString(testsuit &suite);
+	void testAsString(testsuit &suite);
+	void testWrapper(testsuit &suite);
+}
+
 namespace types
 {
 	void testDate(testsuit &suite);
