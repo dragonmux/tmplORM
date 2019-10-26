@@ -56,10 +56,10 @@ $(O): CFLAGS_EXTRA += -I. $(shell pkg-config --cflags crunch++)
 	$(call run-cmd,cxx,$(CFLAGS))
 
 check: all
-	$(call run-cmd,crunch,$(subst .so,,$(TESTS) $(O)))
+	$(call run-cmd,crunch,$(subst .so,,$(TESTS)))
 
 clean:
-	$(call run-cmd,rm,tests,$(TESTS) $(GCH))
+	$(call run-cmd,rm,tests,$(TESTS) $(GCH) $(O))
 #	$(call run-cmd,rm,makedep,.dep/*.d)
 
 .PHONY: default all check clean
