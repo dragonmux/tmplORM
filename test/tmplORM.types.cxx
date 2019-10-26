@@ -7,7 +7,7 @@ using systemClock_t = std::chrono::system_clock;
 std::string operator ""_s(const char *str, size_t len) noexcept
 	{ return {str, len}; }
 
-namespace dateTime
+namespace testDateTime
 {
 	using namespace tmplORM::types::baseTypes;
 	using namespace tmplORM::types::dateTimeTypes;
@@ -107,7 +107,7 @@ namespace dateTime
 	}
 }
 
-namespace date
+namespace testDate
 {
 	using namespace tmplORM::types::baseTypes;
 	using namespace tmplORM::types::dateTimeTypes;
@@ -176,7 +176,7 @@ namespace date
 	}
 }
 
-namespace types
+namespace testTypes
 {
 	using irqus::typestring;
 	using date_t = tmplORM::types::date_t<typestring<>>;

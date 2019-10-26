@@ -4,11 +4,11 @@
 class testDateTime_t final : public testsuit
 {
 private:
-	void testCtor() { dateTime::testCtor(*this); }
-	void testFromString() { dateTime::testFromString(*this); }
-	void testFromSystemTime() { dateTime::testFromSystemTime(*this); }
-	void testAsString() { dateTime::testAsString(*this); }
-	void testWrapper() { dateTime::testWrapper(*this); }
+	void testCtor() { testDateTime::testCtor(*this); }
+	void testFromString() { testDateTime::testFromString(*this); }
+	void testFromSystemTime() { testDateTime::testFromSystemTime(*this); }
+	void testAsString() { testDateTime::testAsString(*this); }
+	void testWrapper() { testDateTime::testWrapper(*this); }
 
 public:
 	void registerTests() final override
@@ -24,10 +24,10 @@ public:
 class testDate_t final : public testsuit
 {
 private:
-	void testCtor() { date::testCtor(*this); }
-	void testFromString() { date::testFromString(*this); }
-	void testAsString() { date::testAsString(*this); }
-	void testWrapper() { date::testWrapper(*this); }
+	void testCtor() { testDate::testCtor(*this); }
+	void testFromString() { testDate::testFromString(*this); }
+	void testAsString() { testDate::testAsString(*this); }
+	void testWrapper() { testDate::testWrapper(*this); }
 
 public:
 	void registerTests() final override
@@ -42,10 +42,10 @@ public:
 class testTypes_t final : public testsuit
 {
 private:
-	void testDate() { types::testDate(*this); }
-	void testTime() { types::testTime(*this); }
-	void testDateTime() { types::testDateTime(*this); }
-	void testUUID() { types::testUUID(*this); }
+	void testDate() { testTypes::testDate(*this); }
+	void testTime() { testTypes::testTime(*this); }
+	void testDateTime() { testTypes::testDateTime(*this); }
+	void testUUID() { testTypes::testUUID(*this); }
 
 public:
 	void registerTests() final override

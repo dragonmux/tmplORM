@@ -1,7 +1,7 @@
 #ifndef TEST_TYPES__HXX
 #define TEST_TYPES__HXX
 
-namespace dateTime
+namespace testDateTime
 {
 	void testCtor(testsuit &suite);
 	void testFromString(testsuit &suite);
@@ -10,7 +10,7 @@ namespace dateTime
 	void testWrapper(testsuit &suite);
 }
 
-namespace date
+namespace testDate
 {
 	void testCtor(testsuit &suite);
 	void testFromString(testsuit &suite);
@@ -18,7 +18,7 @@ namespace date
 	void testWrapper(testsuit &suite);
 }
 
-namespace types
+namespace testTypes
 {
 	void testDate(testsuit &suite);
 	void testTime(testsuit &suite);
