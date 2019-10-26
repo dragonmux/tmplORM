@@ -9,3 +9,5 @@ extraction:
         - export GCC="gcc -fPIC -DPIC" GXX="g++ -fPIC -DPIC"
         - make
         - make buildCheck
+queries:
+  - include: "*"
