@@ -174,6 +174,26 @@ jobs:
             - gcc-8
             - g++-8
             - libmysqlclient-dev
+    - compiler: gcc-9
+      env: GCC=gcc-9 GXX=g++-9 COVERAGE=0
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-9
+            - g++-9
+            - libmysqlclient-dev
+    - compiler: gcc-9
+      env: GCC=gcc-9 GXX=g++-9 GCOV=gcov-9
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - gcc-9
+            - g++-9
+            - libmysqlclient-dev
 
 env:
   global:
