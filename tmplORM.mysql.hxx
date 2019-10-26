@@ -341,7 +341,7 @@ namespace tmplORM
 				if (!query.execute())
 					throw mySQLValueError_t(mySQLErrorType_t::queryError);
 				// Pull the result set back
-				mySQLPreparedResult_t result = database.queryResult();
+				mySQLPreparedResult_t result = query.queryResult(sizeof...(fields_t));
 				if (!result.valid())
 					throw mySQLValueError_t(mySQLErrorType_t::queryError);
 				fixedVector_t<T> data{result.numRows()};
