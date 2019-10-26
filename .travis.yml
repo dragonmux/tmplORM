@@ -3,7 +3,7 @@ os: linux
 
 before_install:
   - export GCC="$GCC -m64 -fPIC -DPIC" GXX="$GXX -m64 -fPIC -DPIC"
-  - sudo service mysql stop
+  - sudo systemctl stop mysql || true
   - source .travis-ci/msodbcsql17.sh
   - source .travis-ci/docker.sh
 install:
