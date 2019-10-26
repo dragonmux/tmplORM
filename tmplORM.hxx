@@ -354,25 +354,25 @@ namespace tmplORM
 			{
 			private:
 				uint16_t _year;
-				uint16_t _month;
-				uint16_t _day;
+				uint8_t _month;
+				uint8_t _day;
 
 			public:
 				constexpr _date_t() noexcept : _year{0}, _month{0}, _day{0} { }
-				constexpr _date_t(const uint16_t year, const uint16_t month, const uint16_t day) noexcept :
+				constexpr _date_t(const uint16_t year, const uint8_t month, const uint8_t day) noexcept :
 					_year{year}, _month{month}, _day{day} { }
 				constexpr uint16_t year() const noexcept { return _year; }
-				constexpr uint16_t month() const noexcept { return _month; }
-				constexpr uint16_t day() const noexcept { return _day; }
+				constexpr uint8_t month() const noexcept { return _month; }
+				constexpr uint8_t day() const noexcept { return _day; }
 			};
 
 			struct _dateTime_t : public _date_t, public _time_t
 			{
 			public:
 				constexpr _dateTime_t() noexcept : _date_t{}, _time_t{} { }
-				constexpr _dateTime_t(const uint16_t year, const uint16_t month, const uint16_t day,
+				constexpr _dateTime_t(const uint16_t year, const uint8_t month, const uint8_t day,
 					const duration_t &time) noexcept : _date_t{year, month, day}, _time_t{time} { }
-				constexpr _dateTime_t(const uint16_t year, const uint16_t month, const uint16_t day) noexcept :
+				constexpr _dateTime_t(const uint16_t year, const uint8_t month, const uint8_t day) noexcept :
 					_date_t{year, month, day}, _time_t{} { }
 				constexpr _dateTime_t(const duration_t &time) noexcept : _date_t{}, _time_t{time} { }
 			};

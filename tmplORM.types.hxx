@@ -21,37 +21,37 @@ namespace tmplORM
 			{
 			protected:
 				uint16_t _year;
-				uint16_t _month;
-				uint16_t _day;
+				uint8_t _month;
+				uint8_t _day;
 
 				friend bool operator ==(const ormDate_t &a, const ormDate_t &b) noexcept;
 
 			public:
 				constexpr ormDate_t() noexcept : _year{0}, _month{0}, _day{0} { }
-				constexpr ormDate_t(const uint16_t year, const uint16_t month, const uint16_t day) noexcept :
+				constexpr ormDate_t(const uint16_t year, const uint8_t month, const uint8_t day) noexcept :
 					_year{year}, _month{month}, _day{day} { }
 
 				constexpr uint16_t year() const noexcept { return _year; }
 				void year(const uint16_t year) noexcept { _year = year; }
-				constexpr uint16_t month() const noexcept { return _month; }
-				void month(const uint16_t month) noexcept { _month = month; }
-				constexpr uint16_t day() const noexcept { return _day; }
-				void day(const uint16_t day) noexcept { _day = day; }
+				constexpr uint8_t month() const noexcept { return _month; }
+				void month(const uint8_t month) noexcept { _month = month; }
+				constexpr uint8_t day() const noexcept { return _day; }
+				void day(const uint8_t day) noexcept { _day = day; }
 
 				ormDate_t(const char *date) noexcept : ormDate_t{}
 				{
 					_year = toInt_t<uint16_t>{date, 4};
 					date += 5;
-					_month = toInt_t<uint16_t>{date, 2};
+					_month = toInt_t<uint8_t>{date, 2};
 					date += 3;
-					_day = toInt_t<uint16_t>{date, 2};
+					_day = toInt_t<uint8_t>{date, 2};
 				}
 
 				std::unique_ptr<char []> asString() const noexcept
 				{
 					fromInt_t<uint16_t, uint16_t> year{_year};
-					fromInt_t<uint16_t, uint16_t> month{_month};
-					fromInt_t<uint16_t, uint16_t> day{_day};
+					fromInt_t<uint8_t, uint8_t> month{_month};
+					fromInt_t<uint8_t, uint8_t> day{_day};
 
 					auto str = makeUnique<char []>(year.length() + month.length() + day.length());
 					if (!str)
@@ -201,8 +201,8 @@ namespace tmplORM
 				private:
 					struct timezone_t
 					{
-						int32_t offset;
-						int32_t leapCorrection;
+						::int32_t offset;
+						::int32_t leapCorrection;
 						size_t leapCount;
 					};
 
@@ -257,7 +257,7 @@ namespace tmplORM
 
 				public:
 					constexpr ormDateTime_t() noexcept : ormDate_t{}, ormTime_t{} { }
-					constexpr ormDateTime_t(const uint16_t year, const uint16_t month, const uint16_t day,
+					constexpr ormDateTime_t(const uint16_t year, const uint8_t month, const uint8_t day,
 						const uint16_t hour, const uint16_t minute, const uint16_t second, const uint32_t nanoSecond) noexcept :
 						ormDate_t{year, month, day}, ormTime_t{hour, minute, second, nanoSecond} { }
 					ormDateTime_t(const char *dateTime) noexcept : ormDate_t{dateTime}, ormTime_t{dateTime + 11} { }
@@ -289,8 +289,8 @@ namespace tmplORM
 					std::unique_ptr<char []> asString() const noexcept
 					{
 						fromInt_t<uint16_t, uint16_t> year{_year};
-						fromInt_t<uint16_t, uint16_t> month{_month};
-						fromInt_t<uint16_t, uint16_t> day{_day};
+						fromInt_t<uint8_t, uint8_t> month{_month};
+						fromInt_t<uint8_t, uint8_t> day{_day};
 						fromInt_t<uint16_t, uint16_t> hour{_hour};
 						fromInt_t<uint16_t, uint16_t> minute{_minute};
 						fromInt_t<uint16_t, uint16_t> second{_second};
