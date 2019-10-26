@@ -85,7 +85,7 @@ namespace dateTime
 	{
 		const ormDateTime_t dateTime{2018, 07, 04, 01, 23, 45, 678901234};
 		const auto asString = dateTime.asString();
-		printf("Formatted %s as %s\n", dateTimeStr.data(), asString.get());
+		suite.assertEqual(asString.get(), dateTimeStr.data(), dateTimeStr.size());
 	}
 
 	void testWrapper(testsuit &suite)
