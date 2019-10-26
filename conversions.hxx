@@ -140,6 +140,59 @@ public:
 		{ formatFraction(maxDigits, buffer); }
 };
 
+template<size_t _length, typename int_t, char padding = '0'> struct fromFixedInt_t
+{
+private:
+	static_assert(isUnsigned<int_t>::value, "fromFixedInt_t only supports unsigned for now");
+	static_assert(isIntegral<int_t>::value, "fromFixedInt_t does not support non-integer types");
+	static_assert(!isBoolean<int_t>::value, "fromFixedInt_t does not support boolean types");
+	int_t _value;
+
+	constexpr uint8_t calcDigits(const int_t number) const noexcept
+		{ return number < 10 ? 1 : 1 + calcDigits(number / 10); }
+
+	[[gnu::noinline]] int_t process(const int_t number, char *const buffer,
+		const uint8_t digits, const size_t index) const noexcept
+	{
+		if (number < 10)
+		{
+			buffer[digits - index] = number + '0';
+			buffer[digits + 1] = 0;
+		}
+		else
+		{
+			const int_t num = number - (process(number / 10, buffer, digits, index + 1) * 10);
+			buffer[digits - index] = num + '0';
+		}
+		return number;
+	}
+
+	void format(char *const buffer) const noexcept
+	{
+		const uint8_t digits = calcDigits(_value);
+		if (digits <= _length)
+		{
+			const size_t offset = _length - digits;
+			const auto _buffer = std::fill_n(buffer, offset, padding);
+			process(_value, _buffer, digits - 1, 0);
+		}
+		else
+			std::fill_n(buffer, _length, padding);
+	}
+
+public:
+	constexpr fromFixedInt_t(const int_t value) noexcept : _value(value) { }
+	uint8_t digits() const noexcept { return calcDigits(_value); }
+	constexpr uint8_t length() const noexcept { return _length + 1; }
+	void formatTo(char *const buffer) const noexcept { format(buffer); }
+	void formatTo(const std::unique_ptr<char []> &buffer) const noexcept { format(buffer.get()); }
+};
+
+template<size_t length, typename int_t> constexpr fromFixedInt_t<length, int_t>
+	fromInt(const int_t number) noexcept { return {number}; }
+template<size_t length, char padding, typename int_t> constexpr fromFixedInt_t<length, int_t, padding>
+	fromInt(const int_t number) noexcept { return {number}; }
+
 template<typename int_t> struct toInt_t
 {
 private:
