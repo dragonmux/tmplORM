@@ -18,6 +18,14 @@ namespace testDate
 	void testWrapper(testsuit &suite);
 }
 
+namespace testTime
+{
+	void testCtor(testsuit &suite);
+	void testFromString(testsuit &suite);
+	void testAsString(testsuit &suite);
+	void testWrapper(testsuit &suite);
+}
+
 namespace testTypes
 {
 	void testDate(testsuit &suite);

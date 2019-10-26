@@ -39,6 +39,24 @@ public:
 	}
 };
 
+class testTime_t final : public testsuit
+{
+private:
+	void testCtor() { testTime::testCtor(*this); }
+	void testFromString() { testTime::testFromString(*this); }
+	void testAsString() { testTime::testAsString(*this); }
+	void testWrapper() { testTime::testWrapper(*this); }
+
+public:
+	void registerTests() final override
+	{
+		CXX_TEST(testCtor)
+		CXX_TEST(testFromString)
+		CXX_TEST(testAsString)
+		CXX_TEST(testWrapper)
+	}
+};
+
 class testTypes_t final : public testsuit
 {
 private:
@@ -60,5 +78,5 @@ public:
 CRUNCH_API void registerCXXTests() noexcept;
 void registerCXXTests() noexcept
 {
-	registerTestClasses<testDateTime_t, testDate_t, testTypes_t>();
+	registerTestClasses<testDateTime_t, testDate_t, testTime_t, testTypes_t>();
 }

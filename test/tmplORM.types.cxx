@@ -176,6 +176,62 @@ namespace testDate
 	}
 }
 
+namespace testTime
+{
+	using namespace tmplORM::types::baseTypes;
+	using namespace tmplORM::types::dateTimeTypes;
+	const auto timeStr = "01:23:45.678901234Z"_s;
+
+	void testCtor(testsuit &suite)
+	{
+		const ormTime_t a;
+		suite.assertEqual(a.hour(), 0);
+		suite.assertEqual(a.minute(), 0);
+		suite.assertEqual(a.second(), 0);
+		suite.assertEqual(a.nanoSecond(), 0);
+
+		const ormTime_t b{12, 34, 45, 678901234};
+		suite.assertEqual(b.hour(), 12);
+		suite.assertEqual(b.minute(), 34);
+		suite.assertEqual(b.second(), 45);
+		suite.assertEqual(b.nanoSecond(), 678901234);
+	}
+
+	void testFromString(testsuit &suite)
+	{
+		const ormTime_t a{"12:34:45.678901234"};
+		suite.assertEqual(a.hour(), 12);
+		suite.assertEqual(a.minute(), 34);
+		suite.assertEqual(a.second(), 45);
+		suite.assertEqual(a.nanoSecond(), 678901234);
+		const ormTime_t b{"12:34:45.6789"};
+		suite.assertEqual(b.hour(), 12);
+		suite.assertEqual(b.minute(), 34);
+		suite.assertEqual(b.second(), 45);
+		suite.assertEqual(b.nanoSecond(), 678900000);
+		const ormTime_t c{"12:34:45.6789012345678"};
+		suite.assertEqual(c.hour(), 12);
+		suite.assertEqual(c.minute(), 34);
+		suite.assertEqual(c.second(), 45);
+		suite.assertEqual(c.nanoSecond(), 678901234);
+	}
+
+	void testAsString(testsuit &suite)
+	{
+		const ormTime_t time{01, 23, 45, 678901234};
+		const auto asString = time.asString();
+		suite.assertEqual(asString.get(), timeStr.data(), timeStr.size());
+	}
+
+	void testWrapper(testsuit &suite)
+	{
+		const _time_t a;
+		suite.assertEqual(a.time().count(), 0);
+		const _time_t c{nanoseconds{1234567890}};
+		suite.assertEqual(c.time().count(), 1234567890);
+	}
+}
+
 namespace testTypes
 {
 	using irqus::typestring;
