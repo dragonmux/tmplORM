@@ -3,7 +3,7 @@
  * @description Using reinterpret_cast<>() is, except in rare circumstance, UB-invoking
  *    Please do not use reinterpret_cast<>()
  * @kind problem
- * @problem.severity error
+ * @problem.severity warning
  * @precision medium
  * @id cpp/reinterpret-cast
  * @tags reliability
