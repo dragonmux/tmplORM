@@ -333,13 +333,13 @@ bool tSQLResult_t::error(const int16_t err) const noexcept
 	{ return !client || client->error(err, SQL_HANDLE_STMT, queryHandle); }
 
 tSQLValue_t::tSQLValue_t(const void *const _data, const uint64_t _length, const int16_t _type) noexcept :
-	data{static_cast<const char *const>(_data)}, length{_length}, type{_type}
+	data{static_cast<const char *>(_data)}, length{_length}, type{_type}
 {
 	if (isWCharType(type))
 	{
 		using mutStringPtr_t = std::unique_ptr<char []>;
-		mutStringPtr_t newData = utf16::convert(static_cast<const char16_t *const>(_data));
-		data.reset(const_cast<const char *const>(newData.release()));
+		mutStringPtr_t newData = utf16::convert(static_cast<const char16_t *>(_data));
+		data.reset(const_cast<const char *>(newData.release()));
 	}
 }
 
@@ -351,7 +351,7 @@ void tSQLValue_t::operator =(tSQLValue_t &&value) noexcept
 }
 
 template<typename T> const T &reinterpret(const stringPtr_t &data) noexcept
-	{ return *reinterpret_cast<const T *const>(data.get()); }
+	{ return *reinterpret_cast<const T *>(data.get()); }
 
 std::unique_ptr<char []> tSQLValue_t::asString(const bool release) const
 {
