@@ -128,9 +128,9 @@ namespace tmplORM
 
 				std::unique_ptr<char []> asString() const noexcept
 				{
-					fromInt_t<uint16_t, uint16_t> hour{_hour};
-					fromInt_t<uint16_t, uint16_t> minute{_minute};
-					fromInt_t<uint16_t, uint16_t> second{_second};
+					const auto hour = fromInt<2>(_hour);
+					const auto minute = fromInt<2>(_minute);
+					const auto second = fromInt<2>(_second);
 					fromInt_t<uint32_t, uint32_t> nanoSecond{_nanoSecond};
 
 					auto str = makeUnique<char []>(hour.length() + minute.length() +
