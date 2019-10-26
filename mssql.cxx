@@ -404,7 +404,7 @@ ormDate_t tSQLValue_t::asDate() const
 	if (isNull() || type != SQL_TYPE_DATE || length < sizeof(SQL_TYPE_DATE))
 		throw tSQLValueError_t(tSQLErrorType_t::dateError);
 	auto date = reinterpret<SQL_DATE_STRUCT>(data);
-	return {uint16_t(date.year), date.month, date.day};
+	return {uint16_t(date.year), uint8_t(date.month), uint8_t(date.day)};
 }
 
 // TODO: ormTime_t tSQLValue_t::asTime() const => SQL_TYPE_TIME, SQL_TIME_STRUCT
@@ -414,8 +414,8 @@ ormDateTime_t tSQLValue_t::asDateTime() const
 	if (isNull() || type != SQL_TYPE_TIMESTAMP || length < sizeof(SQL_TYPE_TIMESTAMP))
 		throw tSQLValueError_t(tSQLErrorType_t::dateTimeError);
 	auto dateTime = reinterpret<SQL_TIMESTAMP_STRUCT>(data);
-	return {uint16_t(dateTime.year), dateTime.month, dateTime.day, dateTime.hour,
-		dateTime.minute, dateTime.second, dateTime.fraction};
+	return {uint16_t(dateTime.year), uint8_t(dateTime.month), uint8_t(dateTime.day),
+		dateTime.hour, 	dateTime.minute, dateTime.second, dateTime.fraction};
 }
 
 ormUUID_t tSQLValue_t::asUUID() const
