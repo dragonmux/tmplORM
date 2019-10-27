@@ -5,12 +5,14 @@ project(
 		'cpp_std=c++11',
 		'warning_level=3',
 	],
-	version: '0.2.0'
+	version: '0.2.0',
+	meson_version: '>= 0.52'
 )
 
 cxx = meson.get_compiler('cpp')
 pkgconfig = import('pkgconfig')
 isWindows = target_machine.system() == 'windows'
+coverage = get_option('b_coverage')
 
 threading = dependency('threads')
 dl = cxx.find_library('dl', required: not isWindows)
@@ -40,6 +42,7 @@ endif
 tmplORMSrc = [
 	'string.cxx', 'mysql.cxx', 'mssql.cxx', 'tmplORM.types.cxx'
 ]
+tmplORMSrcDir = meson.current_source_dir()
 
 tmplORM = shared_library(
 	'tmplORM',
@@ -79,4 +82,5 @@ foreach header : ['json.hxx', 'fromJSON.hxx', 'toJSON.hxx', 'helpers.hxx']
 	install_headers(join_paths('serializer', header), subdir: 'tmplORM/serializer')
 endforeach
 
-#subdir('test')
+crunchMake = find_program('crunchMake', required: false)
+subdir('test', if_found: crunchMake)
