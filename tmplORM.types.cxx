@@ -183,17 +183,17 @@ fd_t tzOpenFile(const char *const file) noexcept
 
 bool readTransitions(const fd_t &fd, const size_t width) noexcept
 {
-	if (!fd.read(transitions.get(), transitionsCount * width) ||
+	const auto buffer = makeUnique<uint8_t []>(transitionsCount * width);
+	if (!fd.read(buffer.get(), transitionsCount * width) ||
 		!fd.read(typeIndexes, transitionsCount))
 		return false;
 
-	const uint8_t *const buffer = reinterpret_cast<uint8_t *>(transitions.get());
 	if (sizeof(time_t) == 8)
 	{
 		for (size_t i{transitionsCount}; i > 0; )
 		{
 			const size_t index = --i;
-			transitions[index] = asInt64(buffer + (i * width), width);
+			transitions[index] = asInt64(buffer.get() + (i * width), width);
 			if (typeIndexes[i] >= typesCount)
 				return false;
 		}
@@ -203,7 +203,7 @@ bool readTransitions(const fd_t &fd, const size_t width) noexcept
 		for (size_t i{transitionsCount}; i > 0; )
 		{
 			size_t index = --i;
-			transitions[index] = asInt32(buffer + (i * width));
+			transitions[index] = asInt32(buffer.get() + (i * width));
 			if (typeIndexes[i] >= typesCount)
 				return false;
 		}
