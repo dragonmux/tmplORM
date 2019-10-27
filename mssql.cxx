@@ -20,9 +20,6 @@
 
 using namespace tmplORM::mssql::driver;
 
-template<typename T> void swap(const T &a, const T &b) noexcept(noexcept(std::swap(const_cast<T &>(a), const_cast<T &>(b))))
-	{ std::swap(const_cast<T &>(a), const_cast<T &>(b)); }
-
 inline tSQLExecErrorType_t translateError(const SQLRETURN result) noexcept
 {
 	if (result == SQL_NEED_DATA)
@@ -260,8 +257,8 @@ void tSQLResult_t::operator =(tSQLResult_t &&res) noexcept
 {
 	std::swap(client, res.client);
 	std::swap(queryHandle, res.queryHandle);
-	swap(_hasData, res._hasData);
-	swap(_freeHandle, res._freeHandle);
+	std::swap(_hasData, res._hasData);
+	std::swap(_freeHandle, res._freeHandle);
 	std::swap(fields, res.fields);
 	std::swap(fieldInfo, res.fieldInfo);
 	valueCache.swap(res.valueCache);
@@ -346,8 +343,8 @@ tSQLValue_t::tSQLValue_t(const void *const _data, const uint64_t _length, const 
 void tSQLValue_t::operator =(tSQLValue_t &&value) noexcept
 {
 	std::swap(data, value.data);
-	swap(length, value.length);
-	swap(type, value.type);
+	std::swap(length, value.length);
+	std::swap(type, value.type);
 }
 
 template<typename T> const T &reinterpret(const stringPtr_t &data) noexcept
@@ -446,7 +443,7 @@ tSQLExecError_t::tSQLExecError_t(const tSQLExecErrorType_t error, const int16_t 
 
 void tSQLExecError_t::operator =(tSQLExecError_t &&err) noexcept
 {
-	swap(_error, err._error);
+	std::swap(_error, err._error);
 	std::swap(_state, err._state);
 	std::swap(_message, err._message);
 }

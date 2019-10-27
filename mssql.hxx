@@ -41,7 +41,7 @@ struct tmplORM_API tSQLExecError_t final
 {
 private:
 	using sqlState_t = std::array<char, 6>;
-	const tSQLExecErrorType_t _error;
+	tSQLExecErrorType_t _error;
 	sqlState_t _state;
 	std::unique_ptr<char []> _message;
 
@@ -70,8 +70,8 @@ struct tmplORM_API tSQLValue_t final
 {
 private:
 	mutable stringPtr_t data;
-	const uint64_t length;
-	const int16_t type;
+	uint64_t length;
+	int16_t type;
 
 public:
 	/*! @brief Default constructor for value objects, constructing the null value by default */
@@ -145,7 +145,7 @@ private:
 	using fieldType_t = std::pair<int16_t, uint32_t>;
 	const tSQLClient_t *client;
 	void *queryHandle;
-	const bool _hasData, _freeHandle;
+	bool _hasData, _freeHandle;
 	uint16_t fields;
 	std::unique_ptr<fieldType_t []> fieldInfo;
 	mutable fixedVector_t<tSQLValue_t> valueCache;
