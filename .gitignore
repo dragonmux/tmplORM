@@ -5,3 +5,6 @@
 *.o
 *.so*
 *.pc
+
+buildCheck
+build
