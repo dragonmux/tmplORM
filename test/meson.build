@@ -45,11 +45,11 @@ foreach test : tmplORMTests
 		output: test + '.so',
 		build_by_default: true
 	)
-endforeach
 
-test(
-	'tmplORM',
-	crunchpp,
-	args: tmplORMTests,
-	workdir: meson.current_build_dir()
-)
+	test(
+		test,
+		crunchpp,
+		args: [test],
+		workdir: meson.current_build_dir()
+	)
+endforeach
