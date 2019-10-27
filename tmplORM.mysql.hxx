@@ -119,7 +119,8 @@ namespace tmplORM
 
 				bool operator ()(MYSQL_BIND &param, const ormUUID_t &_value, managedPtr_t<void> &paramStorage) noexcept
 				{
-					const uint8_t *const value = _value.asBuffer();
+					std::array<uint8_t, sizeof(guid_t)> value{};
+					memcpy(value.data(), _value.asPointer(), value.size());
 					std::array<char, 32> uuid;
 					for (uint8_t i = 0; i < uuid.size(); ++i)
 					{

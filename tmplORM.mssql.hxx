@@ -125,7 +125,7 @@ namespace tmplORM
 				void *operator ()(const ormUUID_t &value, managedPtr_t<void> &paramStorage) const noexcept
 				{
 					SQLGUID guid{};
-					memcpy(&guid, value.asBuffer(), sizeof(SQLGUID));
+					memcpy(&guid, value.asPointer(), sizeof(guid_t));
 					swapBytes(guid.Data1);
 					swapBytes(guid.Data2);
 					swapBytes(guid.Data3);

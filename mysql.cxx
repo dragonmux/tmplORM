@@ -630,7 +630,7 @@ ormDateTime_t mySQLValue_t::asDateTime() const
 valueOrError_t<ormUUID_t, mySQLValueError_t> checkedConvertUUID(const char *const uuid) noexcept
 {
 	ormUUID_t result{};
-	uint8_t *const buffer = result.asBuffer();
+	std::array<uint8_t, sizeof(guid_t)> buffer{};
 	for (uint8_t i{0}; i < 16; ++i)
 	{
 		toInt_t<uint8_t> value{uuid + (i << 1U), 2};
@@ -639,6 +639,7 @@ valueOrError_t<ormUUID_t, mySQLValueError_t> checkedConvertUUID(const char *cons
 		else
 			return mySQLValueError_t{mySQLErrorType_t::uuidError};
 	}
+	memcpy(result.asPointer(), buffer.data(), buffer.size());
 	return result;
 }
 
