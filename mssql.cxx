@@ -78,7 +78,7 @@ tSQLClient_t::tSQLClient_t() noexcept : dbHandle(nullptr), connection(nullptr), 
 {
 	if (SQLAllocHandle(SQL_HANDLE_ENV, nullptr, &dbHandle) != SQL_SUCCESS || !dbHandle)
 		error(tSQLExecErrorType_t::connect, SQL_HANDLE_ENV, dbHandle);
-	else if (error(SQLSetEnvAttr(dbHandle, SQL_ATTR_ODBC_VERSION, reinterpret_cast<void *>(long(SQL_OV_ODBC3)), 0), SQL_HANDLE_ENV, dbHandle))
+	else if (error(SQLSetEnvAttr(dbHandle, SQL_ATTR_ODBC_VERSION, reinterpret_cast<void *>(SQL_OV_ODBC3), 0), SQL_HANDLE_ENV, dbHandle)) // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm [cpp/reinterpret-cast]
 		return;
 	else if (SQLAllocHandle(SQL_HANDLE_DBC, dbHandle, &connection) != SQL_SUCCESS || !connection)
 		error(tSQLExecErrorType_t::connect, SQL_HANDLE_DBC, connection);
@@ -151,7 +151,7 @@ tSQLResult_t tSQLClient_t::query(const char *const queryStmt) const noexcept
 bool tSQLClient_t::beginTransact() const noexcept
 {
 	if (needsCommit || !valid() || error(SQLSetConnectAttr(connection, SQL_ATTR_AUTOCOMMIT,
-		reinterpret_cast<void *>(long(SQL_AUTOCOMMIT_OFF)), 0), SQL_HANDLE_DBC, connection))
+		reinterpret_cast<void *>(SQL_AUTOCOMMIT_OFF), 0), SQL_HANDLE_DBC, connection)) // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm [cpp/reinterpret-cast]
 		return false;
 	return needsCommit = true;
 }
@@ -162,7 +162,7 @@ bool tSQLClient_t::endTransact(const bool commitSuccess) const noexcept
 	{
 		needsCommit = error(SQLEndTran(SQL_HANDLE_DBC, connection, commitSuccess ? SQL_COMMIT : SQL_ROLLBACK),
 			SQL_HANDLE_DBC, connection) || error(SQLSetConnectAttr(connection, SQL_ATTR_AUTOCOMMIT,
-			reinterpret_cast<void *>(long(SQL_AUTOCOMMIT_ON)), 0), SQL_HANDLE_DBC, connection);
+			reinterpret_cast<void *>(SQL_AUTOCOMMIT_ON), 0), SQL_HANDLE_DBC, connection); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm [cpp/reinterpret-cast]
 	}
 	return !needsCommit;
 }
