@@ -358,7 +358,7 @@ std::unique_ptr<const char []> tSQLValue_t::asString(const bool release) const
 {
 	if (isNull() || (!isCharType(type) && !isWCharType(type)))
 		throw tSQLValueError_t(tSQLErrorType_t::stringError);
-	return release ? std::move(data) : stringDup(data.get());
+	return release ? std::move(data) : stringDup(data);
 }
 
 template<int16_t rawType, int16_t, tSQLErrorType_t error, typename T> T asInt(const tSQLValue_t &val, const stringPtr_t &data, const int16_t type)

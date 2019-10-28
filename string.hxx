@@ -18,9 +18,9 @@
 tmplORM_FNAPI std::unique_ptr<const char []> formatString(const char *format, ...) noexcept tmplORM_STRING_FORMAT_ARGS(1, 2);
 tmplORM_FNAPI std::unique_ptr<const char []> vaFormatString(const char *format, va_list args) noexcept;
 tmplORM_FNAPI std::unique_ptr<char []> stringDup(const char *const str) noexcept;
-tmplORM_FNAPI std::unique_ptr<const char []> strNewDup(const char *const str) noexcept;
-
 inline std::unique_ptr<char []> stringDup(const std::unique_ptr<char []> &str) noexcept { return stringDup(str.get()); }
+inline std::unique_ptr<char []> stringDup(const std::unique_ptr<const char []> &str) noexcept { return stringDup(str.get()); }
+inline std::unique_ptr<const char []> strNewDup(const char *const str) noexcept { return stringDup(str); }
 
 struct utf16_t final
 {

@@ -44,9 +44,6 @@ std::unique_ptr<char []> stringDup(const char *const str) noexcept
 	return ret;
 }
 
-std::unique_ptr<const char []> strNewDup(const char *const str) noexcept
-	{ return std::unique_ptr<const char []>(stringDup(str).release()); }
-
 inline bool isMultiValid() noexcept { return true; }
 template<typename... values_t> inline bool isMultiValid(const uint8_t c, values_t ...values) noexcept
 	{ return (c & 0xC0U) == 0x80U && isMultiValid(values...); }
