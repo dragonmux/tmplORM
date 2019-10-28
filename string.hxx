@@ -39,8 +39,8 @@ public:
 	operator std::unique_ptr<char16_t []>() noexcept { return std::move(str); }
 	operator const char16_t *() const noexcept { return str.get(); }
 	operator char16_t *() const noexcept { return str.get(); }
-	operator const uint16_t *() const noexcept { return reinterpret_cast<uint16_t *>(str.get()); } // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm [cpp/cpp/reinterpret-cast]
-	operator uint16_t *() const noexcept { return reinterpret_cast<uint16_t *>(str.get()); } // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm [cpp/cpp/reinterpret-cast]
+	operator const uint16_t *() const noexcept { return reinterpret_cast<uint16_t *>(str.get()); } // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm [cpp/reinterpret-cast]
+	operator uint16_t *() const noexcept { return reinterpret_cast<uint16_t *>(str.get()); } // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm [cpp/reinterpret-cast]
 	operator void *() const noexcept { return static_cast<void *>(str.get()); }
 	explicit operator bool() const noexcept { return bool(str); }
 
@@ -65,8 +65,8 @@ public:
 	operator std::unique_ptr<char []>() noexcept { return std::move(str); }
 	operator const char *() const noexcept { return str.get(); }
 	operator char *() const noexcept { return str.get(); }
-	operator const uint8_t *() const noexcept { return reinterpret_cast<uint8_t *>(str.get()); } // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm [cpp/cpp/reinterpret-cast]
-	operator uint8_t *() const noexcept { return reinterpret_cast<uint8_t *>(str.get()); } // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm [cpp/cpp/reinterpret-cast]
+	operator const uint8_t *() const noexcept { return reinterpret_cast<uint8_t *>(str.get()); } // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm [cpp/reinterpret-cast]
+	operator uint8_t *() const noexcept { return reinterpret_cast<uint8_t *>(str.get()); } // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm [cpp/reinterpret-cast]
 	explicit operator bool() const noexcept { return bool(str); }
 
 	utf8_t(const utf8_t &) = delete;
