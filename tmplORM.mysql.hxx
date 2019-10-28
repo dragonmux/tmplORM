@@ -121,15 +121,15 @@ namespace tmplORM
 				{
 					std::array<uint8_t, sizeof(guid_t)> value{};
 					memcpy(value.data(), _value.asPointer(), value.size());
-					std::array<char, 32> uuid;
+					std::array<char, 32> uuid{};
 					for (uint8_t i = 0; i < uuid.size(); ++i)
 					{
 						// Computes a shift of 4 for the first nibble, and 0 for the second
-						const uint8_t shift = 4 >> ((i & 1) << 2);
+						const uint8_t shift = 4U >> ((i & 1U) << 2U);
 						// This then extracts the correct nibble of the current byte to convert. It acomplishes
 						// this by performing a shift to get the correct nibble into the bottom nibble of the byte
 						// and then masking off that nibble
-						char hex = (value[i >> 1] >> shift) & 0x0F;
+						char hex = uint8_t(value[i >> 1U] >> shift) & 0x0FU;
 						if (hex > 9)
 							hex += 0x07;
 						uuid[i] = hex + 0x30;
