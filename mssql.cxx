@@ -223,10 +223,12 @@ bool tSQLQuery_t::error(const int16_t err) const noexcept
 tSQLResult_t::tSQLResult_t(const tSQLClient_t *const _client, void *handle, const bool hasData, const bool freeHandle) noexcept :
 	client{_client}, queryHandle{handle}, _hasData{hasData}, _freeHandle{freeHandle}, fields{0}, fieldInfo{}, valueCache{}
 {
-	if (error(SQLNumResultCols(queryHandle, reinterpret_cast<int16_t *>(&fields))) || (fields & 0x8000))
-		fields = 0;
-	else if (fields)
+	int16_t _fields;
+	if (error(SQLNumResultCols(queryHandle, &_fields)) || (uint16_t(_fields) & 0x8000U))
+		return;
+	else if (_fields)
 	{
+		fields = uint16_t(_fields);
 		fieldInfo = makeUnique<fieldType_t []>(fields);
 		valueCache = fixedVector_t<tSQLValue_t>{fields};
 		if (!fieldInfo || !valueCache.valid())
