@@ -271,6 +271,8 @@ namespace tmplORM
 		public:
 			session_t() noexcept = default;
 			~session_t() noexcept = default;
+			session_t(session_t &&) noexcept = default;
+			session_t &operator =(session_t &&) noexcept = default;
 
 			template<typename tableName, typename... fields> bool createTable(const model_t<tableName, fields...> &)
 			{
@@ -374,6 +376,9 @@ namespace tmplORM
 			void disconnect() noexcept { database.disconnect(); }
 			bool selectDB(const char *const db) const noexcept { return database.selectDB(db); }
 			const tSQLExecError_t &error() const noexcept { return database.error(); }
+
+			session_t(const session_t &) = delete;
+			session_t &operator =(const session_t &) = delete;
 		};
 	}
 	using mssql_t = mssql::session_t;

@@ -299,6 +299,8 @@ namespace tmplORM
 		public:
 			session_t() noexcept = default;
 			~session_t() noexcept = default;
+			session_t(session_t &&) noexcept = default;
+			session_t &operator =(session_t &&) noexcept = default;
 
 			template<typename tableName, typename... fields> bool createTable(const model_t<tableName, fields...> &)
 			{
@@ -425,6 +427,9 @@ namespace tmplORM
 			bool selectDB(const char *const db) const noexcept { return database.selectDB(db); }
 			const char *error() const noexcept { return database.error(); }
 			uint32_t errorNum() const noexcept { return database.errorNum(); }
+
+			session_t(const session_t &) = delete;
+			session_t &operator =(const session_t &) = delete;
 		};
 	}
 	using mysql_t = mysql::session_t;
