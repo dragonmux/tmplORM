@@ -55,6 +55,18 @@
 		"deque": "cpp",
 		"numeric": "cpp",
 		"cinttypes": "cpp",
-		"cerrno": "cpp"
+		"cerrno": "cpp",
+		"hash_map": "cpp",
+		"list": "cpp",
+		"algorithm": "cpp",
+		"iterator": "cpp",
+		"map": "cpp",
+		"memory": "cpp",
+		"memory_resource": "cpp",
+		"optional": "cpp",
+		"random": "cpp",
+		"regex": "cpp",
+		"string": "cpp",
+		"string_view": "cpp"
 	}
 }
