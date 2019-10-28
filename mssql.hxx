@@ -82,7 +82,7 @@ public:
 	void operator =(tSQLValue_t &&value) noexcept;
 
 	bool isNull() const noexcept { return !data; }
-	std::unique_ptr<char []> asString(const bool release = true) const;
+	std::unique_ptr<const char []> asString(const bool release = true) const;
 	/*! @brief Converter for arbitrary binary buffers */
 	const void *asBuffer(size_t &bufferLength, const bool release = false) const;
 	bool asBool() const;
@@ -101,7 +101,7 @@ public:
 	ormUUID_t asUUID() const;
 
 	/*! @brief Auto-converter for strings */
-	operator std::unique_ptr<char []>() const { return asString(); }
+	operator std::unique_ptr<const char []>() const { return asString(); }
 	/*! @brief Auto-converter to raw buffer */
 	//operator const char *() const noexcept { return data.get(); }
 	/*! @brief Auto-converter for booleans */

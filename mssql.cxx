@@ -347,14 +347,18 @@ void tSQLValue_t::operator =(tSQLValue_t &&value) noexcept
 	std::swap(type, value.type);
 }
 
-template<typename T> const T &reinterpret(const stringPtr_t &data) noexcept
-	{ return *reinterpret_cast<const T *>(data.get()); }
+template<typename T> T reinterpret(const stringPtr_t &data) noexcept
+{
+	T value{};
+	memcpy(&value, data.get(), sizeof(T));
+	return value;
+}
 
-std::unique_ptr<char []> tSQLValue_t::asString(const bool release) const
+std::unique_ptr<const char []> tSQLValue_t::asString(const bool release) const
 {
 	if (isNull() || (!isCharType(type) && !isWCharType(type)))
 		throw tSQLValueError_t(tSQLErrorType_t::stringError);
-	return release ? std::unique_ptr<char []>{const_cast<char *>(data.release())} : stringDup(data.get());
+	return release ? std::move(data) : stringDup(data.get());
 }
 
 template<int16_t rawType, int16_t, tSQLErrorType_t error, typename T> T asInt(const tSQLValue_t &val, const stringPtr_t &data, const int16_t type)
@@ -400,7 +404,7 @@ ormDate_t tSQLValue_t::asDate() const
 {
 	if (isNull() || type != SQL_TYPE_DATE || length < sizeof(SQL_TYPE_DATE))
 		throw tSQLValueError_t(tSQLErrorType_t::dateError);
-	auto date = reinterpret<SQL_DATE_STRUCT>(data);
+	const auto date = reinterpret<SQL_DATE_STRUCT>(data);
 	return {uint16_t(date.year), uint8_t(date.month), uint8_t(date.day)};
 }
 
@@ -410,7 +414,7 @@ ormDateTime_t tSQLValue_t::asDateTime() const
 {
 	if (isNull() || type != SQL_TYPE_TIMESTAMP || length < sizeof(SQL_TYPE_TIMESTAMP))
 		throw tSQLValueError_t(tSQLErrorType_t::dateTimeError);
-	auto dateTime = reinterpret<SQL_TIMESTAMP_STRUCT>(data);
+	const auto dateTime = reinterpret<SQL_TIMESTAMP_STRUCT>(data);
 	return {uint16_t(dateTime.year), uint8_t(dateTime.month), uint8_t(dateTime.day),
 		dateTime.hour, 	dateTime.minute, dateTime.second, dateTime.fraction};
 }
@@ -419,8 +423,7 @@ ormUUID_t tSQLValue_t::asUUID() const
 {
 	if (isNull() || type != SQL_GUID)
 		throw tSQLValueError_t(tSQLErrorType_t::uuidError);
-	auto guid = reinterpret<guid_t>(data);
-	return {guid, true};
+	return {reinterpret<guid_t>(data), true};
 }
 
 tSQLExecError_t::tSQLExecError_t(const tSQLExecErrorType_t error, const int16_t handleType, void *const handle) noexcept : _error(error), _state{{}}, _message()
