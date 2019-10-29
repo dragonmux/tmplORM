@@ -280,7 +280,11 @@ private:
 public:
 	tSQLValueError_t() noexcept : errorType{tSQLErrorType_t::noError} { }
 	tSQLValueError_t(const tSQLErrorType_t type) noexcept : errorType{type} { }
+	tSQLValueError_t(const tSQLValueError_t &) noexcept = default;
+	tSQLValueError_t(tSQLValueError_t &&) noexcept = default;
 	~tSQLValueError_t() noexcept = default;
+	tSQLValueError_t &operator =(const tSQLValueError_t &) noexcept = default;
+	tSQLValueError_t &operator =(tSQLValueError_t &&) noexcept = default;
 	const char *error() const noexcept;
 	const char *what() const noexcept { return error(); }
 

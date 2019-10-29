@@ -321,8 +321,12 @@ private:
 
 public:
 	mySQLValueError_t() noexcept : errorType{mySQLErrorType_t::noError} { }
-	mySQLValueError_t(mySQLErrorType_t type) noexcept : errorType{type} { }
+	mySQLValueError_t(const mySQLErrorType_t type) noexcept : errorType{type} { }
+	mySQLValueError_t(const mySQLValueError_t &) noexcept = default;
+	mySQLValueError_t(mySQLValueError_t &&) noexcept = default;
 	~mySQLValueError_t() noexcept = default;
+	mySQLValueError_t &operator =(const mySQLValueError_t &) noexcept = default;
+	mySQLValueError_t &operator =(mySQLValueError_t &&) noexcept = default;
 	const char *error() const noexcept;
 	const char *what() const noexcept { return error(); }
 
