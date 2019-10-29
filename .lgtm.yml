@@ -11,3 +11,5 @@ extraction:
         - make buildCheck
 queries:
   - include: "*"
+  - exclude: cpp/loop-variable-changed
+  - exclude: cpp/commented-out-code
