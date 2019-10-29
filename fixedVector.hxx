@@ -9,10 +9,10 @@ template<typename T> struct boundedIterator_t final
 private:
 	T *const data;
 	size_t index;
-	size_t max;
+	const size_t max;
 
 	constexpr boundedIterator_t(T *const ptr, const size_t _index, const size_t _max) noexcept :
-		data(ptr), index(_index), max(_max) { }
+		data{ptr}, index{_index}, max{_max} { }
 
 public:
 	using value_type = T;
@@ -20,12 +20,12 @@ public:
 	using reference = T &;
 
 	constexpr boundedIterator_t(T *const ptr, const size_t _max) noexcept :
-		data(ptr), index(0), max(_max) { }
+		data{ptr}, index{0}, max{_max} { }
 	boundedIterator_t(const boundedIterator_t &) noexcept = default;
-	boundedIterator_t(boundedIterator_t &&) = default;
+	boundedIterator_t(boundedIterator_t &&) noexcept = default;
 	~boundedIterator_t() noexcept = default;
 	boundedIterator_t &operator =(const boundedIterator_t &) noexcept = default;
-	boundedIterator_t &operator =(boundedIterator_t &&) = default;
+	boundedIterator_t &operator =(boundedIterator_t &&) noexcept = default;
 
 	reference operator *() const noexcept { return data[index]; }
 	pointer operator ->() const noexcept { return data + index; }
