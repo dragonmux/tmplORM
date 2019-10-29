@@ -41,11 +41,12 @@ namespace managedPtr
 		using pointer = T *;
 		using reference = T &;
 
-		constexpr managedPtr_t() noexcept : ptr(nullptr), deleteFunc(nullptr) { }
-		managedPtr_t(T *p) noexcept : ptr(p), deleteFunc(del<T>) { }
-		managedPtr_t(managedPtr_t &&p) noexcept : managedPtr_t() { swap(p); }
-		template<typename U, typename = typename std::enable_if<!std::is_same<T, U>::value && std::is_base_of<T, U>::value>::type>
-			managedPtr_t(managedPtr_t<U> &&p) noexcept : managedPtr_t() { swap(p); }
+		constexpr managedPtr_t() noexcept : ptr{nullptr}, deleteFunc{nullptr} { }
+		managedPtr_t(T *p) noexcept : ptr{p}, deleteFunc{del<T>} { }
+		managedPtr_t(managedPtr_t &&p) noexcept : managedPtr_t{} { swap(p); }
+		template<typename U, typename = typename std::enable_if<!std::is_same<T, U>::value &&
+				std::is_base_of<T, U>::value>::type>
+			managedPtr_t(managedPtr_t<U> &&p) noexcept : managedPtr_t{} { swap(p); }
 		~managedPtr_t() noexcept { if (deleteFunc) deleteFunc(ptr); }
 		managedPtr_t &operator =(managedPtr_t &&p) noexcept { swap(p); return *this; }
 
@@ -86,10 +87,10 @@ namespace managedPtr
 		delete_t deleteFunc;
 
 	public:
-		constexpr managedPtr_t() noexcept : ptr(nullptr), deleteFunc(nullptr) { }
-		managedPtr_t(managedPtr_t &&p) noexcept : managedPtr_t() { swap(p); }
+		constexpr managedPtr_t() noexcept : ptr{nullptr}, deleteFunc{nullptr} { }
+		managedPtr_t(managedPtr_t &&p) noexcept : managedPtr_t{} { swap(p); }
 		template<typename T, typename = typename std::enable_if<!std::is_same<T, void>::value>::type>
-			managedPtr_t(managedPtr_t<T> &&p) noexcept : managedPtr_t() { swap(p); }
+			managedPtr_t(managedPtr_t<T> &&p) noexcept : managedPtr_t{} { swap(p); }
 		~managedPtr_t() noexcept { if (deleteFunc) deleteFunc(ptr); }
 		managedPtr_t &operator =(managedPtr_t &&p) noexcept { swap(p); return *this; }
 		template<typename T> managedPtr_t &operator =(T *obj) noexcept { return *this = managedPtr_t<T>(obj); }
