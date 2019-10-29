@@ -657,7 +657,7 @@ private:
 		const auto testData = "This is \x00\xFF only a test"_s;
 		auto value = tSQLValue_t{nullptr, 0, SQL_VARCHAR};
 		assertTrue(value.isNull());
-		tryFailConversion<std::unique_ptr<char []>>(value);
+		tryFailConversion<std::unique_ptr<const char []>>(value);
 		value = {S_(testData.data(), testData.size()), testData.size(), SQL_VARCHAR};
 		assertFalse(value.isNull());
 		auto testStr = value.asString(true);
