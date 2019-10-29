@@ -22,7 +22,7 @@ namespace managedPtr
 		delete [] object;
 	}*/
 
-	template<typename T> struct managedPtr_t
+	template<typename T> struct managedPtr_t final
 	{
 	private:
 		T *ptr;
@@ -79,7 +79,7 @@ namespace managedPtr
 		managedPtr_t &operator =(const managedPtr_t &) = delete;
 	};
 
-	template<> struct managedPtr_t<void>
+	template<> struct managedPtr_t<void> final
 	{
 	private:
 		void *ptr;
