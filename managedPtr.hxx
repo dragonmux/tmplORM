@@ -99,9 +99,9 @@ namespace managedPtr
 		operator const void *() const noexcept { return ptr; }
 		operator void *() noexcept { return ptr; }
 		void *get() noexcept { return ptr; }
-		template<typename T> T *get() noexcept { return reinterpret_cast<T *>(ptr); }
+		template<typename T> T *get() noexcept { return static_cast<T *>(ptr); }
 		void *get() const noexcept { return ptr; }
-		template<typename T> T *get() const noexcept { return reinterpret_cast<T *const>(ptr); }
+		template<typename T> T *get() const noexcept { return static_cast<T *const>(ptr); }
 		bool valid() const noexcept { return ptr; }
 		explicit operator bool() const noexcept { return ptr; }
 
