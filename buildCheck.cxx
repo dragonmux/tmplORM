@@ -21,17 +21,17 @@ using std::endl;
 #define BRACKET COLOUR("1;34")
 #define INFO COLOUR("1;36")
 
-#define SET_COL(x) "\x1B[" << x << "G"
+#define SET_COL(x) "\x1B[" << (x) << "G"
 #define NEWLINE NORMAL << endl
 
 uint16_t getColumns()
 {
 	struct winsize win{};
 	ioctl(STDIN_FILENO, TIOCGWINSZ, &win);
-	return (win.ws_col == 0 ? 80 : win.ws_col);
+	return win.ws_col == 0 ? 80 : win.ws_col;
 }
 
-#define COL (getColumns() >> 1) - 4
+#define COL ((getColumns() >> 1U) - 4)
 
 void echoPass() noexcept { cout << SET_COL(COL) BRACKET "[" SUCCESS "  OK  " BRACKET "]" NEWLINE; }
 void echoFail() noexcept { cout << SET_COL(COL) BRACKET "[" FAILURE " FAIL " BRACKET "]" NEWLINE; }
