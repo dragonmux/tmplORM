@@ -213,7 +213,7 @@ namespace tmplORM
 				}
 			};
 
-			template<typename T> void mySQLBind_t::bindOut(const size_t index, const fieldLength_t length)
+			template<typename T> void mySQLBind_t::bindOut(const size_t index, const fieldLength_t)
 				noexcept
 			{
 				if (index >= numParams)
@@ -299,8 +299,8 @@ namespace tmplORM
 		public:
 			session_t() noexcept = default;
 			~session_t() noexcept = default;
-			session_t(session_t &&) noexcept = default;
-			session_t &operator =(session_t &&) noexcept = default;
+			session_t(session_t &&session) noexcept : database{session.database} { }
+			void operator =(session_t &&session) noexcept { database = session.database; }
 
 			template<typename tableName, typename... fields> bool createTable(const model_t<tableName, fields...> &)
 			{
