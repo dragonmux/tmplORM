@@ -8,19 +8,10 @@ namespace managedPtr
 {
 	using delete_t = void (*)(void *const);
 
-	/*template<typename T>
-		typename std::enable_if<!std::is_array<T>::value>::type deletePtr(void *const objectPtr)
-	{
-		T *const object = reinterpret_cast<T *const>(objectPtr);
-		delete object;
-	}
-
-	template<typename T>
-		typename std::enable_if<std::is_array<T>::value>::type deletePtr(void *const objectPtr)
-	{
-		T *const object = reinterpret_cast<T *const>(objectPtr);
-		delete [] object;
-	}*/
+	template<typename T> typename std::enable_if<!std::is_array<T>::value>::type
+		deletePtr(void *const object) { delete static_cast<T *>(object); }
+	template<typename T> typename std::enable_if<std::is_array<T>::value>::type
+		deletePtr(void *const object) { delete [] static_cast<typename std::decay<T>::type>(object); }
 
 	template<typename T> struct managedPtr_t final
 	{
@@ -42,7 +33,7 @@ namespace managedPtr
 		using reference = T &;
 
 		constexpr managedPtr_t() noexcept : ptr{nullptr}, deleteFunc{nullptr} { }
-		managedPtr_t(T *p) noexcept : ptr{p}, deleteFunc{del<T>} { }
+		managedPtr_t(T *p) noexcept : ptr{p}, deleteFunc{deletePtr<T>} { }
 		managedPtr_t(managedPtr_t &&p) noexcept : managedPtr_t{} { swap(p); }
 		template<typename U, typename = typename std::enable_if<!std::is_same<T, U>::value &&
 				std::is_base_of<T, U>::value>::type>
