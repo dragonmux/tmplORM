@@ -267,8 +267,8 @@ template<typename fieldName, typename T> const char *fieldName_(const type_t<fie
 
 int main(int, char **) noexcept
 {
-	cout << "Model user_t represents " << user.tableName() << " with " << user_t::N << " fields\n";
-	cout << "Model userTimeLog_t represents " << timeLog.tableName() << " with " << userTimeLog_t::N << " fields\n";
+	cout << "Model user_t represents " << user_t::tableName() << " with " << user_t::N << " fields\n";
+	cout << "Model userTimeLog_t represents " << userTimeLog_t::tableName() << " with " << userTimeLog_t::N << " fields\n";
 	echoPass();
 
 	cout << INFO "MySQL tests:" NEWLINE;
