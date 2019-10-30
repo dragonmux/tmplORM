@@ -64,7 +64,7 @@ public:
 	using iterator = boundedIterator_t<T>;
 	using const_iterator = boundedIterator_t<const T>;
 
-	constexpr fixedVector_t() noexcept : _data{}, _length{0} { }
+	fixedVector_t() noexcept : _data{}, _length{0} { }
 	fixedVector_t(const size_t length) noexcept : _data{length ? new (std::nothrow) T[length]() : nullptr},
 		_length{length} { }
 	fixedVector_t(fixedVector_t &&vec) noexcept : fixedVector_t{} { swap(vec); }
