@@ -21,13 +21,6 @@ namespace managedPtr
 		friend struct managedPtr_t<void>;
 		template<typename U> friend struct managedPtr_t;
 
-		template<typename U = T> static void del(void *const object)
-		{
-			if (object)
-				static_cast<U *>(object)->~U();
-			operator delete(object);
-		}
-
 	public:
 		using pointer = T *;
 		using reference = T &;
