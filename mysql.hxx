@@ -27,6 +27,7 @@ using sql_ulong_t = unsigned long;
 using mySQLFieldType_t = enum enum_field_types;
 using namespace tmplORM::types::baseTypes;
 using tmplORM::common::fieldLength_t;
+tmplORM_FNAPI const char nullParam;
 
 struct tmplORM_API mySQLValue_t final
 {

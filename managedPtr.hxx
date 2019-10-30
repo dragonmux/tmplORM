@@ -1,7 +1,7 @@
 #ifndef MANAGED_PTR__HXX
 #define MANAGED_PTR__HXX
 
-//#include <type_traits>
+#include <type_traits>
 #include <utility>
 
 namespace managedPtr

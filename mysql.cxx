@@ -46,6 +46,8 @@ bool mySQLClient_t::haveConnection = false;
 /*! @brief Constant used for telling MySQL Client that we really want it to auto-reconnect */
 static const bool autoReconnect = true;
 
+const char tmplORM::mysql::driver::nullParam = char(true);
+
 /*! @brief Constructs a fresh MySQL client connection container */
 mySQLClient_t::mySQLClient_t() noexcept
 {
