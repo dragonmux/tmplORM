@@ -390,7 +390,8 @@ namespace tmplORM
 				constexpr uint32_t data1() const noexcept { return _uuid.data1; }
 				constexpr uint16_t data2() const noexcept { return _uuid.data2; }
 				constexpr uint16_t data3() const noexcept { return _uuid.data3; }
-				const uint8_t *data4() const noexcept { return reinterpret_cast<const uint8_t *>(&_uuid.data4); }
+				const uint8_t *data4() const noexcept
+					{ return reinterpret_cast<const uint8_t *>(&_uuid.data4); } // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm [cpp/reinterpret-cast]
 
 				ormUUID_t(const char *uuid) noexcept : ormUUID_t()
 				{
