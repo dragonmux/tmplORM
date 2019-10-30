@@ -310,23 +310,6 @@ namespace tmplORM
 		template<typename _fieldName> using int16_t = type_t<_fieldName, std::int16_t>;
 		template<typename _fieldName> using int8_t = type_t<_fieldName, std::int8_t>;
 
-		/*template<typename _fieldName> struct int8_t : public type_t<_fieldName, std::int8_t>
-		{
-		private:
-			using parentType_t = type_t<_fieldName, std::int8_t>;
-
-		public:
-			using type = typename parentType_t::type;
-			using parentType_t::operator const type;
-			using parentType_t::operator ==;
-			using parentType_t::operator !=;
-
-			void operator =(const std::int64_t &value) noexcept { parentType_t::value(std::int8_t(value)); }
-			void value(const std::int64_t &_value) noexcept { parentType_t::value(std::int8_t(_value)); }
-			type value() noexcept { return *this; }
-			const type value() const noexcept { return *this; }
-		};*/
-
 		template<typename _fieldName> using bool_t = type_t<_fieldName, bool>;
 		template<typename _fieldName> using float_t = type_t<_fieldName, float>;
 		template<typename _fieldName> using double_t = type_t<_fieldName, double>;
@@ -529,7 +512,6 @@ namespace tmplORM
 
 			constexpr uuid_t() noexcept : parentType_t{} { }
 			uuid_t(const ormUUID_t _value) noexcept : parentType_t{} { value(_value); }
-			//operator ormUUID_t() const noexcept { return uuid(); }
 			void operator =(const char *const _value) noexcept { value(_value); }
 			void guid(const ormUUID_t &_value) noexcept { value(_value); }
 			ormUUID_t guid() const noexcept { return *this; }
