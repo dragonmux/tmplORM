@@ -65,9 +65,7 @@ namespace tmplORM
 		namespace driver
 		{
 			using namespace tmplORM::types::baseTypes;
-
-			static const char nullParam = char(true);
-			constexpr static char *const notNullParam = nullptr;
+			constexpr auto notNullParam = nullptr;
 
 			template<typename T> typename std::enable_if<!isNumeric<T>::value>::type
 				bindT(MYSQL_BIND &param) noexcept { param.is_unsigned = false; }
