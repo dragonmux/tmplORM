@@ -544,7 +544,7 @@ size_t searchFor(const time_t time) noexcept
 	return low;
 }
 
-void computeRules(size_t &i) noexcept
+uint8_t computeRules(const size_t i) noexcept
 {
 	const uint8_t type = typeIndexes[i];
 	tzName[types[type].isDst] = tzString(&zoneNames[types[type].index]);
@@ -561,7 +561,7 @@ void computeRules(size_t &i) noexcept
 	}
 	if (!tzName[0])
 		tzName[0] = tzName[1];
-	i = type;
+	return type;
 }
 
 int32_t computeOffset(const size_t index) noexcept
@@ -605,20 +605,14 @@ ormDateTime_t::timezone_t ormDateTime_t::tzCompute(const systemTime_t &time)
 	else if (timeSecs >= transitions[transitionsCount - 1])
 	{
 		if (!tzSpec)
-		{
-			i = transitionsCount - 1;
-			computeRules(i);
-		}
+			i = computeRules(transitionsCount - 1);
 		else
 		{
 			// TODO: implement TZ string parser/decoder
 		}
 	}
 	else
-	{
-		i = searchFor(timeSecs);
-		computeRules(i);
-	}
+		i = computeRules(searchFor(timeSecs));
 	timezone_t result{computeOffset(i), 0, 0};
 	i = leapsCount;
 	do
