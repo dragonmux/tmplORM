@@ -584,19 +584,19 @@ ormDateTime_t::timezone_t ormDateTime_t::tzCompute(const systemTime_t &time)
 		tzInit();
 
 	const time_t timeSecs{systemClock_t::to_time_t(timePoint_t{time})};
-	size_t i{0};
+	size_t typeIndex{0};
 	tzName[0] = nullptr;
 	tzName[1] = nullptr;
 	if (!transitionsCount || timeSecs < transitions[0])
 	{
-		for (; i < typesCount && ::types[i].isDst; ++i)
+		for (; typeIndex < typesCount && ::types[typeIndex].isDst; ++typeIndex)
 		{
 			if (!tzName[1])
-				tzName[1] = tzString(&zoneNames[::types[i].index]);
+				tzName[1] = tzString(&zoneNames[::types[typeIndex].index]);
 		}
-		if (typesCount && i == typesCount)
-			tzName[0] = tzString(&zoneNames[::types[i = 0].index]);
-		for (size_t j{i}; j < typesCount && !tzName[1]; ++j)
+		if (typesCount && typeIndex == typesCount)
+			tzName[0] = tzString(&zoneNames[::types[typeIndex = 0].index]);
+		for (size_t j{typeIndex}; j < typesCount && !tzName[1]; ++j)
 		{
 			if (::types[j].isDst)
 				tzName[1] = tzString(&zoneNames[::types[j].index]);
@@ -605,16 +605,16 @@ ormDateTime_t::timezone_t ormDateTime_t::tzCompute(const systemTime_t &time)
 	else if (timeSecs >= transitions[transitionsCount - 1])
 	{
 		if (!tzSpec)
-			i = computeRules(transitionsCount - 1);
+			typeIndex = computeRules(transitionsCount - 1);
 		else
 		{
 			// TODO: implement TZ string parser/decoder
 		}
 	}
 	else
-		i = computeRules(searchFor(timeSecs));
-	timezone_t result{computeOffset(i), 0, 0};
-	i = leapsCount;
+		typeIndex = computeRules(searchFor(timeSecs));
+	timezone_t result{computeOffset(typeIndex), 0, 0};
+	size_t i{leapsCount};
 	do
 	{
 		if (!i)
