@@ -13,3 +13,4 @@ queries:
   - include: "*"
   - exclude: cpp/loop-variable-changed
   - exclude: cpp/commented-out-code
+  - include: cpp/todo-comment
