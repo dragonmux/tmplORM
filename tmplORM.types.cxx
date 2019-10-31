@@ -550,11 +550,11 @@ void computeRules(size_t &i) noexcept
 	tzName[types[type].isDst] = tzString(&zoneNames[types[type].index]);
 	for (size_t j{i + 1}; j < transitionsCount; ++j)
 	{
-		uint8_t type = typeIndexes[j];
-		const bool isDst = types[type].isDst;
+		uint8_t nextType = typeIndexes[j];
+		const bool isDst = types[nextType].isDst;
 		if (!tzName[isDst])
 		{
-			tzName[isDst] = tzString(&zoneNames[types[type].index]);
+			tzName[isDst] = tzString(&zoneNames[types[nextType].index]);
 			if (tzName[!isDst])
 				break;
 		}
