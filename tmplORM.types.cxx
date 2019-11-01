@@ -52,7 +52,7 @@ static int32_t ruleStdOffset{};
 static int32_t ruleDstOffset{};
 static bool isDaylight;
 static int32_t timeZone;
-static bool tzInitialised{false};
+bool tzInitialised{false};
 
 static size_t transitionsCount{}, typesCount{}, leapsCount{};
 static std::unique_ptr<time_t []> transitions{};
