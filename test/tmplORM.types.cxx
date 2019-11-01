@@ -2,14 +2,13 @@
 #include <chrono>
 #include <crunch++.h>
 #include <tmplORM.hxx>
+#include <dateTime.hxx>
 #include "testTypes.hxx"
 
 using systemClock_t = std::chrono::system_clock;
 using std::chrono::seconds;
-std::string operator ""_s(const char *str, size_t len) noexcept
-	{ return {str, len}; }
+std::string operator ""_s(const char *str, size_t len) noexcept { return {str, len}; }
 constexpr seconds operator ""_s(const unsigned long long value) noexcept { return seconds{value}; }
-extern bool tzInitialised;
 
 namespace testDateTime
 {
