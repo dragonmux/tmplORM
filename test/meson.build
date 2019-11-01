@@ -28,7 +28,7 @@ objectMap = {
 	'testConversions': {'test': ['conversions.cxx']},
 	'testFixedVector': {'test': ['fixedVector.cxx']},
 	'testTypes': {'tmplORM': ['string.cxx', 'tmplORM.types.cxx'], 'test': ['tmplORM.types.cxx']},
-	'testDateTime': {'tmplORM': ['string.cxx']}
+	'testDateTime': {'tmplORM': ['string.cxx', 'tmplORM.types.cxx']}
 }
 
 foreach test : tmplORMTests

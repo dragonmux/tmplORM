@@ -4,6 +4,7 @@
 #include <array>
 #include <chrono>
 #include <tmplORM.types.hxx>
+#include <dateTime.hxx>
 #include <fd.hxx>
 
 using tmplORM::types::baseTypes::ormDateTime_t;
@@ -25,21 +26,6 @@ struct tzHead_t
 	std::array<uint8_t, 4> charCount;
 };
 
-struct ttInfo_t
-{
-	int32_t offset;
-	uint8_t isDst;
-	uint8_t index;
-	bool isStd;
-	bool isGmt;
-};
-
-struct leap_t
-{
-	time_t transition;
-	int32_t change;
-};
-
 struct tzString_t
 {
 	size_t length;
@@ -47,7 +33,7 @@ struct tzString_t
 	std::unique_ptr<tzString_t> next;
 };
 
-static std::array<const char *, 2> tzName{};
+std::array<const char *, 2> tzName{};
 static int32_t ruleStdOffset{};
 static int32_t ruleDstOffset{};
 static bool isDaylight;
@@ -55,12 +41,12 @@ static int32_t timeZone;
 bool tzInitialised{false};
 
 static size_t transitionsCount{}, typesCount{}, leapsCount{};
-static std::unique_ptr<time_t []> transitions{};
-static std::unique_ptr<uint8_t []> typeIndexes{};
-static std::unique_ptr<ttInfo_t []> types{};
-static std::unique_ptr<char []> zoneNames{};
-static std::unique_ptr<leap_t []> leaps{};
-static std::unique_ptr<char []> tzSpec{};
+std::unique_ptr<time_t []> transitions{};
+std::unique_ptr<uint8_t []> typeIndexes{};
+std::unique_ptr<ttInfo_t []> types{};
+std::unique_ptr<char []> zoneNames{};
+std::unique_ptr<leap_t []> leaps{};
+std::unique_ptr<char []> tzSpec{};
 static std::unique_ptr<tzString_t> tzStringList{};
 
 // TODO: fixme.
