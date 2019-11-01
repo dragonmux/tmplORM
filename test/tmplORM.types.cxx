@@ -4,8 +4,10 @@
 #include "testTypes.hxx"
 
 using systemClock_t = std::chrono::system_clock;
+using std::chrono::seconds;
 std::string operator ""_s(const char *str, size_t len) noexcept
 	{ return {str, len}; }
+constexpr seconds operator ""_s(const unsigned long long value) noexcept { return seconds{value}; }
 
 namespace testDateTime
 {
@@ -104,6 +106,26 @@ namespace testDateTime
 		suite.assertEqual(c.month(), 07);
 		suite.assertEqual(c.day(), 04);
 		suite.assertEqual(c.time().count(), 1234567890);
+	}
+
+	void testTimeZones(testsuit &suite)
+	{
+		const ormDateTime_t preFirstTransition{-3852662326_s};
+		suite.assertEqual(preFirstTransition.year(), 1847);
+		suite.assertEqual(preFirstTransition.month(), 11);
+		suite.assertEqual(preFirstTransition.day(), 30);
+		suite.assertEqual(preFirstTransition.hour(), 19);
+		suite.assertEqual(preFirstTransition.minute(), 05);
+		suite.assertEqual(preFirstTransition.second(), 12);
+		suite.assertEqual(preFirstTransition.nanoSecond(), 0);
+		const ormDateTime_t firstTransition{-3852662325_s};
+		suite.assertEqual(firstTransition.year(), 1847);
+		suite.assertEqual(firstTransition.month(), 11);
+		suite.assertEqual(firstTransition.day(), 30);
+		suite.assertEqual(firstTransition.hour(), 19);
+		suite.assertEqual(firstTransition.minute(), 05);
+		suite.assertEqual(firstTransition.second(), 13);
+		suite.assertEqual(firstTransition.nanoSecond(), 0);
 	}
 }
 

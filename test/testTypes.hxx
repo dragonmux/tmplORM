@@ -8,6 +8,7 @@ namespace testDateTime
 	void testFromSystemTime(testsuit &suite);
 	void testAsString(testsuit &suite);
 	void testWrapper(testsuit &suite);
+	void testTimeZones(testsuit &suite);
 }
 
 namespace testDate

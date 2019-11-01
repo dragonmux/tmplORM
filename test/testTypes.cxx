@@ -9,6 +9,7 @@ private:
 	void testFromSystemTime() { testDateTime::testFromSystemTime(*this); }
 	void testAsString() { testDateTime::testAsString(*this); }
 	void testWrapper() { testDateTime::testWrapper(*this); }
+	void testTimeZones() { testDateTime::testTimeZones(*this); }
 
 public:
 	void registerTests() final override
@@ -18,6 +19,7 @@ public:
 		CXX_TEST(testFromSystemTime)
 		CXX_TEST(testAsString)
 		CXX_TEST(testWrapper)
+		CXX_TEST(testTimeZones)
 	}
 };
 
