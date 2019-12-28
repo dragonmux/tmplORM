@@ -190,12 +190,15 @@ namespace tmplORM
 				constexpr years operator ""_y(const unsigned long long value) noexcept { return years{value}; }
 				constexpr days operator ""_day(const unsigned long long value) noexcept { return days{value}; }
 
-				//extern "C" void __tz_compute(time_t timer, struct tm *tm, int use_localtime);
-				constexpr static std::array<std::array<uint16_t, 12>, 2> monthDays
-				{{
-					{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
-					{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
-				}};
+				static std::array<std::array<uint16_t, 12>, 2> monthDays;
+
+				constexpr bool isLeap(const rep_t year) noexcept
+					{ return (year % 4) == 0 && ((year % 100) != 0 || (year % 400) == 0); }
+				constexpr bool isLeap(const years &year) noexcept { return isLeap(year.count()); }
+				constexpr rep_t div(const years a, const rep_t b) noexcept
+					{ return (a.count() / b) + ((a.count() % b) < 0); }
+				constexpr days leapsFor(const years year) noexcept
+					{ return days{div(year, 4) - div(year, 100) + div(year, 400)}; }
 
 				struct ormDateTime_t final : public ormDate_t, ormTime_t
 				{
@@ -208,14 +211,6 @@ namespace tmplORM
 					};
 
 					void display() const noexcept { printf("%04u-%02u-%02u %02u:%02u:%02u.%u\n", _year, _month, _day, _hour, _minute, _second, _nanoSecond); }
-
-					constexpr bool isLeap(const rep_t year) const noexcept
-						{ return (year % 4) == 0 && ((year % 100) != 0 || (year % 400) == 0); }
-					constexpr bool isLeap(const years &year) const noexcept { return isLeap(year.count()); }
-					constexpr rep_t div(const years a, const rep_t b) const noexcept
-						{ return (a.count() / b) + ((a.count() % b) < 0); }
-					constexpr days leapsFor(const years year) const noexcept
-						{ return days{div(year, 4) - div(year, 100) + div(year, 400)}; }
 
 					template<typename value_t> void correctDay(days &day, value_t &rem) noexcept
 					{

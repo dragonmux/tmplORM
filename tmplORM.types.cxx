@@ -12,6 +12,12 @@ using tmplORM::types::baseTypes::chrono::durationIn;
 using tmplORM::types::baseTypes::chrono::seconds;
 using tmplORM::types::baseTypes::chrono::operator ""_y;
 
+static std::array<std::array<uint16_t, 12>, 2> monthDays
+{{
+	{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
+	{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+}};
+
 constexpr static std::array<char, 4> tzMagic{{'T', 'Z', 'i', 'f'}};
 struct tzHead_t
 {
