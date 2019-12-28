@@ -680,8 +680,45 @@ bool tzParseRule(const char *&tzSpec, const uint8_t ruleIndex) noexcept
 	return true;
 }
 
+void tzUpdateRules() noexcept
+{
+	isDaylight = tzRules[0].offset != tzRules[1].offset;
+	timezone = -tzRules[0].offset;
+	tzName[0] = tzRules[0].name;
+	tzName[1] = tzRules[1].name;
+}
+
 bool tzParseSpec(const char *&tzSpec, const uint8_t rule) noexcept
 	{ return tzParseName(tzSpec, rule) && (tzParseOffset(tzSpec, rule) || rule); }
+
+void tzParseSpec() noexcept
+{
+	const char *spec = tzSpec.get();
+	if (tzParseSpec(spec, 0))
+	{
+		if (*spec)
+		{
+			if (tzParseSpec(spec, 1))
+			{
+				if (!*spec || (*spec++ == ',' && !*spec--))
+				{
+					// tzReadDefault();
+					puts("Mode not currently supported");
+				}
+			}
+			// Now figure out the STD <-> DST rules.
+			if (tzParseRule(spec, 0))
+				tzParseRule(spec, 1);
+		}
+		else
+		{
+			// No DST? No problem. Just make it the same as STD.
+			tzRules[1].name = tzRules[0].name;
+			tzRules[1].offset = tzRules[0].offset;
+		}
+	}
+	tzUpdateRules();
+}
 
 void tzInit() noexcept
 {
