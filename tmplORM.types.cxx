@@ -9,10 +9,17 @@
 
 using tmplORM::types::baseTypes::ormDateTime_t;
 using tmplORM::types::baseTypes::chrono::durationIn;
+using tmplORM::types::baseTypes::chrono::durationAs;
+using tmplORM::types::baseTypes::chrono::years;
 using tmplORM::types::baseTypes::chrono::days;
+using tmplORM::types::baseTypes::chrono::hours;
 using tmplORM::types::baseTypes::chrono::seconds;
 using tmplORM::types::baseTypes::chrono::operator ""_y;
 using tmplORM::types::baseTypes::chrono::operator ""_day;
+using tmplORM::types::baseTypes::chrono::isLeap;
+
+constexpr hours operator ""_h(const unsigned long long value) noexcept { return hours{value}; }
+constexpr seconds operator ""_sec(const unsigned long long value) noexcept { return seconds{value}; }
 
 static std::array<std::array<uint16_t, 12>, 2> monthDays
 {{
@@ -816,6 +823,71 @@ int32_t computeOffset(const size_t index) noexcept
 	return info.offset;
 }
 
+constexpr int16_t y1970_4 = 1970 / 4;
+constexpr int16_t y1970_100 = 1970 / 100;
+constexpr int16_t y1970_400 = 1970 / 400;
+
+void computeChange(tzRule_t &rule, const int16_t year) noexcept
+{
+	time_t time = 0;
+	if (year != -1 && rule.yearFor == year)
+		return; // We already did the legwork (except for 2BC) cool.. fast path!
+	else if (year > 1970)
+	{
+		const auto _year = year - 1;
+		time = durationIn<seconds>(years{year - 1970} + days{(_year / 4 - y1970_4) -
+			(_year / 100 - y1970_100) + (_year / 400 - y1970_400)});
+	}
+
+	switch (rule.type)
+	{
+	case tzRuleType_t::J1:
+		time += durationIn<seconds>(days{rule.day - 1});
+		if (rule.day >= 60 && isLeap(year))
+			time += durationIn<seconds>(1_day);
+		break;
+	case tzRuleType_t::J0:
+		time += durationIn<seconds>(days{rule.day});
+		break;
+	case tzRuleType_t::M:
+		const auto &daysFor = monthDays[isLeap(year)];
+		for (uint8_t i = 0; i < rule.month; ++i)
+			time += durationIn<seconds>(days{daysFor[i]});
+		const uint8_t month = rule.month < 3 ? rule.month + 12 : rule.month;
+		const int16_t _year = rule.month < 3 ? year - 1 : year;
+		const auto _century = std::div(_year, 100);
+		const int16_t century = _century.quot;
+		const int16_t centuryYear = _century.rem;
+		// We're after the first day of the month here, so we set q from the Gregorian formula
+		// on https://en.wikipedia.org/wiki/Zeller%27s_congruence to 1
+		uint8_t dow = uint32_t(1 + 13 * (month + 1) / 5 + centuryYear +
+			centuryYear / 4 + century / 4 - 2 * century) % 7;
+		int16_t day = rule.day < dow ? rule.day + 7 - dow : rule.day - dow;
+		for (uint16_t i = 1; i < rule.week; ++i)
+		{
+			if (day + 7 > daysFor[rule.month])
+				break;
+			day += 7;
+		}
+		time += durationIn<seconds>(days{day});
+		break;
+	}
+
+	rule.change = time - rule.offset + rule.seconds;
+	rule.yearFor = year;
+}
+
+ormDateTime_t::timezone_t ormDateTime_t::tzComputeFor(const time_t timeSecs, const int16_t year) noexcept
+{
+	computeChange(tzRules[0], year);
+	computeChange(tzRules[1], year);
+	if (tzRules[0].change > tzRules[1].change)
+		isDaylight = timeSecs < tzRules[1].change || timeSecs >= tzRules[0].change;
+	else
+		isDaylight = timeSecs >= tzRules[0].change && timeSecs < tzRules[1].change;
+	return {tzRules[isDaylight].offset, 0, 0};
+}
+
 void ormDateTime_t::tzComputeLeaps(ormDateTime_t::timezone_t &result, const time_t timeSecs) noexcept
 {
 	size_t index{leapsCount};
@@ -879,8 +951,11 @@ ormDateTime_t::timezone_t ormDateTime_t::tzCompute(const systemTime_t &time) noe
 			typeIndex = computeRules(transitionsCount - 1);
 		else
 		{
-			// TODO: implement TZ string parser/decoder
+			tzParseSpec();
 			const auto year = computeOffsetYear(time, 0_sec);
+			auto result = tzComputeFor(timeSecs, year);
+			tzComputeLeaps(result, timeSecs);
+			return result;
 		}
 	}
 	else

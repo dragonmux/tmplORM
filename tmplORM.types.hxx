@@ -249,6 +249,7 @@ namespace tmplORM
 					}
 
 					int16_t computeOffsetYear(const systemTime_t time, const seconds offset) noexcept;
+					timezone_t tzComputeFor(const time_t timeSecs, const int16_t year) noexcept;
 					void tzComputeLeaps(timezone_t &result, const time_t timeSecs) noexcept;
 					timezone_t tzCompute(const systemTime_t &time) noexcept;
 					friend bool operator ==(const ormDateTime_t &a, const ormDateTime_t &b) noexcept;
