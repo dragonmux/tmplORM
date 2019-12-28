@@ -648,7 +648,31 @@ int32_t computeOffset(const size_t index) noexcept
 	return info.offset;
 }
 
-ormDateTime_t::timezone_t ormDateTime_t::tzCompute(const systemTime_t &time)
+void ormDateTime_t::tzComputeLeaps(ormDateTime_t::timezone_t &result, const time_t timeSecs) noexcept
+{
+	size_t index{leapsCount};
+	do
+	{
+		if (!index)
+			return;
+		--index;
+	}
+	while (timeSecs < leaps[index].transition);
+	result.leapCorrection = leaps[index].change;
+	if (timeSecs == leaps[index].transition && ((!index && leaps[index].change > 0) ||
+		leaps[index].change > leaps[index - 1].change))
+	{
+		while (index > 0 && leaps[index].transition == leaps[index - 1].transition + 1 &&
+			leaps[index].change == leaps[index - 1].change + 1)
+		{
+			++result.leapCount;
+			--index;
+		}
+		++result.leapCount;
+	}
+}
+
+ormDateTime_t::timezone_t ormDateTime_t::tzCompute(const systemTime_t &time) noexcept
 {
 	if (!tzInitialised)
 		tzInit();
@@ -684,25 +708,6 @@ ormDateTime_t::timezone_t ormDateTime_t::tzCompute(const systemTime_t &time)
 	else
 		typeIndex = computeRules(searchFor(timeSecs));
 	timezone_t result{computeOffset(typeIndex), 0, 0};
-	size_t i{leapsCount};
-	do
-	{
-		if (!i)
-			return result;
-		--i;
-	}
-	while (timeSecs < leaps[i].transition);
-	result.leapCorrection = leaps[i].change;
-	if (timeSecs == leaps[i].transition && ((!i && leaps[i].change > 0) ||
-		leaps[i].change > leaps[i - 1].change))
-	{
-		while (i > 0 && leaps[i].transition == leaps[i - 1].transition + 1 &&
-			leaps[i].change == leaps[i - 1].change + 1)
-		{
-			++result.leapCount;
-			--i;
-		}
-		++result.leapCount;
-	}
+	tzComputeLeaps(result, timeSecs);
 	return result;
 }
