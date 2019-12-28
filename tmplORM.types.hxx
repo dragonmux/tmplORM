@@ -226,7 +226,7 @@ namespace tmplORM
 						}
 					}
 
-					uint16_t computeYear(days &day) noexcept
+					int16_t computeYear(days &day) noexcept
 					{
 						years year = 1970_y;
 						while (day.count() < 0 || day.count() > (isLeap(year) ? 366 : 365))
@@ -260,10 +260,10 @@ namespace tmplORM
 
 					ormDateTime_t(const systemTime_t time) noexcept : ormDateTime_t{}
 					{
-						timezone_t timeZone = tzCompute(time);
+						const timezone_t timeZone = tzCompute(time);
 						auto day = days{durationAs<seconds>(time) / seconds{1_day}};
 						auto rem = time - day;
-						rem += seconds{timeZone.offset};
+						rem += seconds{timeZone.offset - timeZone.leapCorrection};
 						correctDay(day, rem);
 						_year = computeYear(day);
 						_month = computeMonth(_year, day);
