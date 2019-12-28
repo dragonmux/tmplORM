@@ -491,6 +491,67 @@ bool tzReadFile(const char *const file) noexcept
 	return tzInitialised = true;
 }
 
+inline bool isAlpha(const char x) noexcept
+{
+	return
+		(x >= 'a' && x <= 'z') ||
+		(x >= 'A' && x <= 'Z');
+}
+
+inline bool isNumber(const char x) noexcept
+	{ return x >= '0' && x <= '9'; }
+inline bool isAlphaNum(const char x) noexcept
+	{ return isAlpha(x) || isNumber(x); }
+inline bool isSign(const char x) noexcept
+	{ return x == '+' || x == '-'; }
+
+bool tzParseName(const char *&tzSpec, const uint8_t rule) noexcept
+{
+	const char *begin = tzSpec, *end = tzSpec;
+	while (isAlpha(*end))
+		++end;
+	size_t length = end - begin;
+	if (length < 3)
+	{
+		end = tzSpec;
+		if (*end++ != '<')
+			return false;
+		begin = end;
+		while (isAlphaNum(*end) || isSign(*end))
+			++end;
+		length = end - begin;
+		if (*end++ != '>' || length < 3)
+			return false;
+	}
+	const auto name = tzString(begin, length);
+	if (!name)
+		return false;
+	tzRules[rule].name = name;
+	tzSpec = end;
+	return true;
+}
+
+inline uint16_t tzParseInt(const char *&str) noexcept
+{
+	uint16_t value = 0;
+	while (isNumber(*str))
+	{
+		value *= 10;
+		value += *str++ - '0';
+	}
+	return value;
+}
+
+inline bool tzDefaultRules(const uint8_t rule) noexcept
+{
+	if (!rule)
+		tzRules[0].offset = 0;
+	else
+		// DST defaults to an offset one hour later than STD.
+		tzRules[1].offset = tzRules[0].offset + (60 * 60);
+	return false;
+}
+
 void tzInit() noexcept
 {
 	const char *tz = getenv("TZ");
