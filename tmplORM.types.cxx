@@ -598,6 +598,88 @@ bool tzParseOffset(const char *&tzSpec, const uint8_t rule) noexcept
 	return true;
 }
 
+bool tzParseRule(const char *&tzSpec, const uint8_t ruleIndex) noexcept
+{
+	const char *start = tzSpec;
+	tzRule_t &rule = tzRules[ruleIndex];
+	// Skip past any incorrectly-specified POSIX.1 comma
+	start += *start == ',';
+	if (*start == 'J' || isNumber(*start))
+	{
+		rule.type = *start == 'J' ? tzRuleType_t::J1 : tzRuleType_t::J0;
+		if (rule.type == tzRuleType_t::J1 && !isNumber(*++start))
+			return false;
+		const char *end = start;
+		const auto day = tzParseInt(end);
+		if (start == end || day > 365)
+			return false;
+		else if (rule.type == tzRuleType_t::J1 && day == 0)
+			return false;
+		rule.day = day;
+		start = end;
+	}
+	else if (*start == 'M')
+	{
+		rule.type = tzRuleType_t::M;
+		++start;
+		if (!tzParseTripple(start, '.', rule.month, rule.week, rule.day) ||
+			rule.month < 1 || rule.month > 12 ||
+			rule.week < 1 || rule.week > 6 ||
+			rule.day > 6)
+			return false;
+	}
+	else if (*start == 0)
+	{
+		/*
+		 * Daylight time rules in the US are defined in the document "US Code,
+		 * Title 15, Chapter 6, Subchapter IX - Standard Time". These dates were
+		 * established by Congress in the Energy Policy Act of 2005 (Public Library
+		 * number 109-58, 119 Stat 594 from 2005). Below is the equivilent of the
+		 * tzSpec "M3.2.0,M11.1.0" with /2 not needed since 2:00am is the default.
+		 */
+		rule.type = tzRuleType_t::M;
+		if (!ruleIndex)
+		{
+			rule.month = 3;
+			rule.week = 2;
+			rule.day = 0;
+		}
+		else
+		{
+			rule.month = 11;
+			rule.week = 1;
+			rule.day = 0;
+		}
+
+	}
+	else
+		return false;
+
+	if (*start && *start != '/' && *start != ',')
+		return false;
+	else if (*start == '/')
+	{
+		if (!*++start)
+			return false;
+		bool negative = *start == '-';
+		start += negative;
+		uint16_t hours{}, minutes{}, seconds{};
+		if (!tzParseTripple(start, ':', hours, minutes, seconds))
+		{
+			hours = 2;
+			minutes = 0;
+			seconds = 0;
+		}
+		rule.seconds = (negative ? -1 : 1) * computeOffset(hours, minutes, seconds);
+	}
+	else
+		rule.seconds = durationIn<seconds>(2_h);
+
+	rule.yearFor = -1;
+	tzSpec = start;
+	return true;
+}
+
 bool tzParseSpec(const char *&tzSpec, const uint8_t rule) noexcept
 	{ return tzParseName(tzSpec, rule) && (tzParseOffset(tzSpec, rule) || rule); }
 
