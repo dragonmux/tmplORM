@@ -39,11 +39,28 @@ struct tzString_t
 	std::unique_ptr<tzString_t> next;
 };
 
+enum class tzRuleType_t : uint8_t
+	{ J0, J1, M };
+
+struct tzRule_t
+{
+	const char *name;
+	tzRuleType_t type;
+	uint16_t month;
+	uint16_t week;
+	uint16_t day;
+	int64_t seconds;
+	int32_t offset;
+	time_t change;
+	int32_t yearFor;
+};
+
 std::array<const char *, 2> tzName{};
 static int32_t ruleStdOffset{};
 static int32_t ruleDstOffset{};
 static bool isDaylight;
 static int32_t timeZone;
+std::array<tzRule_t, 2> tzRules{};
 bool tzInitialised{false};
 
 static size_t transitionsCount{}, typesCount{}, leapsCount{};
