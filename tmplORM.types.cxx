@@ -552,6 +552,53 @@ inline bool tzDefaultRules(const uint8_t rule) noexcept
 	return false;
 }
 
+inline uint32_t computeOffset(uint16_t hours, uint16_t minutes, uint16_t seconds) noexcept
+{
+	if (hours > 24)
+		hours = 24;
+	if (minutes > 59)
+		minutes = 59;
+	if (seconds > 59)
+		seconds = 59;
+	return (hours * 60 + minutes) * 60 + seconds;
+}
+
+bool tzParseTripple(const char *&str, const char seperator, uint16_t &first,
+	uint16_t &second, uint16_t &third) noexcept
+{
+	const char *begin = str;
+	const char *end = str;
+	first = tzParseInt(end);
+	if (begin == end || *end++ != seperator)
+		return false;
+	begin = end;
+	second = tzParseInt(end);
+	if (begin == end || *end++ != seperator)
+		return false;
+	begin = end;
+	third = tzParseInt(end);
+	if (begin == end)
+		return false;
+	str = end;
+	return true;
+}
+
+bool tzParseOffset(const char *&tzSpec, const uint8_t rule) noexcept
+{
+	if (rule == 0 && !(*tzSpec && (isSign(*tzSpec) || isNumber(*tzSpec))))
+		return false;
+	// If the offset is into the past, then we want to add it, otherwise we want to subtract it.
+	const int8_t sign = isSign(*tzSpec) && *tzSpec++ == '-' ? 1 : -1;
+	uint16_t hours{}, minutes{}, seconds{};
+	if (!tzParseTripple(tzSpec, ':', hours, minutes, seconds))
+		return tzDefaultRules(rule);
+	tzRules[rule].offset = sign * computeOffset(hours, minutes, seconds);
+	return true;
+}
+
+bool tzParseSpec(const char *&tzSpec, const uint8_t rule) noexcept
+	{ return tzParseName(tzSpec, rule) && (tzParseOffset(tzSpec, rule) || rule); }
+
 void tzInit() noexcept
 {
 	const char *tz = getenv("TZ");
