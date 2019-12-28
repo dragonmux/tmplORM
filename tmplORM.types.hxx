@@ -20,7 +20,7 @@ namespace tmplORM
 			struct ormDate_t
 			{
 			protected:
-				uint16_t _year;
+				int16_t _year;
 				uint8_t _month;
 				uint8_t _day;
 
@@ -28,11 +28,11 @@ namespace tmplORM
 
 			public:
 				constexpr ormDate_t() noexcept : _year{0}, _month{0}, _day{0} { }
-				constexpr ormDate_t(const uint16_t year, const uint8_t month, const uint8_t day) noexcept :
+				constexpr ormDate_t(const int16_t year, const uint8_t month, const uint8_t day) noexcept :
 					_year{year}, _month{month}, _day{day} { }
 
-				constexpr uint16_t year() const noexcept { return _year; }
-				void year(const uint16_t year) noexcept { _year = year; }
+				constexpr int16_t year() const noexcept { return _year; }
+				void year(const int16_t year) noexcept { _year = year; }
 				constexpr uint8_t month() const noexcept { return _month; }
 				void month(const uint8_t month) noexcept { _month = month; }
 				constexpr uint8_t day() const noexcept { return _day; }
@@ -40,8 +40,9 @@ namespace tmplORM
 
 				ormDate_t(const char *date) noexcept : ormDate_t{}
 				{
-					_year = toInt_t<uint16_t>{date, 4};
-					date += 5;
+					const auto negative = *date == '-';
+					_year = toInt_t<int16_t>{date, size_t(4 + negative)};
+					date += 5 + negative;
 					_month = toInt_t<uint8_t>{date, 2};
 					date += 3;
 					_day = toInt_t<uint8_t>{date, 2};
@@ -49,7 +50,7 @@ namespace tmplORM
 
 				std::unique_ptr<char []> asString() const noexcept
 				{
-					const auto year = fromInt<4>(_year);
+					const auto year = fromInt<4>(uint16_t(_year));
 					const auto month = fromInt<2>(_month);
 					const auto day = fromInt<2>(_day);
 
@@ -257,7 +258,7 @@ namespace tmplORM
 
 				public:
 					constexpr ormDateTime_t() noexcept : ormDate_t{}, ormTime_t{} { }
-					constexpr ormDateTime_t(const uint16_t year, const uint8_t month, const uint8_t day,
+					constexpr ormDateTime_t(const int16_t year, const uint8_t month, const uint8_t day,
 						const uint16_t hour, const uint16_t minute, const uint16_t second, const uint32_t nanoSecond) noexcept :
 						ormDate_t{year, month, day}, ormTime_t{hour, minute, second, nanoSecond} { }
 					ormDateTime_t(const char *dateTime) noexcept : ormDate_t{dateTime}, ormTime_t{dateTime + 11} { }
@@ -288,7 +289,7 @@ namespace tmplORM
 
 					std::unique_ptr<char []> asString() const noexcept
 					{
-						const auto year = fromInt<4>(_year);
+						const auto year = fromInt<4>(uint16_t(_year));
 						const auto month = fromInt<2>(_month);
 						const auto day = fromInt<2>(_day);
 						const auto hour = fromInt<2>(_hour);
