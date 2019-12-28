@@ -9,8 +9,10 @@
 
 using tmplORM::types::baseTypes::ormDateTime_t;
 using tmplORM::types::baseTypes::chrono::durationIn;
+using tmplORM::types::baseTypes::chrono::days;
 using tmplORM::types::baseTypes::chrono::seconds;
 using tmplORM::types::baseTypes::chrono::operator ""_y;
+using tmplORM::types::baseTypes::chrono::operator ""_day;
 
 static std::array<std::array<uint16_t, 12>, 2> monthDays
 {{
@@ -719,6 +721,15 @@ void ormDateTime_t::tzComputeLeaps(ormDateTime_t::timezone_t &result, const time
 	}
 }
 
+int16_t ormDateTime_t::computeOffsetYear(const systemTime_t time, const seconds offset) noexcept
+{
+	auto day = days{durationAs<seconds>(time) / seconds{1_day}};
+	auto rem = time - day;
+	rem += offset;
+	correctDay(day, rem);
+	return computeYear(day);
+}
+
 ormDateTime_t::timezone_t ormDateTime_t::tzCompute(const systemTime_t &time) noexcept
 {
 	if (!tzInitialised)
@@ -750,6 +761,7 @@ ormDateTime_t::timezone_t ormDateTime_t::tzCompute(const systemTime_t &time) noe
 		else
 		{
 			// TODO: implement TZ string parser/decoder
+			const auto year = computeOffsetYear(time, 0_sec);
 		}
 	}
 	else
