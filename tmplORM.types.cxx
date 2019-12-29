@@ -558,7 +558,7 @@ inline bool tzDefaultRules(const uint8_t rule) noexcept
 		tzRules[0].offset = 0;
 	else
 		// DST defaults to an offset one hour later than STD.
-		tzRules[1].offset = tzRules[0].offset + (60 * 60);
+		tzRules[1].offset = (seconds{tzRules[0].offset} + 1_h).count();;
 	return false;
 }
 
