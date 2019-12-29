@@ -149,16 +149,16 @@ namespace testDateTime
 		suite.assertEqual(preLastTransition.month(), 11);
 		suite.assertEqual(preLastTransition.day(), 01);
 		suite.assertEqual(preLastTransition.hour(), 05);
-		//suite.assertEqual(preLastTransition.minute(), 59);
-		//suite.assertEqual(preLastTransition.second(), 59);
+		suite.assertEqual(preLastTransition.minute(), 59);
+		suite.assertEqual(preLastTransition.second(), 59);
 		suite.assertEqual(preLastTransition.nanoSecond(), 0);
 		const ormDateTime_t lastTransition{2140668000_s};
 		suite.assertEqual(lastTransition.year(), 2037);
 		suite.assertEqual(lastTransition.month(), 11);
 		suite.assertEqual(lastTransition.day(), 01);
-		//suite.assertEqual(lastTransition.hour(), 06);
-		//suite.assertEqual(lastTransition.minute(), 00);
-		//suite.assertEqual(lastTransition.second(), 00);
+		suite.assertEqual(lastTransition.hour(), 06);
+		suite.assertEqual(lastTransition.minute(), 00);
+		suite.assertEqual(lastTransition.second(), 00);
 		suite.assertEqual(lastTransition.nanoSecond(), 0);
 		cleanupTZ();
 	}
