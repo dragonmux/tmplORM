@@ -861,8 +861,9 @@ void computeChange(tzRule_t &rule, const int16_t year) noexcept
 		time += durationIn<seconds>(days{rule.day});
 		break;
 	case tzRuleType_t::M:
+		const uint16_t _month = rule.month - 1;
 		const auto &daysFor = monthDays[isLeap(year)];
-		for (uint8_t i = 0; i < rule.month; ++i)
+		for (uint8_t i = 0; i < _month; ++i)
 			time += durationIn<seconds>(days{daysFor[i]});
 		const uint8_t month = rule.month < 3 ? rule.month + 12 : rule.month;
 		const int16_t _year = rule.month < 3 ? year - 1 : year;
@@ -870,13 +871,13 @@ void computeChange(tzRule_t &rule, const int16_t year) noexcept
 		const int16_t century = _century.quot;
 		const int16_t centuryYear = _century.rem;
 		// We're after the first day of the month here, so we set q from the Gregorian formula
-		// on https://en.wikipedia.org/wiki/Zeller%27s_congruence to 1
-		uint8_t dow = uint32_t(1 + 13 * (month + 1) / 5 + centuryYear +
+		// on https://en.wikipedia.org/wiki/Zeller%27s_congruence to 0
+		uint8_t dow = uint32_t(13 * (month + 1) / 5 + centuryYear +
 			centuryYear / 4 + century / 4 - 2 * century) % 7;
 		int16_t day = rule.day < dow ? rule.day + 7 - dow : rule.day - dow;
 		for (uint16_t i = 1; i < rule.week; ++i)
 		{
-			if (day + 7 > daysFor[rule.month])
+			if (day + 7 >= daysFor[_month])
 				break;
 			day += 7;
 		}
