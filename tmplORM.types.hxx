@@ -190,7 +190,7 @@ namespace tmplORM
 				constexpr years operator ""_y(const unsigned long long value) noexcept { return years{value}; }
 				constexpr days operator ""_day(const unsigned long long value) noexcept { return days{value}; }
 
-				static std::array<std::array<uint16_t, 12>, 2> monthDays;
+				extern std::array<std::array<uint16_t, 12>, 2> monthDays;
 
 				constexpr bool isLeap(const rep_t year) noexcept
 					{ return (year % 4) == 0 && ((year % 100) != 0 || (year % 400) == 0); }

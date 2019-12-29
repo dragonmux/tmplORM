@@ -17,11 +17,12 @@ using tmplORM::types::baseTypes::chrono::seconds;
 using tmplORM::types::baseTypes::chrono::operator ""_y;
 using tmplORM::types::baseTypes::chrono::operator ""_day;
 using tmplORM::types::baseTypes::chrono::isLeap;
+using tmplORM::types::baseTypes::chrono::monthDays;
 
 constexpr hours operator ""_h(const unsigned long long value) noexcept { return hours{value}; }
 constexpr seconds operator ""_sec(const unsigned long long value) noexcept { return seconds{value}; }
 
-static std::array<std::array<uint16_t, 12>, 2> monthDays
+std::array<std::array<uint16_t, 12>, 2> tmplORM::types::baseTypes::chrono::monthDays
 {{
 	{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
 	{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
