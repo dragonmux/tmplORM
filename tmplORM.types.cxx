@@ -579,13 +579,23 @@ bool tzParseTripple(const char *&str, const char seperator, uint16_t &first,
 	const char *begin = str;
 	const char *end = str;
 	first = tzParseInt(end);
-	if (begin == end || *end++ != seperator)
+	if (begin == end)
 		return false;
-	begin = end;
+	else if (*end != seperator)
+	{
+		str = end;
+		return true;
+	}
+	begin = ++end;
 	second = tzParseInt(end);
-	if (begin == end || *end++ != seperator)
+	if (begin == end)
 		return false;
-	begin = end;
+	else if (*end != seperator)
+	{
+		str = end;
+		return true;
+	}
+	begin = ++end;
 	third = tzParseInt(end);
 	if (begin == end)
 		return false;
