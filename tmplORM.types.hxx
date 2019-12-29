@@ -239,12 +239,12 @@ namespace tmplORM
 						return year.count();
 					}
 
-					uint16_t computeMonth(const uint16_t year, days &day) noexcept
+					uint8_t computeMonth(const uint16_t year, days &day) noexcept
 					{
 						const auto &daysFor = monthDays[isLeap(year)];
-						uint32_t i{0};
+						uint8_t i{0};
 						++day;
-						while (day.count() > daysFor[i])
+						while (day.count() > daysFor[i] && i < daysFor.size())
 							day -= days{daysFor[i++]};
 						return i + 1;
 					}
