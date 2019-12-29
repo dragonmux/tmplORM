@@ -179,7 +179,8 @@ namespace tmplORM
 					using ratio_t = std::ratio<num, denom>;
 
 				using rep_t = systemClock_t::rep;
-				using years = duration_t<rep_t, ratio_t<31556952>>;
+				// The "correct" value is 31556952, but this screws with our timezone calcs.
+				using years = duration_t<rep_t, ratio_t<31536000>>;
 				using months = duration_t<rep_t, ratio_t<2629746>>;
 				using days = duration_t<rep_t, ratio_t<86400>>;
 				using hours = std::chrono::hours;
