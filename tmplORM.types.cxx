@@ -515,15 +515,15 @@ inline bool isAlphaNum(const char x) noexcept
 inline bool isSign(const char x) noexcept
 	{ return x == '+' || x == '-'; }
 
-bool tzParseName(const char *&tzSpec, const uint8_t rule) noexcept
+bool tzParseName(const char *&spec, const uint8_t rule) noexcept
 {
-	const char *begin = tzSpec, *end = tzSpec;
+	const char *begin = spec, *end = spec;
 	while (isAlpha(*end))
 		++end;
 	size_t length = end - begin;
 	if (length < 3)
 	{
-		end = tzSpec;
+		end = spec;
 		if (*end++ != '<')
 			return false;
 		begin = end;
@@ -537,7 +537,7 @@ bool tzParseName(const char *&tzSpec, const uint8_t rule) noexcept
 	if (!name)
 		return false;
 	tzRules[rule].name = name;
-	tzSpec = end;
+	spec = end;
 	return true;
 }
 
@@ -603,22 +603,22 @@ bool tzParseTripple(const char *&str, const char seperator, uint16_t &first,
 	return true;
 }
 
-bool tzParseOffset(const char *&tzSpec, const uint8_t rule) noexcept
+bool tzParseOffset(const char *&spec, const uint8_t rule) noexcept
 {
-	if (rule == 0 && !(*tzSpec && (isSign(*tzSpec) || isNumber(*tzSpec))))
+	if (rule == 0 && !(*spec && (isSign(*spec) || isNumber(*spec))))
 		return false;
 	// If the offset is into the past, then we want to add it, otherwise we want to subtract it.
-	const int8_t sign = isSign(*tzSpec) && *tzSpec++ == '-' ? 1 : -1;
+	const int8_t sign = isSign(*spec) && *spec++ == '-' ? 1 : -1;
 	uint16_t hours{}, minutes{}, seconds{};
-	if (!tzParseTripple(tzSpec, ':', hours, minutes, seconds))
+	if (!tzParseTripple(spec, ':', hours, minutes, seconds))
 		return tzDefaultRules(rule);
 	tzRules[rule].offset = sign * computeOffset(hours, minutes, seconds);
 	return true;
 }
 
-bool tzParseRule(const char *&tzSpec, const uint8_t ruleIndex) noexcept
+bool tzParseRule(const char *&spec, const uint8_t ruleIndex) noexcept
 {
-	const char *start = tzSpec;
+	const char *start = spec;
 	tzRule_t &rule = tzRules[ruleIndex];
 	// Skip past any incorrectly-specified POSIX.1 comma
 	start += *start == ',';
@@ -694,7 +694,7 @@ bool tzParseRule(const char *&tzSpec, const uint8_t ruleIndex) noexcept
 		rule.seconds = durationIn<seconds>(2_h);
 
 	rule.yearFor = -1;
-	tzSpec = start;
+	spec = start;
 	return true;
 }
 
@@ -706,8 +706,8 @@ void tzUpdateRules() noexcept
 	tzName[1] = tzRules[1].name;
 }
 
-bool tzParseSpec(const char *&tzSpec, const uint8_t rule) noexcept
-	{ return tzParseName(tzSpec, rule) && (tzParseOffset(tzSpec, rule) || rule); }
+bool tzParseSpec(const char *&spec, const uint8_t rule) noexcept
+	{ return tzParseName(spec, rule) && (tzParseOffset(spec, rule) || rule); }
 
 void tzParseSpec() noexcept
 {
