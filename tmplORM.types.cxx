@@ -562,7 +562,7 @@ inline bool tzDefaultRules(const uint8_t rule) noexcept
 	return false;
 }
 
-inline int32_t computeOffset(uint16_t hours, uint16_t minutes, uint16_t seconds) noexcept
+inline int64_t computeOffset(uint16_t hours, uint16_t minutes, uint16_t seconds) noexcept
 {
 	if (hours > 24)
 		hours = 24;
@@ -612,7 +612,7 @@ bool tzParseOffset(const char *&spec, const uint8_t rule) noexcept
 	uint16_t hours{}, minutes{}, seconds{};
 	if (!tzParseTripple(spec, ':', hours, minutes, seconds))
 		return tzDefaultRules(rule);
-	tzRules[rule].offset = sign * computeOffset(hours, minutes, seconds);
+	tzRules[rule].offset = int32_t(sign * computeOffset(hours, minutes, seconds));
 	return true;
 }
 
