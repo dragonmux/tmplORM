@@ -562,7 +562,7 @@ inline bool tzDefaultRules(const uint8_t rule) noexcept
 	return false;
 }
 
-inline uint32_t computeOffset(uint16_t hours, uint16_t minutes, uint16_t seconds) noexcept
+inline int32_t computeOffset(uint16_t hours, uint16_t minutes, uint16_t seconds) noexcept
 {
 	if (hours > 24)
 		hours = 24;
@@ -863,7 +863,7 @@ void computeChange(tzRule_t &rule, const int16_t year) noexcept
 	case tzRuleType_t::M:
 		const uint16_t _month = rule.month - 1;
 		const auto &daysFor = monthDays[isLeap(year)];
-		for (uint8_t i = 0; i < _month; ++i)
+		for (uint16_t i = 0; i < _month; ++i)
 			time += durationIn<seconds>(days{daysFor[i]});
 		const uint8_t month = rule.month < 3 ? rule.month + 12 : rule.month;
 		const int16_t _year = rule.month < 3 ? year - 1 : year;
