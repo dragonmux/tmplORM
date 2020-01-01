@@ -244,7 +244,7 @@ namespace tmplORM
 						const auto &daysFor = monthDays[isLeap(year)];
 						uint8_t i{0};
 						++day;
-						while (day.count() > daysFor[i] && i < daysFor.size())
+						while (day.count() > daysFor[i] && i < uint8_t(daysFor.size()))
 							day -= days{daysFor[i++]};
 						return i + 1;
 					}
