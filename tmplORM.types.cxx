@@ -298,7 +298,7 @@ void readTzSpec(const fd_t &fd, const size_t tzSpecLen, const size_t version) no
 			!fd.read(tzSpec, tzSpecLen - 1))
 			tzSpec = nullptr;
 		else
-			tzSpec[tzSpecLen] = 0;
+			tzSpec[tzSpecLen - 1] = 0;
 	}
 	else if (sizeof(time_t) == 4 && version)
 	{
@@ -348,7 +348,7 @@ char *tzString(const std::unique_ptr<char []> &string) noexcept { return tzStrin
 bool registerZones(const size_t charCount) noexcept
 {
 	zoneNames[charCount] = 0;
-	for (size_t i{}; i < transitionsCount; ++i)
+	for (size_t i{}; i < typesCount; ++i)
 		if (!tzString(&zoneNames[types[i].index]))
 			return false;
 	return true;
