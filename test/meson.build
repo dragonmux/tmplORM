@@ -1,4 +1,5 @@
 crunchpp = find_program('crunch++')
+libcrunchpp = dependency('crunch++')
 subdir('data')
 
 tmplORMTests = [
@@ -16,6 +17,7 @@ testHelpers = static_library(
 	'testHelpers',
 	['conversions.cxx', 'fixedVector.cxx', 'tmplORM.types.cxx'],
 	pic: true,
+	dependencies: [libcrunchpp],
 	include_directories: include_directories('..'),
 	install: false,
 	build_by_default: true
