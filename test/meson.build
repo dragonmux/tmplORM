@@ -13,6 +13,11 @@ else
 	crunchCoverage = []
 endif
 
+sanitizer = get_option('b_sanitize')
+if sanitizer != 'none'
+	crunchCoverage += ['-fsanitize=' + sanitizer]
+endif
+
 testHelpers = static_library(
 	'testHelpers',
 	['conversions.cxx', 'fixedVector.cxx', 'tmplORM.types.cxx'],
