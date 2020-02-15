@@ -53,9 +53,8 @@ jobs:
     #          key_url: 'http://apt.llvm.org/llvm-snapshot.gpg.key'
     #        - ubuntu-toolchain-r-test
     #      packages:
-    #        - gcc-4.9
-    #        - g++-4.9
     #        - clang-5.0
+    #        - python3.6
     #        - libmysqlclient-dev
     #  if: branch != coverityScan
     - compiler: gcc-5
@@ -64,9 +63,10 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - deadsnakes
           packages:
-            - gcc-5
             - g++-5
+            - python3.6
             - libmysqlclient-dev
       arch: amd64
       if: branch != coverityScan
@@ -76,9 +76,10 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - deadsnakes
           packages:
-            - gcc-5
             - g++-5
+            - python3.6
             - libmysqlclient-dev
       arch: amd64
       if: branch != coverityScan
@@ -88,9 +89,10 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - deadsnakes
           packages:
-            - gcc-6
             - g++-6
+            - python3.6
             - libmysqlclient-dev
       arch: amd64
       if: branch != coverityScan
@@ -100,9 +102,10 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - deadsnakes
           packages:
-            - gcc-6
             - g++-6
+            - python3.6
             - libmysqlclient-dev
       arch: amd64
       if: branch != coverityScan
@@ -112,9 +115,10 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - deadsnakes
           packages:
-            - gcc-7
             - g++-7
+            - python3.6
             - libmysqlclient-dev
       arch: amd64
       if: branch != coverityScan
@@ -124,9 +128,10 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - deadsnakes
           packages:
-            - gcc-7
             - g++-7
+            - python3.6
             - libmysqlclient-dev
       arch: amd64
       if: branch != coverityScan
@@ -136,9 +141,10 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - deadsnakes
           packages:
-            - gcc-8
             - g++-8
+            - python3.6
             - libmysqlclient-dev
       arch: amd64
       if: branch != coverityScan
@@ -148,9 +154,10 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - deadsnakes
           packages:
-            - gcc-8
             - g++-8
+            - python3.6
             - libmysqlclient-dev
       arch: amd64
       if: branch != coverityScan
@@ -160,9 +167,10 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - deadsnakes
           packages:
-            - gcc-9
             - g++-9
+            - python3.6
             - libmysqlclient-dev
       arch: amd64
       if: branch != coverityScan
@@ -172,9 +180,10 @@ jobs:
         apt:
           sources:
             - ubuntu-toolchain-r-test
+            - deadsnakes
           packages:
-            - gcc-9
             - g++-9
+            - python3.6
             - libmysqlclient-dev
       arch: amd64
       if: branch != coverityScan
