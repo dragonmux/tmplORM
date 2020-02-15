@@ -6,4 +6,5 @@ This caused me to set out to program something efficient that solves the problem
 
 [![Build Status](https://travis-ci.org/DX-MON/tmplORM.svg?branch=master)](https://travis-ci.org/DX-MON/tmplORM)
 [![codecov](https://codecov.io/gh/DX-MON/tmplORM/branch/master/graph/badge.svg)](https://codecov.io/gh/DX-MON/tmplORM)
-
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/DX-MON/tmplORM.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/DX-MON/tmplORM/alerts/)
+[![Coverity Status](https://scan.coverity.com/projects/20296/badge.svg)](https://scan.coverity.com/projects/dx-mon-tmplorm)
