@@ -51,7 +51,8 @@
             },
             "compilerPath": "/usr/bin/gcc-5",
             "cppStandard": "c++11",
-            "cStandard": "c11"
+            "cStandard": "c11",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
         },
         {
             "name": "Win32",
