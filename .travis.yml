@@ -7,7 +7,7 @@ before_install:
   - source .travis-ci/msodbcsql17.sh
   - source .travis-ci/docker.sh
   - if [ $COVERITY -eq 1 ]; then
-      .travis-ci/installCoverity.sh
+      .travis-ci/installCoverity.sh;
     fi
 install:
   - pushd $HOME/build
