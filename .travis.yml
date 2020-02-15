@@ -39,6 +39,9 @@ after_script:
   - docker stop $MSSQL_CONTAINER
   - docker stop $MYSQL_CONTAINER
 
+cache:
+  pip: true
+
 jobs:
   include:
     #- compiler: clang-5.0
@@ -181,11 +184,41 @@ jobs:
 #        apt:
 #          sources:
 #            - ubuntu-toolchain-r-test
+#           - deadsnakes
 #          packages:
-#            - gcc-9
 #            - g++-9
+#            - python3.6
 #            - libmysqlclient-dev
 #      arch: arm64
+#      if: branch != coverityScan
+    - compiler: gcc-9
+      env:
+        - CC=gcc-9 CXX=g++-9 COVERAGE=0 COVERITY_PROJECT_NAME=DX-MON/crunch
+        - secure: "kzqSZ8o3nVAZK4KqwKVkxvn8UITA6k/4sOpuuhqryqVEPbaSPOwjXiS3fXLQ8KHDKxogOLvQZ7moOYiLqizAF/vL5Zdzmv2UyHETB9fncLkwX0/lUQL8sPuSdHd0k+aAPncA8lPkuY6MQKljkX2UUfK+TdT3pKWUeT3x7gex2Iw97KFPdL3JeBhtrfgLzCb6cfZIZM22GSl7BQtmxZEJWRLGzsjtgitpHiGqTaYnCCrkbm/pp6zTBkhqn2dXLzF47Kf35p75LORi+feO5GUPgSK5OoM6pLN/4XyrMe5FUlfVcGv1wTW1ErLgBcRnkCdEhUzCKEMd2U0jIflT+Zbau7l/Pde73xGLBPK2aAWGHKt7iBuv6vOi6BEuL0eJKbyqflllZWqJbMOYP6a/rIwxXoqx0dKpyJoX5ECm6yyvnZiRTbkxBcxJJ3HKVCZJpplR046Yd942yTTz+NMRVZaUOUvROwXzmT71akYZ3cxw0yW0+ZXanWE/pQyUWCIiQT0kEmTqOEOUfsJkCqN42p/V/v7KLf9MmbQzjtZ2XgPVMx6dwlQEiaEcX0z29IDwKnrKJgJygqrW6ww1i9XFLu/zJ8wS6uyQgAKFtB3/O4JukEvqYX/qax+153uvk+7/pPdMNw3lG0gxFHTdyzvrPGSJIY/oOhbY1E/pSeOp7r7JzIs="
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - deadsnakes
+          packages:
+            - g++-9
+            - python3.6
+            - libmysqlclient-dev
+        coverity_scan:
+          project:
+            name: "DX-MON/tmplORM"
+            description: "An ORM based on template meta-programming in C++"
+          notification_email: dx-mon@users.sourceforge.net
+          build_command_prepend: "meson build --prefix=$HOME/.local"
+          build_command: "ninja -C build"
+          branch_pattern: coverityScan
+      before_install:
+        - .travis-ci/installCoverity.sh
+      before_script:
+      script: touch build
+      after_failure: cat cov-int/build-log.txt
+      arch: amd64
+      if: branch = coverityScan
 
 env:
   global:
