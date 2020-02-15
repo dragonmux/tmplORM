@@ -1,5 +1,6 @@
 language: cpp
 os: linux
+dist: xenial
 
 before_install:
   - export GCC="$GCC -m64 -fPIC -DPIC" GXX="$GXX -m64 -fPIC -DPIC"
@@ -53,6 +54,7 @@ jobs:
     #        - g++-4.9
     #        - clang-5.0
     #        - libmysqlclient-dev
+    #  if: branch != coverityScan
     - compiler: gcc-5
       env: GCC=gcc-5 GXX=g++-5 COVERAGE=0
       addons:
@@ -64,6 +66,7 @@ jobs:
             - g++-5
             - libmysqlclient-dev
       arch: amd64
+      if: branch != coverityScan
     - compiler: gcc-5
       env: GCC=gcc-5 GXX=g++-5 GCOV=gcov-5
       addons:
@@ -75,6 +78,7 @@ jobs:
             - g++-5
             - libmysqlclient-dev
       arch: amd64
+      if: branch != coverityScan
     - compiler: gcc-6
       env: GCC=gcc-6 GXX=g++-6 COVERAGE=0
       addons:
@@ -86,6 +90,7 @@ jobs:
             - g++-6
             - libmysqlclient-dev
       arch: amd64
+      if: branch != coverityScan
     - compiler: gcc-6
       env: GCC=gcc-6 GXX=g++-6 GCOV=gcov-6
       addons:
@@ -97,6 +102,7 @@ jobs:
             - g++-6
             - libmysqlclient-dev
       arch: amd64
+      if: branch != coverityScan
     - compiler: gcc-7
       env: GCC=gcc-7 GXX=g++-7 COVERAGE=0
       addons:
@@ -108,6 +114,7 @@ jobs:
             - g++-7
             - libmysqlclient-dev
       arch: amd64
+      if: branch != coverityScan
     - compiler: gcc-7
       env: GCC=gcc-7 GXX=g++-7 GCOV=gcov-7
       addons:
@@ -119,6 +126,7 @@ jobs:
             - g++-7
             - libmysqlclient-dev
       arch: amd64
+      if: branch != coverityScan
     - compiler: gcc-8
       env: GCC=gcc-8 GXX=g++-8 COVERAGE=0
       addons:
@@ -130,6 +138,7 @@ jobs:
             - g++-8
             - libmysqlclient-dev
       arch: amd64
+      if: branch != coverityScan
     - compiler: gcc-8
       env: GCC=gcc-8 GXX=g++-8 GCOV=gcov-8
       addons:
@@ -141,6 +150,7 @@ jobs:
             - g++-8
             - libmysqlclient-dev
       arch: amd64
+      if: branch != coverityScan
     - compiler: gcc-9
       env: GCC=gcc-9 GXX=g++-9 COVERAGE=0
       addons:
@@ -152,6 +162,7 @@ jobs:
             - g++-9
             - libmysqlclient-dev
       arch: amd64
+      if: branch != coverityScan
     - compiler: gcc-9
       env: GCC=gcc-9 GXX=g++-9 GCOV=gcov-9
       addons:
@@ -163,6 +174,7 @@ jobs:
             - g++-9
             - libmysqlclient-dev
       arch: amd64
+      if: branch != coverityScan
 #    - compiler: gcc-9
 #      env: GCC=gcc-9 GXX=g++-9 GCOV=gcov-9
 #      addons:
