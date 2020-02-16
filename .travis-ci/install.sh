@@ -23,7 +23,7 @@ if [ ! -d crunch ]; then
 	cd crunch
 	meson build --prefix=/usr --buildtype=release -Dstrip=true
 	ninja -C build
-	sudo ninja -C build install
+	sudo -E ninja -C build install
 	cd ..
 fi
 
@@ -32,6 +32,6 @@ if [ ! -d rSON ]; then
 	cd rSON
 	meson build --prefix=/usr --buildtype=release -Dstrip=true
 	ninja -C build
-	sudo ninja -C build install
+	sudo -E ninja -C build install
 	cd ..
 fi
