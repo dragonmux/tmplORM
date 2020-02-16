@@ -309,6 +309,7 @@ catch (const std::out_of_range &error)
 	write(STDERR_FILENO, desc.data(), desc.size());
 	write(STDERR_FILENO, what.data(), what.size());
 	write(STDERR_FILENO, "\n", 1);
+	std::terminate();
 }
 
 void mySQLBind_t::operator =(mySQLBind_t &&binds) noexcept
