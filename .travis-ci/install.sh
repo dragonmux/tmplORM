@@ -17,6 +17,7 @@ fi
 
 cd $HOME/build/deps
 unset COVERAGE
+NINJA=`which ninja`
 
 if [ ! -d crunch ]; then
 	git clone https://github.com/DX-MON/crunch crunch
@@ -25,7 +26,7 @@ if [ ! -d crunch ]; then
 	ninja -C build
 	cd ..
 fi
-sudo -E ninja -C crunch/build install
+sudo $NINJA -C crunch/build install
 
 if [ ! -d rSON ]; then
 	git clone https://github.com/DX-MON/rSON rSON
@@ -34,4 +35,4 @@ if [ ! -d rSON ]; then
 	ninja -C build
 	cd ..
 fi
-sudo -E ninja -C rSON/build install
+sudo $NINJA -C rSON/build install
