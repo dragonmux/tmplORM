@@ -23,15 +23,15 @@ if [ ! -d crunch ]; then
 	cd crunch
 	meson build --prefix=/usr --buildtype=release -Dstrip=true
 	ninja -C build
-	sudo -E ninja -C build install
 	cd ..
 fi
+sudo -E ninja -C crunch/build install
 
 if [ ! -d rSON ]; then
 	git clone https://github.com/DX-MON/rSON rSON
 	cd rSON
 	meson build --prefix=/usr --buildtype=release -Dstrip=true
 	ninja -C build
-	sudo -E ninja -C build install
 	cd ..
 fi
+sudo -E ninja -C rSON/build install
