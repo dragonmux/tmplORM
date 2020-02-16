@@ -9,24 +9,7 @@ before_install:
   - if [ $COVERITY -eq 1 ]; then
       .travis-ci/installCoverity.sh;
     fi
-install:
-  - pushd $HOME/build
-  - if [ $COVERAGE -eq 1 ]; then
-      export _COV=$COVERAGE;
-      unset COVERAGE;
-    fi
-  - git clone https://github.com/DX-MON/crunch.git DX-MON/crunch
-  - cd DX-MON/crunch
-  - sudo make install
-  - cd ../..
-  - git clone https://github.com/DX-MON/rSON.git DX-MON/rSON
-  - cd DX-MON/rSON
-  - sudo make install
-  - popd
-  - if [ -n "${_COV}" ]; then
-      export COVERAGE=$_COV;
-      unset _COV;
-    fi
+install: .travis-ci/install.sh
 script:
   - export GCC="$GCC -m64 -fPIC -DPIC" GXX="$GXX -m64 -fPIC -DPIC"
   - make
@@ -44,6 +27,8 @@ after_script:
 
 cache:
   pip: true
+  directories:
+    - $HOME/build/deps
 
 jobs:
   include:
