@@ -753,7 +753,7 @@ void tzInit() noexcept
 	isDaylight = false;
 	timeZone = 0;
 	tzName[0] = tzString("UTC");
-	tzName[1] = tzName[1];
+	tzName[1] = tzName[0];
 	tzInitialised = true;
 }
 
