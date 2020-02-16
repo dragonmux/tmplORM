@@ -1,5 +1,10 @@
 #include <cmath>
 #include <cstring>
+#ifndef _WINDOWS
+#include <unistd.h>
+#else
+#include <io.h>
+#endif
 #include "mysql.hxx"
 #include "value.hxx"
 #include "string.hxx"
@@ -8,7 +13,7 @@
  * @internal
  * @file
  * @author Rachel Mant
- * @date 2016-2018
+ * @date 2016-2020
  * @brief C++ MySQL driver abstraction layer for handling client connections and query datasets
  */
 
@@ -281,12 +286,29 @@ void mySQLPreparedResult_t::fetchColumn(const size_t index) const noexcept
 
 mySQLBind_t::mySQLBind_t(mySQLBind_t &&binds) noexcept : mySQLBind_t{} { *this = std::move(binds); }
 
-mySQLBind_t::mySQLBind_t(const size_t paramsCount) noexcept : params{paramsCount}, paramStorage{paramsCount}, numParams{paramsCount}
+mySQLBind_t::mySQLBind_t(const size_t paramsCount) noexcept try : params{paramsCount}, paramStorage{paramsCount}, numParams{paramsCount}
 {
 	if (!params.valid())
 		return;
 	for (size_t i = 0; i < numParams; ++i)
 		params[i].buffer_type = MYSQL_TYPE_NULL;
+}
+catch (const vectorStateException_t &error)
+{
+	const std::string desc{"tmplORM FATAL: Failed to allocate parameters - "_s};
+	const std::string what{error.what()};
+	write(STDERR_FILENO, desc.data(), desc.size());
+	write(STDERR_FILENO, what.data(), what.size());
+	write(STDERR_FILENO, "\n", 1);
+	std::terminate();
+}
+catch (const std::out_of_range &error)
+{
+	const std::string desc{"tmplORM FATAL: Indexing failure - "_s};
+	const std::string what{error.what()};
+	write(STDERR_FILENO, desc.data(), desc.size());
+	write(STDERR_FILENO, what.data(), what.size());
+	write(STDERR_FILENO, "\n", 1);
 }
 
 void mySQLBind_t::operator =(mySQLBind_t &&binds) noexcept

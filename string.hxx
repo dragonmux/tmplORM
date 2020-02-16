@@ -22,6 +22,8 @@ inline std::unique_ptr<char []> stringDup(const std::unique_ptr<char []> &str) n
 inline std::unique_ptr<char []> stringDup(const std::unique_ptr<const char []> &str) noexcept { return stringDup(str.get()); }
 inline std::unique_ptr<const char []> strNewDup(const char *const str) noexcept { return stringDup(str); }
 
+inline std::string operator ""_s(const char *str, const size_t len) noexcept { return {str, len}; }
+
 struct utf16_t final
 {
 private:
