@@ -1,3 +1,8 @@
+#ifndef _WINDOWS
+#include <unistd.h>
+#else
+#include <io.h>
+#endif
 #define UNICODE
 #include <sql.h>
 #include <sqlext.h>
@@ -288,7 +293,7 @@ inline bool isWCharType(const int16_t type) noexcept { return type == SQL_WLONGV
 inline bool isBinType(const int16_t type) noexcept { return type == SQL_LONGVARBINARY || type == SQL_VARBINARY || type == SQL_BINARY; }
 tSQLValue_t tSQLResult_t::nullValue{};
 
-tSQLValue_t &tSQLResult_t::operator [](const uint16_t idx) const noexcept
+tSQLValue_t &tSQLResult_t::operator [](const uint16_t idx) const noexcept try
 {
 	if (idx >= fields || !valid())
 		return nullValue;
@@ -326,6 +331,24 @@ tSQLValue_t &tSQLResult_t::operator [](const uint16_t idx) const noexcept
 	}
 	valueCache[idx] = {valueStorage.release(), valueLength, type};
 	return valueCache[idx];
+}
+catch (const vectorStateException_t &error)
+{
+	const std::string desc{"tmplORM FATAL: Failed to allocate parameters - "_s};
+	const std::string what{error.what()};
+	write(STDERR_FILENO, desc.data(), desc.size());
+	write(STDERR_FILENO, what.data(), what.size());
+	write(STDERR_FILENO, "\n", 1);
+	std::terminate();
+}
+catch (const std::out_of_range &error)
+{
+	const std::string desc{"tmplORM FATAL: Indexing failure - "_s};
+	const std::string what{error.what()};
+	write(STDERR_FILENO, desc.data(), desc.size());
+	write(STDERR_FILENO, what.data(), what.size());
+	write(STDERR_FILENO, "\n", 1);
+	std::terminate();
 }
 
 bool tSQLResult_t::error(const int16_t err) const noexcept
