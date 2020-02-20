@@ -286,10 +286,8 @@ void mySQLPreparedResult_t::fetchColumn(const size_t index) const noexcept
 
 mySQLBind_t::mySQLBind_t(mySQLBind_t &&binds) noexcept : mySQLBind_t{} { *this = std::move(binds); }
 
-mySQLBind_t::mySQLBind_t(const size_t paramsCount) noexcept try : params{paramsCount}, paramStorage{paramsCount}, numParams{paramsCount}
+void mySQLBind_t::resetParams() noexcept try
 {
-	if (!params.valid())
-		return;
 	for (size_t i = 0; i < numParams; ++i)
 		params[i].buffer_type = MYSQL_TYPE_NULL;
 }
@@ -310,6 +308,13 @@ catch (const std::out_of_range &error)
 	write(STDERR_FILENO, what.data(), what.size());
 	write(STDERR_FILENO, "\n", 1);
 	std::terminate();
+}
+
+mySQLBind_t::mySQLBind_t(const size_t paramsCount) noexcept : params{paramsCount}, paramStorage{paramsCount}, numParams{paramsCount}
+{
+	if (!params.valid())
+		return;
+	resetParams();
 }
 
 void mySQLBind_t::operator =(mySQLBind_t &&binds) noexcept

@@ -177,6 +177,8 @@ private:
 	fixedVector_t<managedPtr_t<void>> paramStorage;
 	size_t numParams;
 
+	void resetParams() noexcept;
+
 protected:
 	mySQLBind_t(const size_t paramsCount) noexcept;
 	friend struct mySQLPreparedResult_t;
