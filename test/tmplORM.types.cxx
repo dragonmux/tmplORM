@@ -112,7 +112,10 @@ namespace testDateTime
 	{
 		tzInitialised = false;
 		char *cwd = getcwd(nullptr, 0);
-		setenv("TZDIR", cwd, true);
+		if (cwd)
+			setenv("TZDIR", cwd, true);
+		else
+			setenv("TZDIR", ".", true);
 		setenv("TZ", "data/GMT_BST.timezone", true);
 		free(cwd);
 	}
