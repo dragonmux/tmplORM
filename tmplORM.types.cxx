@@ -3,10 +3,10 @@
 #include <cstring>
 #include <array>
 #include <chrono>
-#include <tmplORM.types.hxx>
-#include <dateTime.hxx>
 #include <substrate/fd>
 #include <substrate/utility>
+#include <tmplORM.types.hxx>
+#include <dateTime.hxx>
 
 using substrate::fd_t;
 
@@ -485,10 +485,10 @@ bool tzReadFile(const char *const file) noexcept
 	typeIndexes = substrate::make_unique_nothrow<uint8_t []>(transitionsCount);
 	types = substrate::make_unique_nothrow<ttInfo_t []>(typesCount);
 	zoneNames = substrate::make_unique_nothrow<char []>(charCount + 1);
-	leaps = substrate::make_unique_nothrow<leap_t []>(leapsCount);
+	leaps = leapsCount ? substrate::make_unique_nothrow<leap_t []>(leapsCount) : nullptr;
 	tzSpec = tzSpecLen ? substrate::make_unique_nothrow<char []>(tzSpecLen) : nullptr;
 	if (!transitions || !typeIndexes || !types ||
-		!zoneNames || !leaps || (tzSpecLen && !tzSpec) ||
+		!zoneNames || (leapsCount && !leaps) || (tzSpecLen && !tzSpec) ||
 		!readTransitions(fd, width) ||
 		!readTypes(fd, charCount) ||
 		!fd.read(zoneNames, charCount) ||
