@@ -128,7 +128,7 @@ private:
 		assertTrue(client.error() == tSQLExecErrorType_t::ok);
 		assertTrue(client.valid());
 
-		testClient = substrate::make_unique<tSQLClient_t>();
+		testClient = substrate::make_unique_nothrow<tSQLClient_t>();
 		assertNotNull(testClient);
 		assertFalse(testClient->valid());
 		*testClient = std::move(client);

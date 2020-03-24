@@ -67,6 +67,7 @@
 		"random": "cpp",
 		"regex": "cpp",
 		"string": "cpp",
-		"string_view": "cpp"
+		"string_view": "cpp",
+		"fd": "cpp"
 	}
 }

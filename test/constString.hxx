@@ -40,7 +40,7 @@ private:
 	{
 		if (!str)
 			str = "";
-		auto ret = substrate::make_unique<char []>(strlen(str) + 1);
+		auto ret = substrate::make_unique_nothrow<char []>(strlen(str) + 1);
 		if (!ret)
 			return nullptr;
 		strcpy(ret.get(), str);
@@ -51,7 +51,7 @@ private:
 	{
 		if (!str && n)
 			return nullptr;
-		auto ret = substrate::make_unique<char []>(n);
+		auto ret = substrate::make_unique_nothrow<char []>(n);
 		if (!ret)
 			return nullptr;
 		memcpy(ret.get(), str, n);

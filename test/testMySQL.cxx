@@ -152,7 +152,7 @@ private:
 		assertEqual(client.errorNum(), 0);
 		assertTrue(client.valid());
 
-		testClient = substrate::make_unique<mySQLClient_t>();
+		testClient = substrate::make_unique_nothrow<mySQLClient_t>();
 		assertNotNull(testClient);
 		assertTrue(testClient->valid());
 		// If we try to connect again while already connected, it should no-op.

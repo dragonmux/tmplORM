@@ -176,7 +176,7 @@ namespace tmplORM
 
 	template<typename T> std::unique_ptr<jsonAtom_t> modelToJSON(const fixedVector_t<T> &modelData)
 	{
-		auto json = substrate::make_unique<jsonArray_t>();
+		auto json = substrate::make_unique_nothrow<jsonArray_t>();
 		if (!json)
 			return nullptr;
 		for (const auto &item : modelData)

@@ -205,8 +205,9 @@ fd_t tzOpenFile(const char *const file) noexcept
 
 bool readTransitions(const fd_t &fd, const size_t width) noexcept
 {
-	const auto buffer = substrate::make_unique<uint8_t []>(transitionsCount * width);
-	if (!fd.read(buffer.get(), transitionsCount * width) ||
+	const auto buffer = substrate::make_unique_nothrow<uint8_t []>(transitionsCount * width);
+	if (!buffer ||
+		!fd.read(buffer.get(), transitionsCount * width) ||
 		!fd.read(typeIndexes, transitionsCount))
 		return false;
 
@@ -328,10 +329,10 @@ char *tzString(const char *string, const size_t length) noexcept
 		}
 	}
 
-	auto value = substrate::make_unique<tzString_t>();
+	auto value = substrate::make_unique_nothrow<tzString_t>();
 	if (!value)
 		return nullptr;
-	value->data = substrate::make_unique<char []>(length + 1);
+	value->data = substrate::make_unique_nothrow<char []>(length + 1);
 	if (!value->data)
 		return nullptr;
 	char *const result = value->data.get();
@@ -480,12 +481,12 @@ bool tzReadFile(const char *const file) noexcept
 			return false;
 	}
 
-	transitions = substrate::make_unique<time_t []>(transitionsCount);
-	typeIndexes = substrate::make_unique<uint8_t []>(transitionsCount);
-	types = substrate::make_unique<ttInfo_t []>(typesCount);
-	zoneNames = substrate::make_unique<char []>(charCount + 1);
-	leaps = substrate::make_unique<leap_t []>(leapsCount);
-	tzSpec = tzSpecLen ? substrate::make_unique<char []>(tzSpecLen) : nullptr;
+	transitions = substrate::make_unique_nothrow<time_t []>(transitionsCount);
+	typeIndexes = substrate::make_unique_nothrow<uint8_t []>(transitionsCount);
+	types = substrate::make_unique_nothrow<ttInfo_t []>(typesCount);
+	zoneNames = substrate::make_unique_nothrow<char []>(charCount + 1);
+	leaps = substrate::make_unique_nothrow<leap_t []>(leapsCount);
+	tzSpec = tzSpecLen ? substrate::make_unique_nothrow<char []>(tzSpecLen) : nullptr;
 	if (!transitions || !typeIndexes || !types ||
 		!zoneNames || !leaps || (tzSpecLen && !tzSpec) ||
 		!readTransitions(fd, width) ||

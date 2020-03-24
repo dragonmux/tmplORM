@@ -101,7 +101,7 @@ public:
 
 	operator std::unique_ptr<char []>() const noexcept
 	{
-		auto number = substrate::make_unique<char []>(digits(_value) + 1);
+		auto number = substrate::make_unique_nothrow<char []>(digits(_value) + 1);
 		if (!number)
 			return nullptr;
 		format(number.get());
@@ -120,7 +120,7 @@ public:
 
 	std::unique_ptr<char []> formatFraction(const uint8_t maxDigits) const noexcept
 	{
-		auto number = substrate::make_unique<char []>(fractionLength(maxDigits));
+		auto number = substrate::make_unique_nothrow<char []>(fractionLength(maxDigits));
 		if (!number)
 			return nullptr;
 		formatFraction(maxDigits, number.get());
