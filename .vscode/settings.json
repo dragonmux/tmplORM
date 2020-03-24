@@ -68,6 +68,7 @@
 		"regex": "cpp",
 		"string": "cpp",
 		"string_view": "cpp",
-		"fd": "cpp"
+		"fd": "cpp",
+		"fixed_vector": "cpp"
 	}
 }

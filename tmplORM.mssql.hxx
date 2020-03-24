@@ -13,7 +13,7 @@
 /*!
  * @file
  * @author Rachel Mant
- * @date 2016-2017
+ * @date 2016-2020
  * @brief Defines the MSSQL mapper for the ORM
  */
 
@@ -21,6 +21,7 @@ namespace tmplORM
 {
 	namespace mssql
 	{
+		using substrate::managedPtr_t;
 		using namespace tmplORM::common;
 		using namespace tmplORM::mssql::driver;
 		using namespace tmplORM::types::baseTypes;
@@ -101,7 +102,7 @@ namespace tmplORM
 					date.year = value.year();
 					date.month = value.month();
 					date.day = value.day();
-					paramStorage = makeManaged<SQL_DATE_STRUCT>(date);
+					paramStorage = substrate::make_managed_nothrow<SQL_DATE_STRUCT>(date);
 					return paramStorage.get();
 				}
 
@@ -118,7 +119,7 @@ namespace tmplORM
 					dateTime.fraction = value.nanoSecond() / 100;
 					dateTime.fraction *= 100; // This is here to fix the accuracy for the server
 
-					paramStorage = makeManaged<SQL_TIMESTAMP_STRUCT>(dateTime);
+					paramStorage = substrate::make_managed_nothrow<SQL_TIMESTAMP_STRUCT>(dateTime);
 					return paramStorage.get();
 				}
 
@@ -129,7 +130,7 @@ namespace tmplORM
 					swapBytes(guid.Data1);
 					swapBytes(guid.Data2);
 					swapBytes(guid.Data3);
-					paramStorage = makeManaged<SQLGUID>(guid);
+					paramStorage = substrate::make_managed_nothrow<SQLGUID>(guid);
 					return paramStorage.get();
 				}
 			};

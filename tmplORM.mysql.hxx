@@ -10,6 +10,7 @@ namespace tmplORM
 {
 	namespace mysql
 	{
+		using substrate::managedPtr_t;
 		using namespace tmplORM::common;
 		using namespace tmplORM::mysql::driver;
 		using namespace tmplORM::types::baseTypes;
@@ -87,7 +88,7 @@ namespace tmplORM
 					date.day = value.day();
 					date.time_type = MYSQL_TIMESTAMP_DATE;
 
-					paramStorage = makeManaged<MYSQL_TIME>(date);
+					paramStorage = substrate::make_managed_nothrow<MYSQL_TIME>(date);
 					if (!paramStorage)
 						return false;
 					param.buffer = paramStorage;
@@ -107,7 +108,7 @@ namespace tmplORM
 					dateTime.second_part = value.nanoSecond() / std::chrono::duration_cast<nanoseconds_t>(1_us).count();
 					dateTime.time_type = MYSQL_TIMESTAMP_DATETIME;
 
-					paramStorage = makeManaged<MYSQL_TIME>(dateTime);
+					paramStorage = substrate::make_managed_nothrow<MYSQL_TIME>(dateTime);
 					if (!paramStorage)
 						return false;
 					param.buffer = paramStorage;
@@ -133,7 +134,7 @@ namespace tmplORM
 						uuid[i] = hex + 0x30;
 					}
 
-					auto storage = makeManaged<decltype(uuid)>(uuid);
+					auto storage = substrate::make_managed_nothrow<decltype(uuid)>(uuid);
 					if (!storage)
 						return false;
 					param.buffer = storage->data();
@@ -177,25 +178,25 @@ namespace tmplORM
 			template<typename value_t> struct bindOutStorage_t
 			{
 				constexpr uint32_t length() const noexcept { return sizeof(value_t); }
-				managedPtr_t<void> operator ()() const noexcept { return makeManaged<value_t>(); }
+				managedPtr_t<void> operator ()() const noexcept { return substrate::make_managed_nothrow<value_t>(); }
 			};
 
 			template<> struct bindOutStorage_t<ormDate_t>
 			{
 				constexpr uint32_t length() const noexcept { return sizeof(MYSQL_TIME); }
-				managedPtr_t<void> operator ()() const noexcept { return makeManaged<MYSQL_TIME>(); }
+				managedPtr_t<void> operator ()() const noexcept { return substrate::make_managed_nothrow<MYSQL_TIME>(); }
 			};
 
 			template<> struct bindOutStorage_t<ormDateTime_t>
 			{
 				constexpr uint32_t length() const noexcept { return sizeof(MYSQL_TIME); }
-				managedPtr_t<void> operator ()() const noexcept { return makeManaged<MYSQL_TIME>(); }
+				managedPtr_t<void> operator ()() const noexcept { return substrate::make_managed_nothrow<MYSQL_TIME>(); }
 			};
 
 			/*template<> struct bindOutStorage_t<ormUUID_t>
 			{
 				constexpr uint32_t length() const noexcept { return 32; }
-				managedPtr_t<void> operator ()() const noexcept { return makeManaged<char []>(32); }
+				managedPtr_t<void> operator ()() const noexcept { return substrate::make_managed_nothrow<char []>(32); }
 			};*/
 
 			template<typename T> struct bindValueOut_t

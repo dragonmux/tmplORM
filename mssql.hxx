@@ -5,7 +5,7 @@
 #include <array>
 #include <memory>
 #include <utility>
-#include <managedPtr.hxx>
+#include <substrate/managed_ptr>
 #include <tmplORM.hxx>
 
 /*!
@@ -186,7 +186,7 @@ private:
 	const tSQLClient_t *client;
 	void *queryHandle;
 	size_t numParams;
-	fixedVector_t<managedPtr_t<void>> paramStorage;
+	fixedVector_t<substrate::managedPtr_t<void>> paramStorage;
 	fixedVector_t<long> dataLengths;
 	mutable bool executed;
 

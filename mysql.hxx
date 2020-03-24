@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <mysql.h>
 #include <utility>
-#include "managedPtr.hxx"
+#include <substrate/managed_ptr>
 #include "tmplORM.hxx"
 
 /*!
@@ -173,7 +173,7 @@ struct mySQLBind_t final
 {
 private:
 	fixedVector_t<MYSQL_BIND> params;
-	fixedVector_t<managedPtr_t<void>> paramStorage;
+	fixedVector_t<substrate::managedPtr_t<void>> paramStorage;
 	size_t numParams;
 
 	void resetParams() noexcept;
