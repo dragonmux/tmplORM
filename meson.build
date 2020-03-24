@@ -19,6 +19,7 @@ threading = dependency('threads')
 dl = cxx.find_library('dl', required: not isWindows)
 odbc = cxx.find_library('odbc')
 rSON = dependency('rSON')
+substrate = dependency('substrate')
 
 mysqlConfig = find_program('mysql_config')
 mysql = declare_dependency(
@@ -48,7 +49,7 @@ tmplORMSrcDir = meson.current_source_dir()
 tmplORM = shared_library(
 	'tmplORM',
 	tmplORMSrc,
-	dependencies: [threading, dl, odbc, mysql],
+	dependencies: [threading, dl, odbc, mysql, substrate],
 	version: meson.project_version(),
 	install: true
 )

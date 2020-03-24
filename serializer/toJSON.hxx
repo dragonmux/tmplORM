@@ -4,7 +4,7 @@
 #include <memory>
 #include <tmplORM.hxx>
 #include <fixedVector.hxx>
-#include <string.hxx>
+#include <substrate/utility>
 #include "json.hxx"
 
 namespace tmplORM
@@ -49,7 +49,7 @@ namespace tmplORM
 			static std::unique_ptr<jsonAtom_t> from(const nullable_t<T> &value)
 			{
 				if (value.isNull())
-					return makeUnique<jsonNull_t>();
+					return substrate::make_unique<jsonNull_t>();
 				return makeAtom_t<T>::from(value);
 			}
 		};
@@ -59,7 +59,7 @@ namespace tmplORM
 			static std::unique_ptr<jsonAtom_t> from(const jsonNullable_t<T> &value)
 			{
 				if (value.isNull())
-					return makeUnique<jsonNull_t>();
+					return substrate::make_unique<jsonNull_t>();
 				return makeAtom_t<T>::from(value);
 			}
 		};
@@ -67,25 +67,25 @@ namespace tmplORM
 		template<typename fieldName> struct makeAtom_t<date_t<fieldName>>
 		{
 			static std::unique_ptr<jsonString_t> from(const date_t<fieldName> &value)
-				{ return makeUnique<jsonString_t>(value.date().asString().release()); }
+				{ return substrate::make_unique<jsonString_t>(value.date().asString().release()); }
 		};
 
 		template<typename fieldName> struct makeAtom_t<dateTime_t<fieldName>>
 		{
 			static std::unique_ptr<jsonString_t> from(const dateTime_t<fieldName> &value)
-				{ return makeUnique<jsonString_t>(value.dateTime().asString().release()); }
+				{ return substrate::make_unique<jsonString_t>(value.dateTime().asString().release()); }
 		};
 
 		template<typename fieldName> struct makeAtom_t<time_t<fieldName>>
 		{
 			static std::unique_ptr<jsonString_t> from(const time_t<fieldName> &value)
-				{ return makeUnique<jsonString_t>(value.time()); }
+				{ return substrate::make_unique<jsonString_t>(value.time()); }
 		};
 
 		template<typename fieldName> struct makeAtom_t<uuid_t<fieldName>>
 		{
 			static std::unique_ptr<jsonString_t> from(const uuid_t<fieldName> &value)
-				{ return makeUnique<jsonString_t>(value.uuid().asString().release()); }
+				{ return substrate::make_unique<jsonString_t>(value.uuid().asString().release()); }
 		};
 
 		template<typename fieldName, typename T> struct makeAtom_t<type_t<fieldName, T>>
@@ -97,42 +97,42 @@ namespace tmplORM
 			template<typename U> struct makeNumeric_t<U, true, false>
 			{
 				static std::unique_ptr<jsonInt_t> from(const type_t<fieldName, U> &value)
-					{ return makeUnique<jsonInt_t>(value.value()); }
+					{ return substrate::make_unique<jsonInt_t>(value.value()); }
 			};
 
 			template<typename U> struct makeNumeric_t<U, false, true>
 			{
 				static std::unique_ptr<jsonFloat_t> from(const type_t<fieldName, U> &value)
-					{ return makeUnique<jsonFloat_t>(value.value()); }
+					{ return substrate::make_unique<jsonFloat_t>(value.value()); }
 			};
 
 			template<typename U> struct makeNumeric_t<U, false, false>
 			{
 				static std::unique_ptr<jsonBool_t> from(const type_t<fieldName, bool> &value)
-					{ return makeUnique<jsonBool_t>(value.value()); }
+					{ return substrate::make_unique<jsonBool_t>(value.value()); }
 			};
 
 			static std::unique_ptr<jsonAtom_t> from(const type_t<fieldName, T> &value)
 				{ return makeNumeric_t<T>::from(value); }
 #else
 			static std::unique_ptr<jsonInt_t> from(const type_t<fieldName, enableIf<isInteger<T>::value, T>> &value)
-				{ return makeUnique<jsonInt_t>(value.value()); }
+				{ return substrate::make_unique<jsonInt_t>(value.value()); }
 
 			static std::unique_ptr<jsonFloat_t> from(const type_t<fieldName,
-				enableIf<isFloatingPoint<T>::value, T>> &value) { return makeUnique<jsonFloat_t>(value.value()); }
+				enableIf<isFloatingPoint<T>::value, T>> &value) { return substrate::make_unique<jsonFloat_t>(value.value()); }
 #endif
 		};
 
 		template<typename fieldName, size_t N> struct makeAtom_t<unicode_t<fieldName, N>>
 		{
 			static std::unique_ptr<jsonString_t> from(const unicode_t<fieldName, N> &value)
-				{ return makeUnique<jsonString_t>(stringDup(value.value()).release()); }
+				{ return substrate::make_unique<jsonString_t>(stringDup(value.value()).release()); }
 		};
 
 		template<typename fieldName> struct makeAtom_t<unicodeText_t<fieldName>>
 		{
 			static std::unique_ptr<jsonString_t> from(const unicodeText_t<fieldName> &value)
-				{ return makeUnique<jsonString_t>(stringDup(value.value()).release()); }
+				{ return substrate::make_unique<jsonString_t>(stringDup(value.value()).release()); }
 		};
 
 		template<typename model_t> struct modelToJSON_t
@@ -162,7 +162,7 @@ namespace tmplORM
 		template<typename tableName, typename... fields_t> std::unique_ptr<jsonAtom_t>
 			modelToJSON(const model_t<tableName, fields_t...> &model)
 		{
-			std::unique_ptr<jsonAtom_t> data = makeUnique<jsonObject_t>();
+			std::unique_ptr<jsonAtom_t> data = substrate::make_unique<jsonObject_t>();
 			modelToJSON_t<model_t<tableName, fields_t...>>::template convert<fields_t...>(model, *data);
 			return data;
 		}
@@ -176,7 +176,7 @@ namespace tmplORM
 
 	template<typename T> std::unique_ptr<jsonAtom_t> modelToJSON(const fixedVector_t<T> &modelData)
 	{
-		auto json = makeUnique<jsonArray_t>();
+		auto json = substrate::make_unique<jsonArray_t>();
 		if (!json)
 			return nullptr;
 		for (const auto &item : modelData)

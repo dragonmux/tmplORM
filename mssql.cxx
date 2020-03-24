@@ -6,14 +6,14 @@
 #define UNICODE
 #include <sql.h>
 #include <sqlext.h>
+#include <substrate/utility>
 #include "mssql.hxx"
-#include "string.hxx"
 
 /*!
  * @internal
  * @file
  * @author Rachel Mant
- * @date 2016-2018
+ * @date 2016-2020
  * @brief C++ MSSQL/T-SQL driver abstraction layer for handling client connections and query datasets
  */
 
@@ -234,7 +234,7 @@ tSQLResult_t::tSQLResult_t(const tSQLClient_t *const _client, void *handle, cons
 	else if (_fields)
 	{
 		fields = uint16_t(_fields);
-		fieldInfo = makeUnique<fieldType_t []>(fields);
+		fieldInfo = substrate::make_unique<fieldType_t []>(fields);
 		valueCache = fixedVector_t<tSQLValue_t>{fields};
 		if (!fieldInfo || !valueCache.valid())
 			return;
@@ -317,7 +317,7 @@ tSQLValue_t &tSQLResult_t::operator [](const uint16_t idx) const noexcept try
 			++valueLength;
 	}
 
-	auto valueStorage = makeUnique<char []>(valueLength);
+	auto valueStorage = substrate::make_unique<char []>(valueLength);
 	if (!valueStorage)
 		return nullValue;
 	valueStorage[valueLength - 1] = 0;
@@ -460,7 +460,7 @@ tSQLExecError_t::tSQLExecError_t(const tSQLExecErrorType_t error, const int16_t 
 
 		SQLGetDiagFieldA(handleType, handle, 1, SQL_DIAG_SQLSTATE, _state.data(), _state.size(), nullptr);
 		SQLGetDiagFieldA(handleType, handle, 1, SQL_DIAG_MESSAGE_TEXT, nullptr, 0, &messageLen);
-		_message = makeUnique<char []>(++messageLen);
+		_message = substrate::make_unique<char []>(++messageLen);
 		if (_message)
 		{
 			SQLGetDiagFieldA(handleType, handle, 1, SQL_DIAG_MESSAGE_TEXT, _message.get(), messageLen, nullptr);

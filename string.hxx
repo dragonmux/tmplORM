@@ -11,7 +11,7 @@
 /*!
  * @file
  * @author Rachel Mant
- * @date 2016-2017
+ * @date 2016-2020
  * @brief Defines the interface to the string helpers we implement
  */
 
@@ -90,23 +90,5 @@ public:
 	static size_t length(const utf16_t &str) noexcept { return str ? length<char16_t>(str) : 0; }
 	static size_t length(const utf8_t &str) noexcept { return str ? length<char>(str) : 0; }
 };
-
-template<typename T> struct makeUnique_ { using uniqueType = std::unique_ptr<T>; };
-template<typename T> struct makeUnique_<T []> { using arrayType = std::unique_ptr<T []>; };
-template<typename T, size_t N> struct makeUnique_<T [N]> { struct invalidType { }; };
-
-template<typename T, typename... Args> inline typename makeUnique_<T>::uniqueType makeUnique(Args &&...args) noexcept
-{
-	using ctorT = typename std::remove_const<T>::type;
-	return std::unique_ptr<T>(new (std::nothrow) ctorT(std::forward<Args>(args)...));
-}
-
-template<typename T> inline typename makeUnique_<T>::arrayType makeUnique(const size_t num) noexcept
-{
-	using ctorT = typename std::remove_const<typename std::remove_extent<T>::type>::type;
-	return std::unique_ptr<T>(new (std::nothrow) ctorT[num]());
-}
-
-template<typename T, typename... Args> inline typename makeUnique_<T>::invalidType makeUnique(Args &&...) noexcept = delete;
 
 #endif /*tmplORM_STRING__HXX*/

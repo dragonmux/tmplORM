@@ -5,6 +5,7 @@
 #include <utility>
 #include <string>
 #include <string.hxx>
+#include <substrate/utility>
 
 template<typename> struct isBoolean_ : public std::false_type { };
 template<> struct isBoolean_<bool> : public std::true_type { };
@@ -100,7 +101,7 @@ public:
 
 	operator std::unique_ptr<char []>() const noexcept
 	{
-		auto number = makeUnique<char []>(digits(_value) + 1);
+		auto number = substrate::make_unique<char []>(digits(_value) + 1);
 		if (!number)
 			return nullptr;
 		format(number.get());
@@ -119,7 +120,7 @@ public:
 
 	std::unique_ptr<char []> formatFraction(const uint8_t maxDigits) const noexcept
 	{
-		auto number = makeUnique<char []>(fractionLength(maxDigits));
+		auto number = substrate::make_unique<char []>(fractionLength(maxDigits));
 		if (!number)
 			return nullptr;
 		formatFraction(maxDigits, number.get());

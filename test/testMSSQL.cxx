@@ -2,9 +2,9 @@
 #include <string>
 #include <chrono>
 #include <type_traits>
+#include <substrate/utility>
 #include <crunch++.h>
 #include <mssql.hxx>
-#include <string.hxx>
 #include <tmplORM.mssql.hxx>
 #include "constString.hxx"
 
@@ -12,7 +12,7 @@
  * @internal
  * @file
  * @author Rachel Mant
- * @date 2017-2018
+ * @date 2017-2020
  * @brief Unit tests for the MSSQL driver abstraction layer
  */
 
@@ -26,9 +26,6 @@ using systemClock_t = std::chrono::system_clock;
 #define i64(n)		INT64_C(n)
 using std::chrono::milliseconds;
 using tmplORM::types::chrono::durationIn;
-
-std::string operator ""_s(const char *str, size_t len) noexcept
-	{ return {str, len}; }
 
 std::unique_ptr<tSQLClient_t> testClient{};
 constString_t driver, host, username, password;
@@ -131,7 +128,7 @@ private:
 		assertTrue(client.error() == tSQLExecErrorType_t::ok);
 		assertTrue(client.valid());
 
-		testClient = makeUnique<tSQLClient_t>();
+		testClient = substrate::make_unique<tSQLClient_t>();
 		assertNotNull(testClient);
 		assertFalse(testClient->valid());
 		*testClient = std::move(client);

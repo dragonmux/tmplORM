@@ -5,9 +5,9 @@
 #else
 #include <io.h>
 #endif
+#include <substrate/utility>
 #include "mysql.hxx"
 #include "value.hxx"
-#include "string.hxx"
 
 /*!
  * @internal
@@ -389,7 +389,7 @@ void mySQLRow_t::fetch() noexcept
 		{
 			fields = mysql_num_fields(result);
 			if (fields)
-				fieldTypes = makeUnique<mySQLFieldType_t []>(fields);
+				fieldTypes = substrate::make_unique<mySQLFieldType_t []>(fields);
 			if (!fieldTypes)
 				return;
 			for (uint32_t i = 0; i < fields; ++i)
@@ -462,7 +462,7 @@ std::unique_ptr<char []> mySQLValue_t::asString() const
 	//else if (type != MYSQL_TYPE_STRING && type != MYSQL_TYPE_VAR_STRING)
 	//	throw mySQLValueError_t(mySQLErrorType_t::stringError);
 	const size_t dataLen = data[len - 1] ? len + 1 : len;
-	auto str = makeUnique<char []>(dataLen);
+	auto str = substrate::make_unique<char []>(dataLen);
 	if (!str)
 		return nullptr;
 	memcpy(str.get(), data, len);

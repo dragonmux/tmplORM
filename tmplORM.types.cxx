@@ -6,6 +6,7 @@
 #include <tmplORM.types.hxx>
 #include <dateTime.hxx>
 #include <fd.hxx>
+#include <substrate/utility>
 
 using tmplORM::types::baseTypes::ormDateTime_t;
 using tmplORM::types::baseTypes::chrono::durationIn;
@@ -202,7 +203,7 @@ fd_t tzOpenFile(const char *const file) noexcept
 
 bool readTransitions(const fd_t &fd, const size_t width) noexcept
 {
-	const auto buffer = makeUnique<uint8_t []>(transitionsCount * width);
+	const auto buffer = substrate::make_unique<uint8_t []>(transitionsCount * width);
 	if (!fd.read(buffer.get(), transitionsCount * width) ||
 		!fd.read(typeIndexes, transitionsCount))
 		return false;
@@ -325,10 +326,10 @@ char *tzString(const char *string, const size_t length) noexcept
 		}
 	}
 
-	auto value = makeUnique<tzString_t>();
+	auto value = substrate::make_unique<tzString_t>();
 	if (!value)
 		return nullptr;
-	value->data = makeUnique<char []>(length + 1);
+	value->data = substrate::make_unique<char []>(length + 1);
 	if (!value->data)
 		return nullptr;
 	char *const result = value->data.get();
@@ -477,12 +478,12 @@ bool tzReadFile(const char *const file) noexcept
 			return false;
 	}
 
-	transitions = makeUnique<time_t []>(transitionsCount);
-	typeIndexes = makeUnique<uint8_t []>(transitionsCount);
-	types = makeUnique<ttInfo_t []>(typesCount);
-	zoneNames = makeUnique<char []>(charCount + 1);
-	leaps = makeUnique<leap_t []>(leapsCount);
-	tzSpec = tzSpecLen ? makeUnique<char []>(tzSpecLen) : nullptr;
+	transitions = substrate::make_unique<time_t []>(transitionsCount);
+	typeIndexes = substrate::make_unique<uint8_t []>(transitionsCount);
+	types = substrate::make_unique<ttInfo_t []>(typesCount);
+	zoneNames = substrate::make_unique<char []>(charCount + 1);
+	leaps = substrate::make_unique<leap_t []>(leapsCount);
+	tzSpec = tzSpecLen ? substrate::make_unique<char []>(tzSpecLen) : nullptr;
 	if (!transitions || !typeIndexes || !types ||
 		!zoneNames || !leaps || (tzSpecLen && !tzSpec) ||
 		!readTransitions(fd, width) ||

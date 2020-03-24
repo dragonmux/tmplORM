@@ -7,7 +7,7 @@
 /*!
  * @file
  * @author Rachel Mant
- * @date 2017
+ * @date 2017-2020
  * @brief Defines core base types for the ORM
  */
 
@@ -54,7 +54,7 @@ namespace tmplORM
 					const auto month = fromInt<2>(_month);
 					const auto day = fromInt<2>(_day);
 
-					auto str = makeUnique<char []>(year.length() + month.length() + day.length());
+					auto str = substrate::make_unique<char []>(year.length() + month.length() + day.length());
 					if (!str)
 						return nullptr;
 
@@ -134,7 +134,7 @@ namespace tmplORM
 					const auto second = fromInt<2>(_second);
 					fromInt_t<uint32_t, uint32_t> nanoSecond{_nanoSecond};
 
-					auto str = makeUnique<char []>(hour.length() + minute.length() +
+					auto str = substrate::make_unique<char []>(hour.length() + minute.length() +
 						second.length() + nanoSecond.fractionLength(9) + 1);
 					if (!str)
 						return nullptr;
@@ -296,7 +296,7 @@ namespace tmplORM
 						const auto second = fromInt<2>(_second);
 						fromInt_t<uint32_t, uint32_t> nanoSecond{_nanoSecond};
 
-						auto str = makeUnique<char []>(year.length() + month.length() + day.length() + 1 +
+						auto str = substrate::make_unique<char []>(year.length() + month.length() + day.length() + 1 +
 							hour.length() + minute.length() + second.length() + nanoSecond.fractionLength(9));
 						if (!str)
 							return nullptr;
@@ -410,7 +410,7 @@ namespace tmplORM
 				std::unique_ptr<char []> asString() const noexcept
 				{
 					std::array<uint8_t, sizeof(guid_t)> buffer{};
-					auto str = makeUnique<char []>(36);
+					auto str = substrate::make_unique<char []>(36);
 					if (!str)
 						return nullptr;
 					memcpy(buffer.data(), asPointer(), sizeof(guid_t));
@@ -429,7 +429,7 @@ namespace tmplORM
 				std::unique_ptr<char []> asPackedString() const noexcept
 				{
 					std::array<uint8_t, sizeof(guid_t)> buffer{};
-					auto str = makeUnique<char []>(32);
+					auto str = substrate::make_unique<char []>(32);
 					if (!str)
 						return nullptr;
 					memcpy(buffer.data(), asPointer(), sizeof(guid_t));

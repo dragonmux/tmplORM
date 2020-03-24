@@ -3,8 +3,8 @@
 
 #include <string>
 #include <cassert>
-#include <memory.h>
-#include <stddef.h>
+#include <memory>
+#include <cstddef>
 
 struct constString_t final
 {
@@ -40,7 +40,7 @@ private:
 	{
 		if (!str)
 			str = "";
-		auto ret = makeUnique<char []>(strlen(str) + 1);
+		auto ret = substrate::make_unique<char []>(strlen(str) + 1);
 		if (!ret)
 			return nullptr;
 		strcpy(ret.get(), str);
@@ -51,7 +51,7 @@ private:
 	{
 		if (!str && n)
 			return nullptr;
-		auto ret = makeUnique<char []>(n);
+		auto ret = substrate::make_unique<char []>(n);
 		if (!ret)
 			return nullptr;
 		memcpy(ret.get(), str, n);
@@ -97,7 +97,7 @@ public:
 
 	void operator =(const char c)
 	{
-		auto str = makeUnique<char []>(1);
+		auto str = substrate::make_unique<char []>(1);
 		assign(str, 1);
 		str[0] = c;
 	}

@@ -1,10 +1,10 @@
-#include <chrono>
-#include <crunch++.h>
-#include <mysql.hxx>
-
 #include <sys/types.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <chrono>
+#include <substrate/utility>
+#include <crunch++.h>
+#include <mysql.hxx>
 #include <tmplORM.mysql.hxx>
 #include "constString.hxx"
 
@@ -12,7 +12,7 @@
  * @internal
  * @file
  * @author Rachel Mant
- * @date 2016-2017
+ * @date 2016-2020
  * @brief Unit tests for the MySQL driver abstraction layer
  */
 
@@ -152,7 +152,7 @@ private:
 		assertEqual(client.errorNum(), 0);
 		assertTrue(client.valid());
 
-		testClient = makeUnique<mySQLClient_t>();
+		testClient = substrate::make_unique<mySQLClient_t>();
 		assertNotNull(testClient);
 		assertTrue(testClient->valid());
 		// If we try to connect again while already connected, it should no-op.

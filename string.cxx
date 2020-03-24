@@ -1,12 +1,13 @@
-#include "string.hxx"
 #include <cstring>
 #include <new>
 #include <limits>
+#include <substrate/utility>
+#include "string.hxx"
 
 /*!
  * @file
  * @author Rachel Mant
- * @date 2016-2017
+ * @date 2016-2020
  * @brief Implementation of various string helpers which ideally would be in the STL
  */
 
@@ -25,7 +26,7 @@ std::unique_ptr<const char []> vaFormatString(const char *format, va_list args) 
 	va_copy(lenArgs, args);
 	const size_t len = vsnprintf(nullptr, 0, format, lenArgs) + 1;
 	va_end(lenArgs);
-	auto ret = makeUnique<char []>(len);
+	auto ret = substrate::make_unique<char []>(len);
 	if (!ret)
 		return nullptr;
 	vsprintf(ret.get(), format, args);
@@ -37,7 +38,7 @@ std::unique_ptr<char []> stringDup(const char *const str) noexcept
 	if (!str)
 		return nullptr;
 	const size_t length = strlen(str) + 1;
-	auto ret = makeUnique<char []>(length);
+	auto ret = substrate::make_unique<char []>(length);
 	if (!ret)
 		return nullptr;
 	memcpy(ret.get(), str, length);
@@ -157,7 +158,7 @@ utf16_t utf16::convert(const char *const str) noexcept
 {
 	const size_t lenUTF8 = utf16::length(str);
 	const size_t lenUTF16 = countUnits(str);
-	auto result = makeUnique<char16_t []>(lenUTF16);
+	auto result = substrate::make_unique<char16_t []>(lenUTF16);
 	if (!result || !lenUTF16)
 		return nullptr;
 	for (size_t i = 0, j = 0; i < lenUTF8; ++i, ++j)
@@ -196,7 +197,7 @@ utf8_t utf16::convert(const char16_t *const str) noexcept
 {
 	const size_t lenUTF16 = utf16::length(str);
 	const size_t lenUTF8 = countUnits(str);
-	auto result = makeUnique<char []>(lenUTF8);
+	auto result = substrate::make_unique<char []>(lenUTF8);
 	if (!result || !lenUTF8)
 		return nullptr;
 	for (size_t i = 0, j = 0; i < lenUTF16; ++i, ++j)
