@@ -158,8 +158,10 @@ utf16_t utf16::convert(const char *const str) noexcept
 {
 	const size_t lenUTF8 = utf16::length(str);
 	const size_t lenUTF16 = countUnits(str);
+	if (!lenUTF16)
+		return nullptr;
 	auto result = substrate::make_unique_nothrow<char16_t []>(lenUTF16);
-	if (!result || !lenUTF16)
+	if (!result)
 		return nullptr;
 	for (size_t i = 0, j = 0; i < lenUTF8; ++i, ++j)
 	{
@@ -197,8 +199,10 @@ utf8_t utf16::convert(const char16_t *const str) noexcept
 {
 	const size_t lenUTF16 = utf16::length(str);
 	const size_t lenUTF8 = countUnits(str);
+	if (!lenUTF8)
+		return nullptr;
 	auto result = substrate::make_unique_nothrow<char []>(lenUTF8);
-	if (!result || !lenUTF8)
+	if (!result)
 		return nullptr;
 	for (size_t i = 0, j = 0; i < lenUTF16; ++i, ++j)
 	{
