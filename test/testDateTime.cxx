@@ -31,7 +31,7 @@ private:
 		assertNotNull(typeIndexes);
 		assertNotNull(types);
 		assertNotNull(zoneNames);
-		assertNotNull(leaps);
+		assertNull(leaps);
 		assertNotNull(tzSpec);
 
 		assertNotNull(tzName[0]);
