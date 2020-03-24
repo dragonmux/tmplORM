@@ -5,8 +5,10 @@
 #include <chrono>
 #include <tmplORM.types.hxx>
 #include <dateTime.hxx>
-#include <fd.hxx>
+#include <substrate/fd>
 #include <substrate/utility>
+
+using substrate::fd_t;
 
 using tmplORM::types::baseTypes::ormDateTime_t;
 using tmplORM::types::baseTypes::chrono::durationIn;

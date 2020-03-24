@@ -1,11 +1,9 @@
 include Makefile.inc
 
-PKG_CONFIG_PKGS =
-CFLAGS_EXTRA = -MMD -MF .dep/$*.d $(shell mysql_config --include)
-#$(shell pkg-config --cflags $(PKG_CONFIG_PKGS))
+PKG_CONFIG_PKGS = substrate
+CFLAGS_EXTRA = -MMD -MF .dep/$*.d $(shell mysql_config --include) $(shell pkg-config --cflags $(PKG_CONFIG_PKGS))
 CFLAGS = -c $(OPTIM_FLAGS) -Wall -Wextra -pedantic -std=c++11 -I. $(CFLAGS_EXTRA) -o $@ $<
-LIBS = $(shell mysql_config --libs) -lodbc -ldl -pthread
-#$(shell pkg-config --libs $(PKG_CONFIG_PKGS))
+LIBS = $(shell mysql_config --libs) -lodbc -ldl -pthread $(shell pkg-config --libs $(PKG_CONFIG_PKGS))
 LFLAGS = $(OPTIM_FLAGS) -shared $(O) $(LIBS) -o $@
 
 SED = sed -e 's:@LIBDIR@:$(LIBDIR):g' -e 's:@PREFIX@:$(PREFIX):g' -e 's:@VERSION@:$(VER):g'
