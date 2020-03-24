@@ -75,7 +75,7 @@ run_target(
 install_headers(
 	'mysql.hxx', 'mssql.hxx', 'tmplORM.hxx', 'tmplORM.mysql.hxx', 'tmplORM.mssql.hxx',
 	'tmplORM.common.hxx', 'tmplORM.types.hxx', 'tmplORM.extern.hxx', 'conversions.hxx',
-	'fixedVector.hxx', 'string.hxx', 'managedPtr.hxx',
+	'string.hxx', 'managedPtr.hxx',
 	subdir: 'tmplORM'
 )
 install_headers('typestring/typestring.hh', subdir: 'typestring')

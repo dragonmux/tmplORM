@@ -9,14 +9,15 @@
 #include <new>
 #include <chrono>
 #include <type_traits>
+#include <substrate/fixed_vector>
 #include <typestring/typestring.hh>
 #include <tmplORM.extern.hxx>
 #include <tmplORM.types.hxx>
-#include <fixedVector.hxx>
 
 #define ts(x) typestring_is(x)
 #define ts_(x) ts(x)()
 
+using substrate::fixedVector_t;
 constexpr std::chrono::microseconds operator ""_us(const unsigned long long usecs)
 	{ return std::chrono::microseconds{usecs}; }
 

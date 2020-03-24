@@ -1,6 +1,10 @@
 #include <crunch++.h>
-#include <fixedVector.hxx>
+#include <substrate/fixed_vector>
 #include <testFixedVector.hxx>
+
+using substrate::boundedIterator_t;
+using substrate::vectorStateException_t;
+using substrate::fixedVector_t;
 
 std::array<int32_t, 10> testNums =
 {

@@ -4,14 +4,13 @@
 #include <cstdint>
 #include <mysql.h>
 #include <utility>
-#include "fixedVector.hxx"
 #include "managedPtr.hxx"
 #include "tmplORM.hxx"
 
 /*!
  * @file
  * @author Rachel Mant
- * @date 2016-2018
+ * @date 2016-2020
  * @brief Defines the interface to the MySQL abstraction layer
  */
 

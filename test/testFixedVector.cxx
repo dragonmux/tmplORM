@@ -1,6 +1,8 @@
 #include <crunch++.h>
-#include <fixedVector.hxx>
+#include <substrate/fixed_vector>
 #include "testFixedVector.hxx"
+
+using substrate::fixedVector_t;
 
 class testBoundedIterator final : public testsuit
 {

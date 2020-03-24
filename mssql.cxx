@@ -23,6 +23,7 @@
 // Instead of this, we have our own recoder that performs a single allocation
 // and returns either the completely recoded string, or nullptr.
 
+using substrate::vectorStateException_t;
 using namespace tmplORM::mssql::driver;
 
 inline tSQLExecErrorType_t translateError(const SQLRETURN result) noexcept

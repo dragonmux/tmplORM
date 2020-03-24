@@ -17,6 +17,7 @@
  * @brief C++ MySQL driver abstraction layer for handling client connections and query datasets
  */
 
+using substrate::vectorStateException_t;
 using namespace std;
 using namespace tmplORM::mysql::driver;
 
