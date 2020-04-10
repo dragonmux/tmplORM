@@ -242,10 +242,9 @@ namespace tmplORM
 					uint8_t computeMonth(const uint16_t year, days &day) noexcept
 					{
 						const auto &daysFor = monthDays[isLeap(year)];
-						uint8_t i{0};
-						++day;
-						while (day.count() > daysFor[i] && i < uint8_t(daysFor.size()))
-							day -= days{daysFor[i++]};
+						size_t i{0};
+						for (++day; day.count() > daysFor[i] && i < daysFor.size(); ++i)
+							day -= days{daysFor[i]};
 						return i + 1;
 					}
 
