@@ -83,7 +83,7 @@ bool haveEnvironment() noexcept
 	return !(driver.empty() || host.empty() || username.empty() || password.empty());
 }
 
-class testMSSQL_t final : public testsuit
+class testMSSQL_t final : public testsuite
 {
 private:
 	void printError(const char *prefix, const tSQLExecError_t &error) const noexcept
@@ -549,7 +549,7 @@ public:
 	}
 };
 
-class testMSSQLValue_t final : public testsuit
+class testMSSQLValue_t final : public testsuite
 {
 private:
 	char *S_(const char *const str, const int64_t len = -1) noexcept

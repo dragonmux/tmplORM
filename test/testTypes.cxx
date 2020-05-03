@@ -1,7 +1,7 @@
 #include <crunch++.h>
 #include "testTypes.hxx"
 
-class testDateTime_t final : public testsuit
+class testDateTime_t final : public testsuite
 {
 private:
 	void testCtor() { testDateTime::testCtor(*this); }
@@ -23,7 +23,7 @@ public:
 	}
 };
 
-class testDate_t final : public testsuit
+class testDate_t final : public testsuite
 {
 private:
 	void testCtor() { testDate::testCtor(*this); }
@@ -41,7 +41,7 @@ public:
 	}
 };
 
-class testTime_t final : public testsuit
+class testTime_t final : public testsuite
 {
 private:
 	void testCtor() { testTime::testCtor(*this); }
@@ -59,7 +59,7 @@ public:
 	}
 };
 
-class testTypes_t final : public testsuit
+class testTypes_t final : public testsuite
 {
 private:
 	void testDate() { testTypes::testDate(*this); }

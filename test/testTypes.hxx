@@ -3,36 +3,36 @@
 
 namespace testDateTime
 {
-	void testCtor(testsuit &suite);
-	void testFromString(testsuit &suite);
-	void testFromSystemTime(testsuit &suite);
-	void testAsString(testsuit &suite);
-	void testWrapper(testsuit &suite);
-	void testTimeZones(testsuit &suite);
+	void testCtor(testsuite &suite);
+	void testFromString(testsuite &suite);
+	void testFromSystemTime(testsuite &suite);
+	void testAsString(testsuite &suite);
+	void testWrapper(testsuite &suite);
+	void testTimeZones(testsuite &suite);
 }
 
 namespace testDate
 {
-	void testCtor(testsuit &suite);
-	void testFromString(testsuit &suite);
-	void testAsString(testsuit &suite);
-	void testWrapper(testsuit &suite);
+	void testCtor(testsuite &suite);
+	void testFromString(testsuite &suite);
+	void testAsString(testsuite &suite);
+	void testWrapper(testsuite &suite);
 }
 
 namespace testTime
 {
-	void testCtor(testsuit &suite);
-	void testFromString(testsuit &suite);
-	void testAsString(testsuit &suite);
-	void testWrapper(testsuit &suite);
+	void testCtor(testsuite &suite);
+	void testFromString(testsuite &suite);
+	void testAsString(testsuite &suite);
+	void testWrapper(testsuite &suite);
 }
 
 namespace testTypes
 {
-	void testDate(testsuit &suite);
-	void testTime(testsuit &suite);
-	void testDateTime(testsuit &suite);
-	void testUUID(testsuit &suite);
+	void testDate(testsuite &suite);
+	void testTime(testsuite &suite);
+	void testDateTime(testsuite &suite);
+	void testUUID(testsuite &suite);
 }
 
 #endif /*TEST_TYPES__HXX*/

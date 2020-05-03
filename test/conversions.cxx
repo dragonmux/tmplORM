@@ -10,7 +10,7 @@ private:
 	using fromInt = fromInt_t<int_t, int_t>;
 
 public:
-	void testConversions(testsuit &suite, const testOk_t<int_t> &tests)
+	void testConversions(testsuite &suite, const testOk_t<int_t> &tests)
 	{
 		for (const auto &test : tests)
 		{
@@ -20,21 +20,21 @@ public:
 	}
 };
 
-void testFromUint8(testsuit &suite, const testOk_t<uint8_t> tests)
+void testFromUint8(testsuite &suite, const testOk_t<uint8_t> tests)
 	{ testFromInt_t<uint8_t> tester; tester.testConversions(suite, tests); }
-void testFromInt8(testsuit &suite, const testOk_t<int8_t> tests)
+void testFromInt8(testsuite &suite, const testOk_t<int8_t> tests)
 	{ testFromInt_t<int8_t> tester; tester.testConversions(suite, tests); }
-void testFromUint16(testsuit &suite, const testOk_t<uint16_t> tests)
+void testFromUint16(testsuite &suite, const testOk_t<uint16_t> tests)
 	{ testFromInt_t<uint16_t> tester; tester.testConversions(suite, tests); }
-void testFromInt16(testsuit &suite, const testOk_t<int16_t> tests)
+void testFromInt16(testsuite &suite, const testOk_t<int16_t> tests)
 	{ testFromInt_t<int16_t> tester; tester.testConversions(suite, tests); }
-void testFromUint32(testsuit &suite, const testOk_t<uint32_t> tests)
+void testFromUint32(testsuite &suite, const testOk_t<uint32_t> tests)
 	{ testFromInt_t<uint32_t> tester; tester.testConversions(suite, tests); }
-void testFromInt32(testsuit &suite, const testOk_t<int32_t> tests)
+void testFromInt32(testsuite &suite, const testOk_t<int32_t> tests)
 	{ testFromInt_t<int32_t> tester; tester.testConversions(suite, tests); }
-void testFromUint64(testsuit &suite, const testOk_t<uint64_t> tests)
+void testFromUint64(testsuite &suite, const testOk_t<uint64_t> tests)
 	{ testFromInt_t<uint64_t> tester; tester.testConversions(suite, tests); }
-void testFromInt64(testsuit &suite, const testOk_t<int64_t> tests)
+void testFromInt64(testsuite &suite, const testOk_t<int64_t> tests)
 	{ testFromInt_t<int64_t> tester; tester.testConversions(suite, tests); }
 
 template<typename int_t> struct testToInt_t
@@ -43,7 +43,7 @@ private:
 	using toInt = toInt_t<int_t>;
 
 public:
-	void testOctConversions(testsuit &suite, const testOk_t<int_t> &tests)
+	void testOctConversions(testsuite &suite, const testOk_t<int_t> &tests)
 	{
 		for (const auto &test : tests)
 		{
@@ -54,7 +54,7 @@ public:
 		}
 	}
 
-	void testIntConversions(testsuit &suite, const testOk_t<int_t> &tests)
+	void testIntConversions(testsuite &suite, const testOk_t<int_t> &tests)
 	{
 		for (const auto &test : tests)
 		{
@@ -65,7 +65,7 @@ public:
 		}
 	}
 
-	void testHexConversions(testsuit &suite, const testOk_t<int_t> &tests)
+	void testHexConversions(testsuite &suite, const testOk_t<int_t> &tests)
 	{
 		for (const auto &test : tests)
 		{
@@ -84,7 +84,7 @@ private:
 
 public:
 	toIntType_t(const char *const test) noexcept : value(test) { }
-	template<typename test_t> void test(testsuit &suite, const char *const test)
+	template<typename test_t> void test(testsuite &suite, const char *const test)
 	{
 		test_t what{suite, test};
 		what(value);
@@ -100,7 +100,7 @@ private:
 public:
 	toIntTypes_t(const char *const test) noexcept : toIntTypes_t<ints_t...>(test), type(test) { }
 
-	template<template<typename> class test_t> void test(testsuit &suite, const char *const test)
+	template<template<typename> class test_t> void test(testsuite &suite, const char *const test)
 	{
 		type.template test<test_t<toInt_t<int_t>>>(suite, test);
 		toIntTypes_t<ints_t...>::template test<test_t>(suite, test);
@@ -110,34 +110,34 @@ public:
 template<> struct toIntTypes_t<>
 {
 	toIntTypes_t(const char *const) noexcept { }
-	template<template<typename> class test_t> void test(testsuit &, const char *const) { }
+	template<template<typename> class test_t> void test(testsuite &, const char *const) { }
 };
 
-extern void testOctToUint8(testsuit &suite, const testOk_t<uint8_t> tests)
+extern void testOctToUint8(testsuite &suite, const testOk_t<uint8_t> tests)
 	{ testToInt_t<uint8_t> tester; tester.testOctConversions(suite, tests); }
-extern void testOctToInt8(testsuit &suite, const testOk_t<int8_t> tests)
+extern void testOctToInt8(testsuite &suite, const testOk_t<int8_t> tests)
 	{ testToInt_t<int8_t> tester; tester.testOctConversions(suite, tests); }
-extern void testOctToUint16(testsuit &suite, const testOk_t<uint16_t> tests)
+extern void testOctToUint16(testsuite &suite, const testOk_t<uint16_t> tests)
 	{ testToInt_t<uint16_t> tester; tester.testOctConversions(suite, tests); }
-extern void testOctToInt16(testsuit &suite, const testOk_t<int16_t> tests)
+extern void testOctToInt16(testsuite &suite, const testOk_t<int16_t> tests)
 	{ testToInt_t<int16_t> tester; tester.testOctConversions(suite, tests); }
-extern void testOctToUint32(testsuit &suite, const testOk_t<uint32_t> tests)
+extern void testOctToUint32(testsuite &suite, const testOk_t<uint32_t> tests)
 	{ testToInt_t<uint32_t> tester; tester.testOctConversions(suite, tests); }
-extern void testOctToInt32(testsuit &suite, const testOk_t<int32_t> tests)
+extern void testOctToInt32(testsuite &suite, const testOk_t<int32_t> tests)
 	{ testToInt_t<int32_t> tester; tester.testOctConversions(suite, tests); }
-extern void testOctToUint64(testsuit &suite, const testOk_t<uint64_t> tests)
+extern void testOctToUint64(testsuite &suite, const testOk_t<uint64_t> tests)
 	{ testToInt_t<uint64_t> tester; tester.testOctConversions(suite, tests); }
-extern void testOctToInt64(testsuit &suite, const testOk_t<int64_t> tests)
+extern void testOctToInt64(testsuite &suite, const testOk_t<int64_t> tests)
 	{ testToInt_t<int64_t> tester; tester.testOctConversions(suite, tests); }
 
 template<typename toInt_t> struct testOctShouldFail_t
 {
 private:
-	testsuit &suite;
+	testsuite &suite;
 	const char *const test;
 
 public:
-	testOctShouldFail_t(testsuit &suite_, const char *const test_) noexcept : suite(suite_), test(test_) { }
+	testOctShouldFail_t(testsuite &suite_, const char *const test_) noexcept : suite(suite_), test(test_) { }
 
 	void operator ()(toInt_t &value)
 	{
@@ -147,7 +147,7 @@ public:
 	}
 };
 
-extern void testOctShouldFail(testsuit &suite, const testFailStr_t tests)
+extern void testOctShouldFail(testsuite &suite, const testFailStr_t tests)
 {
 	for (const char *const test : tests)
 	{
@@ -156,31 +156,31 @@ extern void testOctShouldFail(testsuit &suite, const testFailStr_t tests)
 	}
 }
 
-void testDecToUint8(testsuit &suite, const testOk_t<uint8_t> tests)
+void testDecToUint8(testsuite &suite, const testOk_t<uint8_t> tests)
 	{ testToInt_t<uint8_t> tester; tester.testIntConversions(suite, tests); }
-void testDecToInt8(testsuit &suite, const testOk_t<int8_t> tests)
+void testDecToInt8(testsuite &suite, const testOk_t<int8_t> tests)
 	{ testToInt_t<int8_t> tester; tester.testIntConversions(suite, tests); }
-void testDecToUint16(testsuit &suite, const testOk_t<uint16_t> tests)
+void testDecToUint16(testsuite &suite, const testOk_t<uint16_t> tests)
 	{ testToInt_t<uint16_t> tester; tester.testIntConversions(suite, tests); }
-void testDecToInt16(testsuit &suite, const testOk_t<int16_t> tests)
+void testDecToInt16(testsuite &suite, const testOk_t<int16_t> tests)
 	{ testToInt_t<int16_t> tester; tester.testIntConversions(suite, tests); }
-void testDecToUint32(testsuit &suite, const testOk_t<uint32_t> tests)
+void testDecToUint32(testsuite &suite, const testOk_t<uint32_t> tests)
 	{ testToInt_t<uint32_t> tester; tester.testIntConversions(suite, tests); }
-void testDecToInt32(testsuit &suite, const testOk_t<int32_t> tests)
+void testDecToInt32(testsuite &suite, const testOk_t<int32_t> tests)
 	{ testToInt_t<int32_t> tester; tester.testIntConversions(suite, tests); }
-void testDecToUint64(testsuit &suite, const testOk_t<uint64_t> tests)
+void testDecToUint64(testsuite &suite, const testOk_t<uint64_t> tests)
 	{ testToInt_t<uint64_t> tester; tester.testIntConversions(suite, tests); }
-void testDecToInt64(testsuit &suite, const testOk_t<int64_t> tests)
+void testDecToInt64(testsuite &suite, const testOk_t<int64_t> tests)
 	{ testToInt_t<int64_t> tester; tester.testIntConversions(suite, tests); }
 
 template<typename toInt_t> struct testDecShouldFail_t
 {
 private:
-	testsuit &suite;
+	testsuite &suite;
 	const char *const test;
 
 public:
-	testDecShouldFail_t(testsuit &suite_, const char *const test_) noexcept : suite(suite_), test(test_) { }
+	testDecShouldFail_t(testsuite &suite_, const char *const test_) noexcept : suite(suite_), test(test_) { }
 
 	void operator ()(toInt_t &value)
 	{
@@ -189,7 +189,7 @@ public:
 	}
 };
 
-void testDecShouldFail(testsuit &suite, const testFailStr_t tests)
+void testDecShouldFail(testsuite &suite, const testFailStr_t tests)
 {
 	for (const char *const test : tests)
 	{
@@ -198,31 +198,31 @@ void testDecShouldFail(testsuit &suite, const testFailStr_t tests)
 	}
 }
 
-extern void testHexToUint8(testsuit &suite, const testOk_t<uint8_t> tests)
+extern void testHexToUint8(testsuite &suite, const testOk_t<uint8_t> tests)
 	{ testToInt_t<uint8_t> tester; tester.testHexConversions(suite, tests); }
-extern void testHexToInt8(testsuit &suite, const testOk_t<int8_t> tests)
+extern void testHexToInt8(testsuite &suite, const testOk_t<int8_t> tests)
 	{ testToInt_t<int8_t> tester; tester.testHexConversions(suite, tests); }
-extern void testHexToUint16(testsuit &suite, const testOk_t<uint16_t> tests)
+extern void testHexToUint16(testsuite &suite, const testOk_t<uint16_t> tests)
 	{ testToInt_t<uint16_t> tester; tester.testHexConversions(suite, tests); }
-extern void testHexToInt16(testsuit &suite, const testOk_t<int16_t> tests)
+extern void testHexToInt16(testsuite &suite, const testOk_t<int16_t> tests)
 	{ testToInt_t<int16_t> tester; tester.testHexConversions(suite, tests); }
-extern void testHexToUint32(testsuit &suite, const testOk_t<uint32_t> tests)
+extern void testHexToUint32(testsuite &suite, const testOk_t<uint32_t> tests)
 	{ testToInt_t<uint32_t> tester; tester.testHexConversions(suite, tests); }
-extern void testHexToInt32(testsuit &suite, const testOk_t<int32_t> tests)
+extern void testHexToInt32(testsuite &suite, const testOk_t<int32_t> tests)
 	{ testToInt_t<int32_t> tester; tester.testHexConversions(suite, tests); }
-extern void testHexToUint64(testsuit &suite, const testOk_t<uint64_t> tests)
+extern void testHexToUint64(testsuite &suite, const testOk_t<uint64_t> tests)
 	{ testToInt_t<uint64_t> tester; tester.testHexConversions(suite, tests); }
-extern void testHexToInt64(testsuit &suite, const testOk_t<int64_t> tests)
+extern void testHexToInt64(testsuite &suite, const testOk_t<int64_t> tests)
 	{ testToInt_t<int64_t> tester; tester.testHexConversions(suite, tests); }
 
 template<typename toInt_t> struct testHexShouldFail_t
 {
 private:
-	testsuit &suite;
+	testsuite &suite;
 	const char *const test;
 
 public:
-	testHexShouldFail_t(testsuit &suite_, const char *const test_) noexcept : suite(suite_), test(test_) { }
+	testHexShouldFail_t(testsuite &suite_, const char *const test_) noexcept : suite(suite_), test(test_) { }
 
 	void operator ()(toInt_t &value)
 	{
@@ -232,7 +232,7 @@ public:
 	}
 };
 
-extern void testHexShouldFail(testsuit &suite, const testFailStr_t tests)
+extern void testHexShouldFail(testsuite &suite, const testFailStr_t tests)
 {
 	for (const char *const test : tests)
 	{

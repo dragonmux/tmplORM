@@ -4,7 +4,7 @@
 #define u64(n)		UINT64_C(n)
 #define i64(n)		INT64_C(n)
 
-struct testFromInt_t final : public testsuit
+struct testFromInt_t final : public testsuite
 {
 public:
 	void testUint8_t()
@@ -202,7 +202,7 @@ public:
 	}
 };
 
-struct testOctToInt_t final : public testsuit
+struct testOctToInt_t final : public testsuite
 {
 public:
 	void testUint8_t()
@@ -366,7 +366,7 @@ public:
 	}
 };
 
-struct testDecToInt_t final : public testsuit
+struct testDecToInt_t final : public testsuite
 {
 public:
 	void testUint8_t()
@@ -527,7 +527,7 @@ public:
 	}
 };
 
-struct testHexToInt_t final : public testsuit
+struct testHexToInt_t final : public testsuite
 {
 public:
 	void testUint8_t()
@@ -692,7 +692,7 @@ public:
 	}
 };
 
-struct testSwapBytes_t final : public testsuit
+struct testSwapBytes_t final : public testsuite
 {
 public:
 	void testSwapBytes16()

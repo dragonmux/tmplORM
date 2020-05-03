@@ -2,7 +2,7 @@
 #include <tmplORM.mssql.hxx>
 #include "models.hxx"
 
-class testMSSQLMapper final : public testsuit
+class testMSSQLMapper final : public testsuite
 {
 public:
 	void testInsertGen()

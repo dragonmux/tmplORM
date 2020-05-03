@@ -82,7 +82,7 @@ bool haveEnvironment() noexcept
 	return !(host.empty() || username.empty() || password.empty());
 }
 
-class testMySQL_t final : public testsuit
+class testMySQL_t final : public testsuite
 {
 private:
 	void printError(const char *prefix, const mySQLClient_t &client)
@@ -487,7 +487,7 @@ public:
 	}
 };
 
-class testMySQLValue_t final : public testsuit
+class testMySQLValue_t final : public testsuite
 {
 private:
 	template<typename T> void checkValue(const T &var, const T &expected)

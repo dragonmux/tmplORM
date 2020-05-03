@@ -34,7 +34,7 @@ order_t order;
 demographic_t demographic;
 customerDemographic_t customerDemographic;
 
-class testMySQLMapper final : public testsuit
+class testMySQLMapper final : public testsuite
 {
 public:
 	void testCreateTableGen()

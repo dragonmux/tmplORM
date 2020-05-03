@@ -14,7 +14,7 @@ std::unique_ptr<char []> currentWorkDir() noexcept
 	return stringDup(cwd);
 }
 
-class testDateTime_t final : public testsuit
+class testDateTime_t final : public testsuite
 {
 private:
 	void testReadExtended()

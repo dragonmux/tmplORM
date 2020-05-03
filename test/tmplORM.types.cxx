@@ -15,7 +15,7 @@ namespace testDateTime
 	using namespace tmplORM::types::dateTimeTypes;
 	const auto dateTimeStr = "2018-07-04T01:23:45.678901234Z"_s;
 
-	void testCtor(testsuit &suite)
+	void testCtor(testsuite &suite)
 	{
 		const ormDateTime_t a;
 		suite.assertEqual(a.year(), 0);
@@ -36,7 +36,7 @@ namespace testDateTime
 		suite.assertEqual(b.nanoSecond(), 678901234);
 	}
 
-	void testFromString(testsuit &suite)
+	void testFromString(testsuite &suite)
 	{
 		const ormDateTime_t a{"2018-07-04 12:34:45.678901234"};
 		suite.assertEqual(a.year(), 2018);
@@ -64,7 +64,7 @@ namespace testDateTime
 		suite.assertEqual(c.nanoSecond(), 678901234);
 	}
 
-	void testFromSystemTime(testsuit &suite)
+	void testFromSystemTime(testsuite &suite)
 	{
 		using seconds = std::chrono::seconds;
 		const auto now = systemClock_t::now();
@@ -82,14 +82,14 @@ namespace testDateTime
 		suite.assertEqual(a.nanoSecond(), (now.time_since_epoch() - seconds{time}).count());
 	}
 
-	void testAsString(testsuit &suite)
+	void testAsString(testsuite &suite)
 	{
 		const ormDateTime_t dateTime{2018, 07, 04, 01, 23, 45, 678901234};
 		const auto asString = dateTime.asString();
 		suite.assertEqual(asString.get(), dateTimeStr.data(), dateTimeStr.size());
 	}
 
-	void testWrapper(testsuit &suite)
+	void testWrapper(testsuite &suite)
 	{
 		const _dateTime_t a;
 		suite.assertEqual(a.year(), 0);
@@ -127,7 +127,7 @@ namespace testDateTime
 		unsetenv("TZ");
 	}
 
-	void testTimeZones(testsuit &suite)
+	void testTimeZones(testsuite &suite)
 	{
 		setupTZ();
 		const ormDateTime_t preFirstTransition{-3852662326_s};
@@ -172,7 +172,7 @@ namespace testDate
 	using namespace tmplORM::types::dateTimeTypes;
 	const auto dateStr = "2018-07-04"_s;
 
-	void testCtor(testsuit &suite)
+	void testCtor(testsuite &suite)
 	{
 		const ormDate_t a;
 		suite.assertEqual(a.year(), 0);
@@ -185,7 +185,7 @@ namespace testDate
 		suite.assertEqual(b.day(), 04);
 	}
 
-	void testFromString(testsuit &suite)
+	void testFromString(testsuite &suite)
 	{
 		const ormDate_t a{"2018-07-04"};
 		suite.assertEqual(a.year(), 2018);
@@ -197,7 +197,7 @@ namespace testDate
 		suite.assertEqual(b.day(), 04);
 	}
 
-	void testFromSystemTime(testsuit &suite)
+	void testFromSystemTime(testsuite &suite)
 	{
 		using seconds = std::chrono::seconds;
 		const auto now = systemClock_t::now();
@@ -215,14 +215,14 @@ namespace testDate
 		suite.assertEqual(a.nanoSecond(), (now.time_since_epoch() - seconds{time}).count());
 	}
 
-	void testAsString(testsuit &suite)
+	void testAsString(testsuite &suite)
 	{
 		const ormDate_t date{2018, 07, 04};
 		const auto asString = date.asString();
 		suite.assertEqual(asString.get(), dateStr.data(), dateStr.size());
 	}
 
-	void testWrapper(testsuit &suite)
+	void testWrapper(testsuite &suite)
 	{
 		const _date_t a;
 		suite.assertEqual(a.year(), 0);
@@ -241,7 +241,7 @@ namespace testTime
 	using namespace tmplORM::types::dateTimeTypes;
 	const auto timeStr = "01:23:45.678901234Z"_s;
 
-	void testCtor(testsuit &suite)
+	void testCtor(testsuite &suite)
 	{
 		const ormTime_t a;
 		suite.assertEqual(a.hour(), 0);
@@ -256,7 +256,7 @@ namespace testTime
 		suite.assertEqual(b.nanoSecond(), 678901234);
 	}
 
-	void testFromString(testsuit &suite)
+	void testFromString(testsuite &suite)
 	{
 		const ormTime_t a{"12:34:45.678901234"};
 		suite.assertEqual(a.hour(), 12);
@@ -275,14 +275,14 @@ namespace testTime
 		suite.assertEqual(c.nanoSecond(), 678901234);
 	}
 
-	void testAsString(testsuit &suite)
+	void testAsString(testsuite &suite)
 	{
 		const ormTime_t time{01, 23, 45, 678901234};
 		const auto asString = time.asString();
 		suite.assertEqual(asString.get(), timeStr.data(), timeStr.size());
 	}
 
-	void testWrapper(testsuit &suite)
+	void testWrapper(testsuite &suite)
 	{
 		const _time_t a;
 		suite.assertEqual(a.time().count(), 0);
@@ -316,7 +316,7 @@ namespace testTypes
 			uint16_t((nanoSeconds >> 14) | 0x8000), swapBytes(uint64_t{0x123456789ABCU}) >> 16};
 	}();
 
-	void testDate(testsuit &suite)
+	void testDate(testsuite &suite)
 	{
 		date_t date;
 		const ormDate_t a = date.value();
@@ -354,7 +354,7 @@ namespace testTypes
 		suite.assertEqual(e.day(), 0);
 	}
 
-	void testTime(testsuit &suite)
+	void testTime(testsuite &suite)
 	{
 		time_t time;
 		const ormTime_t a = time.value();
@@ -397,7 +397,7 @@ namespace testTypes
 		suite.assertEqual(e.nanoSecond(), 0);
 	}
 
-	void testDateTime(testsuit &suite)
+	void testDateTime(testsuite &suite)
 	{
 		dateTime_t dateTime;
 		const ormDateTime_t a = dateTime.value();
@@ -455,7 +455,7 @@ namespace testTypes
 		suite.assertEqual(e.nanoSecond(), 0);
 	}
 
-	void testUUID(testsuit &suite)
+	void testUUID(testsuite &suite)
 	{
 		suite.assertEqual(sizeof(uint64_t), 8);
 

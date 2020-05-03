@@ -18,7 +18,7 @@ template<typename T, size_t N> constexpr size_t count(const std::array<T, N> &) 
 
 namespace boundedIterator
 {
-	void testCtor(testsuit &suite)
+	void testCtor(testsuite &suite)
 	{
 		arrayIter_t iter{testNums.data(), count(testNums)};
 		suite.assertEqual(*iter, 0);
@@ -27,7 +27,7 @@ namespace boundedIterator
 		suite.assertTrue(iter != iter + 1);
 	}
 
-	void testIndex(testsuit &suite)
+	void testIndex(testsuite &suite)
 	{
 		arrayIter_t iter{testNums.data(), count(testNums)};
 		suite.assertEqual(iter[0], 0);
@@ -36,7 +36,7 @@ namespace boundedIterator
 		suite.assertEqual(iter[5], 5);
 	}
 
-	void testInc(testsuit &suite)
+	void testInc(testsuite &suite)
 	{
 		arrayIter_t iter{testNums.data(), count(testNums)};
 		iter += 10;
@@ -49,7 +49,7 @@ namespace boundedIterator
 		suite.assertTrue(iter == iter + SIZE_MAX);
 	}
 
-	void testDec(testsuit &suite)
+	void testDec(testsuite &suite)
 	{
 		arrayIter_t iter{testNums.data(), count(testNums)};
 		iter -= 1;
@@ -65,7 +65,7 @@ namespace boundedIterator
 
 namespace fixedVector
 {
-	template<typename T, typename E> void testThrowsExcept(testsuit &suite, T &vec, const char *const errorText)
+	template<typename T, typename E> void testThrowsExcept(testsuite &suite, T &vec, const char *const errorText)
 	{
 		try
 		{
@@ -84,12 +84,12 @@ namespace fixedVector
 	template<typename T, typename value_t = typename typeOfVector<T>::type>
 		value_t &index(T &vec, const size_t index) { return vec[index]; }
 
-	template<typename T> void testIterEqual(testsuit &suite, T &vec)
+	template<typename T> void testIterEqual(testsuite &suite, T &vec)
 		{ suite.assertTrue(vec.begin() == vec.end()); }
-	template<typename T> void testIterNotEqual(testsuit &suite, T &vec)
+	template<typename T> void testIterNotEqual(testsuite &suite, T &vec)
 		{ suite.assertTrue(vec.begin() != vec.end()); }
 
-	void testInvalid(testsuit &suite)
+	void testInvalid(testsuite &suite)
 	{
 		fixedVector_t<int> vec;
 		suite.assertFalse(vec.valid());
@@ -104,7 +104,7 @@ namespace fixedVector
 		testIterEqual<const fixedVector_t<int>>(suite, vec);
 	}
 
-	void testIndexing(testsuit &suite)
+	void testIndexing(testsuite &suite)
 	{
 		using fixedVec = fixedVector_t<int>;
 		using constFixedVec = const fixedVector_t<int>;
@@ -122,7 +122,7 @@ namespace fixedVector
 		testThrowsExcept<constFixedVec, std::out_of_range>(suite, vec, "Index into fixedVector_t out of bounds");
 	}
 
-	void testSwap(testsuit &suite)
+	void testSwap(testsuite &suite)
 	{
 		fixedVector_t<int> vecA(2), vecB(3);
 		suite.assertTrue(vecA.valid());

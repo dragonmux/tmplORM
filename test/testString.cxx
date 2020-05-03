@@ -1,7 +1,7 @@
 #include <crunch++.h>
 #include <string.hxx>
 
-class testConvert final : public testsuit
+class testConvert final : public testsuite
 {
 private:
 	const char *const utf8Ref = u8"\u005B\u00D8\u04D5\u16A0\u2026\uFFFD\U00010117";
@@ -38,7 +38,7 @@ public:
 	}
 };
 
-class testValid final : public testsuit
+class testValid final : public testsuite
 {
 private:
 	void assertInvalid(const utf16_t &val)
@@ -85,7 +85,7 @@ public:
 	}
 };
 
-class testFormat final : public testsuit
+class testFormat final : public testsuite
 {
 public:
 	void testStringDup()
