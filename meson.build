@@ -86,3 +86,9 @@ endforeach
 
 crunchMake = find_program('crunchMake', required: false)
 subdir('test', if_found: crunchMake)
+
+tmplORM_dep = declare_dependency(
+	include_directories: include_directories('.'),
+	link_with: tmplORM,
+	version: meson.project_version()
+)
