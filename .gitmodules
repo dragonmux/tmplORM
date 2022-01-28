@@ -1,0 +1,3 @@
+[submodule "typestring"]
+	path = typestring
+	url = https://github.com/irrequietus/typestring
