@@ -22,7 +22,7 @@ odbc = cxx.find_library('odbc')
 if get_option('build_check')
 	rSON = dependency('rSON')
 endif
-substrate = dependency('substrate', fallback: ['substrate', 'substrate_dep'])
+substrate = dependency('substrate', fallback: ['substrate', 'substrate_dep'], 	default_options: ['build_tests=false'])
 
 mysqlConfig = find_program('mysql_config')
 mysql = declare_dependency(
