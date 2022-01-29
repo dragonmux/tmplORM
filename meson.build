@@ -89,8 +89,10 @@ foreach header : ['json.hxx', 'fromJSON.hxx', 'toJSON.hxx', 'helpers.hxx']
 	install_headers(join_paths('serializer', header), subdir: 'tmplORM/serializer')
 endforeach
 
-crunchMake = find_program('crunchMake', required: false)
-subdir('test', if_found: crunchMake)
+if get_option('build_tests')
+	crunchMake = find_program('crunchMake', required: false)
+	subdir('test', if_found: crunchMake)
+endif
 
 tmplORM_dep = declare_dependency(
 	include_directories: include_directories('.'),
