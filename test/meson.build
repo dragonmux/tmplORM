@@ -4,7 +4,7 @@ subdir('data')
 
 tmplORMTests = [
 	'testString', #'testMySQL', 'testMSSQL', 'testMySQLMapper', 'testMSSQLMapper',
-	'testConversions', 'testFixedVector', 'testTypes', 'testDateTime'
+	'testFixedVector', 'testTypes', 'testDateTime'
 ]
 
 if coverage
@@ -20,7 +20,7 @@ endif
 
 testHelpers = static_library(
 	'testHelpers',
-	['conversions.cxx', 'fixedVector.cxx', 'tmplORM.types.cxx'],
+	['fixedVector.cxx', 'tmplORM.types.cxx'],
 	pic: true,
 	dependencies: [libcrunchpp, substrate],
 	include_directories: include_directories('..'),
@@ -32,7 +32,6 @@ objectMap = {
 	'testString': {'tmplORM': ['string.cxx']},
 	'testMySQL': {'tmplORM': ['mysql.cxx', 'string.cxx', 'tmplORM.types.cxx']},
 	'testMSSQL': {'tmplORM': ['mssql.cxx', 'string.cxx', 'tmplORM.types.cxx'], 'libs': [odbc]},
-	'testConversions': {'test': ['conversions.cxx']},
 	'testFixedVector': {'test': ['fixedVector.cxx']},
 	'testTypes': {'tmplORM': ['string.cxx', 'tmplORM.types.cxx'], 'test': ['tmplORM.types.cxx']},
 	'testDateTime': {'tmplORM': ['string.cxx', 'tmplORM.types.cxx']}
