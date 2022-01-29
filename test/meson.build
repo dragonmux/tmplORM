@@ -22,7 +22,7 @@ testHelpers = static_library(
 	'testHelpers',
 	['conversions.cxx', 'fixedVector.cxx', 'tmplORM.types.cxx'],
 	pic: true,
-	dependencies: [libcrunchpp],
+	dependencies: [libcrunchpp, substrate],
 	include_directories: include_directories('..'),
 	install: false,
 	build_by_default: true
