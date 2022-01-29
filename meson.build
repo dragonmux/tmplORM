@@ -26,8 +26,8 @@ substrate = dependency('substrate', fallback: ['substrate', 'substrate_dep'])
 
 mysqlConfig = find_program('mysql_config')
 mysql = declare_dependency(
-	compile_args: run_command([mysqlConfig, '--cflags']).stdout().split(),
-	link_args: run_command([mysqlConfig, '--libs']).stdout().split()
+	compile_args: run_command([mysqlConfig, '--cflags'], check: true).stdout().split(),
+	link_args: run_command([mysqlConfig, '--libs'], check: true).stdout().split()
 )
 
 add_project_arguments(
