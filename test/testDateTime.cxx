@@ -8,10 +8,12 @@ using tmplORM::types::baseTypes::ormDateTime_t;
 
 std::unique_ptr<char []> currentWorkDir() noexcept
 {
-	const char *cwd = getcwd(nullptr, 0);
+	char *cwd = getcwd(nullptr, 0);
 	if (!cwd)
 		return nullptr;
-	return stringDup(cwd);
+	auto result{stringDup(cwd)};
+	free(cwd);
+	return result;
 }
 
 class testDateTime_t final : public testsuite
@@ -44,7 +46,7 @@ private:
 	{
 		const auto now{systemClock_t::now()};
 		const auto nowSecs{systemClock_t::to_time_t(now)};
-		const auto localTime{*localtime(&nowSecs)};
+		const auto localTime{*gmtime(&nowSecs)};
 		const ormDateTime_t ormTime{now};
 
 		assertEqual(ormTime.year(), localTime.tm_year + 1900);
