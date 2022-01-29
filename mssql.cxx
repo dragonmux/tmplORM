@@ -125,9 +125,16 @@ bool tSQLClient_t::connect(const char *const driver, const char *const host, con
 	if (!connString)
 		return !error(tSQLExecErrorType_t::connect);
 	auto odbcString = utf16::convert(connString.get());
+	auto odbcStringLen = utf16::length(odbcString);
 	int16_t resultLen{};
 
-	return haveConnection = !error(SQLDriverConnect(connection, nullptr, odbcString, utf16::length(odbcString), nullptr, 0, &resultLen, SQL_DRIVER_NOPROMPT), SQL_HANDLE_DBC, connection);
+	if (odbcStringLen > std::numeric_limits<SQLSMALLINT>::max())
+		return false;
+	return haveConnection = !error(SQLDriverConnect(
+			connection, nullptr, odbcString, static_cast<SQLSMALLINT>(odbcStringLen),
+			nullptr, 0, &resultLen, SQL_DRIVER_NOPROMPT
+		), SQL_HANDLE_DBC, connection
+	);
 }
 
 bool tSQLClient_t::selectDB(const char *const db) const noexcept
@@ -135,7 +142,12 @@ bool tSQLClient_t::selectDB(const char *const db) const noexcept
 	if (!connection || !db)
 		return false;
 	auto odbcString = utf16::convert(db);
-	return !error(SQLSetConnectAttr(connection, SQL_ATTR_CURRENT_CATALOG, odbcString, utf16::length(odbcString) * 2), SQL_HANDLE_DBC, connection);
+	auto odbcStringLen = utf16::length(odbcString);
+	if (odbcStringLen > std::numeric_limits<SQLINTEGER>::max())
+		return false;
+	return !error(SQLSetConnectAttr(
+			connection, SQL_ATTR_CURRENT_CATALOG, odbcString, static_cast<SQLINTEGER>(utf16::length(odbcString) * 2)
+		), SQL_HANDLE_DBC, connection);
 }
 
 tSQLQuery_t tSQLClient_t::prepare(const char *const queryStmt, const size_t paramsCount) const noexcept
@@ -193,7 +205,11 @@ tSQLQuery_t::tSQLQuery_t(const tSQLClient_t *const parent, void *handle, const c
 		return;
 	}
 	const auto query = utf16::convert(queryStmt);
-	error(SQLPrepare(queryHandle, query, utf16::length(query)));
+	const auto queryLength{utf16::length(query)};
+	if (queryLength > std::numeric_limits<SQLINTEGER>::max())
+		error(SQL_ERROR);
+	else
+		error(SQLPrepare(queryHandle, query, static_cast<SQLINTEGER>(queryLength)));
 }
 
 tSQLQuery_t::~tSQLQuery_t() noexcept
@@ -242,8 +258,13 @@ tSQLResult_t::tSQLResult_t(const tSQLClient_t *const _client, void *handle, cons
 		for (uint16_t i = 0; i < fields; ++i)
 		{
 			long type = 0, length = 0;
-			if (error(SQLColAttribute(queryHandle, i + 1, SQL_DESC_CONCISE_TYPE, nullptr, 0, nullptr, &type)) || !type ||
-				error(SQLColAttribute(queryHandle, i + 1, SQL_DESC_OCTET_LENGTH, nullptr, 0, nullptr, &length)) || length < 0)
+			if (error(
+					SQLColAttribute(queryHandle, static_cast<SQLUSMALLINT>(i + 1U), SQL_DESC_CONCISE_TYPE,
+						nullptr, 0, nullptr, &type)
+				) || !type || error(
+					SQLColAttribute(queryHandle, static_cast<SQLUSMALLINT>(i + 1U), SQL_DESC_OCTET_LENGTH,
+						nullptr, 0, nullptr, &length)
+				) || length < 0)
 			{
 				fieldInfo.reset();
 				return;
@@ -300,7 +321,7 @@ tSQLValue_t &tSQLResult_t::operator [](const uint16_t idx) const noexcept try
 		return nullValue;
 	else if (!valueCache[idx].isNull())
 		return valueCache[idx];
-	const uint16_t column = idx + 1;
+	const auto column{static_cast<uint16_t>(idx + 1U)};
 
 	// Pitty this can't use C++17 syntax: [const int16_t type, const uint32_t valueLength] = fieldInfo[idx];
 	int16_t type;
@@ -360,9 +381,8 @@ tSQLValue_t::tSQLValue_t(const void *const _data, const uint64_t _length, const 
 {
 	if (isWCharType(type))
 	{
-		using mutStringPtr_t = std::unique_ptr<char []>;
-		mutStringPtr_t newData = utf16::convert(static_cast<const char16_t *>(_data));
-		data.reset(const_cast<const char *>(newData.release()));
+		auto newData{utf16::convert(static_cast<const char16_t *>(_data))};
+		data.reset(newData.release());
 	}
 }
 
@@ -394,15 +414,24 @@ template<int16_t rawType, int16_t, tSQLErrorType_t error, typename T> T asInt(co
 	return reinterpret<T>(data);
 }
 
-uint8_t tSQLValue_t::asUint8() const { return asInt<SQL_TINYINT, SQL_C_UTINYINT, tSQLErrorType_t::uint8Error, uint8_t>(*this, data, type); }
-int8_t tSQLValue_t::asInt8() const { return asInt<SQL_TINYINT, SQL_C_STINYINT, tSQLErrorType_t::int8Error, int8_t>(*this, data, type); }
-uint16_t tSQLValue_t::asUint16() const { return asInt<SQL_SMALLINT, SQL_C_USHORT, tSQLErrorType_t::uint16Error, uint16_t>(*this, data, type); }
-int16_t tSQLValue_t::asInt16() const { return asInt<SQL_SMALLINT, SQL_C_SSHORT, tSQLErrorType_t::int16Error, int16_t>(*this, data, type); }
-uint32_t tSQLValue_t::asUint32() const { return asInt<SQL_INTEGER, SQL_C_ULONG, tSQLErrorType_t::uint32Error, uint32_t>(*this, data, type); }
-int32_t tSQLValue_t::asInt32() const { return asInt<SQL_INTEGER, SQL_C_SLONG, tSQLErrorType_t::int32Error, int32_t>(*this, data, type); }
-uint64_t tSQLValue_t::asUint64() const { return asInt<SQL_BIGINT, SQL_C_UBIGINT, tSQLErrorType_t::uint64Error, uint64_t>(*this, data, type); }
-int64_t tSQLValue_t::asInt64() const { return asInt<SQL_BIGINT, SQL_C_SBIGINT, tSQLErrorType_t::int64Error, int64_t>(*this, data, type); }
-float tSQLValue_t::asFloat() const { return asInt<SQL_REAL, SQL_C_FLOAT, tSQLErrorType_t::floatError, float>(*this, data, type); }
+uint8_t tSQLValue_t::asUint8() const
+	{ return asInt<SQL_TINYINT, SQL_C_UTINYINT, tSQLErrorType_t::uint8Error, uint8_t>(*this, data, type); }
+int8_t tSQLValue_t::asInt8() const
+	{ return asInt<SQL_TINYINT, SQL_C_STINYINT, tSQLErrorType_t::int8Error, int8_t>(*this, data, type); }
+uint16_t tSQLValue_t::asUint16() const
+	{ return asInt<SQL_SMALLINT, SQL_C_USHORT, tSQLErrorType_t::uint16Error, uint16_t>(*this, data, type); }
+int16_t tSQLValue_t::asInt16() const
+	{ return asInt<SQL_SMALLINT, SQL_C_SSHORT, tSQLErrorType_t::int16Error, int16_t>(*this, data, type); }
+uint32_t tSQLValue_t::asUint32() const
+	{ return asInt<SQL_INTEGER, SQL_C_ULONG, tSQLErrorType_t::uint32Error, uint32_t>(*this, data, type); }
+int32_t tSQLValue_t::asInt32() const
+	{ return asInt<SQL_INTEGER, SQL_C_SLONG, tSQLErrorType_t::int32Error, int32_t>(*this, data, type); }
+uint64_t tSQLValue_t::asUint64() const
+	{ return asInt<SQL_BIGINT, SQL_C_UBIGINT, tSQLErrorType_t::uint64Error, uint64_t>(*this, data, type); }
+int64_t tSQLValue_t::asInt64() const
+	{ return asInt<SQL_BIGINT, SQL_C_SBIGINT, tSQLErrorType_t::int64Error, int64_t>(*this, data, type); }
+float tSQLValue_t::asFloat() const
+	{ return asInt<SQL_REAL, SQL_C_FLOAT, tSQLErrorType_t::floatError, float>(*this, data, type); }
 
 double tSQLValue_t::asDouble() const
 {
@@ -456,16 +485,21 @@ tSQLExecError_t::tSQLExecError_t(const tSQLExecErrorType_t error, const int16_t 
 {
 	if (handle)
 	{
-		int16_t messageLen = 0;
+		int16_t length = 0;
 		static_assert(sqlState_t{}.size() == SQL_SQLSTATE_SIZE + 1, "sqlState_t not the correct length for this ODBC interface");
 
-		SQLGetDiagFieldA(handleType, handle, 1, SQL_DIAG_SQLSTATE, _state.data(), _state.size(), nullptr);
-		SQLGetDiagFieldA(handleType, handle, 1, SQL_DIAG_MESSAGE_TEXT, nullptr, 0, &messageLen);
-		_message = substrate::make_unique_nothrow<char []>(++messageLen);
+		SQLGetDiagFieldA(handleType, handle, 1, SQL_DIAG_SQLSTATE, _state.data(),
+			static_cast<SQLSMALLINT>(_state.size()), nullptr);
+		SQLGetDiagFieldA(handleType, handle, 1, SQL_DIAG_MESSAGE_TEXT, nullptr, 0, &length);
+		if (length < 0)
+			return;
+		const auto messageLen{static_cast<uint16_t>(length + 1)};
+		_message = substrate::make_unique_nothrow<char []>(messageLen);
 		if (_message)
 		{
-			SQLGetDiagFieldA(handleType, handle, 1, SQL_DIAG_MESSAGE_TEXT, _message.get(), messageLen, nullptr);
-			_message[messageLen - 1] = 0;
+			SQLGetDiagFieldA(handleType, handle, 1, SQL_DIAG_MESSAGE_TEXT, _message.get(),
+				static_cast<SQLSMALLINT>(messageLen), nullptr);
+			_message[messageLen - 1U] = 0;
 		}
 	}
 }

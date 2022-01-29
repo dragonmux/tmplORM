@@ -83,8 +83,8 @@ namespace tmplORM
 
 		constexpr bool isLowerCase(const char x) noexcept { return x >= 'a' && x <= 'z'; }
 		constexpr bool isUpperCase(const char x) noexcept { return x >= 'A' && x <= 'Z'; }
-		constexpr char toLower(const char x) noexcept { return isUpperCase(x) ? x + 0x20 : x; }
-		constexpr char toUpper(const char x) noexcept { return isLowerCase(x) ? x - 0x20 : x; }
+		constexpr char toLower(const char x) noexcept { return isUpperCase(x) ? char(x + 0x20) : x; }
+		constexpr char toUpper(const char x) noexcept { return isLowerCase(x) ? char(x - 0x20) : x; }
 		constexpr bool isUnderscore(const char x) noexcept { return x == '_'; }
 
 		template<char...> struct isUpperCase__t;
