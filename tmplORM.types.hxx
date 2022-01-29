@@ -197,7 +197,7 @@ namespace tmplORM
 				extern std::array<std::array<uint16_t, 12>, 2> monthDays;
 
 				constexpr bool isLeap(const rep_t year) noexcept
-					{ return (year % 4) == 0 && ((year % 100) != 0 || (year % 400) == 0); }
+					{ return (year % 4U) == 0 && ((year % 100U) != 0 || (year % 400U) == 0); }
 				constexpr bool isLeap(const years &year) noexcept { return isLeap(year.count()); }
 				constexpr rep_t div(const years a, const rep_t b) noexcept
 					{ return (a.count() / b) + ((a.count() % b) < 0); }
@@ -242,7 +242,7 @@ namespace tmplORM
 						return static_cast<int16_t>(year.count());
 					}
 
-					uint8_t computeMonth(const uint16_t year, days &day) noexcept
+					uint8_t computeMonth(const int16_t year, days &day) noexcept
 					{
 						const auto &daysFor = monthDays[isLeap(year)];
 						size_t i{0};
@@ -273,15 +273,15 @@ namespace tmplORM
 						correctDay(day, rem);
 						_year = computeYear(day);
 						_month = computeMonth(_year, day);
-						_day = day.count();
+						_day = static_cast<uint8_t>(day.count());
 
-						_hour = durationIn<hours>(rem);
+						_hour = static_cast<uint16_t>(durationIn<hours>(rem));
 						rem -= hours{_hour};
-						_minute = durationIn<minutes>(rem);
+						_minute = static_cast<uint16_t>(durationIn<minutes>(rem));
 						rem -= minutes{_minute};
-						_second = durationIn<seconds>(rem);
+						_second = static_cast<uint16_t>(durationIn<seconds>(rem));
 						rem -= seconds{_second};
-						_nanoSecond = durationIn<nanoseconds>(rem);
+						_nanoSecond = static_cast<uint32_t>(durationIn<nanoseconds>(rem));
 
 						//display();
 					}
@@ -384,7 +384,7 @@ namespace tmplORM
 			}
 
 			inline char asHex(const uint8_t value) noexcept
-				{ return value < 10 ? value + '0' : value + 'A' - 10; }
+				{ return static_cast<char>(value < 10U ? value + '0' : value + 'A' - 10); }
 
 			struct ormUUID_t final
 			{
