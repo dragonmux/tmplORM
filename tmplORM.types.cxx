@@ -28,15 +28,15 @@ constexpr seconds operator ""_sec(const unsigned long long value) noexcept { ret
 
 std::array<std::array<uint16_t, 12>, 2> tmplORM::types::baseTypes::chrono::monthDays
 {{
-	{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
-	{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
+	{{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}},
+	{{31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}}
 }};
 
 constexpr static std::array<char, 4> tzMagic{{'T', 'Z', 'i', 'f'}};
 struct tzHead_t
 {
 	std::array<char, 4> magic;
-	char version;
+	uint8_t version;
 	std::array<char, 15> reserved;
 	uint32_t ttIsGmtCount;
 	uint32_t ttIsStdCount;
@@ -88,7 +88,7 @@ static std::unique_ptr<tzString_t> tzStringList{};
 
 // TODO: fixme.
 #define TZDIR "/usr/share/zoneinfo"
-#define TZDEFAULT "localtime"
+#define TZDEFAULT "/etc/localtime"
 constexpr size_t halfYear = durationIn<seconds>(1_y) / 2;
 
 template<typename T> constexpr size_t signBit() noexcept
@@ -98,26 +98,26 @@ constexpr uint8_t sizeBits = std::numeric_limits<size_t>::digits - 1;
 
 inline int32_t asInt32(const uint8_t *const value) noexcept
 {
-	int32_t result{};
+	uint32_t result{};
 	if (sizeof(int32_t) != 4 && value[0] >> signBit<char>())
-		result = int32_t(uint32_t(-1) & ~0xFFFFFFFFU);
+		result = uint32_t(-1) & ~0xFFFFFFFFU;
 	result |= uint32_t(value[0] << 24U) | uint32_t(value[1] << 16U) |
 		uint32_t(value[2] << 8U) | value[3];
-	return result;
+	return static_cast<int32_t>(result);
 }
 inline int32_t asInt32(const std::array<uint8_t, 4> &value) noexcept
 	{ return asInt32(value.data()); }
 
 inline int64_t asInt64(const uint8_t *const value) noexcept
 {
-	int64_t result{};
+	uint64_t result{};
 	if (sizeof(int64_t) != 8 && value[0] >> signBit<char>())
-		result = int64_t(uint64_t(-1) & ~0xFFFFFFFFFFFFFFFFU);
+		result = uint64_t(-1) & ~0xFFFFFFFFFFFFFFFFU;
 	result |= (uint64_t(value[0]) << 56U) | (uint64_t(value[1]) << 48U) |
 		(uint64_t(value[2]) << 40U) | (uint64_t(value[3]) << 32U) |
 		(uint64_t(value[4]) << 24U) | (uint64_t(value[5]) << 16U) |
 		(uint64_t(value[6]) << 8U) | uint64_t(value[7]);
-	return result;
+	return static_cast<int64_t>(result);
 }
 
 inline int64_t asInt64(const uint8_t *const value, const size_t width) noexcept
@@ -434,8 +434,8 @@ bool tzReadFile(const char *const file) noexcept
 	// this is not to deal with an error but to ensure good state when entering this function
 	badRead();
 
-	size_t charCount{}, isStdCount{}, isGmtCount{};
-	uint8_t version{};
+	size_t charCount{0}, isStdCount{0}, isGmtCount{0};
+	uint8_t version{0};
 	auto readHeader = [&]() noexcept -> bool
 	{
 		tzHead_t header{};
@@ -463,12 +463,12 @@ bool tzReadFile(const char *const file) noexcept
 	};
 
 	if (!readHeader())
-		return false;
+		return badRead();
 	else if (sizeof(time_t) == 8 && version)
 	{
 		const auto toSkip{safeAdd(safeMul(transitionsCount, 5U), safeMul(typesCount, 6U),
 			charCount, safeMul(leapsCount, 8U), isStdCount, isGmtCount)};
-		if (toSkip == sizeMax || !fd.seek(toSkip, SEEK_CUR) || !readHeader())
+		if (toSkip == sizeMax || !fd.seek(static_cast<off_t>(toSkip), SEEK_CUR) || !readHeader())
 			return false;
 		width = 8U;
 	}
@@ -485,7 +485,7 @@ bool tzReadFile(const char *const file) noexcept
 		const off_t rem = fileStat.st_size - fd.tell();
 		if (rem < 0)
 			return false;
-		tzSpecLen = safeSub(rem, totalSize, 1U);
+		tzSpecLen = safeSub(static_cast<size_t>(rem), totalSize, 1U);
 		if (tzSpecLen == 0 || tzSpecLen == sizeMax)
 			return false;
 	}
@@ -773,8 +773,9 @@ void tzInit() noexcept
 
 size_t searchFor(const time_t time) noexcept
 {
-	size_t low{0}, high{transitionsCount - 1};
-	size_t i{(transitions[high] - time) / halfYear};
+	size_t low{0};
+	size_t high{transitionsCount - 1U};
+	size_t i{size_t(transitions[high] - time) / halfYear};
 	// If we have a reasonable guess for i, tune low and high to reduce the search space if possible.
 	if (i < transitionsCount)
 	{
@@ -859,8 +860,8 @@ void computeChange(tzRule_t &rule, const int16_t year) noexcept
 		return; // We already did the legwork (except for 2BC) cool.. fast path!
 	else if (year > 1970)
 	{
-		const auto _year = year - 1;
-		time = durationIn<seconds>(years{uint16_t(year) - 1970U} + days{(_year / 4U - y1970_4) -
+		const auto _year{static_cast<uint16_t>(year - 1)};
+		time = durationIn<seconds>(years{uint32_t(year) - 1970U} + days{(_year / 4U - y1970_4) -
 			(_year / 100U - y1970_100) + (_year / 400U - y1970_400)});
 	}
 
@@ -875,19 +876,19 @@ void computeChange(tzRule_t &rule, const int16_t year) noexcept
 		time += durationIn<seconds>(days{rule.day});
 		break;
 	case tzRuleType_t::M:
-		const uint32_t _month = rule.month - 1U;
-		const auto &daysFor = monthDays[isLeap(year)];
+		const auto _month{rule.month - 1U};
+		const auto &daysFor{monthDays[isLeap(year)]};
 		for (uint16_t i = 0; i < _month; ++i)
 			time += durationIn<seconds>(days{daysFor[i]});
-		const uint32_t month = rule.month < 3U ? rule.month + 12U : rule.month;
-		const int32_t _year = rule.month < 3U ? year - 1 : year;
-		const auto _century = std::div(_year, 100);
-		const int32_t century = _century.quot;
-		const int32_t centuryYear = _century.rem;
+		const auto month{rule.month < 3U ? rule.month + 12U : rule.month};
+		const auto _year{rule.month < 3U ? year - 1 : year};
+		const auto _century{std::div(_year, 100)};
+		const auto century{_century.quot};
+		const auto centuryYear{static_cast<uint8_t>(_century.rem)};
 		// We're after the first day of the month here, so we set q from the Gregorian formula
 		// on https://en.wikipedia.org/wiki/Zeller%27s_congruence to 0
-		uint32_t dow = uint32_t(13U * (month + 1U) / 5U + centuryYear +
-			centuryYear / 4U + century / 4U - 2U * century) % 7U;
+		const uint32_t dow = uint32_t(13U * (month + 1U) / 5U + centuryYear +
+			centuryYear / 4U + uint32_t(century / 4 - 2 * century)) % 7U;
 		uint32_t day = rule.day < dow ? rule.day + 7U - dow : rule.day - dow;
 		for (uint16_t i = 1U; i < rule.week; ++i)
 		{
@@ -956,7 +957,7 @@ ormDateTime_t::timezone_t ormDateTime_t::tzCompute(const systemTime_t &time) noe
 	size_t typeIndex{0};
 	tzName[0] = nullptr;
 	tzName[1] = nullptr;
-	if (!transitionsCount || timeSecs < transitions[0])
+	if (!transitionsCount || timeSecs < transitions[0U])
 	{
 		for (; typeIndex < typesCount && ::types[typeIndex].isDst; ++typeIndex)
 		{
@@ -964,17 +965,17 @@ ormDateTime_t::timezone_t ormDateTime_t::tzCompute(const systemTime_t &time) noe
 				tzName[1] = tzString(&zoneNames[::types[typeIndex].index]);
 		}
 		if (typesCount && typeIndex == typesCount)
-			tzName[0] = tzString(&zoneNames[::types[typeIndex = 0].index]);
-		for (size_t j{typeIndex}; j < typesCount && !tzName[1]; ++j)
+			tzName[0] = tzString(&zoneNames[::types[typeIndex = 0U].index]);
+		for (size_t j{typeIndex}; j < typesCount && !tzName[1U]; ++j)
 		{
 			if (::types[j].isDst)
 				tzName[1] = tzString(&zoneNames[::types[j].index]);
 		}
 	}
-	else if (timeSecs >= transitions[transitionsCount - 1])
+	else if (timeSecs >= transitions[transitionsCount - 1U])
 	{
 		if (!tzSpec)
-			typeIndex = computeRules(transitionsCount - 1);
+			typeIndex = computeRules(transitionsCount - 1U);
 		else
 		{
 			tzParseSpec();
@@ -985,7 +986,7 @@ ormDateTime_t::timezone_t ormDateTime_t::tzCompute(const systemTime_t &time) noe
 		}
 	}
 	else
-		typeIndex = computeRules(searchFor(timeSecs));
+		typeIndex = computeRules(searchFor(timeSecs) - 1U);
 	timezone_t result{computeOffset(typeIndex), 0, 0};
 	tzComputeLeaps(result, timeSecs);
 	return result;
