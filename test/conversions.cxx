@@ -1,8 +1,9 @@
 #include <crunch++.h>
-#include <conversions.hxx>
+#include <substrate/conversions>
 #include <testConversions.hxx>
 
 using str_t = std::char_traits<char>;
+using namespace substrate;
 
 template<typename int_t> struct testFromInt_t
 {
@@ -54,12 +55,12 @@ public:
 		}
 	}
 
-	void testIntConversions(testsuite &suite, const testOk_t<int_t> &tests)
+	void testDecConversions(testsuite &suite, const testOk_t<int_t> &tests)
 	{
 		for (const auto &test : tests)
 		{
 			auto value = toInt{test.second};
-			suite.assertTrue(value.isInt());
+			suite.assertTrue(value.isDec());
 			suite.assertEqual(value.length(), str_t::length(test.second));
 			suite.assertEqual(value, test.first);
 		}
@@ -157,21 +158,21 @@ extern void testOctShouldFail(testsuite &suite, const testFailStr_t tests)
 }
 
 void testDecToUint8(testsuite &suite, const testOk_t<uint8_t> tests)
-	{ testToInt_t<uint8_t> tester; tester.testIntConversions(suite, tests); }
+	{ testToInt_t<uint8_t> tester; tester.testDecConversions(suite, tests); }
 void testDecToInt8(testsuite &suite, const testOk_t<int8_t> tests)
-	{ testToInt_t<int8_t> tester; tester.testIntConversions(suite, tests); }
+	{ testToInt_t<int8_t> tester; tester.testDecConversions(suite, tests); }
 void testDecToUint16(testsuite &suite, const testOk_t<uint16_t> tests)
-	{ testToInt_t<uint16_t> tester; tester.testIntConversions(suite, tests); }
+	{ testToInt_t<uint16_t> tester; tester.testDecConversions(suite, tests); }
 void testDecToInt16(testsuite &suite, const testOk_t<int16_t> tests)
-	{ testToInt_t<int16_t> tester; tester.testIntConversions(suite, tests); }
+	{ testToInt_t<int16_t> tester; tester.testDecConversions(suite, tests); }
 void testDecToUint32(testsuite &suite, const testOk_t<uint32_t> tests)
-	{ testToInt_t<uint32_t> tester; tester.testIntConversions(suite, tests); }
+	{ testToInt_t<uint32_t> tester; tester.testDecConversions(suite, tests); }
 void testDecToInt32(testsuite &suite, const testOk_t<int32_t> tests)
-	{ testToInt_t<int32_t> tester; tester.testIntConversions(suite, tests); }
+	{ testToInt_t<int32_t> tester; tester.testDecConversions(suite, tests); }
 void testDecToUint64(testsuite &suite, const testOk_t<uint64_t> tests)
-	{ testToInt_t<uint64_t> tester; tester.testIntConversions(suite, tests); }
+	{ testToInt_t<uint64_t> tester; tester.testDecConversions(suite, tests); }
 void testDecToInt64(testsuite &suite, const testOk_t<int64_t> tests)
-	{ testToInt_t<int64_t> tester; tester.testIntConversions(suite, tests); }
+	{ testToInt_t<int64_t> tester; tester.testDecConversions(suite, tests); }
 
 template<typename toInt_t> struct testDecShouldFail_t
 {
@@ -184,7 +185,7 @@ public:
 
 	void operator ()(toInt_t &value)
 	{
-		suite.assertFalse(value.isInt());
+		suite.assertFalse(value.isDec());
 		suite.assertEqual(value.length(), str_t::length(test));
 	}
 };
@@ -240,14 +241,3 @@ extern void testHexShouldFail(testsuite &suite, const testFailStr_t tests)
 		types.template test<testHexShouldFail_t>(suite, test);
 	}
 }
-
-template<typename int_t> int_t swapBytes_(const int_t val) noexcept
-{
-	auto result(val);
-	swapBytes(result);
-	return result;
-}
-
-uint16_t testSwapBytes(const uint16_t val) noexcept { return swapBytes_(val); }
-uint32_t testSwapBytes(const uint32_t val) noexcept { return swapBytes_(val); }
-uint64_t testSwapBytes(const uint64_t val) noexcept { return swapBytes_(val); }

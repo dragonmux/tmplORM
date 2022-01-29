@@ -49,8 +49,4 @@ extern void testHexToUint64(testsuite &suite, const testOk_t<uint64_t> tests);
 extern void testHexToInt64(testsuite &suite, const testOk_t<int64_t> tests);
 extern void testHexShouldFail(testsuite &suite, const testFailStr_t tests);
 
-extern uint16_t testSwapBytes(const uint16_t val) noexcept;
-extern uint32_t testSwapBytes(const uint32_t val) noexcept;
-extern uint64_t testSwapBytes(const uint64_t val) noexcept;
-
 #endif /*TEST_CONVERSIONS__HXX*/

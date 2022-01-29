@@ -1,8 +1,9 @@
 #ifndef tmplORM_TYPES__HXX
 #define tmplORM_TYPES__HXX
 
-#include <conversions.hxx>
 #include <cstring>
+#include <substrate/conversions>
+#include <string.hxx>
 
 /*!
  * @file
@@ -17,6 +18,8 @@ namespace tmplORM
 	{
 		inline namespace baseTypes
 		{
+			using namespace substrate;
+
 			struct ormDate_t
 			{
 			protected:
@@ -355,6 +358,33 @@ namespace tmplORM
 				return a.data1 == b.data1 && a.data2 == b.data2 &&
 					a.data3 == b.data3 && a.data4 == b.data4;
 			}
+
+			inline void swapBytes(uint16_t &val) noexcept
+			{
+				val = (uint16_t(val >> 8U) & 0xFFU) | uint16_t((val & 0xFFU) << 8U);
+			}
+
+			inline void swapBytes(uint32_t &val) noexcept
+			{
+				val = (uint32_t(val >> 24U) & 0xFFU) | (uint32_t(val >> 8U) & 0xFF00U) |
+					uint32_t((val & 0xFF00U) << 8U) | uint32_t((val & 0xFFU) << 24U);
+			}
+
+			inline void swapBytes(uint64_t &val) noexcept
+			{
+				val = (uint64_t(val >> 56U) & 0xFFU) | (uint64_t(val >> 40U) & 0xFF00U) | (uint64_t(val >> 24U) & 0xFF0000U) | (uint64_t(val >> 8U) & 0xFF000000U) |
+					uint64_t((val & 0xFF000000U) << 8U) | uint64_t((val & 0xFF0000U) << 24U) | uint64_t((val & 0xFF00U) << 40U) | uint64_t((val & 0xFFU) << 56U);
+			}
+
+			template<typename T> inline T swapBytes(const T &a) noexcept
+			{
+				typename std::make_unsigned<T>::type result(a);
+				swapBytes(result);
+				return result;
+			}
+
+			inline char asHex(const uint8_t value) noexcept
+				{ return value < 10 ? value + '0' : value + 'A' - 10; }
 
 			struct ormUUID_t final
 			{

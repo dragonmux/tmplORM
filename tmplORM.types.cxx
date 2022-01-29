@@ -258,13 +258,12 @@ bool readLeaps(const fd_t &fd, const size_t width) noexcept
 	for (size_t i{}; i < leapsCount; ++i)
 	{
 		if (!fd.read(buffer, width) ||
-			!fd.read(leaps[i].change))
+			!fd.readBE(leaps[i].change))
 			return false;
 		else if (sizeof(time_t) == 8)
 			leaps[i].transition = asInt64(buffer, width);
 		else
 			leaps[i].transition = asInt32(buffer);
-		swapBytes(leaps[i].change);
 	}
 	return true;
 }
