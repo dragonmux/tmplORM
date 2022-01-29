@@ -125,9 +125,9 @@ namespace tmplORM
 					++time;
 					toInt_t<uint64_t> nanoSeconds(time);
 					if (nanoSeconds.length() <= 9U)
-						_nanoSecond = nanoSeconds * power10(9U - nanoSeconds.length());
+						_nanoSecond = static_cast<uint32_t>(nanoSeconds * power10(9U - nanoSeconds.length()));
 					else
-						_nanoSecond = nanoSeconds / power10(nanoSeconds.length() - 9U);
+						_nanoSecond = static_cast<uint32_t>(nanoSeconds / power10(nanoSeconds.length() - 9U));
 				}
 
 				std::unique_ptr<char []> asString() const noexcept
