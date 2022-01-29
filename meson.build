@@ -7,7 +7,8 @@ project(
 		'b_ndebug=if-release'
 	],
 	version: '0.2.0',
-	meson_version: '>= 0.52'
+	meson_version: '>= 0.52',
+	subproject_dir: 'deps'
 )
 
 cxx = meson.get_compiler('cpp')
@@ -21,7 +22,7 @@ odbc = cxx.find_library('odbc')
 if get_option('build_check')
 	rSON = dependency('rSON')
 endif
-substrate = dependency('substrate')
+substrate = dependency('substrate', fallback: ['substrate', 'substrate_dep'])
 
 mysqlConfig = find_program('mysql_config')
 mysql = declare_dependency(
