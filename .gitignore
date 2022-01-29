@@ -1,10 +1,2 @@
-.dep
-
-*.gch
-
-*.o
-*.so*
-*.pc
-
-buildCheck
-build
+/.vscode/
+/build/
