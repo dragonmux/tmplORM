@@ -986,7 +986,7 @@ ormDateTime_t::timezone_t ormDateTime_t::tzCompute(const systemTime_t &time) noe
 		}
 	}
 	else
-		typeIndex = computeRules(searchFor(timeSecs) - 1U);
+		typeIndex = computeRules(searchFor(timeSecs));// - 1U);
 	timezone_t result{computeOffset(typeIndex), 0, 0};
 	tzComputeLeaps(result, timeSecs);
 	return result;

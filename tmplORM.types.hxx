@@ -214,8 +214,6 @@ namespace tmplORM
 						size_t leapCount;
 					};
 
-					void display() const noexcept { printf("%04d-%02u-%02u %02u:%02u:%02u.%u\n", _year, _month, _day, _hour, _minute, _second, _nanoSecond); }
-
 					template<typename value_t> void correctDay(days &day, value_t &rem) noexcept
 					{
 						while (rem.count() < 0)
@@ -282,8 +280,6 @@ namespace tmplORM
 						_second = static_cast<uint16_t>(durationIn<seconds>(rem));
 						rem -= seconds{_second};
 						_nanoSecond = static_cast<uint32_t>(durationIn<nanoseconds>(rem));
-
-						//display();
 					}
 					ormDateTime_t(const timePoint_t &point) noexcept :
 						ormDateTime_t{point.time_since_epoch()} { }
