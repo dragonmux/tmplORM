@@ -1,5 +1,5 @@
-#ifndef tmplORM_MYSQL__HXX
-#define tmplORM_MYSQL__HXX
+#ifndef tmplORM_MYSQL_HXX
+#define tmplORM_MYSQL_HXX
 
 #include "tmplORM.hxx"
 #include <type_traits>
@@ -434,4 +434,4 @@ namespace tmplORM
 	using mysql_t = mysql::session_t;
 }
 
-#endif /*tmplORM_MYSQL__HXX*/
+#endif /*tmplORM_MYSQL_HXX*/

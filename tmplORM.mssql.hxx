@@ -1,5 +1,5 @@
-#ifndef tmplORM_MSSQL__HXX
-#define tmplORM_MSSQL__HXX
+#ifndef tmplORM_MSSQL_HXX
+#define tmplORM_MSSQL_HXX
 
 #ifndef UNICODE
 #define UNICODE
@@ -385,4 +385,4 @@ namespace tmplORM
 	using mssql_t = mssql::session_t;
 }
 
-#endif /*tmplORM_MSSQL__HXX*/
+#endif /*tmplORM_MSSQL_HXX*/

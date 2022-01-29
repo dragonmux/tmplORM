@@ -1,5 +1,5 @@
-#ifndef tmplORM_JSON_HELPERS__HXX
-#define tmplORM_JSON_HELPERS__HXX
+#ifndef tmplORM_JSON_HELPERS_HXX
+#define tmplORM_JSON_HELPERS_HXX
 
 #include <stdint.h>
 #include <regex>
@@ -138,4 +138,4 @@ inline bool validateUnixPath(const jsonString_t &pathStr) noexcept
 inline bool validatePath(const jsonString_t &path) noexcept
 	{ return validateUNCPath(path) || validateWindowsPath(path) || validateUnixPath(path); }
 
-#endif /*tmplORM_JSON_HELPERS__HXX*/
+#endif /*tmplORM_JSON_HELPERS_HXX*/

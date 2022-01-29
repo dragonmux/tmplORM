@@ -1,5 +1,5 @@
-#ifndef MSSQL__HXX
-#define MSSQL__HXX
+#ifndef MSSQL_HXX
+#define MSSQL_HXX
 
 #include <cstdint>
 #include <array>
@@ -294,4 +294,4 @@ public:
 	}
 }
 
-#endif /*MSSQL__HXX*/
+#endif /*MSSQL_HXX*/

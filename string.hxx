@@ -1,5 +1,5 @@
-#ifndef tmplORM_STRING__HXX
-#define tmplORM_STRING__HXX
+#ifndef tmplORM_STRING_HXX
+#define tmplORM_STRING_HXX
 
 #include <cstdarg>
 #include <memory>
@@ -91,4 +91,4 @@ public:
 	static size_t length(const utf8_t &str) noexcept { return str ? length<char>(str) : 0; }
 };
 
-#endif /*tmplORM_STRING__HXX*/
+#endif /*tmplORM_STRING_HXX*/

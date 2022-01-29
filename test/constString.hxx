@@ -1,5 +1,5 @@
-#ifndef CONST_STRING__HXX
-#define CONST_STRING__HXX
+#ifndef CONST_STRING_HXX
+#define CONST_STRING_HXX
 
 #include <string>
 #include <cassert>
@@ -150,4 +150,4 @@ public:
 		{ return {*this, pos, n}; }
 };
 
-#endif /*CONST_STRING__HXX*/
+#endif /*CONST_STRING_HXX*/

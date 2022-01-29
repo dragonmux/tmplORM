@@ -1,5 +1,5 @@
-#ifndef TO_JSON__HXX
-#define TO_JSON__HXX
+#ifndef TO_JSON_HXX
+#define TO_JSON_HXX
 
 #include "../models.hxx"
 #include <serializer/toJSON.hxx>
@@ -41,4 +41,4 @@ inline namespace toJSON
 	}
 }
 
-#endif /*TO_JSON__HXX*/
+#endif /*TO_JSON_HXX*/

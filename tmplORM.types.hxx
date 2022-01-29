@@ -1,5 +1,5 @@
-#ifndef tmplORM_TYPES__HXX
-#define tmplORM_TYPES__HXX
+#ifndef tmplORM_TYPES_HXX
+#define tmplORM_TYPES_HXX
 
 #include <cstring>
 #include <substrate/conversions>
@@ -474,4 +474,4 @@ namespace tmplORM
 	}
 }
 
-#endif /*tmplORM_TYPES__HXX*/
+#endif /*tmplORM_TYPES_HXX*/

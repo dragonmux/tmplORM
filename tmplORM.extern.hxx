@@ -1,5 +1,5 @@
-#ifndef tmplORM_EXTERN__HXX
-#define tmplORM_EXTERN__HXX
+#ifndef tmplORM_EXTERN_HXX
+#define tmplORM_EXTERN_HXX
 
 #ifdef _MSC_VER
 	// TODO: Define me.
@@ -14,4 +14,4 @@
 	#define tmplORM_FNAPI extern tmplORM_API
 #endif
 
-#endif /*tmplORM_EXTERN__HXX*/
+#endif /*tmplORM_EXTERN_HXX*/

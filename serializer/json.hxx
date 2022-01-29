@@ -1,5 +1,5 @@
-#ifndef tmplORM_JSON__HXX
-#define tmplORM_JSON__HXX
+#ifndef tmplORM_JSON_HXX
+#define tmplORM_JSON_HXX
 
 #include <tmplORM.hxx>
 #include <rSON.h>
@@ -102,4 +102,4 @@ namespace tmplORM
 	}
 }
 
-#endif /*tmplORM_JSON__HXX*/
+#endif /*tmplORM_JSON_HXX*/

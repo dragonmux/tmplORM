@@ -1,5 +1,5 @@
-#ifndef TEST_TYPES__HXX
-#define TEST_TYPES__HXX
+#ifndef TEST_TYPES_HXX
+#define TEST_TYPES_HXX
 
 namespace testDateTime
 {
@@ -35,4 +35,4 @@ namespace testTypes
 	void testUUID(testsuite &suite);
 }
 
-#endif /*TEST_TYPES__HXX*/
+#endif /*TEST_TYPES_HXX*/

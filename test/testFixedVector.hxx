@@ -1,5 +1,5 @@
-#ifndef TEST_FIXED_VECTOR__HXX
-#define TEST_FIXED_VECTOR__HXX
+#ifndef TEST_FIXED_VECTOR_HXX
+#define TEST_FIXED_VECTOR_HXX
 
 namespace boundedIterator
 {
@@ -16,4 +16,4 @@ namespace fixedVector
 	void testSwap(testsuite &suite);
 }
 
-#endif /*TEST_FIXED_VECTOR__HXX*/
+#endif /*TEST_FIXED_VECTOR_HXX*/

@@ -1,5 +1,5 @@
-#ifndef tmplORM_FROM_JSON__HXX
-#define tmplORM_FROM_JSON__HXX
+#ifndef tmplORM_FROM_JSON_HXX
+#define tmplORM_FROM_JSON_HXX
 
 #include <memory>
 #include <tmplORM.hxx>
@@ -176,4 +176,4 @@ namespace tmplORM
 		{ return tmplORM::json::isValidJSONArray<T>(atom); }
 }
 
-#endif /*tmplORM_FROM_JSON__HXX*/
+#endif /*tmplORM_FROM_JSON_HXX*/

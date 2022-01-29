@@ -1,5 +1,5 @@
-#ifndef tmplORM__HXX
-#define tmplORM__HXX
+#ifndef tmplORM_HXX
+#define tmplORM_HXX
 
 #include <cstdint>
 #include <string>
@@ -773,4 +773,4 @@ namespace tmplORM
 	using common::session_t;
 }
 
-#endif /*tmplORM__HXX*/
+#endif /*tmplORM_HXX*/

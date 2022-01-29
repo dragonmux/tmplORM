@@ -1,5 +1,5 @@
-#ifndef VALUE__HXX
-#define VALUE__HXX
+#ifndef VALUE_HXX
+#define VALUE_HXX
 
 template<typename T, typename E> struct valueOrError_t final
 {
@@ -30,4 +30,4 @@ public:
 	valueOrError_t &operator =(const valueOrError_t &) = delete;
 };
 
-#endif /*VALUE__HXX*/
+#endif /*VALUE_HXX*/

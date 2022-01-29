@@ -1,5 +1,5 @@
-#ifndef DATETIME_INTERNAL__HXX
-#define DATETIME_INTERNAL__HXX
+#ifndef DATETIME_INTERNAL_HXX
+#define DATETIME_INTERNAL_HXX
 
 #include <time.h>
 #include <array>
@@ -32,4 +32,4 @@ extern std::unique_ptr<char []> tzSpec;
 
 extern bool tzReadFile(const char *const file) noexcept;
 
-#endif /*DATETIME_INTERNAL__HXX*/
+#endif /*DATETIME_INTERNAL_HXX*/

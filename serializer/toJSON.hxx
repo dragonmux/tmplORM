@@ -1,5 +1,5 @@
-#ifndef tmplORM_TO_JSON__HXX
-#define tmplORM_TO_JSON__HXX
+#ifndef tmplORM_TO_JSON_HXX
+#define tmplORM_TO_JSON_HXX
 
 #include <memory>
 #include <tmplORM.hxx>
@@ -185,4 +185,4 @@ namespace tmplORM
 	}
 }
 
-#endif /*tmplORM_TO_JSON__HXX*/
+#endif /*tmplORM_TO_JSON_HXX*/

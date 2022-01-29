@@ -1,5 +1,5 @@
-#ifndef TEST_CONVERSIONS__HXX
-#define TEST_CONVERSIONS__HXX
+#ifndef TEST_CONVERSIONS_HXX
+#define TEST_CONVERSIONS_HXX
 
 #include <utility>
 #include <vector>
@@ -49,4 +49,4 @@ extern void testHexToUint64(testsuite &suite, const testOk_t<uint64_t> tests);
 extern void testHexToInt64(testsuite &suite, const testOk_t<int64_t> tests);
 extern void testHexShouldFail(testsuite &suite, const testFailStr_t tests);
 
-#endif /*TEST_CONVERSIONS__HXX*/
+#endif /*TEST_CONVERSIONS_HXX*/

@@ -1,5 +1,5 @@
-#ifndef MYSQL__HXX
-#define MYSQL__HXX
+#ifndef MYSQL_HXX
+#define MYSQL_HXX
 
 #include <cstdint>
 #include <mysql.h>
@@ -340,4 +340,4 @@ public:
 	}
 }
 
-#endif /*MYSQL__HXX*/
+#endif /*MYSQL_HXX*/
