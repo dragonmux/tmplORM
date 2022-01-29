@@ -18,7 +18,9 @@ coverage = get_option('b_coverage')
 threading = dependency('threads')
 dl = cxx.find_library('dl', required: not isWindows)
 odbc = cxx.find_library('odbc')
-rSON = dependency('rSON')
+if get_option('build_check')
+	rSON = dependency('rSON')
+endif
 substrate = dependency('substrate')
 
 mysqlConfig = find_program('mysql_config')
@@ -61,16 +63,18 @@ pkgconfig.generate(
 	description: 'The tmplORM template meta-programming ORM\'s C++ runtime'
 )
 
-run_target(
-	'buildCheck',
-	command: executable(
-		'_buildCheck',
-		['buildCheck.cxx'],
-		dependencies: [threading, dl, odbc, mysql, rSON],
-		install: false,
-		build_by_default: false
+if get_option('build_check')
+	run_target(
+		'buildCheck',
+		command: executable(
+			'_buildCheck',
+			['buildCheck.cxx'],
+			dependencies: [threading, dl, odbc, mysql, rSON],
+			install: false,
+			build_by_default: false
+		)
 	)
-)
+endif
 
 install_headers(
 	'mysql.hxx', 'mssql.hxx', 'tmplORM.hxx', 'tmplORM.mysql.hxx', 'tmplORM.mssql.hxx',

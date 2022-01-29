@@ -1,0 +1,1 @@
+option('build_check', type: 'boolean', value: true)
