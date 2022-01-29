@@ -282,7 +282,7 @@ void mySQLPreparedResult_t::fetchColumn(const size_t index) const noexcept
 {
 	if (index >= columns.count())
 		return;
-	mysql_stmt_fetch_column(query, columns.data() + index, index, 0);
+	mysql_stmt_fetch_column(query, columns.data() + index, static_cast<uint32_t>(index), 0);
 }
 
 mySQLBind_t::mySQLBind_t(mySQLBind_t &&binds) noexcept : mySQLBind_t{} { *this = std::move(binds); }
@@ -494,6 +494,7 @@ bool mySQLValue_t::asBool(const uint8_t bit) const
 template<typename T, mySQLErrorType_t errorType> valueOrError_t<T, mySQLValueError_t> checkedConvertInt(const char *const data, const uint64_t len) noexcept
 {
 	using U = substrate::promoted_type_t<typename std::make_unsigned<T>::type>;
+	using I = substrate::promoted_type_t<T>;
 	if (!len)
 		return 0;
 	const bool sign = is_signed<T>::value && isMinus(data[0]);
@@ -514,8 +515,8 @@ template<typename T, mySQLErrorType_t errorType> valueOrError_t<T, mySQLValueErr
 	if (num < preNum)
 		return mySQLValueError_t{errorType};
 	else if (sign)
-		return -T(num);
-	return T(num);
+		return static_cast<T>(-static_cast<I>(num));
+	return static_cast<T>	(num);
 }
 
 /*!
