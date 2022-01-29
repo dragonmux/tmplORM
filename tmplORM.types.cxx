@@ -447,8 +447,10 @@ bool tzReadFile(const char *const file) noexcept
 			!fd.readBE(header.ttIsStdCount) ||
 			!fd.readBE(header.leapCount) ||
 			!fd.readBE(header.timeCount) ||
+			!fd.readBE(header.typeCount) ||
 			!fd.readBE(header.charCount))
 			return false;
+		version = header.version;
 		transitionsCount = header.timeCount;
 		typesCount = header.typeCount;
 		charCount = header.charCount;
@@ -457,8 +459,6 @@ bool tzReadFile(const char *const file) noexcept
 		isGmtCount = header.ttIsGmtCount;
 		if (isStdCount > typesCount || isGmtCount > typesCount)
 			return false;
-		if (header.version)
-			version = static_cast<uint8_t>(header.version - '0');
 		return true;
 	};
 

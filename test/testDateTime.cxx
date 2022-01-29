@@ -46,7 +46,7 @@ private:
 	{
 		const auto now{systemClock_t::now()};
 		const auto nowSecs{systemClock_t::to_time_t(now)};
-		const auto localTime{*gmtime(&nowSecs)};
+		const auto localTime{*localtime(&nowSecs)};
 		const ormDateTime_t ormTime{now};
 
 		assertEqual(ormTime.year(), localTime.tm_year + 1900);
