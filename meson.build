@@ -139,3 +139,9 @@ tmplORM_dep = declare_dependency(
 	link_with: tmplORM,
 	version: meson.project_version()
 )
+
+runClangTidy = find_program('runClangTidy.py')
+run_target(
+	'clang-tidy',
+	command: [runClangTidy, '-s', meson.current_source_dir(), '-p', meson.current_build_dir()]
+)

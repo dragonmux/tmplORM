@@ -1,0 +1,32 @@
+---
+#Checks: '*,-fuchsia-*,-google-*,-android-*,-llvmlibc-*,-llvm-*,-altera-*,-hicpp-braces-around-statements,-hicpp-use-override,-hicpp-no-array-decay,-hicpp-vararg,-hicpp-explicit-conversions,-hicpp-no-malloc,-hicpp-special-member-functions,-hicpp-named-parameter,-hicpp-avoid-c-arrays'
+Checks:              'bugprone-*,cert-*,cppcoreguidelines-*,modernize-*,performance-*,readability-*,portability-*,clang-diagnostic-*,clang-analyzer-*,-modernize-use-trailing-return-type,-cppcoreguidelines-avoid-magic-numbers,-readability-redundant-member-init,-readability-else-after-return,-readability-implicit-bool-conversion,-readability-named-parameter,-readability-braces-around-statements,-readability-avoid-const-params-in-decls,-readability-magic-numbers,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-avoid-non-const-global-variables,llvm-namespace-comment'
+WarningsAsErrors: ''
+FormatStyle: 'none'
+AnalyzeTemporaryDtors: false
+CheckOptions:
+  - key:             cert-dcl16-c.NewSuffixes
+    value:           'L;LL;LU;LLU'
+  - key:             cert-oop54-cpp.WarnOnlyIfThisHasSuspiciousField
+    value:           '0'
+  - key:             cppcoreguidelines-explicit-virtual-functions.IgnoreDestructors
+    value:           '0'
+  - key:             cppcoreguidelines-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
+    value:           '1'
+  - key:             modernize-loop-convert.MaxCopySize
+    value:           '16'
+  - key:             modernize-loop-convert.MinConfidence
+    value:           reasonable
+  - key:             modernize-loop-convert.NamingStyle
+    value:           camelBack
+  - key:             modernize-pass-by-value.IncludeStyle
+    value:           llvm
+  - key:             modernize-replace-auto-ptr.IncludeStyle
+    value:           llvm
+  - key:             modernize-use-nullptr.NullMacros
+    value:           'NULL'
+  - key:             readability-braces-around-statements.ShortStatementLines
+    value:           '4'
+  - key:             llvm-namespace-comment.ShortNamespaceLines
+    value:           '20'
+...
