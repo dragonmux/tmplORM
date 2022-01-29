@@ -8,6 +8,7 @@
 #include <tmplORM.types.hxx>
 #include <dateTime.hxx>
 
+using substrate::promoted_type_t;
 using substrate::fd_t;
 
 using tmplORM::types::baseTypes::ormDateTime_t;
@@ -37,12 +38,12 @@ struct tzHead_t
 	std::array<char, 4> magic;
 	char version;
 	std::array<char, 15> reserved;
-	std::array<uint8_t, 4> ttIsGmtCount;
-	std::array<uint8_t, 4> ttIsStdCount;
-	std::array<uint8_t, 4> leapCount;
-	std::array<uint8_t, 4> timeCount;
-	std::array<uint8_t, 4> typeCount;
-	std::array<uint8_t, 4> charCount;
+	uint32_t ttIsGmtCount;
+	uint32_t ttIsStdCount;
+	uint32_t leapCount;
+	uint32_t timeCount;
+	uint32_t typeCount;
+	uint32_t charCount;
 };
 
 struct tzString_t
@@ -148,7 +149,7 @@ size_t safeAdd(const size_t a, const size_t b) noexcept
 		return sizeMax;
 	// Do the top-end addition, and if it produces a value that exceeds 2 bits of storage..
 	// overflow would occur and we return sizeMax
-	else if ((a >> uint8_t(sizeBits - 1)) + (b >> uint8_t(sizeBits - 1)) > 3)
+	else if ((a >> uint8_t(sizeBits - 1U)) + (b >> uint8_t(sizeBits - 1U)) > 3)
 		return sizeMax;
 	return a + b;
 }
@@ -434,21 +435,30 @@ bool tzReadFile(const char *const file) noexcept
 	badRead();
 
 	size_t charCount{}, isStdCount{}, isGmtCount{};
-	int8_t version{};
+	uint8_t version{};
 	auto readHeader = [&]() noexcept -> bool
 	{
 		tzHead_t header{};
-		if (!fd.read(header) || header.magic != tzMagic)
+		if (!fd.read(header.magic) ||
+			header.magic != tzMagic ||
+			!fd.read(header.version) ||
+			!fd.read(header.reserved) ||
+			!fd.readBE(header.ttIsGmtCount) ||
+			!fd.readBE(header.ttIsStdCount) ||
+			!fd.readBE(header.leapCount) ||
+			!fd.readBE(header.timeCount) ||
+			!fd.readBE(header.charCount))
 			return false;
-		transitionsCount = asInt32(header.timeCount);
-		typesCount = asInt32(header.typeCount);
-		charCount = asInt32(header.charCount);
-		leapsCount = asInt32(header.leapCount);
-		isStdCount = asInt32(header.ttIsStdCount);
-		isGmtCount = asInt32(header.ttIsGmtCount);
+		transitionsCount = header.timeCount;
+		typesCount = header.typeCount;
+		charCount = header.charCount;
+		leapsCount = header.leapCount;
+		isStdCount = header.ttIsStdCount;
+		isGmtCount = header.ttIsGmtCount;
 		if (isStdCount > typesCount || isGmtCount > typesCount)
 			return false;
-		version = header.version;
+		if (header.version)
+			version = static_cast<uint8_t>(header.version - '0');
 		return true;
 	};
 
@@ -456,17 +466,17 @@ bool tzReadFile(const char *const file) noexcept
 		return false;
 	else if (sizeof(time_t) == 8 && version)
 	{
-		const size_t toSkip{safeAdd(safeMul(transitionsCount, 5), safeMul(typesCount, 6),
-			charCount, safeMul(leapsCount, 8), isStdCount, isGmtCount)};
+		const auto toSkip{safeAdd(safeMul(transitionsCount, 5U), safeMul(typesCount, 6U),
+			charCount, safeMul(leapsCount, 8U), isStdCount, isGmtCount)};
 		if (toSkip == sizeMax || !fd.seek(toSkip, SEEK_CUR) || !readHeader())
 			return false;
-		width = 8;
+		width = 8U;
 	}
 	else if (sizeof(time_t) == 4 && width == 8)
 		return false;
 
-	const size_t totalSize{safeAdd(safeMul(transitionsCount, width + 1), safeMul(typesCount, 6),
-		charCount, safeMul(leapsCount, 8), isStdCount, isGmtCount)};
+	const auto totalSize{safeAdd(safeMul(transitionsCount, width + 1U), safeMul(typesCount, 6U),
+		charCount, safeMul(leapsCount, 8U), isStdCount, isGmtCount)};
 	if (totalSize == sizeMax)
 		return false;
 	size_t tzSpecLen{};
@@ -475,7 +485,7 @@ bool tzReadFile(const char *const file) noexcept
 		const off_t rem = fileStat.st_size - fd.tell();
 		if (rem < 0)
 			return false;
-		tzSpecLen = safeSub(rem, totalSize, 1);
+		tzSpecLen = safeSub(rem, totalSize, 1U);
 		if (tzSpecLen == 0 || tzSpecLen == sizeMax)
 			return false;
 	}
@@ -523,8 +533,8 @@ bool tzParseName(const char *&spec, const uint8_t rule) noexcept
 	const char *begin = spec, *end = spec;
 	while (isAlpha(*end))
 		++end;
-	size_t length = end - begin;
-	if (length < 3)
+	auto length = static_cast<size_t>(end - begin);
+	if (length < 3U)
 	{
 		end = spec;
 		if (*end++ != '<')
@@ -532,8 +542,8 @@ bool tzParseName(const char *&spec, const uint8_t rule) noexcept
 		begin = end;
 		while (isAlphaNum(*end) || isSign(*end))
 			++end;
-		length = end - begin;
-		if (*end++ != '>' || length < 3)
+		length = static_cast<size_t>(end - begin);
+		if (*end++ != '>' || length < 3U)
 			return false;
 	}
 	const auto name = tzString(begin, length);
@@ -546,13 +556,14 @@ bool tzParseName(const char *&spec, const uint8_t rule) noexcept
 
 inline uint16_t tzParseInt(const char *&str) noexcept
 {
-	uint16_t value = 0;
+	using uint_t = promoted_type_t<uint16_t>;
+	uint_t value = 0;
 	while (isNumber(*str))
 	{
 		value *= 10;
-		value += *str++ - '0';
+		value += uint_t(*str++ - '0');
 	}
-	return value;
+	return static_cast<uint16_t>(value);
 }
 
 inline bool tzDefaultRules(const uint8_t rule) noexcept
@@ -561,7 +572,7 @@ inline bool tzDefaultRules(const uint8_t rule) noexcept
 		tzRules[0].offset = 0;
 	else
 		// DST defaults to an offset one hour later than STD.
-		tzRules[1].offset = (seconds{tzRules[0].offset} + 1_h).count();;
+		tzRules[1].offset = static_cast<int32_t>((seconds{tzRules[0].offset} + 1_h).count());
 	return false;
 }
 
@@ -849,40 +860,40 @@ void computeChange(tzRule_t &rule, const int16_t year) noexcept
 	else if (year > 1970)
 	{
 		const auto _year = year - 1;
-		time = durationIn<seconds>(years{year - 1970} + days{(_year / 4 - y1970_4) -
-			(_year / 100 - y1970_100) + (_year / 400 - y1970_400)});
+		time = durationIn<seconds>(years{uint16_t(year) - 1970U} + days{(_year / 4U - y1970_4) -
+			(_year / 100U - y1970_100) + (_year / 400U - y1970_400)});
 	}
 
 	switch (rule.type)
 	{
 	case tzRuleType_t::J1:
-		time += durationIn<seconds>(days{rule.day - 1});
-		if (rule.day >= 60 && isLeap(year))
+		time += durationIn<seconds>(days{rule.day - 1U});
+		if (rule.day >= 60U && isLeap(year))
 			time += durationIn<seconds>(1_day);
 		break;
 	case tzRuleType_t::J0:
 		time += durationIn<seconds>(days{rule.day});
 		break;
 	case tzRuleType_t::M:
-		const uint16_t _month = rule.month - 1;
+		const uint32_t _month = rule.month - 1U;
 		const auto &daysFor = monthDays[isLeap(year)];
 		for (uint16_t i = 0; i < _month; ++i)
 			time += durationIn<seconds>(days{daysFor[i]});
-		const uint8_t month = rule.month < 3 ? rule.month + 12 : rule.month;
-		const int16_t _year = rule.month < 3 ? year - 1 : year;
+		const uint32_t month = rule.month < 3U ? rule.month + 12U : rule.month;
+		const int32_t _year = rule.month < 3U ? year - 1 : year;
 		const auto _century = std::div(_year, 100);
-		const int16_t century = _century.quot;
-		const int16_t centuryYear = _century.rem;
+		const int32_t century = _century.quot;
+		const int32_t centuryYear = _century.rem;
 		// We're after the first day of the month here, so we set q from the Gregorian formula
 		// on https://en.wikipedia.org/wiki/Zeller%27s_congruence to 0
-		uint8_t dow = uint32_t(13 * (month + 1) / 5 + centuryYear +
-			centuryYear / 4 + century / 4 - 2 * century) % 7;
-		int16_t day = rule.day < dow ? rule.day + 7 - dow : rule.day - dow;
-		for (uint16_t i = 1; i < rule.week; ++i)
+		uint32_t dow = uint32_t(13U * (month + 1U) / 5U + centuryYear +
+			centuryYear / 4U + century / 4U - 2U * century) % 7U;
+		uint32_t day = rule.day < dow ? rule.day + 7U - dow : rule.day - dow;
+		for (uint16_t i = 1U; i < rule.week; ++i)
 		{
-			if (day + 7 >= daysFor[_month])
+			if (day + 7U >= daysFor[_month])
 				break;
-			day += 7;
+			day += 7U;
 		}
 		time += durationIn<seconds>(days{day});
 		break;
