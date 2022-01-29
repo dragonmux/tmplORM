@@ -44,16 +44,16 @@ namespace tmplORM
 				ormDate_t(const char *date) noexcept : ormDate_t{}
 				{
 					const auto negative = *date == '-';
-					_year = toInt_t<int16_t>{date, size_t(4 + negative)};
+					_year = toInt_t<int16_t>{date, 4U + size_t{negative}};
 					date += 5 + negative;
-					_month = toInt_t<uint8_t>{date, 2};
+					_month = toInt_t<uint8_t>{date, 2U};
 					date += 3;
-					_day = toInt_t<uint8_t>{date, 2};
+					_day = toInt_t<uint8_t>{date, 2U};
 				}
 
 				std::unique_ptr<char []> asString() const noexcept
 				{
-					const auto year = fromInt<4>(uint16_t(_year));
+					const auto year = fromInt<4>(_year);
 					const auto month = fromInt<2>(_month);
 					const auto day = fromInt<2>(_day);
 
@@ -61,13 +61,13 @@ namespace tmplORM
 					if (!str)
 						return nullptr;
 
-					uint16_t offset = 0;
+					size_t offset{};
 					year.formatTo(str.get() + offset);
 					offset += year.length();
-					str[offset - 1] = '-';
+					str[offset - 1U] = '-';
 					month.formatTo(str.get() + offset);
 					offset += month.length();
-					str[offset - 1] = '-';
+					str[offset - 1U] = '-';
 					day.formatTo(str.get() + offset);
 					return str;
 				}
@@ -111,23 +111,23 @@ namespace tmplORM
 
 				ormTime_t(const char *time) noexcept : ormTime_t{}
 				{
-					_hour = toInt_t<uint16_t>(time, 2);
-					time += 3;
-					_minute = toInt_t<uint16_t>(time, 2);
-					time += 3;
-					_second = toInt_t<uint16_t>(time, 2);
-					time += 2;
+					_hour = toInt_t<uint16_t>(time, 2U);
+					time += 3U;
+					_minute = toInt_t<uint16_t>(time, 2U);
+					time += 3U;
+					_second = toInt_t<uint16_t>(time, 2U);
+					time += 2U;
 					// The strlen() check allows for 19 digits to follow. A uint64_t supports a maximum of
 					// 19 digits of any value + a 20th 0-or-1 digit. This provides a good ballance between
 					// support complexity and correctness.
-					if (time[0] == 0 || std::strlen(time) > 20)
+					if (time[0] == 0 || std::strlen(time) > 20U)
 						return;
 					++time;
 					toInt_t<uint64_t> nanoSeconds(time);
-					if (nanoSeconds.length() <= 9)
-						_nanoSecond = nanoSeconds * power10(9 - nanoSeconds.length());
+					if (nanoSeconds.length() <= 9U)
+						_nanoSecond = nanoSeconds * power10(9U - nanoSeconds.length());
 					else
-						_nanoSecond = nanoSeconds / power10(nanoSeconds.length() - 9);
+						_nanoSecond = nanoSeconds / power10(nanoSeconds.length() - 9U);
 				}
 
 				std::unique_ptr<char []> asString() const noexcept
@@ -142,19 +142,19 @@ namespace tmplORM
 					if (!str)
 						return nullptr;
 
-					uint16_t offset = 0;
+					size_t offset{};
 					hour.formatTo(str.get() + offset);
 					offset += hour.length();
-					str[offset - 1] = ':';
+					str[offset - 1U] = ':';
 					minute.formatTo(str.get() + offset);
 					offset += minute.length();
-					str[offset - 1] = ':';
+					str[offset - 1U] = ':';
 					second.formatTo(str.get() + offset);
 					offset += second.length();
-					str[offset - 1] = '.';
+					str[offset - 1U] = '.';
 					nanoSecond.formatFractionTo(9, str.get() + offset);
 					offset += nanoSecond.fractionLength(9);
-					str[offset - 1] = 'Z';
+					str[offset - 1U] = 'Z';
 					str[offset] = 0;
 					return str;
 				}
@@ -214,7 +214,7 @@ namespace tmplORM
 						size_t leapCount;
 					};
 
-					void display() const noexcept { printf("%04u-%02u-%02u %02u:%02u:%02u.%u\n", _year, _month, _day, _hour, _minute, _second, _nanoSecond); }
+					void display() const noexcept { printf("%04d-%02u-%02u %02u:%02u:%02u.%u\n", _year, _month, _day, _hour, _minute, _second, _nanoSecond); }
 
 					template<typename value_t> void correctDay(days &day, value_t &rem) noexcept
 					{
@@ -233,13 +233,13 @@ namespace tmplORM
 					int16_t computeYear(days &day) noexcept
 					{
 						years year = 1970_y;
-						while (day.count() < 0 || day.count() > (isLeap(year) ? 366 : 365))
+						while (day.count() < 0 || day.count() > (isLeap(year) ? 366U : 365U))
 						{
-							const years guess = year + years{day.count() / 365} - years{(day.count() % 365) < 0};
-							day -= days{(guess - year).count() * 365} + leapsFor(guess - 1_y) - leapsFor(year - 1_y);
+							const years guess = year + years{day.count() / 365U} - years{(day.count() % 365U) < 0};
+							day -= days{(guess - year).count() * 365U} + leapsFor(guess - 1_y) - leapsFor(year - 1_y);
 							year = guess;
 						}
-						return year.count();
+						return static_cast<int16_t>(year.count());
 					}
 
 					uint8_t computeMonth(const uint16_t year, days &day) noexcept
@@ -248,7 +248,7 @@ namespace tmplORM
 						size_t i{0};
 						for (++day; day.count() > daysFor[i] && i < daysFor.size(); ++i)
 							day -= days{daysFor[i]};
-						return i + 1;
+						return static_cast<uint8_t>(i + 1U);
 					}
 
 					int16_t computeOffsetYear(const systemTime_t time, const seconds offset) noexcept;
@@ -290,7 +290,7 @@ namespace tmplORM
 
 					std::unique_ptr<char []> asString() const noexcept
 					{
-						const auto year = fromInt<4>(uint16_t(_year));
+						const auto year = fromInt<4>(_year);
 						const auto month = fromInt<2>(_month);
 						const auto day = fromInt<2>(_day);
 						const auto hour = fromInt<2>(_hour);
@@ -303,28 +303,28 @@ namespace tmplORM
 						if (!str)
 							return nullptr;
 
-						uint16_t offset = 0;
+						size_t offset{};
 						year.formatTo(str.get() + offset);
 						offset += year.length();
-						str[offset - 1] = '-';
+						str[offset - 1U] = '-';
 						month.formatTo(str.get() + offset);
 						offset += month.length();
-						str[offset - 1] = '-';
+						str[offset - 1U] = '-';
 						day.formatTo(str.get() + offset);
 						offset += day.length();
-						str[offset - 1] = 'T';
+						str[offset - 1U] = 'T';
 						hour.formatTo(str.get() + offset);
 						offset += hour.length();
-						str[offset - 1] = ':';
+						str[offset - 1U] = ':';
 						minute.formatTo(str.get() + offset);
 						offset += minute.length();
-						str[offset - 1] = ':';
+						str[offset - 1U] = ':';
 						second.formatTo(str.get() + offset);
 						offset += second.length();
-						str[offset - 1] = '.';
+						str[offset - 1U] = '.';
 						nanoSecond.formatFractionTo(9, str.get() + offset);
 						offset += nanoSecond.fractionLength(9);
-						str[offset - 1] = 'Z';
+						str[offset - 1U] = 'Z';
 						str[offset] = 0;
 						return str;
 					}
