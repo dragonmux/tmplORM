@@ -493,7 +493,7 @@ bool mySQLValue_t::asBool(const uint8_t bit) const
  */
 template<typename T, mySQLErrorType_t errorType> valueOrError_t<T, mySQLValueError_t> checkedConvertInt(const char *const data, const uint64_t len) noexcept
 {
-	using U = typename std::make_unsigned<T>::type;
+	using U = substrate::promoted_type_t<typename std::make_unsigned<T>::type>;
 	if (!len)
 		return 0;
 	const bool sign = is_signed<T>::value && isMinus(data[0]);
@@ -505,11 +505,11 @@ template<typename T, mySQLErrorType_t errorType> valueOrError_t<T, mySQLValueErr
 			continue;
 		else if (!isNumber(data[i]))
 			return mySQLValueError_t{errorType};
-		num *= 10;
-		if ((num / 10) < preNum)
+		num *= 10U;
+		if ((num / 10U) < preNum)
 			return mySQLValueError_t{errorType};
 		preNum = num;
-		num += data[i] - '0';
+		num += static_cast<U>(data[i] - '0');
 	}
 	if (num < preNum)
 		return mySQLValueError_t{errorType};
