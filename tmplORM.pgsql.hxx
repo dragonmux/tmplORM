@@ -62,6 +62,63 @@ namespace tmplORM
 		/*! @brief Generates a list of N prepared execution placeholders for a query statement */
 		template<size_t count, size_t N> using placeholder = typename placeholder_t<count, N>::value;
 
+		// Intermediary container type for handling conversion of a field into a form suitable for an INSERT query
+		template<size_t N> struct insertField_t
+		{
+			template<typename fieldName, typename T> static auto value(const type_t<fieldName, T> &) ->
+				typename fieldName_t<N, type_t<fieldName, T>>::value;
+			template<typename T> static auto value(const autoInc_t<T> &) -> typestring<>;
+		};
+		// Alias for the above container type to make it easier to use.
+		template<size_t N, typename T> using insertField = decltype(insertField_t<N>::value(T{}));
+
+		// Constructs a list of fields suitable for use in an INSERT query
+		template<size_t, typename...> struct insertList_t;
+		// Alias for the above to make it easier to use.
+		template<typename... fields> using insertList = typename insertList_t<sizeof...(fields), fields...>::value;
+		// Primary specialisation generates the list
+		template<size_t N, typename field, typename... fields> struct insertList_t<N, field, fields...>
+			{ using value = tycat<insertField<N, field>, insertList<fields...>>; };
+		template<> struct insertList_t<0> { using value = typestring<>; };
+
+		template<bool, size_t N> struct retrieveIDField_t
+		{
+			template<typename fieldName, typename T> static auto value(const type_t<fieldName, T> &) ->
+				tycat<typename fieldName_t<1, type_t<fieldName, T>>::value, comma<N>>;
+		};
+		template<size_t N> struct retrieveIDField_t<false, N>
+			{ template<typename T> static auto value(const T &) -> typestring<>; };
+		template<size_t N, typename field> using retrieveIDField =
+			decltype(retrieveIDField_t<isPrimaryKey(field{}), N>::value(field{}));
+
+		template<size_t, typename...> struct retrieveIDFields_t;
+		template<size_t N, typename... fields> using retrieveIDFields_ =
+			typename retrieveIDFields_t<N, fields...>::value;
+		template<size_t N, typename field, typename... fields>
+			struct retrieveIDFields_t<N, field, fields...>
+		{
+			using value = tycat<
+				retrieveIDField<N, field>,
+				retrieveIDFields_<N - (isPrimaryKey(field{}) ? 1 : 0), fields...>
+			>;
+		};
+		template<> struct retrieveIDFields_t<0> { using value = typestring<>; };
+		template<typename... fields> using retrieveIDFields = retrieveIDFields_<countPrimary<fields...>::count, fields...>;
+
+		// Intermediary type calculation function handling conversion of a field into a form suitable for an INSERT query
+		template<size_t N, typename fieldName, typename T> auto insertAllField_(const type_t<fieldName, T> &) ->
+			typename fieldName_t<N, type_t<fieldName, T>>::value;
+		// Alias for the above to make it easier to use.
+		template<size_t N, typename T> using insertAllField = decltype(insertAllField_<N>(T{}));
+		// Constructs a list of fields suitable for use in an INSERT query
+		template<size_t, typename...> struct insertAllList_t;
+		// Alias for the above to make it easier to use.
+		template<typename... fields> using insertAllList = typename insertAllList_t<sizeof...(fields), fields...>::value;
+		// Primary specialisation generates the list
+		template<size_t N, typename field, typename... fields> struct insertAllList_t<N, field, fields...>
+			{ using value = tycat<insertAllField<N, field>, insertAllList<fields...>>; };
+		template<> struct insertAllList_t<0> { using value = typestring<>; };
+
 		// Intermediary container type for handling conversion of a field into a form suitable for an UPDATE query
 		template<size_t idx, size_t N> struct updateField_t
 		{
@@ -96,24 +153,25 @@ namespace tmplORM
 		template<size_t count, size_t N, typename field> using maybeIDField =
 			typename maybeIDField_t<isPrimaryKey(field{}), count - N + 1, N, field>::value;
 
-		template<size_t, size_t, typename...> struct idFields_t;
-		template<size_t count, size_t N, typename... fields> using idFields_ =
-			typename idFields_t<count, N, fields...>::value;
-		template<size_t count, size_t N, typename field, typename... fields> struct idFields_t<count, N, field, fields...>
+		template<size_t, size_t, typename...> struct matchIDFields_t;
+		template<size_t count, size_t N, typename... fields> using matchIDFields_ =
+			typename matchIDFields_t<count, N, fields...>::value;
+		template<size_t count, size_t N, typename field, typename... fields>
+			struct matchIDFields_t<count, N, field, fields...>
 		{
 			using value = tycat<
 				maybeIDField<count, N, field>,
-				idFields_<count, N - (isPrimaryKey(field{}) ? 1 : 0), fields...>
+				matchIDFields_<count, N - (isPrimaryKey(field{}) ? 1 : 0), fields...>
 			>;
 		};
-		template<size_t count> struct idFields_t<count, 0> { using value = typestring<>; };
-		template<size_t count, typename... fields> using idFieldsN = idFields_<count, count, fields...>;
-		template<typename... fields> using idFields = idFieldsN<countPrimary<fields...>::count, fields...>;
+		template<size_t count> struct matchIDFields_t<count, 0> { using value = typestring<>; };
+		template<size_t count, typename... fields> using matchIDFieldsN = matchIDFields_<count, count, fields...>;
+		template<typename... fields> using matchIDFields = matchIDFieldsN<countPrimary<fields...>::count, fields...>;
 
 		// This intentionally constructs an empty struct to make the using fail if there is no suitable primary field.
 		template<bool, typename...> struct updateWhere_t { };
 		template<typename... fields> struct updateWhere_t<true, fields...>
-			{ using value = tycat<ts(" WHERE "), idFields<fields...>>; };
+			{ using value = tycat<ts(" WHERE "), matchIDFields<fields...>>; };
 		template<typename... fields> using updateWhere =
 			typename updateWhere_t<hasPrimaryKey<fields...>(), fields...>::value;
 
@@ -130,7 +188,7 @@ namespace tmplORM
 			template<typename fieldName, typename T> static auto _name(const type_t<fieldName, T> &) ->
 				typename createName_t<type_t<fieldName, T>>::value;
 			template<typename T> static auto _name(const autoInc_t<T> &) ->
-				tycat<decltype(_name(T{})), ts(" GENERATE BY DEFAULT AS IDENTITY")>;
+				tycat<decltype(_name(T{})), ts(" GENERATED BY DEFAULT AS IDENTITY")>;
 			template<typename T> static auto _name(const primary_t<T> &) ->
 				tycat<decltype(_name(T{})), ts(" PRIMARY KEY")>;
 			using name = decltype(_name(field{}));
@@ -146,6 +204,32 @@ namespace tmplORM
 
 		template<typename tableName, typename... fields> using createTable_ = toString<
 			tycat<ts("CREATE TABLE IF NOT EXISTS "), doubleQuote<tableName>, ts(" ("), createList<fields...>, ts(");")>
+		>;
+		// tycat<> builds up the query string for inserting the data
+		template<typename tableName, typename... fields> using add_ = toString<
+			tycat<
+				ts("INSERT INTO "),
+				doubleQuote<tableName>,
+				ts(" ("),
+				insertList<fields...>,
+				ts(") VALUES ("),
+				placeholder<countInsert_t<fields...>::count, 1>,
+				ts(") RETURNING "),
+				retrieveIDFields<fields...>,
+				ts(";")
+			>
+		>;
+		// tycat<> builds up the query string for inserting the data
+		template<typename tableName, typename... fields> using addAll_ = toString<
+			tycat<
+				ts("INSERT INTO "),
+				doubleQuote<tableName>,
+				ts(" ("),
+				insertAllList<fields...>,
+				ts(") OVERRIDING SYSTEM VALUE VALUES ("),
+				placeholder<sizeof...(fields), 1>,
+				ts(");")
+			>
 		>;
 		// This constructs invalid if there is no field marked primary_t<>! This is quite intentional.
 		template<typename tableName, typename... fields> struct update_t<false, tableName, fields...>
