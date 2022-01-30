@@ -48,6 +48,7 @@ namespace tmplORM
 	{
 	protected:
 		constexpr static const size_t N = sizeof...(Fields);
+		// NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
 		std::tuple<Fields...> _fields;
 
 		constexpr fields_t() noexcept : _fields{} { }
@@ -129,7 +130,7 @@ namespace tmplORM
 
 		template<bool B, typename T = void> using enableIf = typename std::enable_if<B, T>::type;
 		template<typename T, typename U> using isSame = std::is_same<T, U>;
-	}
+	} // namespace utils
 
 	namespace types
 	{
@@ -141,6 +142,7 @@ namespace tmplORM
 		template<typename _fieldName, typename T> struct type_t
 		{
 		protected:
+			// NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
 			T _value;
 
 		/*private:
@@ -326,10 +328,10 @@ namespace tmplORM
 				using duration_t = typename system_clock::duration;
 
 			private:
-				duration_t _time;
+				duration_t _time{};
 
 			public:
-				constexpr _time_t() noexcept : _time{} { }
+				constexpr _time_t() noexcept = default;
 				constexpr _time_t(const duration_t &time) noexcept : _time{time} { }
 				constexpr const duration_t &time() const noexcept { return _time; }
 			};
@@ -337,12 +339,12 @@ namespace tmplORM
 			struct _date_t
 			{
 			private:
-				::int16_t _year;
-				uint8_t _month;
-				uint8_t _day;
+				::int16_t _year{0};
+				uint8_t _month{0};
+				uint8_t _day{0};
 
 			public:
-				constexpr _date_t() noexcept : _year{0}, _month{0}, _day{0} { }
+				constexpr _date_t() noexcept = default;
 				constexpr _date_t(const ::int16_t year, const uint8_t month, const uint8_t day) noexcept :
 					_year{year}, _month{month}, _day{day} { }
 				constexpr ::int16_t year() const noexcept { return _year; }
@@ -492,7 +494,7 @@ namespace tmplORM
 						duration_cast<typename _dateTime_t::duration_t>(time)});
 				}
 			};
-		}
+		} // namespace dateTimeTypes
 
 		using dateTimeTypes::date_t;
 		using dateTimeTypes::time_t;
@@ -562,7 +564,7 @@ namespace tmplORM
 		template<typename fieldName> using short_t = int16_t<fieldName>;
 		template<typename fieldName> using tinyInt_t = int8_t<fieldName>;
 		template<typename fieldName> using bit_t = bool_t<fieldName>;
-	}
+	} // namespace types
 
 	// TODO: Fixme. This is half garbage atm.
 	namespace condition
@@ -592,7 +594,7 @@ namespace tmplORM
 
 		// TODO: Perform the condition stack unwind to count the actual number of things that need binding
 		template<typename T> constexpr size_t countCond() noexcept { return 0; }
-	}
+	} // namespace condition
 	template<typename... conditions> using where = condition::where_t<conditions...>;
 
 	namespace common
@@ -620,7 +622,7 @@ namespace tmplORM
 				constexpr static size_t number = N;
 				using value = typename value_t<N>::value;
 			};
-		}
+		} // namespace intConversion
 		using intConversion::fromInt_t;
 		template<size_t N> using toTypestring = typename fromInt_t<N>::value;
 		template<size_t N> using fromInt = toString<toTypestring<N>>;
@@ -771,8 +773,8 @@ namespace tmplORM
 			session_t(const session_t &) = delete;
 			session_t &operator =(const session_t &) = delete;
 		};
-	}
+	} // namespace common
 	using common::session_t;
-}
+} // namespace tmplORM
 
 #endif /*tmplORM_HXX*/
