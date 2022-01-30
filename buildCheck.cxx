@@ -9,6 +9,7 @@
 
 #include "tmplORM.mysql.hxx"
 #include "tmplORM.mssql.hxx"
+#include "tmplORM.pgsql.hxx"
 
 using std::cout;
 using std::endl;
@@ -183,7 +184,7 @@ namespace mysql
 		del(user, timeLog) ? echoPass() : echoFail();
 		deleteTable<user_t, userTimeLog_t>() ? echoPass() : echoFail();
 	}
-}
+} // namespace mysql
 
 namespace mssql
 {
@@ -261,7 +262,25 @@ namespace mssql
 		del(user, timeLog) ? echoPass() : echoFail();
 		deleteTable<user_t, userTimeLog_t>() ? echoPass() : echoFail();
 	}
-}
+} // namespace mssql
+
+namespace pgsql
+{
+	template<typename tableName, typename... fields> using createTable__ = tmplORM::pgsql::createTable_<tableName, fields...>;
+
+	template<typename tableName, typename... fields> bool createTable_(const model_t<tableName, fields...> &) noexcept
+	{
+		using create = createTable__<tableName, fields...>;
+		cout << create::value << "\n";
+		return true;
+	}
+	template<typename... models> bool createTable() noexcept { return collect(createTable_(models())...); }
+
+	void test() noexcept
+	{
+		createTable<user_t, userTimeLog_t>() ? echoPass() : echoFail();
+	}
+} // namespace pgsql
 
 template<typename fieldName, typename T> const char *fieldName_(const type_t<fieldName, T> &) noexcept { return fieldName::data(); }
 
@@ -276,6 +295,9 @@ int main(int, char **) noexcept
 
 	cout << INFO "MSSQL (Transact-SQL) tests:" NEWLINE;
 	mssql::test();
+
+	cout << INFO "PGSQL tests:" NEWLINE;
+	pgsql::test();
 
 	cout << INFO "General test:" NEWLINE;
 	cout << std::boolalpha;
