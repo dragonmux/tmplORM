@@ -69,14 +69,14 @@ inline namespace common
 	template<> struct insertAllList_t<0> { using value = typestring<>; };
 
 	// Intermediary container type for handling conversion of a field into a form suitable for an UPDATE query
-	template<size_t N> struct updateList__t
+	template<size_t N> struct updateField_t
 	{
 		template<typename fieldName, typename T> static auto value(const type_t<fieldName, T> &) ->
 			tycat<typename fieldName_t<1, type_t<fieldName, T>>::value, ts(" = "), placeholder<1>, comma<N>>;
 		template<typename T> static auto value(const primary_t<T> &) -> typestring<>;
 	};
 	// Alias for the above container type to make it easier to use.
-	template<size_t N, typename T> using updateList__ = decltype(updateList__t<N>::value(T()));
+	template<size_t N, typename T> using updateField = decltype(updateField_t<N>::value(T()));
 
 	// Constructs a list of fields suitable for use in an UPDATE query
 	template<size_t, typename...> struct updateList_t;
@@ -84,7 +84,7 @@ inline namespace common
 	template<typename... fields> using updateList = typename updateList_t<sizeof...(fields), fields...>::value;
 	// Primary specialisation generates the list
 	template<size_t N, typename field, typename... fields> struct updateList_t<N, field, fields...>
-		{ using value = tycat<updateList__<N, field>, updateList<fields...>>; };
+		{ using value = tycat<updateField<N, field>, updateList<fields...>>; };
 	template<> struct updateList_t<0> { using value = typestring<>; };
 
 	template<size_t N, typename field, typename... fields> struct idField_t
@@ -96,12 +96,12 @@ inline namespace common
 	template<bool, size_t N, typename field> struct maybeIDField_t
 		{ using value = tycat<idField<field>, and_<N>>; };
 	template<size_t N, typename field> struct maybeIDField_t<false, N, field> { using value = typestring<>; };
-	template<size_t N, typename field> using maybeIDField = typename maybeIDField_t<isPrimaryKey(field()), N, field>::value;
+	template<size_t N, typename field> using maybeIDField = typename maybeIDField_t<isPrimaryKey(field{}), N, field>::value;
 
 	template<size_t, typename...> struct idFields_t;
 	template<size_t N, typename... fields> using idFields_ = typename idFields_t<N, fields...>::value;
 	template<size_t N, typename field, typename... fields> struct idFields_t<N, field, fields...>
-		{ using value = tycat<maybeIDField<N, field>, idFields_<N - (isPrimaryKey(field()) ? 1 : 0), fields...>>; };
+		{ using value = tycat<maybeIDField<N, field>, idFields_<N - (isPrimaryKey(field{}) ? 1 : 0), fields...>>; };
 	template<> struct idFields_t<0> { using value = typestring<>; };
 	template<typename... fields> using idFields = idFields_<countPrimary<fields...>::count, fields...>;
 
