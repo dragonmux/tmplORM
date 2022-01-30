@@ -36,14 +36,14 @@ inline namespace common
 	template<typename where> using selectWhere = typename whereClause::selectWhere_t<where>::value;
 
 	// Intermediary container type for handling conversion of a field into a form suitable for an INSERT query
-	template<size_t N> struct insertList__t
+	template<size_t N> struct insertField_t
 	{
 		template<typename fieldName, typename T> static auto value(const type_t<fieldName, T> &) ->
 			typename fieldName_t<N, type_t<fieldName, T>>::value;
 		template<typename T> static auto value(const autoInc_t<T> &) -> typestring<>;
 	};
 	// Alias for the above container type to make it easier to use.
-	template<size_t N, typename T> using insertList__ = decltype(insertList__t<N>::value(T()));
+	template<size_t N, typename T> using insertField = decltype(insertField_t<N>::value(T{}));
 
 	// Constructs a list of fields suitable for use in an INSERT query
 	template<size_t, typename...> struct insertList_t;
@@ -51,14 +51,14 @@ inline namespace common
 	template<typename... fields> using insertList = typename insertList_t<sizeof...(fields), fields...>::value;
 	// Primary specialisation generates the list
 	template<size_t N, typename field, typename... fields> struct insertList_t<N, field, fields...>
-		{ using value = tycat<insertList__<N, field>, insertList<fields...>>; };
+		{ using value = tycat<insertField<N, field>, insertList<fields...>>; };
 	template<> struct insertList_t<0> { using value = typestring<>; };
 
 	// Intermediary type calculation function handling conversion of a field into a form suitable for an INSERT query
 	template<size_t N, typename fieldName, typename T> auto insertAllField_(const type_t<fieldName, T> &) ->
 		typename fieldName_t<N, type_t<fieldName, T>>::value;
 	// Alias for the above to make it easier to use.
-	template<size_t N, typename T> using insertAllField = decltype(insertAllField_<N>(T()));
+	template<size_t N, typename T> using insertAllField = decltype(insertAllField_<N>(T{}));
 	// Constructs a list of fields suitable for use in an INSERT query
 	template<size_t, typename...> struct insertAllList_t;
 	// Alias for the above to make it easier to use.
