@@ -183,7 +183,7 @@ namespace tmplORM
 				error(SQLBindParameter(queryHandle, index + 1, SQL_PARAM_INPUT, dataType, odbcDataType, length.second,
 					0, nullptr, 0, &dataLengths[index]));
 			}
-		}
+		} // namespace driver
 
 		/*! @brief Adds brackets around a field or table name */
 		template<typename name> using bracket = tycat<ts("["), name, ts("]")>;
@@ -201,26 +201,28 @@ namespace tmplORM
 		template<typename fieldName, size_t length> struct createName_t<unicode_t<fieldName, length>>
 			{ using value = tycat<bracket<fieldName>, ts(" NVARCHAR("), toTypestring<length>, ts(")")>; };
 
-		template<size_t N, typename field> struct createList__t
+		template<size_t N, typename field> struct createField_t
 		{
 			template<typename fieldName, typename T> static auto _name(const type_t<fieldName, T> &) ->
 				typename createName_t<type_t<fieldName, T>>::value;
 			template<typename fieldName, size_t length> static auto _name(const unicode_t<fieldName, length> &) ->
 				typename createName_t<unicode_t<fieldName, length>>::value;
-			template<typename T> static auto _name(const autoInc_t<T> &) -> tycat<decltype(_name(T())), ts(" IDENTITY")>;
-			template<typename T> static auto _name(const primary_t<T> &) -> tycat<decltype(_name(T())), ts(" PRIMARY KEY")>;
-			using name = decltype(_name(field()));
+			template<typename T> static auto _name(const autoInc_t<T> &) ->
+				tycat<decltype(_name(T{})), ts(" IDENTITY")>;
+			template<typename T> static auto _name(const primary_t<T> &) ->
+				tycat<decltype(_name(T{})), ts(" PRIMARY KEY")>;
+			using name = decltype(_name(field{}));
 
 			static auto value() -> tycat<name, nullable<field::nullable>, comma<N>>;
 		};
 		// Alias for the above container type to make it easier to use
-		template<size_t N, typename T> using createList__ = decltype(createList__t<N, T>::value());
+		template<size_t N, typename T> using createField = decltype(createField_t<N, T>::value());
 
 		// Constructs a list of fields suitable for use in a CREATE query
 		template<size_t, typename...> struct createList_t;
 		// Primary specialisation generates the list
 		template<size_t N, typename field, typename... fields> struct createList_t<N, field, fields...>
-			{ using value = tycat<createList__<N, field>, typename createList_t<N - 1, fields...>::value>; };
+			{ using value = tycat<createField<N, field>, typename createList_t<N - 1, fields...>::value>; };
 		template<> struct createList_t<0> { using value = typestring<>; };
 		// Alias to make createList_t easier to use
 		template<typename... fields> using createList = typename createList_t<sizeof...(fields), fields...>::value;
@@ -381,8 +383,8 @@ namespace tmplORM
 			session_t(const session_t &) = delete;
 			session_t &operator =(const session_t &) = delete;
 		};
-	}
+	} // namespace mssql
 	using mssql_t = mssql::session_t;
-}
+} // namespace tmplORM
 
 #endif /*tmplORM_MSSQL_HXX*/

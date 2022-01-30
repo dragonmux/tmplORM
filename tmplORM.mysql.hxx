@@ -82,23 +82,24 @@ namespace tmplORM
 
 				bool operator ()(MYSQL_BIND &param, const ormDate_t &value, managedPtr_t<void> &paramStorage) noexcept
 				{
-					MYSQL_TIME date;
+					MYSQL_TIME date{};
 					date.year = value.year();
 					date.month = value.month();
 					date.day = value.day();
 					date.time_type = MYSQL_TIMESTAMP_DATE;
 
 					paramStorage = substrate::make_managed_nothrow<MYSQL_TIME>(date);
-					if (!paramStorage)
-						return false;
-					param.buffer = paramStorage;
-					param.buffer_length = sizeof(date);
-					return true;
+					if (paramStorage)
+					{
+						param.buffer = paramStorage;
+						param.buffer_length = sizeof(date);
+					}
+					return paramStorage;
 				}
 
 				bool operator ()(MYSQL_BIND &param, const ormDateTime_t &value, managedPtr_t<void> &paramStorage) noexcept
 				{
-					MYSQL_TIME dateTime;
+					MYSQL_TIME dateTime{};
 					dateTime.year = value.year();
 					dateTime.month = value.month();
 					dateTime.day = value.day();
@@ -109,11 +110,12 @@ namespace tmplORM
 					dateTime.time_type = MYSQL_TIMESTAMP_DATETIME;
 
 					paramStorage = substrate::make_managed_nothrow<MYSQL_TIME>(dateTime);
-					if (!paramStorage)
-						return false;
-					param.buffer = paramStorage;
-					param.buffer_length = sizeof(dateTime);
-					return true;
+					if (paramStorage)
+					{
+						param.buffer = paramStorage;
+						param.buffer_length = sizeof(dateTime);
+					}
+					return paramStorage;
 				}
 
 				bool operator ()(MYSQL_BIND &param, const ormUUID_t &_value, managedPtr_t<void> &paramStorage) noexcept
@@ -135,12 +137,13 @@ namespace tmplORM
 					}
 
 					auto storage = substrate::make_managed_nothrow<decltype(uuid)>(uuid);
-					if (!storage)
-						return false;
-					param.buffer = storage->data();
-					param.buffer_length = uuid.size();
-					paramStorage = std::move(storage);
-					return true;
+					if (storage)
+					{
+						param.buffer = storage->data();
+						param.buffer_length = uuid.size();
+						paramStorage = std::move(storage);
+					}
+					return storage;
 				}
 			};
 
@@ -205,10 +208,9 @@ namespace tmplORM
 				{
 					const bindOutStorage_t<T> makeStorage;
 					paramStorage = makeStorage();
-					if (!paramStorage)
-						return false;
-					param.buffer_length = makeStorage.length();
-					return true;
+					if (paramStorage)
+						param.buffer_length = makeStorage.length();
+					return paramStorage;
 				}
 			};
 
@@ -224,7 +226,7 @@ namespace tmplORM
 				param.length = &param.buffer_length;
 				param.is_null = notNullParam;
 			}
-		}
+		} // namespace driver
 
 		/*! @brief Adds backticks around a field or table name */
 		template<typename name> using backtick = tycat<ts("`"), name, ts("`")>;
@@ -242,24 +244,26 @@ namespace tmplORM
 		template<typename fieldName, size_t length> struct createName_t<unicode_t<fieldName, length>>
 			{ using value = tycat<backtick<fieldName>, ts(" VARCHAR("), toTypestring<length>, ts(")")>; };
 
-		template<size_t N, typename field> struct createList__t
+		template<size_t N, typename field> struct createField_t
 		{
 			template<typename fieldName, typename T> static auto _name(const type_t<fieldName, T> &) ->
 				typename createName_t<type_t<fieldName, T>>::value;
 			template<typename fieldName, size_t length> static auto _name(const unicode_t<fieldName, length> &) ->
 				typename createName_t<unicode_t<fieldName, length>>::value;
-			template<typename T> static auto _name(const autoInc_t<T> &) -> tycat<decltype(_name(T())), ts(" AUTO_INCREMENT")>;
-			template<typename T> static auto _name(const primary_t<T> &) -> tycat<decltype(_name(T())), ts(" PRIMARY KEY")>;
-			using name = decltype(_name(field()));
+			template<typename T> static auto _name(const autoInc_t<T> &) ->
+				tycat<decltype(_name(T{})), ts(" AUTO_INCREMENT")>;
+			template<typename T> static auto _name(const primary_t<T> &) ->
+				tycat<decltype(_name(T{})), ts(" PRIMARY KEY")>;
+			using name = decltype(_name(field{}));
 
 			static auto value() -> tycat<name, nullable<field::nullable>, comma<N>>;
 		};
 		// Alias for the above container type to make it easier to use
-		template<size_t N, typename T> using createList__ = decltype(createList__t<N, T>::value());
+		template<size_t N, typename T> using createField = decltype(createField_t<N, T>::value());
 
 		template<size_t N, typename field, typename... fields> struct createList_t
-			{ using value = tycat<createList__<N, field>, typename createList_t<N - 1, fields...>::value>; };
-		template<typename field> struct createList_t<1, field> { using value = createList__<1, field>; };
+			{ using value = tycat<createField<N, field>, typename createList_t<N - 1, fields...>::value>; };
+		template<typename field> struct createList_t<1, field> { using value = createField<1, field>; };
 		// Alias to make the above easier to use
 		template<typename... fields> using createList = typename createList_t<sizeof...(fields), fields...>::value;
 
@@ -430,8 +434,8 @@ namespace tmplORM
 			session_t(const session_t &) = delete;
 			session_t &operator =(const session_t &) = delete;
 		};
-	}
+	} // namespace mysql
 	using mysql_t = mysql::session_t;
-}
+} // namespace tmplORM
 
 #endif /*tmplORM_MYSQL_HXX*/
