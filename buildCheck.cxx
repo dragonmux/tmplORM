@@ -275,6 +275,7 @@ namespace mssql
 namespace pgsql
 {
 	template<typename tableName, typename... fields> using createTable__ = tmplORM::pgsql::createTable_<tableName, fields...>;
+	template<typename tableName, typename... fields> using update__ = tmplORM::pgsql::update_<tableName, fields...>;
 	template<typename tableName, typename... fields>  using del__ = tmplORM::pgsql::del_<tableName, fields...>;
 	template<typename tableName> using deleteTable__ = tmplORM::pgsql::deleteTable_<tableName>;
 
@@ -285,6 +286,14 @@ namespace pgsql
 		return true;
 	}
 	template<typename... models> bool createTable() noexcept { return collect(createTable_(models())...); }
+
+	template<typename tableName, typename... fields> bool update_(const model_t<tableName, fields...> &) noexcept
+	{
+		using update = update__<tableName, fields...>;
+		cout << update::value << "\n";
+		return true;
+	}
+	template<typename... models_t> bool update(const models_t &...models) noexcept { return collect(update_(models)...); }
 
 	template<typename tableName, typename... fields> bool del_(const model_t<tableName, fields...> &) noexcept
 	{
@@ -305,6 +314,7 @@ namespace pgsql
 	void test() noexcept
 	{
 		createTable<user_t, userTimeLog_t>() ? echoPass() : echoFail();
+		update(user, timeLog) ? echoPass() : echoFail();
 		del(user, timeLog, multiPrimary) ? echoPass() : echoFail();
 		deleteTable<user_t, userTimeLog_t>() ? echoPass() : echoFail();
 	}

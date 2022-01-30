@@ -89,8 +89,6 @@ namespace tmplORM
 		template<size_t idx, typename... fields> using idField =
 			typename idField_t<idx, primaryIndex_t<fields...>::index, fields...>::value;
 
-		//toTypestring
-
 		template<bool, size_t idx, size_t N, typename field> struct maybeIDField_t
 			{ using value = tycat<idField<idx, field>, and_<N>>; };
 		template<size_t idx, size_t N, typename field> struct maybeIDField_t<false, idx, N, field>
@@ -119,6 +117,10 @@ namespace tmplORM
 		template<typename... fields> using updateWhere =
 			typename updateWhere_t<hasPrimaryKey<fields...>(), fields...>::value;
 
+		template<bool, typename tableName, typename... fields> struct update_t { using value = typestring<>; };
+		template<typename tableName, typename... fields> using update_ = toString<typename update_t<sizeof...(fields) ==
+			countPrimary<fields...>::count, tableName, fields...>::value>;
+
 		template<typename> struct createName_t { };
 		template<typename fieldName, typename T> struct createName_t<type_t<fieldName, T>>
 			{ using value = tycat<doubleQuote<fieldName>, ts(" "), stringType<T>>; };
@@ -145,6 +147,18 @@ namespace tmplORM
 		template<typename tableName, typename... fields> using createTable_ = toString<
 			tycat<ts("CREATE TABLE IF NOT EXISTS "), doubleQuote<tableName>, ts(" ("), createList<fields...>, ts(");")>
 		>;
+		// This constructs invalid if there is no field marked primary_t<>! This is quite intentional.
+		template<typename tableName, typename... fields> struct update_t<false, tableName, fields...>
+		{
+			using value = tycat<
+				ts("UPDATE "),
+				doubleQuote<tableName>,
+				ts(" SET "),
+				updateList<1, fields...>,
+				updateWhere<fields...>,
+				ts(";")
+			>;
+		};
 		template<typename tableName, typename... fields> using del_ = toString<
 			tycat<ts("DELETE FROM "), doubleQuote<tableName>, updateWhere<fields...>, ts(";")>
 		>;
