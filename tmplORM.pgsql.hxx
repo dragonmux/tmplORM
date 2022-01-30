@@ -62,6 +62,26 @@ namespace tmplORM
 		/*! @brief Generates a list of N prepared execution placeholders for a query statement */
 		template<size_t count, size_t N> using placeholder = typename placeholder_t<count, N>::value;
 
+		// Intermediary container type for handling conversion of a field into a form suitable for a SELECT query
+		template<size_t N> struct selectField_t
+		{
+			template<typename fieldName, typename T> static auto value(const type_t<fieldName, T> &) ->
+				typename fieldName_t<N, type_t<fieldName, T>>::value;
+		};
+		// Alias for the above container type to make it easier to use.
+		template<size_t N, typename T> using selectField = decltype(selectField_t<N>::value(T{}));
+
+		// Constructs a list of fields suitable for use in a SELECT query
+		template<size_t, typename...> struct selectList_t;
+		// Alias for selectList_t to make it easier to use.
+		template<typename... fields> using selectList = typename selectList_t<sizeof...(fields), fields...>::value;
+		// Primary specialisation generates the list
+		template<size_t N, typename field, typename... fields> struct selectList_t<N, field, fields...>
+			{ using value = tycat<selectField<N, field>, selectList<fields...>>; };
+		template<> struct selectList_t<0> { using value = typestring<>; };
+
+		// TODO: Implement WHERE clause support
+
 		// Intermediary container type for handling conversion of a field into a form suitable for an INSERT query
 		template<size_t N> struct insertField_t
 		{
@@ -204,6 +224,9 @@ namespace tmplORM
 
 		template<typename tableName, typename... fields> using createTable_ = toString<
 			tycat<ts("CREATE TABLE IF NOT EXISTS "), doubleQuote<tableName>, ts(" ("), createList<fields...>, ts(");")>
+		>;
+		template<typename tableName, typename... fields> using select_ = toString<
+			tycat<ts("SELECT "), selectList<fields...>, ts(" FROM "), doubleQuote<tableName>, ts(";")>
 		>;
 		// tycat<> builds up the query string for inserting the data
 		template<typename tableName, typename... fields> using add_ = toString<

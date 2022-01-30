@@ -275,6 +275,7 @@ namespace mssql
 namespace pgsql
 {
 	template<typename tableName, typename... fields> using createTable__ = tmplORM::pgsql::createTable_<tableName, fields...>;
+	template<typename tableName, typename... fields> using select__ = tmplORM::pgsql::select_<tableName, fields...>;
 	template<typename tableName, typename... fields> using add__ = tmplORM::pgsql::add_<tableName, fields...>;
 	template<typename tableName, typename... fields> using addAll__ = tmplORM::pgsql::addAll_<tableName, fields...>;
 	template<typename tableName, typename... fields> using update__ = tmplORM::pgsql::update_<tableName, fields...>;
@@ -288,6 +289,14 @@ namespace pgsql
 		return true;
 	}
 	template<typename... models> bool createTable() noexcept { return collect(createTable_(models())...); }
+
+	template<typename tableName, typename... fields> bool select_(const model_t<tableName, fields...> &) noexcept
+	{
+		using select = select__<tableName, fields...>;
+		cout << select::value << "\n";
+		return true;
+	}
+	template<typename... models> bool select() noexcept { return collect(select_(models())...); }
 
 	template<typename tableName, typename... fields> bool add_(const model_t<tableName, fields...> &) noexcept
 	{
@@ -332,6 +341,7 @@ namespace pgsql
 	void test() noexcept
 	{
 		createTable<user_t, userTimeLog_t>() ? echoPass() : echoFail();
+		select<user_t, userTimeLog_t>() ? echoPass() : echoFail();
 		add(user, timeLog) ? echoPass() : echoFail();
 		addAll(user, timeLog) ? echoPass() : echoFail();
 		update(user, timeLog) ? echoPass() : echoFail();
