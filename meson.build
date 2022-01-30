@@ -19,6 +19,7 @@ coverage = get_option('b_coverage')
 threading = dependency('threads')
 dl = cxx.find_library('dl', required: not isWindows)
 odbc = cxx.find_library('odbc')
+pgsql = dependency('libpq')
 if get_option('build_check')
 	rSON = dependency('rSON')
 endif
@@ -85,14 +86,15 @@ if cxx.get_id() == 'msvc'
 endif
 
 tmplORMSrc = [
-	'string.cxx', 'mysql.cxx', 'mssql.cxx', 'tmplORM.types.cxx'
+	'string.cxx', 'mysql.cxx', 'mssql.cxx', 'pgsql.cxx',
+	'tmplORM.types.cxx'
 ]
 tmplORMSrcDir = meson.current_source_dir()
 
 tmplORM = shared_library(
 	'tmplORM',
 	tmplORMSrc,
-	dependencies: [threading, dl, odbc, mysql, substrate],
+	dependencies: [threading, dl, odbc, pgsql, mysql, substrate],
 	version: meson.project_version(),
 	install: true
 )
@@ -118,9 +120,9 @@ if get_option('build_check')
 endif
 
 install_headers(
-	'mysql.hxx', 'mssql.hxx', 'tmplORM.hxx', 'tmplORM.mysql.hxx', 'tmplORM.mssql.hxx',
-	'tmplORM.pgsql.hxx', 'tmplORM.common.hxx', 'tmplORM.types.hxx', 'tmplORM.extern.hxx',
-	'string.hxx',
+	'mysql.hxx', 'mssql.hxx', 'pgsql.hxx', 'tmplORM.hxx',
+	'tmplORM.mysql.hxx', 'tmplORM.mssql.hxx', 'tmplORM.pgsql.hxx', 'tmplORM.common.hxx',
+	'tmplORM.types.hxx', 'tmplORM.extern.hxx', 'string.hxx',
 	subdir: 'tmplORM'
 )
 install_headers('typestring/typestring.hh', subdir: 'typestring')
