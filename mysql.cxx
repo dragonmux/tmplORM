@@ -18,7 +18,6 @@
  */
 
 using substrate::vectorStateException_t;
-using namespace std;
 using namespace tmplORM::mysql::driver;
 
 // General documentation block (used to document mysql.hxx stuff cleanly
@@ -91,7 +90,8 @@ mySQLClient_t::~mySQLClient_t() noexcept
  * @param passwd The password for the user to connect in with
  * @returns true if the connection was successful (or pre-existing), false otherwise
  */
-bool mySQLClient_t::connect(const char *const host, const uint32_t port, const char *const user, const char *const passwd) const noexcept
+bool mySQLClient_t::connect(const char *const host, const uint32_t port, const char *const user,
+	const char *const passwd) const noexcept
 {
 	if (haveConnection)
 		return true;
@@ -345,12 +345,22 @@ mySQLResult_t::mySQLResult_t(mySQLResult_t &&res) noexcept : mySQLResult_t() { s
  */
 
 /*! @brief Destructor for MySQL result objects */
-mySQLResult_t::~mySQLResult_t() noexcept { if (valid()) mysql_free_result(result); }
+mySQLResult_t::~mySQLResult_t() noexcept
+{
+	if (valid())
+		mysql_free_result(result);
+}
+
 /*!
  * @brief Move assignment operator for the results of a MySQL query
  * @param res The original result who's results we will make our own in trade
  */
-mySQLResult_t &mySQLResult_t::operator =(mySQLResult_t &&res) noexcept { std::swap(result, res.result); return *this; }
+mySQLResult_t &mySQLResult_t::operator =(mySQLResult_t &&res) noexcept
+{
+	std::swap(result, res.result);
+	return *this;
+}
+
 /*! @brief Returns the number of rows this result object represents, or 0 if this is an invalid result object */
 uint64_t mySQLResult_t::numRows() const noexcept { return valid() ? mysql_num_rows(result) : 0; }
 /*! @brief Creates a row object representing result rows for this result object */
@@ -360,7 +370,7 @@ mySQLRow_t mySQLResult_t::resultRows() const noexcept { return valid() ? mySQLRo
  * @brief Constructor for the result rows from a MySQL query
  * @param result The result from which to fetch the result rows from
  */
-mySQLRow_t::mySQLRow_t(MYSQL_RES *res) noexcept : result(res), row(nullptr), fields(0), rowLengths(nullptr) { fetch(); }
+mySQLRow_t::mySQLRow_t(MYSQL_RES *res) noexcept : result{res} { fetch(); }
 
 /*! @brief Swaps the contents of a result rows object with another for a MySQL query */
 void mySQLRow_t::swap(mySQLRow_t &r) noexcept
@@ -491,13 +501,14 @@ bool mySQLValue_t::asBool(const uint8_t bit) const
  * @param len The length of the string to convert
  * @returns The converted integer, or errorType on error.
  */
-template<typename T, mySQLErrorType_t errorType> valueOrError_t<T, mySQLValueError_t> checkedConvertInt(const char *const data, const uint64_t len) noexcept
+template<typename T, mySQLErrorType_t errorType> valueOrError_t<T, mySQLValueError_t>
+	checkedConvertInt(const char *const data, const uint64_t len) noexcept
 {
 	using U = substrate::promoted_type_t<typename std::make_unsigned<T>::type>;
 	using I = substrate::promoted_type_t<T>;
 	if (!len)
 		return 0;
-	const bool sign = is_signed<T>::value && isMinus(data[0]);
+	const bool sign = std::is_signed<T>::value && isMinus(data[0]);
 	const uint64_t numLen = data[len - 1] ? len : len - 1;
 	U preNum = 0, num = 0;
 	for (uint64_t i = 0; i < numLen; ++i)

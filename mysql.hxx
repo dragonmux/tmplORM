@@ -31,13 +31,13 @@ tmplORM_FNAPI const char nullParam;
 struct tmplORM_API mySQLValue_t final
 {
 private:
-	const char *data;
-	uint64_t len;
-	mySQLFieldType_t type;
+	const char *data{nullptr};
+	uint64_t len{0};
+	mySQLFieldType_t type{MYSQL_TYPE_NULL};
 
 public:
 	/*! @brief Default constructor for value objects, constructing the null value by default */
-	constexpr mySQLValue_t() noexcept : data(nullptr), len(0), type(MYSQL_TYPE_NULL) { }
+	constexpr mySQLValue_t() noexcept = default;
 	mySQLValue_t(const char *const _data, const uint64_t _len, const mySQLFieldType_t _type) noexcept;
 	mySQLValue_t(mySQLValue_t &&value) noexcept : mySQLValue_t() { swap(value); }
 	~mySQLValue_t() noexcept = default;
@@ -105,12 +105,12 @@ inline void swap(mySQLValue_t &x, mySQLValue_t &y) noexcept { x.swap(y); }
 struct tmplORM_API mySQLRow_t final
 {
 private:
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	uint32_t fields;
-	sql_ulong_t *rowLengths;
+	MYSQL_RES *result{nullptr};
+	MYSQL_ROW row{nullptr};
+	uint32_t fields{0};
+	sql_ulong_t *rowLengths{nullptr};
 	// fixedVector_t?
-	std::unique_ptr<mySQLFieldType_t []> fieldTypes;
+	std::unique_ptr<mySQLFieldType_t []> fieldTypes{};
 
 	mySQLRow_t(MYSQL_RES *const result) noexcept;
 	void fetch() noexcept;
@@ -118,7 +118,7 @@ private:
 
 public:
 	/*! @brief Default constructor for row objects, constructing invalid row objects by default */
-	mySQLRow_t() noexcept : result(nullptr), row(nullptr), fields(0), rowLengths(nullptr), fieldTypes() { }
+	mySQLRow_t() noexcept = default;
 	mySQLRow_t(mySQLRow_t &&row) noexcept : mySQLRow_t{} { swap(row); }
 	~mySQLRow_t() noexcept;
 	void operator =(mySQLRow_t &&row) noexcept { swap(row); }
@@ -143,7 +143,7 @@ inline void swap(mySQLRow_t &a, mySQLRow_t &b) noexcept { a.swap(b); }
 struct tmplORM_API mySQLResult_t final
 {
 private:
-	MYSQL_RES *result;
+	MYSQL_RES *result{nullptr};
 
 protected:
 	mySQLResult_t(MYSQL *const con) noexcept;
@@ -151,7 +151,7 @@ protected:
 
 public:
 	/*! @brief Default constructor for result objects, constructing invalid result objects by default */
-	constexpr mySQLResult_t() noexcept : result(nullptr) { }
+	constexpr mySQLResult_t() noexcept = default;
 	mySQLResult_t(mySQLResult_t &&res) noexcept;
 	~mySQLResult_t() noexcept;
 	mySQLResult_t &operator =(mySQLResult_t &&res) noexcept;
@@ -172,9 +172,9 @@ public:
 struct mySQLBind_t final
 {
 private:
-	fixedVector_t<MYSQL_BIND> params;
-	fixedVector_t<substrate::managedPtr_t<void>> paramStorage;
-	size_t numParams;
+	fixedVector_t<MYSQL_BIND> params{};
+	fixedVector_t<substrate::managedPtr_t<void>> paramStorage{};
+	size_t numParams{0};
 
 	void resetParams() noexcept;
 
@@ -184,7 +184,7 @@ protected:
 	friend struct mySQLPreparedQuery_t;
 
 public:
-	mySQLBind_t() noexcept : params(), paramStorage(), numParams(0) { }
+	mySQLBind_t() noexcept = default;
 	mySQLBind_t(mySQLBind_t &&binds) noexcept;
 	~mySQLBind_t() noexcept = default;
 	void operator =(mySQLBind_t && binds) noexcept;
@@ -204,15 +204,15 @@ public:
 struct tmplORM_API mySQLPreparedResult_t final
 {
 private:
-	MYSQL_STMT *const query;
-	mySQLBind_t columns;
+	MYSQL_STMT *const query{nullptr};
+	mySQLBind_t columns{};
 
 protected:
 	mySQLPreparedResult_t(MYSQL_STMT *const query, const size_t columnCount) noexcept;
 	friend struct mySQLPreparedQuery_t;
 
 public:
-	mySQLPreparedResult_t() noexcept : query(nullptr), columns() { }
+	mySQLPreparedResult_t() noexcept = default;
 	mySQLPreparedResult_t(mySQLPreparedResult_t &&res) noexcept;
 	~mySQLPreparedResult_t() noexcept = default;
 	/*!
@@ -234,9 +234,9 @@ public:
 struct tmplORM_API mySQLPreparedQuery_t final
 {
 private:
-	MYSQL_STMT *query;
-	mySQLBind_t params;
-	bool executed;
+	MYSQL_STMT *query{nullptr};
+	mySQLBind_t params{};
+	bool executed{false};
 
 	void dtor() noexcept;
 
@@ -246,7 +246,7 @@ protected:
 
 public:
 	/*! @brief Default constructor for prepared query objects, constructing an invalid query by default */
-	mySQLPreparedQuery_t() noexcept : query(nullptr), params(), executed(false) { }
+	mySQLPreparedQuery_t() noexcept = default;
 	mySQLPreparedQuery_t(mySQLPreparedQuery_t &&qry) noexcept;
 	~mySQLPreparedQuery_t() noexcept;
 	void operator =(mySQLPreparedQuery_t &&qry) noexcept;
@@ -319,25 +319,25 @@ enum class mySQLErrorType_t : uint8_t
 struct tmplORM_API mySQLValueError_t final : std::exception
 {
 private:
-	mySQLErrorType_t errorType;
+	mySQLErrorType_t errorType{mySQLErrorType_t::noError};
 
 public:
-	mySQLValueError_t() noexcept : errorType{mySQLErrorType_t::noError} { }
+	mySQLValueError_t() noexcept = default;
 	mySQLValueError_t(const mySQLErrorType_t type) noexcept : errorType{type} { }
 	mySQLValueError_t(const mySQLValueError_t &) noexcept = default;
 	mySQLValueError_t(mySQLValueError_t &&) noexcept = default;
-	~mySQLValueError_t() noexcept = default;
+	~mySQLValueError_t() noexcept final = default;
 	mySQLValueError_t &operator =(const mySQLValueError_t &) noexcept = default;
 	mySQLValueError_t &operator =(mySQLValueError_t &&) noexcept = default;
 	const char *error() const noexcept;
-	const char *what() const noexcept { return error(); }
+	const char *what() const noexcept final { return error(); }
 
 	bool operator ==(const mySQLValueError_t &error) const noexcept { return errorType == error.errorType; }
 	bool operator !=(const mySQLValueError_t &error) const noexcept { return errorType != error.errorType; }
 };
 #undef MySQL_FORMAT_ARGS
-		}
-	}
-}
+		} // namespace driver
+	} // namespace mysql
+} // namespace tmplORM
 
 #endif /*MYSQL_HXX*/

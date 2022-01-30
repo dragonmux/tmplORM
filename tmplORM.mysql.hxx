@@ -4,7 +4,7 @@
 #include "tmplORM.hxx"
 #include <type_traits>
 #include <memory>
-#include <mysql.hxx>
+#include "mysql.hxx"
 
 namespace tmplORM
 {
