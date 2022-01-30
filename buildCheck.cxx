@@ -23,7 +23,7 @@ using std::endl;
 #define INFO COLOUR("1;36")
 
 #define SET_COL(x) "\x1B[" << (x) << "G"
-#define NEWLINE NORMAL << endl
+#define NEWLINE NORMAL "\n"
 
 uint16_t getColumns()
 {
@@ -94,19 +94,27 @@ namespace models
 		// Other fields and stuff..
 		types::bool_t<ts("UserActive")>, types::bool_t<ts("UserIsMinor")>,
 		types::int32_t<ts("UserBadgeNo")>,
-		types::bool_t<ts("UserMagstripeExpired")>> { };
+		types::bool_t<ts("UserMagstripeExpired")>
+	> { };
 
 	struct userTimeLog_t : public model_t<ts("UserTimeLogs"),
 		types::autoInc_t<types::primary_t<types::int32_t<ts("UserTimeLogID")>>>, types::int32_t<ts("UserID")>,
 		// More fields and stuff..
-		types::int32_t<ts("UserTimeLogNotes")>> { };
-}
+		types::int32_t<ts("UserTimeLogNotes")>
+	> { };
+
+	struct multiPrimary_t : public model_t<ts("MultiPrimary"),
+		types::primary_t<types::int64_t<ts("Key1")>>, types::primary_t<types::int64_t<ts("Key2")>>
+	> { };
+} // namespace models
 
 using models::user_t;
 using models::userTimeLog_t;
+using models::multiPrimary_t;
 
 user_t user;
 userTimeLog_t timeLog;
+multiPrimary_t multiPrimary;
 
 namespace mysql
 {
@@ -181,7 +189,7 @@ namespace mysql
 		add(user, timeLog) ? echoPass() : echoFail();
 		addAll(user, timeLog) ? echoPass() : echoFail();
 		update(user, timeLog) ? echoPass() : echoFail();
-		del(user, timeLog) ? echoPass() : echoFail();
+		del(user, timeLog, multiPrimary) ? echoPass() : echoFail();
 		deleteTable<user_t, userTimeLog_t>() ? echoPass() : echoFail();
 	}
 } // namespace mysql
@@ -259,7 +267,7 @@ namespace mssql
 		add(user, timeLog) ? echoPass() : echoFail();
 		addAll(user, timeLog) ? echoPass() : echoFail();
 		update(user, timeLog) ? echoPass() : echoFail();
-		del(user, timeLog) ? echoPass() : echoFail();
+		del(user, timeLog, multiPrimary) ? echoPass() : echoFail();
 		deleteTable<user_t, userTimeLog_t>() ? echoPass() : echoFail();
 	}
 } // namespace mssql
@@ -267,6 +275,8 @@ namespace mssql
 namespace pgsql
 {
 	template<typename tableName, typename... fields> using createTable__ = tmplORM::pgsql::createTable_<tableName, fields...>;
+	template<typename tableName, typename... fields>  using del__ = tmplORM::pgsql::del_<tableName, fields...>;
+	template<typename tableName> using deleteTable__ = tmplORM::pgsql::deleteTable_<tableName>;
 
 	template<typename tableName, typename... fields> bool createTable_(const model_t<tableName, fields...> &) noexcept
 	{
@@ -276,9 +286,27 @@ namespace pgsql
 	}
 	template<typename... models> bool createTable() noexcept { return collect(createTable_(models())...); }
 
+	template<typename tableName, typename... fields> bool del_(const model_t<tableName, fields...> &) noexcept
+	{
+		using del = del__<tableName, fields...>;
+		cout << del::value << "\n";
+		return true;
+	}
+	template<typename... models_t> bool del(const models_t &...models) noexcept { return collect(del_(models)...); }
+
+	template<typename tableName, typename... fields> bool deleteTable_(const model_t<tableName, fields...> &) noexcept
+	{
+		using deleteTable = deleteTable__<tableName>;
+		cout << deleteTable::value << "\n";
+		return true;
+	}
+	template<typename... models> bool deleteTable() noexcept { return collect(deleteTable_(models())...); }
+
 	void test() noexcept
 	{
 		createTable<user_t, userTimeLog_t>() ? echoPass() : echoFail();
+		del(user, timeLog, multiPrimary) ? echoPass() : echoFail();
+		deleteTable<user_t, userTimeLog_t>() ? echoPass() : echoFail();
 	}
 } // namespace pgsql
 
