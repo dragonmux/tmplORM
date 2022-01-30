@@ -119,7 +119,7 @@ endif
 
 install_headers(
 	'mysql.hxx', 'mssql.hxx', 'tmplORM.hxx', 'tmplORM.mysql.hxx', 'tmplORM.mssql.hxx',
-	'tmplORM.common.hxx', 'tmplORM.types.hxx', 'tmplORM.extern.hxx',
+	'tmplORM.pgsql.hxx', 'tmplORM.common.hxx', 'tmplORM.types.hxx', 'tmplORM.extern.hxx',
 	'string.hxx',
 	subdir: 'tmplORM'
 )
