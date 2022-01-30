@@ -703,7 +703,7 @@ namespace tmplORM
 		/*! @brief Counts how many fields are insertable for an INSERT query */
 		template<typename...> struct countInsert_t;
 		template<typename field, typename... fields> struct countInsert_t<field, fields...>
-			{ constexpr static const size_t count = countInsert_(field()) + countInsert_t<fields...>::count; };
+			{ constexpr static const size_t count = countInsert_(field{}) + countInsert_t<fields...>::count; };
 		template<> struct countInsert_t<> { constexpr static const size_t count = 0; };
 
 		template<typename fieldName, typename T> constexpr size_t countUpdate_(const type_t<fieldName, T> &) noexcept { return 1; }
@@ -711,21 +711,23 @@ namespace tmplORM
 		/*! @brief Counts how many fields are updateable for an UPDATE query */
 		template<typename...> struct countUpdate_t;
 		template<typename field, typename... fields> struct countUpdate_t<field, fields...>
-			{ constexpr static const size_t count = countUpdate_(field()) + countUpdate_t<fields...>::count; };
+			{ constexpr static const size_t count = countUpdate_(field{}) + countUpdate_t<fields...>::count; };
 		template<> struct countUpdate_t<> { constexpr static const size_t count = 0; };
 
 		template<typename fieldName, typename T> auto toType_(const type_t<fieldName, T> &) -> type_t<fieldName, T>;
-		template<typename field> using toType = decltype(toType_(field()));
+		template<typename field> using toType = decltype(toType_(field{}));
 
 		template<typename A, typename B> constexpr bool typestrcmp() noexcept { return std::is_same<A, B>::value; }
 
 		template<bool, typename fieldName, typename... fields> struct fieldIndex__t;
-		template<typename name, typename fieldName, typename T> constexpr bool isFieldsName(const alias_t<fieldName, T> &) noexcept
-			{ return typestrcmp<name, fieldName>(); }
-		template<typename name, typename fieldName, typename T> constexpr bool isFieldsName(const type_t<fieldName, T> &) noexcept
-			{ return typestrcmp<name, fieldName>(); }
+		template<typename name, typename fieldName, typename T>
+			constexpr bool isFieldsName(const alias_t<fieldName, T> &) noexcept
+				{ return typestrcmp<name, fieldName>(); }
+		template<typename name, typename fieldName, typename T>
+			constexpr bool isFieldsName(const type_t<fieldName, T> &) noexcept
+				{ return typestrcmp<name, fieldName>(); }
 		template<typename fieldName, typename field, typename... fields>
-			using fieldIndex_ = fieldIndex__t<isFieldsName<fieldName>(field()), fieldName, fields...>;
+			using fieldIndex_ = fieldIndex__t<isFieldsName<fieldName>(field{}), fieldName, fields...>;
 		template<typename fieldName, typename field, typename... fields> struct fieldIndex__t<false, fieldName, field, fields...>
 			{ constexpr static const size_t index = fieldIndex_<fieldName, field, fields...>::index + 1; };
 		template<typename fieldName, typename... fields> struct fieldIndex__t<true, fieldName, fields...>
