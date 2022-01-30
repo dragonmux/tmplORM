@@ -2,6 +2,7 @@
 #define tmplORM_PGSQL_HXX
 
 #include "tmplORM.hxx"
+#include "pgsql.hxx"
 
 namespace tmplORM
 {
@@ -272,7 +273,23 @@ namespace tmplORM
 		template<typename tableName> using deleteTable_ = toString<
 			tycat<ts("DROP TABLE IF EXISTS "), doubleQuote<tableName>, ts(";")>
 		>;
+
+		struct session_t final
+		{
+		private:
+			driver::pgSQLClient_t database;
+
+		public:
+			session_t() noexcept = default;
+			~session_t() noexcept = default;
+			session_t(session_t &&session) noexcept : database{std::move(session.database)} { }
+			void operator =(session_t &&session) noexcept { database = std::move(session.database); }
+
+			session_t(const session_t &) = delete;
+			session_t &operator =(const session_t &) = delete;
+		};
 	} // namespace pgsql
+	using pgsql_t = pgsql::session_t;
 } // namespace tmplORM
 
 #endif /*tmplORM_PGSQL_HXX*/
