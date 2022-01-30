@@ -89,12 +89,12 @@ namespace tmplORM
 					date.time_type = MYSQL_TIMESTAMP_DATE;
 
 					paramStorage = substrate::make_managed_nothrow<MYSQL_TIME>(date);
-					if (paramStorage)
+					if (paramStorage.valid())
 					{
 						param.buffer = paramStorage;
 						param.buffer_length = sizeof(date);
 					}
-					return paramStorage;
+					return paramStorage.valid();
 				}
 
 				bool operator ()(MYSQL_BIND &param, const ormDateTime_t &value, managedPtr_t<void> &paramStorage) noexcept
@@ -110,12 +110,12 @@ namespace tmplORM
 					dateTime.time_type = MYSQL_TIMESTAMP_DATETIME;
 
 					paramStorage = substrate::make_managed_nothrow<MYSQL_TIME>(dateTime);
-					if (paramStorage)
+					if (paramStorage.valid())
 					{
 						param.buffer = paramStorage;
 						param.buffer_length = sizeof(dateTime);
 					}
-					return paramStorage;
+					return paramStorage.valid();
 				}
 
 				bool operator ()(MYSQL_BIND &param, const ormUUID_t &_value, managedPtr_t<void> &paramStorage) noexcept
@@ -137,13 +137,13 @@ namespace tmplORM
 					}
 
 					auto storage = substrate::make_managed_nothrow<decltype(uuid)>(uuid);
-					if (storage)
+					if (storage.valid())
 					{
 						param.buffer = storage->data();
 						param.buffer_length = uuid.size();
 						paramStorage = std::move(storage);
 					}
-					return storage;
+					return storage.valid();
 				}
 			};
 
@@ -206,11 +206,11 @@ namespace tmplORM
 			{
 				bool operator ()(MYSQL_BIND &param, managedPtr_t<void> &paramStorage) noexcept
 				{
-					const bindOutStorage_t<T> makeStorage;
+					const bindOutStorage_t<T> makeStorage{};
 					paramStorage = makeStorage();
-					if (paramStorage)
+					if (paramStorage.valid())
 						param.buffer_length = makeStorage.length();
-					return paramStorage;
+					return paramStorage.valid();
 				}
 			};
 
