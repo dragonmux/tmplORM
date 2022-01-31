@@ -345,6 +345,7 @@ namespace tmplORM
 
 			public:
 				constexpr _date_t() noexcept = default;
+				// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 				constexpr _date_t(const ::int16_t year, const uint8_t month, const uint8_t day) noexcept :
 					_year{year}, _month{month}, _day{day} { }
 				constexpr ::int16_t year() const noexcept { return _year; }
@@ -376,7 +377,12 @@ namespace tmplORM
 				date_t(const ormDate_t _value) noexcept : parentType_t{} { value(_value); }
 				~date_t() noexcept = default;
 				operator ormDate_t() const noexcept { return date(); }
-				void operator =(const date_t &value) noexcept { parentType_t::_value = value._value; }
+				void operator =(const date_t &value) noexcept
+				{
+					if (this == &value)
+						return;
+					parentType_t::_value = value._value;
+				}
 				void operator =(date_t &&value) noexcept { parentType_t::_value = value._value; }
 				void operator =(const char *const _value) noexcept { value(_value); }
 				void operator =(const ormDate_t &_value) noexcept { value(_value); }
@@ -410,7 +416,12 @@ namespace tmplORM
 				time_t(const ormTime_t _value) noexcept : parentType_t{} { value(_value); }
 				~time_t() noexcept = default;
 				operator ormTime_t() const noexcept { return time(); }
-				void operator =(const time_t &value) noexcept { parentType_t::_value = value._value; }
+				void operator =(const time_t &value) noexcept
+				{
+					if (this == &value)
+						return;
+					parentType_t::_value = value._value;
+				}
 				void operator =(time_t &&value) noexcept { parentType_t::_value = value._value; }
 				void operator =(const char *const _value) noexcept { value(_value); }
 				void operator =(const ormTime_t &_value) noexcept { value(_value); }
@@ -459,7 +470,12 @@ namespace tmplORM
 				dateTime_t(const ormDateTime_t _value) noexcept : parentType_t{} { value(_value); }
 				~dateTime_t() noexcept = default;
 				operator ormDateTime_t() const noexcept { return dateTime(); }
-				void operator =(const dateTime_t &value) noexcept { parentType_t::_value = value._value; }
+				void operator =(const dateTime_t &value) noexcept
+				{
+					if (this == &value)
+						return;
+					parentType_t::_value = value._value;
+				}
 				void operator =(dateTime_t &&value) noexcept { parentType_t::_value = value._value; }
 				void operator =(const char *const _value) noexcept { value(_value); }
 				void operator =(const ormDateTime_t &_value) noexcept { value(_value); }
@@ -640,9 +656,9 @@ namespace tmplORM
 		/*! @brief Generates a comma (as necessary) to put after a field in a statement */
 		template<size_t N> using comma = typename comma_t<N>::value;
 
-		template<bool isNull> struct nullable__t { using value = ts(" NOT NULL"); };
-		template<> struct nullable__t<true> { using value = ts(" NULL"); };
-		template<bool isNull> using nullable = typename nullable__t<isNull>::value;
+		template<bool isNull> struct nullableHelper_t { using value = ts(" NOT NULL"); };
+		template<> struct nullableHelper_t<true> { using value = ts(" NULL"); };
+		template<bool isNull> using nullable = typename nullableHelper_t<isNull>::value;
 
 		template<size_t N> struct placeholder_t { using value = tycat<typestring<'?'>, comma<N>, typename placeholder_t<N - 1>::value>; };
 		// Termination here is for 0 rather than 1 to protect us when there are no placeholders to generate
@@ -721,7 +737,7 @@ namespace tmplORM
 
 		template<typename A, typename B> constexpr bool typestrcmp() noexcept { return std::is_same<A, B>::value; }
 
-		template<bool, typename fieldName, typename... fields> struct fieldIndex__t;
+		template<bool, typename fieldName, typename... fields> struct fieldIndexHelper_t;
 		template<typename name, typename fieldName, typename T>
 			constexpr bool isFieldsName(const alias_t<fieldName, T> &) noexcept
 				{ return typestrcmp<name, fieldName>(); }
@@ -729,10 +745,11 @@ namespace tmplORM
 			constexpr bool isFieldsName(const type_t<fieldName, T> &) noexcept
 				{ return typestrcmp<name, fieldName>(); }
 		template<typename fieldName, typename field, typename... fields>
-			using fieldIndex_ = fieldIndex__t<isFieldsName<fieldName>(field{}), fieldName, fields...>;
-		template<typename fieldName, typename field, typename... fields> struct fieldIndex__t<false, fieldName, field, fields...>
-			{ constexpr static const size_t index = fieldIndex_<fieldName, field, fields...>::index + 1; };
-		template<typename fieldName, typename... fields> struct fieldIndex__t<true, fieldName, fields...>
+			using fieldIndex_ = fieldIndexHelper_t<isFieldsName<fieldName>(field{}), fieldName, fields...>;
+		template<typename fieldName, typename field, typename... fields>
+			struct fieldIndexHelper_t<false, fieldName, field, fields...>
+				{ constexpr static const size_t index = fieldIndex_<fieldName, field, fields...>::index + 1; };
+		template<typename fieldName, typename... fields> struct fieldIndexHelper_t<true, fieldName, fields...>
 			{ constexpr static const size_t index = 0; };
 		template<typename fieldName, typename field, typename... fields> struct fieldIndex_t
 			{ constexpr static const size_t index = fieldIndex_<fieldName, field, fields...>::index; };
