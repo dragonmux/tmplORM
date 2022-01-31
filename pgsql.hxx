@@ -34,7 +34,7 @@ public:
 	pgSQLValue_t(std::nullptr_t) noexcept;
 	pgSQLValue_t(const char *const value, Oid _type) noexcept : data{static_cast<const void *>(value)}, type{_type} { }
 
-	bool valid() const noexcept;
+	bool valid() const noexcept { return data || type != InvalidOid; }
 	bool isNull() const noexcept { return !data; }
 	bool asBool() const;
 	uint8_t asUint8() const;
