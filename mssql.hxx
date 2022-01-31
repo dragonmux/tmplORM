@@ -241,15 +241,15 @@ public:
 	 * @returns true if the object is valid, false otherwise
 	 */
 	bool valid() const noexcept { return dbHandle && connection && haveConnection; }
-	bool connect(const char *const driver, const char *const host, const uint32_t port, const char *const user, const char *const passwd) const noexcept;
+	bool connect(const char *driver, const char *host, uint32_t port, const char *user, const char *passwd) const noexcept;
 	void disconnect() const noexcept;
-	bool selectDB(const char *const db) const noexcept;
+	bool selectDB(const char *db) const noexcept;
 	bool beginTransact() const noexcept;
-	bool endTransact(const bool commitSuccess) const noexcept;
+	bool endTransact(bool commitSuccess) const noexcept;
 	bool commit() const noexcept { return endTransact(true); }
 	bool rollback() const noexcept { return endTransact(false); }
-	tSQLResult_t query(const char *const queryStmt) const noexcept;
-	tSQLQuery_t prepare(const char *const queryStmt, const size_t paramsCount) const noexcept;
+	tSQLResult_t query(const char *queryStmt) const noexcept;
+	tSQLQuery_t prepare(const char *queryStmt, const size_t paramsCount) const noexcept;
 	const tSQLExecError_t &error() const noexcept { return _error; }
 
 	/*! @brief Deleted copy constructor for tSQLClient_t as client connections are not copyable */

@@ -241,7 +241,7 @@ private:
 	void dtor() noexcept;
 
 protected:
-	mySQLPreparedQuery_t(MYSQL *const con, const char *const queryStmt, const size_t paramsCount) noexcept;
+	mySQLPreparedQuery_t(MYSQL *con, const char *queryStmt, size_t paramsCount) noexcept;
 	friend struct mySQLClient_t;
 
 public:
@@ -257,9 +257,11 @@ public:
 	bool valid() const noexcept { return query; }
 	bool execute() noexcept;
 	uint64_t rowID() const noexcept;
-	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept { params.bindIn(index, value, length); }
-	template<typename T> void bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept { params.bindIn<T>(index, nullptr, length); }
-	mySQLPreparedResult_t queryResult(const size_t columnCount) const noexcept;
+	template<typename T> void bind(size_t index, const T &value, fieldLength_t length) noexcept
+		{ params.bindIn(index, value, length); }
+	template<typename T> void bind(size_t index, const nullptr_t, fieldLength_t length) noexcept
+		{ params.bindIn<T>(index, nullptr, length); }
+	mySQLPreparedResult_t queryResult(size_t columnCount) const noexcept;
 	uint32_t errorNum() const noexcept;
 	const char *error() const noexcept;
 

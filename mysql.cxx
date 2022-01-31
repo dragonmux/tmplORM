@@ -185,8 +185,8 @@ const char *mySQLClient_t::error() const noexcept { return con ? mysql_error(con
  * @param queryStmt The query statement to prepare
  * @param paramsCount The count of the number of parameters that the query statement contains
  */
-mySQLPreparedQuery_t::mySQLPreparedQuery_t(MYSQL *const con, const char *const queryStmt, const size_t paramsCount) noexcept :
-	query(mysql_stmt_init(con)), params(paramsCount), executed(false)
+mySQLPreparedQuery_t::mySQLPreparedQuery_t(MYSQL *const con, const char *const queryStmt,
+	const size_t paramsCount) noexcept : query{mysql_stmt_init(con)}, params{paramsCount}
 {
 	if (!query || !params.valid())
 		return;

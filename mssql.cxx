@@ -116,7 +116,8 @@ void tSQLClient_t::disconnect() const noexcept
 	}
 }
 
-bool tSQLClient_t::connect(const char *const driver, const char *const host, const uint32_t port, const char *const user, const char *const passwd) const noexcept
+bool tSQLClient_t::connect(const char *const driver, const char *const host, const uint32_t port,
+	const char *const user, const char *const passwd) const noexcept
 {
 	if (!connection || haveConnection)
 		return !error(tSQLExecErrorType_t::connect);
