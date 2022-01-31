@@ -4,11 +4,17 @@ extraction:
       packages:
         - libmysqlclient-dev
         - unixodbc-dev
+        - libpq-dev
+    after_prepare:
+      - PATH="$HOME/.local/bin:$PATH"
+      - pip3 install --upgrade setuptools wheel
+      - pip3 install --upgrade meson
+    configure:
+      command:
+        - meson build
     index:
       build_command:
-        - export GCC="gcc -fPIC -DPIC" GXX="g++ -fPIC -DPIC"
-        - make
-        - make buildCheck
+        - ninja -C build
 queries:
   - include: "*"
   - exclude: cpp/loop-variable-changed
