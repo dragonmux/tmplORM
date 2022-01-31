@@ -292,6 +292,14 @@ namespace tmplORM
 				return result.valid() && result.successful() && result.numRows() == 0;
 			}
 
+			template<typename tableName, typename... fields> bool deleteTable(const model_t<tableName, fields...> &)
+			{
+				using drop = deleteTable_<tableName>;
+				// tycat<> builds up the query for dropping (deleting) the table
+				auto result{database.query(drop::value)};
+				return result.valid() && result.successful() && result.numRows() == 0;
+			}
+
 			bool connect(const char *host, const char *port, const char *user, const char *passwd, const char *db) noexcept
 				{ return database.connect(host, port, user, passwd, db); }
 
