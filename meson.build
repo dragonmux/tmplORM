@@ -25,6 +25,21 @@ if get_option('build_check')
 endif
 substrate = dependency('substrate', fallback: ['substrate', 'substrate_dep'], 	default_options: ['build_tests=false'])
 
+includes = []
+
+if cxx.has_header('/usr/include/postgresql/server/catalog/pg_type_d.h')
+	includes += [include_directories('/usr/include/postgresql/server')]
+else
+	grep = find_program('grep')
+	if (build_machine.system() == 'linux' and
+		run_command(grep, '-q', 'ID=arch', '/etc/os-release', check: false).returncode() == 0)
+		error('Please install the "posgresql" package')
+	else
+		error('Cannot find required PostgreSQL header "catalog/pg_type_d.h" - ' +
+			'please report this to your distro to have them add it to libpq')
+	endif
+endif
+
 mysqlConfig = find_program('mysql_config')
 mysql = declare_dependency(
 	compile_args: run_command([mysqlConfig, '--cflags'], check: true).stdout().split(),
@@ -94,6 +109,7 @@ tmplORMSrcDir = meson.current_source_dir()
 tmplORM = shared_library(
 	'tmplORM',
 	tmplORMSrc,
+	include_directories: includes,
 	dependencies: [threading, dl, odbc, pgsql, mysql, substrate],
 	version: meson.project_version(),
 	install: true
