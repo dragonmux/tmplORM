@@ -20,7 +20,11 @@ pgSQLClient_t::pgSQLClient_t(pgSQLClient_t &&con) noexcept : pgSQLClient_t()
 pgSQLClient_t::~pgSQLClient_t() noexcept
 {
 	if (connection)
+	{
+		if (needsCommit)
+			rollback();
 		PQfinish(connection);
+	}
 }
 
 void pgSQLClient_t::operator=(pgSQLClient_t &&con) noexcept
@@ -35,6 +39,25 @@ bool pgSQLClient_t::connect(const char *const host, const char *const port, cons
 		return false;
 	connection = PQsetdbLogin(host, port, nullptr, nullptr, db, user, passwd);
 	return valid();
+}
+
+bool pgSQLClient_t::beginTransact() noexcept
+{
+	if (needsCommit || !valid())
+		return false;
+	const auto result{query("BEGIN")};
+	needsCommit = result.errorNum() == PGRES_COMMAND_OK;
+	return needsCommit;
+}
+
+bool pgSQLClient_t::endTransact(const bool commitSuccess) noexcept
+{
+	if (needsCommit && valid())
+	{
+		const auto result{query(commitSuccess ? "COMMIT" : "ROLLBACK")};
+		needsCommit = result.errorNum() != PGRES_COMMAND_OK;
+	}
+	return !needsCommit;
 }
 
 pgSQLResult_t pgSQLClient_t::query(const char *const queryStmt) const noexcept
@@ -55,13 +78,13 @@ pgSQLResult_t::pgSQLResult_t(PGresult *res) noexcept : result{res}
 
 pgSQLResult_t::~pgSQLResult_t() noexcept
 {
-	if (valid())
+	if (result)
 		PQclear(result);
 }
 
 pgSQLResult_t &pgSQLResult_t::operator =(pgSQLResult_t &&res) noexcept
 {
-	std::swap(result, res.result);
+	swap(res);
 	return *this;
 }
 

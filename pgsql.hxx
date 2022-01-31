@@ -93,6 +93,7 @@ struct tmplORM_API pgSQLClient_t final
 {
 private:
 	PGconn *connection{nullptr};
+	bool needsCommit{false};
 
 public:
 	pgSQLClient_t() noexcept = default;
@@ -105,6 +106,10 @@ public:
 	 */
 	bool valid() const noexcept { return connection; }
 	bool connect(const char *host, const char *port, const char *user, const char *passwd, const char *db) noexcept;
+	bool beginTransact() noexcept;
+	bool endTransact(bool commitSuccess) noexcept;
+	bool commit() noexcept { return endTransact(true); }
+	bool rollback() noexcept { return endTransact(false); }
 	pgSQLResult_t query(const char *queryStmt) const noexcept;
 
 	/*! @brief Deleted move constructor for pgSQLClient_t as client connections are not movable */
