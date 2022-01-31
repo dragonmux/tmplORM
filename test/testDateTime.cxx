@@ -1,7 +1,7 @@
 #include <unistd.h>
 #include <crunch++.h>
-#include <tmplORM.types.hxx>
-#include <dateTime.hxx>
+#include "tmplORM.types.hxx"
+#include "dateTime.hxx"
 
 using systemClock_t = std::chrono::system_clock;
 using tmplORM::types::baseTypes::ormDateTime_t;
@@ -12,6 +12,7 @@ std::unique_ptr<char []> currentWorkDir() noexcept
 	if (!cwd)
 		return nullptr;
 	auto result{stringDup(cwd)};
+	// NOLINTNEXTLINE(cppcoreguidelines-no-malloc, cppcoreguidelines-owning-memory)
 	free(cwd);
 	return result;
 }
@@ -58,7 +59,7 @@ private:
 	}
 
 public:
-	void registerTests() final override
+	void registerTests() final
 	{
 		CXX_TEST(testReadExtended)
 		CXX_TEST(testConversion)

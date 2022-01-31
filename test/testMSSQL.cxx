@@ -529,7 +529,7 @@ private:
 	}
 
 public:
-	void registerTests() final override
+	void registerTests() final
 	{
 		if (!haveEnvironment())
 			skip("No suitable environment found, refusing to run");
@@ -1023,7 +1023,7 @@ private:
 	}
 
 public:
-	void registerTests() final override
+	void registerTests() final
 	{
 		CXX_TEST(testNull)
 		CXX_TEST(testString)

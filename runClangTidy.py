@@ -32,7 +32,11 @@ def gatherFiles():
 		for file in fileGlob:
 			yield file
 
-extraArgs = []
+extraArgs = [
+	f'--extra-arg=-I{args.sourcePath}/deps/substrate',
+	f'--extra-arg=-I/usr/include/crunch++',
+	f'--extra-arg=-I{args.sourcePath}',
+]
 
 futures = []
 returncode = 0

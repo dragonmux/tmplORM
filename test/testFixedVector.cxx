@@ -12,7 +12,7 @@ public:
 	void testInc() { boundedIterator::testInc(*this); }
 	void testDec() { boundedIterator::testDec(*this); }
 
-	void registerTests() final override
+	void registerTests() final
 	{
 		CXX_TEST(testCtor)
 		CXX_TEST(testIndex)
@@ -41,7 +41,7 @@ public:
 	catch (const std::out_of_range &)
 		{ fail("Unexpected exception thrown during normal fixedVector_t<> access"); }
 
-	void registerTests() final override
+	void registerTests() final
 	{
 		CXX_TEST(testTraits)
 		CXX_TEST(testInvalid)

@@ -30,7 +30,7 @@ public:
 		assertEqual(utf8Res, utf8Ref, utf16::length(utf8Ref));
 	}
 
-	void registerTests() final override
+	void registerTests() final
 	{
 		CXX_TEST(testValidity)
 		CXX_TEST(testUTF8to16)
@@ -78,7 +78,7 @@ public:
 		assertInvalid(utf16::convert(u"\xD800\x08A0"));
 	}
 
-	void registerTests() final override
+	void registerTests() final
 	{
 		CXX_TEST(testBadUTF8)
 		CXX_TEST(testBadUTF16)
@@ -102,7 +102,7 @@ public:
 		assertEqual(str.get(), "Formatting test 1\n");
 	}
 
-	void registerTests() final override
+	void registerTests() final
 	{
 		CXX_TEST(testStringDup)
 		CXX_TEST(testFormatString)

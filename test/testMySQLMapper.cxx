@@ -148,7 +148,7 @@ public:
 		assertEqual(deleteTable(customerDemographic), "DROP TABLE IF EXISTS `CustomerCustDemographics`;");
 	}
 
-	void registerTests() final override
+	void registerTests() final
 	{
 		CXX_TEST(testCreateTableGen)
 		CXX_TEST(testInsertGen)

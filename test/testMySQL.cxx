@@ -468,7 +468,7 @@ private:
 	// TODO: Build a test that checks that connecting to an invalid server fails the way it should here.
 
 public:
-	void registerTests() final override
+	void registerTests() final
 	{
 		if (!haveEnvironment())
 			skip("No suitable environment found, refusing to run");
@@ -910,7 +910,7 @@ public:
 		assertEqual(mySQLValueError_t((mySQLErrorType_t)-1).error(), unknownError);
 	}
 
-	void registerTests() final override
+	void registerTests() final
 	{
 		CXX_TEST(testNull)
 		CXX_TEST(testString)

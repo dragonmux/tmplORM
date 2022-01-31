@@ -189,7 +189,7 @@ public:
 		);
 	}
 
-	void registerTests() final override
+	void registerTests() final
 	{
 		CXX_TEST(testUint8_t)
 		CXX_TEST(testInt8_t)
@@ -352,7 +352,7 @@ public:
 		);
 	}
 
-	void registerTests() final override
+	void registerTests() final
 	{
 		CXX_TEST(testUint8_t)
 		CXX_TEST(testInt8_t)
@@ -513,7 +513,7 @@ public:
 		);
 	}
 
-	void registerTests() final override
+	void registerTests() final
 	{
 		CXX_TEST(testUint8_t)
 		CXX_TEST(testInt8_t)
@@ -678,7 +678,7 @@ public:
 		);
 	}
 
-	void registerTests() final override
+	void registerTests() final
 	{
 		CXX_TEST(testUint8_t)
 		CXX_TEST(testInt8_t)

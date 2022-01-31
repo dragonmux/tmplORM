@@ -13,7 +13,7 @@ public:
 	{
 	}
 
-	void registerTests() final override
+	void registerTests() final
 	{
 		CXX_TEST(testInsertGen)
 		CXX_TEST(testUpdateGen)
