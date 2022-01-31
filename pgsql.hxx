@@ -26,6 +26,7 @@ private:
 public:
 	/*! @brief Default constructor for result objects, constructing invalid result objects by default */
 	constexpr pgSQLResult_t() noexcept = default;
+	pgSQLResult_t(PGresult *res) noexcept : result{res} { }
 	pgSQLResult_t(pgSQLResult_t &&res) noexcept;
 	~pgSQLResult_t() noexcept;
 	pgSQLResult_t &operator =(pgSQLResult_t &&res) noexcept;
@@ -34,6 +35,9 @@ public:
 	 * @returns true if the object is valid, false otherwise
 	 */
 	bool valid() const noexcept { return result; }
+	uint32_t errorNum() const noexcept;
+	const char *error() const noexcept;
+	bool successful() const noexcept;
 	uint32_t numRows() const noexcept;
 
 	/*! @brief Deleted copy constructor for pgSQLResult_t as results are not copyable */
@@ -58,6 +62,12 @@ public:
 	 */
 	bool valid() const noexcept { return connection; }
 	bool connect(const char *host, const char *port, const char *user, const char *passwd, const char *db) noexcept;
+	pgSQLResult_t query(const char *queryStmt) const noexcept;
+
+	/*! @brief Deleted move constructor for pgSQLClient_t as client connections are not movable */
+	pgSQLClient_t(const pgSQLClient_t &) = delete;
+	/*! @brief Deleted move assignment operator for pgSQLClient_t as client connections are not movable */
+	pgSQLClient_t &operator =(const pgSQLClient_t &) = delete;
 };
 		} // namespace driver
 	} // namespace pgsql

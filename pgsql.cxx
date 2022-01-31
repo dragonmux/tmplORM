@@ -34,6 +34,9 @@ bool pgSQLClient_t::connect(const char *const host, const char *const port, cons
 	return valid();
 }
 
+pgSQLResult_t pgSQLClient_t::query(const char *const queryStmt) const noexcept
+	{ return {PQexec(connection, queryStmt)}; }
+
 pgSQLResult_t::pgSQLResult_t(pgSQLResult_t &&res) noexcept : pgSQLResult_t()
 	{ std::swap(result, res.result); }
 
@@ -47,6 +50,17 @@ pgSQLResult_t &pgSQLResult_t::operator =(pgSQLResult_t &&res) noexcept
 {
 	std::swap(result, res.result);
 	return *this;
+}
+
+uint32_t pgSQLResult_t::errorNum() const noexcept
+	{ return result ? PQresultStatus(result) : PGRES_COMMAND_OK; }
+const char *pgSQLResult_t::error() const noexcept
+	{ return result ? PQresultErrorMessage(result) : nullptr; }
+
+bool pgSQLResult_t::successful() const noexcept
+{
+	const auto result{errorNum()};
+	return result == PGRES_COMMAND_OK || result == PGRES_TUPLES_OK || result == PGRES_SINGLE_TUPLE;
 }
 
 uint32_t pgSQLResult_t::numRows() const noexcept { return valid() ? static_cast<uint32_t>(PQntuples(result)) : 0; }
