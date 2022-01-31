@@ -170,7 +170,8 @@ tSQLResult_t tSQLClient_t::query(const char *const queryStmt) const noexcept
 bool tSQLClient_t::beginTransact() const noexcept
 {
 	if (needsCommit || !valid() || error(SQLSetConnectAttr(connection, SQL_ATTR_AUTOCOMMIT,
-		reinterpret_cast<void *>(SQL_AUTOCOMMIT_OFF), 0), SQL_HANDLE_DBC, connection)) // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm [cpp/reinterpret-cast]
+		// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+		reinterpret_cast<void *>(SQL_AUTOCOMMIT_OFF), 0), SQL_HANDLE_DBC, connection)) // lgtm [cpp/reinterpret-cast]
 		return false;
 	return needsCommit = true;
 }
@@ -181,7 +182,8 @@ bool tSQLClient_t::endTransact(const bool commitSuccess) const noexcept
 	{
 		needsCommit = error(SQLEndTran(SQL_HANDLE_DBC, connection, commitSuccess ? SQL_COMMIT : SQL_ROLLBACK),
 			SQL_HANDLE_DBC, connection) || error(SQLSetConnectAttr(connection, SQL_ATTR_AUTOCOMMIT,
-			reinterpret_cast<void *>(SQL_AUTOCOMMIT_ON), 0), SQL_HANDLE_DBC, connection); // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm [cpp/reinterpret-cast]
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+			reinterpret_cast<void *>(SQL_AUTOCOMMIT_ON), 0), SQL_HANDLE_DBC, connection); // lgtm [cpp/reinterpret-cast]
 	}
 	return !needsCommit;
 }
@@ -197,8 +199,9 @@ bool tSQLClient_t::error(const tSQLExecErrorType_t err, const int16_t handleType
 	return _error != tSQLExecErrorType_t::ok;
 }
 
-tSQLQuery_t::tSQLQuery_t(const tSQLClient_t *const parent, void *handle, const char *const queryStmt, const size_t paramsCount) noexcept :
-	client(parent), queryHandle(handle), numParams(paramsCount), paramStorage(paramsCount), dataLengths(paramsCount), executed(false)
+tSQLQuery_t::tSQLQuery_t(const tSQLClient_t *const parent, void *handle, const char *const queryStmt,
+	const size_t paramsCount) noexcept : client{parent}, queryHandle{handle}, numParams{paramsCount},
+		paramStorage{paramsCount}, dataLengths{paramsCount}
 {
 	if (!queryHandle || (numParams && !dataLengths) || !client || !queryStmt)
 	{
@@ -231,10 +234,9 @@ void tSQLQuery_t::operator =(tSQLQuery_t &&qry) noexcept
 
 tSQLResult_t tSQLQuery_t::execute() const noexcept
 {
-	if (!valid() || !queryHandle || !client || executed)
-		return {};
-	else if (error(SQLExecute(queryHandle)) && client->error() != tSQLExecErrorType_t::dataAvail &&
-		client->error() != tSQLExecErrorType_t::noData)
+	if (!valid() || !queryHandle || !client || executed ||
+		(error(SQLExecute(queryHandle)) && client->error() != tSQLExecErrorType_t::dataAvail &&
+		client->error() != tSQLExecErrorType_t::noData))
 		return {};
 	executed = true;
 	return {client, queryHandle, client->error() == tSQLExecErrorType_t::ok};
@@ -252,13 +254,15 @@ tSQLResult_t::tSQLResult_t(const tSQLClient_t *const _client, void *handle, cons
 	else if (_fields)
 	{
 		fields = uint16_t(_fields);
+		// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 		fieldInfo = substrate::make_unique_nothrow<fieldType_t []>(fields);
 		valueCache = fixedVector_t<tSQLValue_t>{fields};
 		if (!fieldInfo || !valueCache.valid())
 			return;
 		for (uint16_t i = 0; i < fields; ++i)
 		{
-			long type = 0, length = 0;
+			long type = 0;
+			long length = 0;
 			if (error(
 					SQLColAttribute(queryHandle, static_cast<SQLUSMALLINT>(i + 1U), SQL_DESC_CONCISE_TYPE,
 						nullptr, 0, nullptr, &type)
@@ -340,6 +344,7 @@ tSQLValue_t &tSQLResult_t::operator [](const uint16_t idx) const noexcept try
 			++valueLength;
 	}
 
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 	auto valueStorage = substrate::make_unique_nothrow<char []>(valueLength);
 	if (!valueStorage)
 		return nullValue;
@@ -377,6 +382,7 @@ catch (const std::out_of_range &error)
 bool tSQLResult_t::error(const int16_t err) const noexcept
 	{ return !client || client->error(err, SQL_HANDLE_STMT, queryHandle); }
 
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 tSQLValue_t::tSQLValue_t(const void *const _data, const uint64_t _length, const int16_t _type) noexcept :
 	data{static_cast<const char *>(_data)}, length{_length}, type{_type}
 {
@@ -401,6 +407,7 @@ template<typename T> T reinterpret(const stringPtr_t &data) noexcept
 	return value;
 }
 
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 std::unique_ptr<const char []> tSQLValue_t::asString(const bool release) const
 {
 	if (isNull() || (!isCharType(type) && !isWCharType(type)))
@@ -458,7 +465,7 @@ const void *tSQLValue_t::asBuffer(size_t &bufferLength, const bool release) cons
 
 ormDate_t tSQLValue_t::asDate() const
 {
-	if (isNull() || type != SQL_TYPE_DATE || length < sizeof(SQL_TYPE_DATE))
+	if (isNull() || type != SQL_TYPE_DATE || length < sizeof(SQL_DATE_STRUCT))
 		throw tSQLValueError_t(tSQLErrorType_t::dateError);
 	const auto date = reinterpret<SQL_DATE_STRUCT>(data);
 	return {date.year, uint8_t(date.month), uint8_t(date.day)};
@@ -468,7 +475,7 @@ ormDate_t tSQLValue_t::asDate() const
 
 ormDateTime_t tSQLValue_t::asDateTime() const
 {
-	if (isNull() || type != SQL_TYPE_TIMESTAMP || length < sizeof(SQL_TYPE_TIMESTAMP))
+	if (isNull() || type != SQL_TYPE_TIMESTAMP || length < sizeof(SQL_TIMESTAMP_STRUCT))
 		throw tSQLValueError_t(tSQLErrorType_t::dateTimeError);
 	const auto dateTime = reinterpret<SQL_TIMESTAMP_STRUCT>(data);
 	return {dateTime.year, uint8_t(dateTime.month), uint8_t(dateTime.day),
@@ -495,6 +502,7 @@ tSQLExecError_t::tSQLExecError_t(const tSQLExecErrorType_t error, const int16_t 
 		if (length < 0)
 			return;
 		const auto messageLen{static_cast<uint16_t>(length + 1)};
+		// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 		_message = substrate::make_unique_nothrow<char []>(messageLen);
 		if (_message)
 		{

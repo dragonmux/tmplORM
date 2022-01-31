@@ -6,7 +6,7 @@
 #include <memory>
 #include <utility>
 #include <substrate/managed_ptr>
-#include <tmplORM.hxx>
+#include "tmplORM.hxx"
 
 /*!
  * @file
@@ -21,7 +21,7 @@ namespace tmplORM
 	{
 		namespace driver
 		{
-using std::nullptr_t;
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 using stringPtr_t = std::unique_ptr<const char []>;
 struct tSQLClient_t;
 using namespace tmplORM::types::baseTypes;
@@ -40,12 +40,13 @@ struct tmplORM_API tSQLExecError_t final
 {
 private:
 	using sqlState_t = std::array<char, 6>;
-	tSQLExecErrorType_t _error;
-	sqlState_t _state;
-	std::unique_ptr<char []> _message;
+	tSQLExecErrorType_t _error{tSQLExecErrorType_t::ok};
+	sqlState_t _state{{}};
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
+	std::unique_ptr<char []> _message{};
 
 public:
-	tSQLExecError_t() noexcept : _error(tSQLExecErrorType_t::ok), _state{{}}, _message() { }
+	tSQLExecError_t() noexcept = default;
 	tSQLExecError_t(const tSQLExecErrorType_t error, const int16_t handleType, void *const handle) noexcept;
 	tSQLExecError_t(tSQLExecError_t &&err) noexcept : tSQLExecError_t() { *this = std::move(err); }
 	~tSQLExecError_t() noexcept = default;
@@ -68,19 +69,20 @@ public:
 struct tmplORM_API tSQLValue_t final
 {
 private:
-	mutable stringPtr_t data;
-	uint64_t length;
-	int16_t type;
+	mutable stringPtr_t data{};
+	uint64_t length{0};
+	int16_t type{0};
 
 public:
 	/*! @brief Default constructor for value objects, constructing the null value by default */
-	tSQLValue_t() noexcept : data(), length(0), type(0) { }
+	tSQLValue_t() noexcept = default;
 	tSQLValue_t(const void *const _data, const uint64_t _length, const int16_t _type) noexcept;
 	tSQLValue_t(tSQLValue_t &&value) noexcept : tSQLValue_t() { *this = std::move(value); }
 	~tSQLValue_t() noexcept = default;
 	void operator =(tSQLValue_t &&value) noexcept;
 
 	bool isNull() const noexcept { return !data; }
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 	std::unique_ptr<const char []> asString(const bool release = true) const;
 	/*! @brief Converter for arbitrary binary buffers */
 	const void *asBuffer(size_t &bufferLength, const bool release = false) const;
@@ -100,6 +102,7 @@ public:
 	ormUUID_t asUUID() const;
 
 	/*! @brief Auto-converter for strings */
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 	operator std::unique_ptr<const char []>() const { return asString(); }
 	/*! @brief Auto-converter to raw buffer */
 	//operator const char *() const noexcept { return data.get(); }
@@ -142,12 +145,14 @@ struct tmplORM_API tSQLResult_t final
 {
 private:
 	using fieldType_t = std::pair<int16_t, uint32_t>;
-	const tSQLClient_t *client;
-	void *queryHandle;
-	bool _hasData, _freeHandle;
-	uint16_t fields;
-	std::unique_ptr<fieldType_t []> fieldInfo;
-	mutable fixedVector_t<tSQLValue_t> valueCache;
+	const tSQLClient_t *client{nullptr};
+	void *queryHandle{nullptr};
+	bool _hasData{false};
+	bool _freeHandle{false};
+	uint16_t fields{0};
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
+	std::unique_ptr<fieldType_t []> fieldInfo{};
+	mutable fixedVector_t<tSQLValue_t> valueCache{};
 	static tSQLValue_t nullValue;
 
 protected:
@@ -157,8 +162,7 @@ protected:
 
 public:
 	/*! @brief Default constructor for result objects, constructing invalid result objects by default */
-	tSQLResult_t() noexcept : client{nullptr}, queryHandle{nullptr}, _hasData{false},
-		_freeHandle{true}, fields{0}, fieldInfo{}, valueCache{} { }
+	tSQLResult_t() noexcept = default;
 	tSQLResult_t(tSQLResult_t &&res) noexcept : tSQLResult_t() { *this = std::move(res); }
 	~tSQLResult_t() noexcept;
 	void operator =(tSQLResult_t &&res) noexcept;
@@ -183,12 +187,12 @@ public:
 struct tmplORM_API tSQLQuery_t final
 {
 private:
-	const tSQLClient_t *client;
-	void *queryHandle;
-	size_t numParams;
-	fixedVector_t<substrate::managedPtr_t<void>> paramStorage;
-	fixedVector_t<long> dataLengths;
-	mutable bool executed;
+	const tSQLClient_t *client{nullptr};
+	void *queryHandle{nullptr};
+	size_t numParams{0};
+	fixedVector_t<substrate::managedPtr_t<void>> paramStorage{};
+	fixedVector_t<long> dataLengths{};
+	mutable bool executed{false};
 
 protected:
 	tSQLQuery_t(const tSQLClient_t *const parent, void *handle, const char *const queryStmt, const size_t paramsCount) noexcept;
@@ -197,7 +201,7 @@ protected:
 
 public:
 	/*! @brief Default constructor for prepared query objects, constructing an invalid query by default */
-	tSQLQuery_t() noexcept : client(nullptr), queryHandle(nullptr), numParams(0), paramStorage(), dataLengths(), executed(false) { }
+	tSQLQuery_t() noexcept = default;
 	tSQLQuery_t(tSQLQuery_t &&qry) noexcept : tSQLQuery_t() { *this = std::move(qry); }
 	~tSQLQuery_t() noexcept;
 	void operator =(tSQLQuery_t &&qry) noexcept;
@@ -208,7 +212,7 @@ public:
 	bool valid() const noexcept { return client && queryHandle; }
 	tSQLResult_t execute() const noexcept;
 	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept;
-	template<typename T> void bind(const size_t index, const nullptr_t, const fieldLength_t length) noexcept;
+	template<typename T> void bind(const size_t index, const std::nullptr_t, const fieldLength_t length) noexcept;
 
 	/*! @brief Deleted copy constructor for tSQLQuery_t as prepared queries are not copyable */
 	tSQLQuery_t(const tSQLQuery_t &) = delete;
@@ -274,24 +278,24 @@ enum class tSQLErrorType_t : uint8_t
 struct tmplORM_API tSQLValueError_t final : std::exception
 {
 private:
-	const tSQLErrorType_t errorType;
+	tSQLErrorType_t errorType{tSQLErrorType_t::noError};
 
 public:
-	tSQLValueError_t() noexcept : errorType{tSQLErrorType_t::noError} { }
+	tSQLValueError_t() noexcept = default;
 	tSQLValueError_t(const tSQLErrorType_t type) noexcept : errorType{type} { }
 	tSQLValueError_t(const tSQLValueError_t &) noexcept = default;
 	tSQLValueError_t(tSQLValueError_t &&) noexcept = default;
-	~tSQLValueError_t() noexcept = default;
+	~tSQLValueError_t() noexcept final = default;
 	tSQLValueError_t &operator =(const tSQLValueError_t &) noexcept = default;
 	tSQLValueError_t &operator =(tSQLValueError_t &&) noexcept = default;
 	const char *error() const noexcept;
-	const char *what() const noexcept { return error(); }
+	const char *what() const noexcept final { return error(); }
 
 	bool operator ==(const tSQLValueError_t &error) const noexcept { return errorType == error.errorType; }
 	bool operator !=(const tSQLValueError_t &error) const noexcept { return errorType != error.errorType; }
 };
-		}
-	}
-}
+		} // namespace driver
+	} // namespace mssql
+} // namespace tmplORM
 
 #endif /*MSSQL_HXX*/
