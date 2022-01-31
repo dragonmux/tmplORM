@@ -1,5 +1,6 @@
 #include <utility>
 #include <substrate/index_sequence>
+#include <substrate/buffer_utils>
 // AAAAAAAAGGGGHHH.. this should be in the libpq headers, but no distro puts it where they should.
 #include <catalog/pg_type_d.h>
 #include "pgsql.hxx"
@@ -128,11 +129,19 @@ void pgSQLResult_t::swap(pgSQLResult_t &res) noexcept
 
 pgSQLValue_t::pgSQLValue_t(std::nullptr_t) noexcept : type{ANYOID} { }
 
-template<typename T> T pgSQLValue_t::reinterpret() const noexcept
+template<typename T> inline T pgSQLValue_t::reinterpret() const noexcept
 {
 	T value{};
 	memcpy(&value, data, sizeof(T));
 	return value;
+}
+
+template<typename T, Oid oid, pgSQLErrorType_t error> inline T pgSQLValue_t::asInt() const
+{
+	if (isNull() || type != oid)
+		throw pgSQLValueError_t{error};
+	// Postgres guarantees "network byte order" (big endian)
+	return substrate::buffer_utils::readBE<T>(data);
 }
 
 bool pgSQLValue_t::asBool() const
@@ -142,6 +151,23 @@ bool pgSQLValue_t::asBool() const
 	const auto value = reinterpret<uint8_t>();
 	return value != 0;
 }
+
+uint8_t pgSQLValue_t::asUint8() const
+	{ return static_cast<uint8_t>(asInt<uint16_t, INT2OID, pgSQLErrorType_t::uint8Error>()); }
+int8_t pgSQLValue_t::asInt8() const
+	{ return static_cast<int8_t>(asInt<int16_t, INT2OID, pgSQLErrorType_t::int8Error>()); }
+uint16_t pgSQLValue_t::asUint16() const
+	{ return asInt<uint16_t, INT2OID, pgSQLErrorType_t::uint16Error>(); }
+int16_t pgSQLValue_t::asInt16() const
+	{ return asInt<int16_t, INT2OID, pgSQLErrorType_t::int16Error>(); }
+uint32_t pgSQLValue_t::asUint32() const
+	{ return asInt<uint32_t, INT4OID, pgSQLErrorType_t::uint32Error>(); }
+int32_t pgSQLValue_t::asInt32() const
+	{ return asInt<int32_t, INT4OID, pgSQLErrorType_t::int32Error>(); }
+uint64_t pgSQLValue_t::asUint64() const
+	{ return asInt<uint64_t, INT8OID, pgSQLErrorType_t::uint64Error>(); }
+int64_t pgSQLValue_t::asInt64() const
+	{ return asInt<int64_t, INT8OID, pgSQLErrorType_t::int64Error>(); }
 
 const char *pgSQLValueError_t::error() const noexcept
 {

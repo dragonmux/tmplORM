@@ -20,13 +20,27 @@ namespace tmplORM
 		{
 using namespace tmplORM::types::baseTypes;
 
+enum class pgSQLErrorType_t : uint8_t
+{
+	noError, binError,
+	stringError, boolError,
+	uint8Error, int8Error,
+	uint16Error, int16Error,
+	uint32Error, int32Error,
+	uint64Error, int64Error,
+	floatError, doubleError,
+	dateError, dateTimeError,
+	uuidError
+};
+
 struct tmplORM_API pgSQLValue_t final
 {
 private:
 	const void *data{nullptr};
 	Oid type{InvalidOid};
 
-	template<typename T> T reinterpret() const noexcept;
+	template<typename T> inline T reinterpret() const noexcept;
+	template<typename T, Oid, pgSQLErrorType_t> inline T asInt() const;
 
 public:
 	/*! @brief Default constructor for value objects, constructing the invalid value by default */
@@ -116,19 +130,6 @@ public:
 	pgSQLClient_t(const pgSQLClient_t &) = delete;
 	/*! @brief Deleted move assignment operator for pgSQLClient_t as client connections are not movable */
 	pgSQLClient_t &operator =(const pgSQLClient_t &) = delete;
-};
-
-enum class pgSQLErrorType_t : uint8_t
-{
-	noError, binError,
-	stringError, boolError,
-	uint8Error, int8Error,
-	uint16Error, int16Error,
-	uint32Error, int32Error,
-	uint64Error, int64Error,
-	floatError, doubleError,
-	dateError, dateTimeError,
-	uuidError
 };
 
 struct tmplORM_API pgSQLValueError_t final : std::exception
