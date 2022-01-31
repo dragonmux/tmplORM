@@ -292,6 +292,9 @@ namespace tmplORM
 				return result.valid() && result.successful() && result.numRows() == 0;
 			}
 
+			bool connect(const char *host, const char *port, const char *user, const char *passwd, const char *db) noexcept
+				{ return database.connect(host, port, user, passwd, db); }
+
 			session_t(const session_t &) = delete;
 			session_t &operator =(const session_t &) = delete;
 		};
