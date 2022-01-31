@@ -285,6 +285,13 @@ namespace tmplORM
 			session_t(session_t &&session) noexcept : database{std::move(session.database)} { }
 			void operator =(session_t &&session) noexcept { database = std::move(session.database); }
 
+			template<typename tableName, typename... fields> bool createTable(const model_t<tableName, fields...> &)
+			{
+				using create = createTable_<tableName, fields...>;
+				auto result{database.query(create::value)};
+				return result.valid() && result.successful() && result.numRows() == 0;
+			}
+
 			session_t(const session_t &) = delete;
 			session_t &operator =(const session_t &) = delete;
 		};
