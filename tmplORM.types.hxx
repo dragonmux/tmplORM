@@ -3,7 +3,7 @@
 
 #include <cstring>
 #include <substrate/conversions>
-#include <string.hxx>
+#include "string.hxx"
 
 /*!
  * @file
@@ -23,19 +23,23 @@ namespace tmplORM
 			struct ormDate_t
 			{
 			protected:
-				int16_t _year;
-				uint8_t _month;
-				uint8_t _day;
+				// NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
+				std::int16_t _year{0};
+				// NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
+				uint8_t _month{0};
+				// NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
+				uint8_t _day{0};
 
 				friend bool operator ==(const ormDate_t &a, const ormDate_t &b) noexcept;
 
 			public:
-				constexpr ormDate_t() noexcept : _year{0}, _month{0}, _day{0} { }
-				constexpr ormDate_t(const int16_t year, const uint8_t month, const uint8_t day) noexcept :
+				constexpr ormDate_t() noexcept = default;
+				// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+				constexpr ormDate_t(const std::int16_t year, const uint8_t month, const uint8_t day) noexcept :
 					_year{year}, _month{month}, _day{day} { }
 
-				constexpr int16_t year() const noexcept { return _year; }
-				void year(const int16_t year) noexcept { _year = year; }
+				constexpr std::int16_t year() const noexcept { return _year; }
+				void year(const std::int16_t year) noexcept { _year = year; }
 				constexpr uint8_t month() const noexcept { return _month; }
 				void month(const uint8_t month) noexcept { _month = month; }
 				constexpr uint8_t day() const noexcept { return _day; }
@@ -44,19 +48,21 @@ namespace tmplORM
 				ormDate_t(const char *date) noexcept : ormDate_t{}
 				{
 					const auto negative = *date == '-';
-					_year = toInt_t<int16_t>{date, 4U + size_t{negative}};
+					_year = toInt_t<std::int16_t>{date, 4U + size_t{negative}};
 					date += 5 + negative;
 					_month = toInt_t<uint8_t>{date, 2U};
 					date += 3;
 					_day = toInt_t<uint8_t>{date, 2U};
 				}
 
+				// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 				std::unique_ptr<char []> asString() const noexcept
 				{
 					const auto year = fromInt<4>(_year);
 					const auto month = fromInt<2>(_month);
 					const auto day = fromInt<2>(_day);
 
+					// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 					auto str = substrate::make_unique_nothrow<char []>(year.length() + month.length() + day.length());
 					if (!str)
 						return nullptr;
@@ -80,10 +86,14 @@ namespace tmplORM
 			struct ormTime_t
 			{
 			protected:
-				uint16_t _hour;
-				uint16_t _minute;
-				uint16_t _second;
-				uint32_t _nanoSecond;
+				// NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
+				uint16_t _hour{0};
+				// NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
+				uint16_t _minute{0};
+				// NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
+				uint16_t _second{0};
+				// NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
+				uint32_t _nanoSecond{0};
 
 				/*!
 				* @brief Raise 10 to the power of power.
@@ -95,7 +105,8 @@ namespace tmplORM
 				friend bool operator ==(const ormTime_t &a, const ormTime_t &b) noexcept;
 
 			public:
-				constexpr ormTime_t() noexcept : _hour(0), _minute(0), _second(0), _nanoSecond(0) { }
+				constexpr ormTime_t() noexcept = default;
+				// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 				constexpr ormTime_t(const uint16_t hour, const uint16_t minute, const uint16_t second,
 					const uint32_t nanoSecond) noexcept : _hour{hour}, _minute{minute},
 					_second{second}, _nanoSecond{nanoSecond} { }
@@ -130,6 +141,7 @@ namespace tmplORM
 						_nanoSecond = static_cast<uint32_t>(nanoSeconds / power10(nanoSeconds.length() - 9U));
 				}
 
+					// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 				std::unique_ptr<char []> asString() const noexcept
 				{
 					const auto hour = fromInt<2>(_hour);
@@ -137,6 +149,7 @@ namespace tmplORM
 					const auto second = fromInt<2>(_second);
 					fromInt_t<uint32_t, uint32_t> nanoSecond{_nanoSecond};
 
+					// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 					auto str = substrate::make_unique_nothrow<char []>(hour.length() + minute.length() +
 						second.length() + nanoSecond.fractionLength(9) + 1);
 					if (!str)
@@ -196,12 +209,12 @@ namespace tmplORM
 
 				extern std::array<std::array<uint16_t, 12>, 2> monthDays;
 
-				constexpr bool isLeap(const rep_t year) noexcept
+				constexpr static bool isLeap(const rep_t year) noexcept
 					{ return (year % 4U) == 0 && ((year % 100U) != 0 || (year % 400U) == 0); }
-				constexpr bool isLeap(const years &year) noexcept { return isLeap(year.count()); }
-				constexpr rep_t div(const years a, const rep_t b) noexcept
+				constexpr static bool isLeap(const years &year) noexcept { return isLeap(year.count()); }
+				constexpr static rep_t div(const years a, const rep_t b) noexcept
 					{ return (a.count() / b) + ((a.count() % b) < 0); }
-				constexpr days leapsFor(const years year) noexcept
+				constexpr static days leapsFor(const years year) noexcept
 					{ return days{div(year, 4) - div(year, 100) + div(year, 400)}; }
 
 				struct ormDateTime_t final : public ormDate_t, ormTime_t
@@ -209,12 +222,12 @@ namespace tmplORM
 				private:
 					struct timezone_t
 					{
-						::int32_t offset;
-						::int32_t leapCorrection;
+						std::int32_t offset;
+						std::int32_t leapCorrection;
 						size_t leapCount;
 					};
 
-					template<typename value_t> void correctDay(days &day, value_t &rem) noexcept
+					template<typename value_t> static void correctDay(days &day, value_t &rem) noexcept
 					{
 						while (rem.count() < 0)
 						{
@@ -228,7 +241,7 @@ namespace tmplORM
 						}
 					}
 
-					int16_t computeYear(days &day) noexcept
+					static std::int16_t computeYear(days &day) noexcept
 					{
 						years year = 1970_y;
 						while (day.count() < 0 || day.count() > (isLeap(year) ? 366U : 365U))
@@ -237,27 +250,31 @@ namespace tmplORM
 							day -= days{(guess - year).count() * 365U} + leapsFor(guess - 1_y) - leapsFor(year - 1_y);
 							year = guess;
 						}
-						return static_cast<int16_t>(year.count());
+						return static_cast<std::int16_t>(year.count());
 					}
 
-					uint8_t computeMonth(const int16_t year, days &day) noexcept
+					static uint8_t computeMonth(const std::int16_t year, days &day) noexcept
 					{
+						// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
 						const auto &daysFor = monthDays[isLeap(year)];
 						size_t i{0};
+						// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
 						for (++day; day.count() > daysFor[i] && i < daysFor.size(); ++i)
+							// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
 							day -= days{daysFor[i]};
 						return static_cast<uint8_t>(i + 1U);
 					}
 
-					int16_t computeOffsetYear(const systemTime_t time, const seconds offset) noexcept;
-					timezone_t tzComputeFor(const time_t timeSecs, const int16_t year) noexcept;
-					void tzComputeLeaps(timezone_t &result, const time_t timeSecs) noexcept;
+					std::int16_t computeOffsetYear(const systemTime_t time, const seconds offset) noexcept;
+					timezone_t tzComputeFor(const std::time_t timeSecs, const std::int16_t year) noexcept;
+					void tzComputeLeaps(timezone_t &result, const std::time_t timeSecs) noexcept;
 					timezone_t tzCompute(const systemTime_t &time) noexcept;
 					friend bool operator ==(const ormDateTime_t &a, const ormDateTime_t &b) noexcept;
 
 				public:
 					constexpr ormDateTime_t() noexcept : ormDate_t{}, ormTime_t{} { }
-					constexpr ormDateTime_t(const int16_t year, const uint8_t month, const uint8_t day,
+					// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+					constexpr ormDateTime_t(const std::int16_t year, const uint8_t month, const uint8_t day,
 						const uint16_t hour, const uint16_t minute, const uint16_t second, const uint32_t nanoSecond) noexcept :
 						ormDate_t{year, month, day}, ormTime_t{hour, minute, second, nanoSecond} { }
 					ormDateTime_t(const char *dateTime) noexcept : ormDate_t{dateTime}, ormTime_t{dateTime + 11} { }
@@ -284,6 +301,7 @@ namespace tmplORM
 					ormDateTime_t(const timePoint_t &point) noexcept :
 						ormDateTime_t{point.time_since_epoch()} { }
 
+					// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 					std::unique_ptr<char []> asString() const noexcept
 					{
 						const auto year = fromInt<4>(_year);
@@ -294,6 +312,7 @@ namespace tmplORM
 						const auto second = fromInt<2>(_second);
 						fromInt_t<uint32_t, uint32_t> nanoSecond{_nanoSecond};
 
+						// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 						auto str = substrate::make_unique_nothrow<char []>(year.length() + month.length() + day.length() + 1 +
 							hour.length() + minute.length() + second.length() + nanoSecond.fractionLength(9));
 						if (!str)
@@ -331,7 +350,7 @@ namespace tmplORM
 					return static_cast<const ormDate_t &>(a) == static_cast<const ormDate_t &>(b) &&
 						static_cast<const ormTime_t &>(a) == static_cast<const ormTime_t &>(b);
 				}
-			}
+			} // namespace chrono
 
 			using chrono::ormDateTime_t;
 			using chrono::operator ==;
@@ -401,6 +420,7 @@ namespace tmplORM
 					}
 				}
 
+				// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 				ormUUID_t(const uint32_t a, const uint16_t b, const uint16_t c, const uint16_t d,
 					const uint64_t e) noexcept : _uuid{a, b, c, uint64_t(e << 16U)}
 				{
@@ -416,7 +436,8 @@ namespace tmplORM
 				constexpr uint16_t data2() const noexcept { return _uuid.data2; }
 				constexpr uint16_t data3() const noexcept { return _uuid.data3; }
 				const uint8_t *data4() const noexcept
-					{ return reinterpret_cast<const uint8_t *>(&_uuid.data4); } // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm [cpp/reinterpret-cast]
+					// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast
+					{ return reinterpret_cast<const uint8_t *>(&_uuid.data4); } // lgtm [cpp/reinterpret-cast]
 
 				ormUUID_t(const char *uuid) noexcept : ormUUID_t()
 				{
@@ -432,9 +453,11 @@ namespace tmplORM
 					_uuid.data4 |= toInt_t<uint32_t>(uuid + 4, 8).fromHex();
 				}
 
+				// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 				std::unique_ptr<char []> asString() const noexcept
 				{
 					std::array<uint8_t, sizeof(guid_t)> buffer{};
+					// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 					auto str = substrate::make_unique_nothrow<char []>(36);
 					if (!str)
 						return nullptr;
@@ -442,6 +465,7 @@ namespace tmplORM
 					for (uint8_t i{0}, j{0}; i < 16; ++i)
 					{
 						// This works because internally we keep things big endian
+						// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
 						const uint8_t value = buffer[i];
 						if (i == 4 || i == 6 || i == 8 || i == 10)
 							str[j++] = '-';
@@ -451,9 +475,11 @@ namespace tmplORM
 					return str;
 				}
 
+				// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 				std::unique_ptr<char []> asPackedString() const noexcept
 				{
 					std::array<uint8_t, sizeof(guid_t)> buffer{};
+					// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 					auto str = substrate::make_unique_nothrow<char []>(32);
 					if (!str)
 						return nullptr;
@@ -461,6 +487,7 @@ namespace tmplORM
 					for (uint8_t i{0}, j{0}; i < 16; ++i)
 					{
 						// This works because internally we keep things big endian
+						// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
 						const uint8_t value = buffer[i];
 						str[j++] = asHex(value >> 4U);
 						str[j++] = asHex(value & 0x0FU);
@@ -470,8 +497,8 @@ namespace tmplORM
 			};
 
 			inline bool operator ==(const ormUUID_t &a, const ormUUID_t &b) noexcept { return a._uuid == b._uuid; }
-		}
-	}
-}
+		} // namespace baseTypes
+	} // namespace types
+} // namespace tmplORM
 
 #endif /*tmplORM_TYPES_HXX*/
