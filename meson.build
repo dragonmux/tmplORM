@@ -18,7 +18,7 @@ coverage = get_option('b_coverage')
 
 threading = dependency('threads')
 dl = cxx.find_library('dl', required: not isWindows)
-odbc = cxx.find_library('odbc')
+odbc = dependency('odbc')
 pgsql = dependency('libpq')
 if get_option('build_check')
 	rSON = dependency('rSON')
