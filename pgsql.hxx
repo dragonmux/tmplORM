@@ -64,6 +64,40 @@ public:
 	ormDate_t asDate() const;
 	ormDateTime_t asDateTime() const;
 	ormUUID_t asUUID() const;
+
+	/*! @brief Auto-converter for booleans */
+	explicit operator bool() const { return asBool(); }
+	/*! @brief Auto-converter for uint8_t's */
+	operator uint8_t() const { return asUint8(); }
+	/*! @brief Auto-converter for int8_t's */
+	operator int8_t() const { return asInt8(); }
+	/*! @brief Auto-converter for uint16_t's */
+	operator uint16_t() const { return asUint16(); }
+	/*! @brief Auto-converter for int16_t's */
+	operator int16_t() const { return asInt16(); }
+	/*! @brief Auto-converter for uint32_t's */
+	operator uint32_t() const { return asUint32(); }
+	/*! @brief Auto-converter for int32_t's */
+	operator int32_t() const { return asInt32(); }
+	/*! @brief Auto-converter for uint64_t's */
+	operator uint64_t() const { return asUint64(); }
+	/*! @brief Auto-converter for int64_t's */
+	operator int64_t() const { return asInt64(); }
+	/*! @brief Auto-converter for floats */
+	operator float() const { return asFloat(); }
+	/*! @brief Auto-converter for doubles */
+	operator double() const { return asDouble(); }
+	/*! @brief Auto-converter for dates */
+	operator ormDate_t() const { return asDate(); }
+	/*! @brief Auto-converter for date-times */
+	operator ormDateTime_t() const { return asDateTime(); }
+	/*! @brief Auto-converter for UUIDs */
+	operator ormUUID_t() const { return asUUID(); }
+
+	/*! @brief Deleted copy constructor for pgSQLValue_t as wrapped values are not copyable */
+	pgSQLValue_t(const pgSQLValue_t &) = delete;
+	/*! @brief Deleted copy assignment operator for pgSQLValue_t as wrapped values are not copyable */
+	pgSQLValue_t &operator =(const pgSQLValue_t &) = delete;
 };
 
 struct tmplORM_API pgSQLResult_t final
