@@ -41,6 +41,7 @@ private:
 
 	template<typename T> inline T reinterpret() const noexcept;
 	template<typename T, Oid, pgSQLErrorType_t> inline T asInt() const;
+	static ormDate_t julianDateToDate(const int64_t date) noexcept;
 
 public:
 	/*! @brief Default constructor for value objects, constructing the invalid value by default */

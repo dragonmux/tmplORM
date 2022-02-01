@@ -15,6 +15,8 @@
 
 using namespace tmplORM::pgsql::driver;
 
+constexpr static int32_t postgresDateEpoch{2451545};
+
 pgSQLClient_t::pgSQLClient_t(pgSQLClient_t &&con) noexcept : pgSQLClient_t()
 	{ std::swap(connection, con.connection); }
 
@@ -173,9 +175,8 @@ int64_t pgSQLValue_t::asInt64() const
 // https://en.wikipedia.org/wiki/Julian_day#Julian_or_Gregorian_calendar_from_Julian_day_number
 // It is insane. This code stinks. The naming is even ?? but there's no way around this.
 // Postgres dug us into this mess
-ormDate_t pgSQLValue_t::asDate() const
+ormDate_t pgSQLValue_t::julianDateToDate(const int64_t date) noexcept
 {
-	const int64_t date = asInt<int32_t, DATEOID, pgSQLErrorType_t::dateError>();
 	const auto f{date + 1401 + (((4 * date + 274277) / 146097) * 3) / 4 - 38};
 	const auto e{4 * f + 3};
 	const auto g{(e % 1461) / 4};
@@ -186,11 +187,25 @@ ormDate_t pgSQLValue_t::asDate() const
 	return {static_cast<int16_t>(year), static_cast<uint8_t>(month), static_cast<uint8_t>(day)};
 }
 
+ormDate_t pgSQLValue_t::asDate() const
+{
+	const auto date{asInt<int32_t, DATEOID, pgSQLErrorType_t::dateError>()};
+	return julianDateToDate(date +  postgresDateEpoch);
+}
+
 ormDateTime_t pgSQLValue_t::asDateTime() const
 {
-	const auto timestamp = asInt<int64_t, TIMESTAMPOID, pgSQLErrorType_t::dateTimeError>();
-	// TODO: perform timestamp to normal datetime conversion - postgres stores these wierd.
-	return {};
+	auto timestamp = asInt<int64_t, TIMESTAMPOID, pgSQLErrorType_t::dateTimeError>();
+	const auto microseconds{static_cast<uint32_t>(timestamp % 1000000)};
+	timestamp /= 1000000;
+	const auto seconds{static_cast<uint8_t>(timestamp % 60)};
+	timestamp /= 60;
+	const auto minutes{static_cast<uint8_t>(timestamp % 60)};
+	timestamp /= 60;
+	const auto hours{static_cast<uint8_t>(timestamp % 24)};
+	timestamp /= 24;
+	const auto date{julianDateToDate(timestamp + postgresDateEpoch)};
+	return {date.year(), date.month(), date.day(), hours, minutes, seconds, microseconds * 1000U};
 }
 
 const char *pgSQLValueError_t::error() const noexcept
