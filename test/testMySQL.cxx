@@ -491,10 +491,13 @@ class testMySQLValue_t final : public testsuite
 private:
 	template<typename T> void checkValue(const T &var, const T &expected)
 		{ assertEqual(var, expected); }
+	// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 	void checkValue(const ormDate_t &var, const ormDate_t &expected)
 		{ assertTrue(var == expected); }
+	// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 	void checkValue(const ormDateTime_t &var, const ormDateTime_t &expected)
 		{ assertTrue(var == expected); }
+	// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 	void checkValue(const ormUUID_t &var, const ormUUID_t &expected)
 		{ assertTrue(var == expected); }
 
