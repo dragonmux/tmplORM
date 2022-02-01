@@ -34,7 +34,8 @@ def gatherFiles():
 
 extraArgs = [
 	f'--extra-arg=-I{args.sourcePath}/deps/substrate',
-	f'--extra-arg=-I/usr/include/crunch++',
+	'--extra-arg=-I/usr/include/postgresql/server'
+	'--extra-arg=-I/usr/include/crunch++',
 	f'--extra-arg=-I{args.sourcePath}',
 ]
 
