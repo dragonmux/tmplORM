@@ -169,6 +169,30 @@ uint64_t pgSQLValue_t::asUint64() const
 int64_t pgSQLValue_t::asInt64() const
 	{ return asInt<int64_t, INT8OID, pgSQLErrorType_t::int64Error>(); }
 
+// The conversion code here is ripped off wholesale from
+// https://en.wikipedia.org/wiki/Julian_day#Julian_or_Gregorian_calendar_from_Julian_day_number
+// It is insane. This code stinks. The naming is even ?? but there's no way around this.
+// Postgres dug us into this mess
+ormDate_t pgSQLValue_t::asDate() const
+{
+	const int64_t date = asInt<int32_t, DATEOID, pgSQLErrorType_t::dateError>();
+	const auto f{date + 1401 + (((4 * date + 274277) / 146097) * 3) / 4 - 38};
+	const auto e{4 * f + 3};
+	const auto g{(e % 1461) / 4};
+	const auto h{5 * g + 2};
+	const auto day{(h % 153) / 5 + 1};
+	const auto month{((h / 153 + 2) % 12) + 1};
+	const auto year{(e / 1461) - 4716 + (14 - month) / 12};
+	return {static_cast<int16_t>(year), static_cast<uint8_t>(month), static_cast<uint8_t>(day)};
+}
+
+ormDateTime_t pgSQLValue_t::asDateTime() const
+{
+	const auto timestamp = asInt<int64_t, TIMESTAMPOID, pgSQLErrorType_t::dateTimeError>();
+	// TODO: perform timestamp to normal datetime conversion - postgres stores these wierd.
+	return {};
+}
+
 const char *pgSQLValueError_t::error() const noexcept
 {
 	switch (errorType)
