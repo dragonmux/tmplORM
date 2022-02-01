@@ -24,8 +24,13 @@ static ormDateTime_t now = systemClock_t::now();
 class testPgSQLValue_t final : public testsuite
 {
 private:
+	constexpr static int32_t jan1st2000{0};
+	constexpr static int32_t feb1st2022{8067};
+
 	template<typename T> void checkValue(const T &var, const T &expected)
 		{ assertEqual(var, expected); }
+
+	// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 	void checkValue(const ormDate_t &var, const ormDate_t &expected)
 	{
 		if (var != expected)
@@ -35,8 +40,11 @@ private:
 			);
 		assertTrue(var == expected);
 	}
+
+	// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 	void checkValue(const ormDateTime_t &var, const ormDateTime_t &expected)
 		{ assertTrue(var == expected); }
+	// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 	void checkValue(const ormUUID_t &var, const ormUUID_t &expected)
 		{ assertTrue(var == expected); }
 
@@ -80,8 +88,6 @@ private:
 
 	void testDate()
 	{
-		constexpr static int32_t jan1st2000{2451545};
-		constexpr static int32_t feb1st2022{2459612};
 		std::array<char, 4> dateBuffer{};
 
 		tryIsNull<ormDate_t>({nullptr});
@@ -89,6 +95,16 @@ private:
 		tryOk<ormDate_t>({dateBuffer.data(), DATEOID}, {2000, 1, 1});
 		substrate::buffer_utils::writeBE(feb1st2022, dateBuffer.data());
 		tryOk<ormDate_t>({dateBuffer.data(), DATEOID}, {2022, 2, 1});
+	}
+
+	void testDateTime()
+	{
+		constexpr static auto jan1st2000Midday{jan1st2000 * INT64_C(86400000000)};
+		std::array<char, 8> dateTimeBuffer{};
+
+		tryIsNull<ormDateTime_t>({nullptr});
+		substrate::buffer_utils::writeBE(jan1st2000Midday, dateTimeBuffer.data());
+		tryOk<ormDateTime_t>({dateTimeBuffer.data(), TIMESTAMPOID}, {2000, 1, 1, 12, 0, 0, 0});
 	}
 
 public:
