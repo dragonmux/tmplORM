@@ -28,7 +28,7 @@ substrate = dependency('substrate', fallback: ['substrate', 'substrate_dep'], 	d
 includes = []
 
 if cxx.has_header('/usr/include/postgresql/server/catalog/pg_type_d.h')
-	includes += [include_directories('/usr/include/postgresql/server')]
+	includes += ['/usr/include/postgresql/server']
 else
 	grep = find_program('grep')
 	if (build_machine.system() == 'linux' and
@@ -111,7 +111,7 @@ tmplORMSrcDir = meson.current_source_dir()
 tmplORM = shared_library(
 	'tmplORM',
 	tmplORMSrc,
-	include_directories: includes,
+	include_directories: include_directories(includes),
 	dependencies: [threading, dl, odbc, pgsql, mysql, substrate],
 	version: meson.project_version(),
 	install: true

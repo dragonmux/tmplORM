@@ -3,7 +3,8 @@ libcrunchpp = dependency('crunch++')
 subdir('data')
 
 tmplORMTests = [
-	'testString', 'testMySQL', 'testMSSQL', 'testMySQLMapper', 'testMSSQLMapper',
+	'testString', 'testMySQL', 'testMSSQL', 'testPgSQL',
+	'testMySQLMapper', 'testMSSQLMapper',
 	'testFixedVector', 'testTypes', 'testDateTime'
 ]
 
@@ -16,6 +17,27 @@ endif
 sanitizer = get_option('b_sanitize')
 if sanitizer != 'none'
 	crunchCoverage += ['-fsanitize=' + sanitizer]
+endif
+
+testIncludes = []
+foreach include : includes
+	testIncludes += ['-I@0@'.format(include)]
+endforeach
+
+pkgConfig = find_program('pkg-config')
+pgsqlCflags = run_command([pkgConfig, '--cflags', 'libpq'], check: true).stdout().strip()
+pgsqlLflags = run_command([pkgConfig, '--libs', 'libpq'], check: true).stdout().strip()
+
+if pgsqlCflags == ''
+	pgsqlCflags = []
+else
+	pgsqlCflags = pgsqlCflags.split()
+endif
+
+if pgsqlLflags == ''
+	pgsqlLflags = []
+else
+	pgsqlLflags = pgsqlLflags.split()
 endif
 
 testHelpers = static_library(
@@ -38,6 +60,10 @@ objectMap = {
 	'testMSSQL': {
 		'tmplORM': ['mssql.cxx', 'string.cxx', 'tmplORM.types.cxx'],
 		'libs': ['-L@0@'.format(odbc.get_variable(pkgconfig: 'libdir')), '-lodbc']
+	},
+	'testPgSQL': {
+		'tmplORM': ['pgsql.cxx', 'tmplORM.types.cxx'],
+		'libs': pgsqlCflags + pgsqlLflags + [testIncludes]
 	},
 	'testFixedVector': {'test': ['fixedVector.cxx']},
 	'testTypes': {'tmplORM': ['string.cxx', 'tmplORM.types.cxx'], 'test': ['tmplORM.types.cxx']},
