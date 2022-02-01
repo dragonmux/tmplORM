@@ -12,7 +12,7 @@
  * @internal
  * @file
  * @author Rachel Mant
- * @date 2016-2020
+ * @date 2016-2022
  * @brief Unit tests for the MySQL driver abstraction layer
  */
 
@@ -27,11 +27,10 @@ using systemClock_t = std::chrono::system_clock;
 using std::chrono::milliseconds;
 using tmplORM::types::chrono::durationIn;
 
-std::unique_ptr<mySQLClient_t> testClient{};
-constString_t host, username, password;
-
+static std::unique_ptr<mySQLClient_t> testClient{};
+static constString_t host, username, password;
 constexpr static uint32_t port = 3306;
-ormDateTime_t now = systemClock_t::now();
+static ormDateTime_t now = systemClock_t::now();
 
 struct data_t
 {
@@ -85,14 +84,14 @@ bool haveEnvironment() noexcept
 class testMySQL_t final : public testsuite
 {
 private:
-	void printError(const char *prefix, const mySQLClient_t &client)
+	static void printError(const char *prefix, const mySQLClient_t &client)
 	{
 		const auto errorStr = client.error();
 		const auto errorNum = client.errorNum();
 		printf("%s failed (%u): %s\n", prefix, errorNum, errorStr);
 	}
 
-	void printError(const char *prefix, const mySQLPreparedQuery_t &query)
+	static void printError(const char *prefix, const mySQLPreparedQuery_t &query)
 	{
 		const auto errorStr = query.error();
 		const auto errorNum = query.errorNum();
@@ -518,20 +517,20 @@ private:
 		catch (const mySQLValueError_t &) { }
 	}
 
-	template<typename T> void tryOk(const mySQLValue_t value, const T expected)
+	template<typename T> void tryOk(const mySQLValue_t &value, const T &expected)
 	{
 		assertFalse(value.isNull());
 		T var = tryOkConversion<T>(value);
 		checkValue(var, expected);
 	}
 
-	template<typename T> void tryIsNull(const mySQLValue_t value)
+	template<typename T> void tryIsNull(const mySQLValue_t &value)
 	{
 		assertTrue(value.isNull());
 		tryFailConversion<T>(value);
 	}
 
-	template<typename T> void tryShouldFail(const mySQLValue_t value)
+	template<typename T> void tryShouldFail(const mySQLValue_t &value)
 	{
 		assertFalse(value.isNull());
 		tryFailConversion<T>(value);
@@ -930,5 +929,4 @@ public:
 	}
 };
 
-CRUNCH_API void registerCXXTests() noexcept;
-void registerCXXTests() noexcept { registerTestClasses<testMySQLValue_t, testMySQL_t>(); }
+CRUNCHpp_TESTS(testMySQLValue_t, testMySQL_t);

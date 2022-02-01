@@ -4,15 +4,15 @@
 #include <type_traits>
 #include <substrate/utility>
 #include <crunch++.h>
-#include <mssql.hxx>
-#include <tmplORM.mssql.hxx>
+#include "mssql.hxx"
+#include "tmplORM.mssql.hxx"
 #include "constString.hxx"
 
 /*!
  * @internal
  * @file
  * @author Rachel Mant
- * @date 2017-2020
+ * @date 2017-2022
  * @brief Unit tests for the MSSQL driver abstraction layer
  */
 
@@ -27,11 +27,10 @@ using systemClock_t = std::chrono::system_clock;
 using std::chrono::milliseconds;
 using tmplORM::types::chrono::durationIn;
 
-std::unique_ptr<tSQLClient_t> testClient{};
-constString_t driver, host, username, password;
-
+static std::unique_ptr<tSQLClient_t> testClient{};
+static constString_t driver, host, username, password;
 constexpr static uint32_t port = 1433;
-ormDateTime_t now = systemClock_t::now();
+static ormDateTime_t now = systemClock_t::now();
 
 struct data_t
 {
@@ -86,7 +85,7 @@ bool haveEnvironment() noexcept
 class testMSSQL_t final : public testsuite
 {
 private:
-	void printError(const char *prefix, const tSQLExecError_t &error) const noexcept
+	static void printError(const char *prefix, const tSQLExecError_t &error) noexcept
 	{
 		const auto errorNum = uint8_t(error.errorNum());
 		printf("%s failed (%u): %s\n", prefix, errorNum, error.error());
@@ -610,20 +609,20 @@ private:
 		catch (const tSQLValueError_t &) { }
 	}
 
-	template<typename T> void tryOk(const tSQLValue_t value, const T expected)
+	template<typename T> void tryOk(const tSQLValue_t &value, const T &expected)
 	{
 		assertFalse(value.isNull());
 		T var = tryOkConversion<T>(value);
 		checkValue(var, expected);
 	}
 
-	template<typename T> void tryIsNull(const tSQLValue_t value)
+	template<typename T> void tryIsNull(const tSQLValue_t &value)
 	{
 		assertTrue(value.isNull());
 		tryFailConversion<T>(value);
 	}
 
-	template<typename T> void tryShouldFail(const tSQLValue_t value)
+	template<typename T> void tryShouldFail(const tSQLValue_t &value)
 	{
 		assertFalse(value.isNull());
 		tryFailConversion<T>(value);
@@ -1045,5 +1044,4 @@ public:
 	}
 };
 
-CRUNCH_API void registerCXXTests() noexcept;
-void registerCXXTests() noexcept {registerTestClasses<testMSSQLValue_t, testMSSQL_t>(); }
+CRUNCHpp_TESTS(testMSSQLValue_t, testMSSQL_t);
