@@ -32,7 +32,7 @@ static constString_t driver, host, username, password;
 constexpr static uint32_t port = 1433;
 static ormDateTime_t now = systemClock_t::now();
 
-struct data_t
+struct data_t final
 {
 	tmplORM::types::int32_t<typestring<>> entryID;
 	tmplORM::types::unicode_t<typestring<>, 50> name;
@@ -40,7 +40,7 @@ struct data_t
 	tmplORM::types::dateTime_t<typestring<>> when;
 };
 
-struct type_t
+struct type_t final
 {
 	tmplORM::types::int32_t<typestring<>> entryID;
 	tmplORM::types::int64_t<typestring<>> int64;
@@ -58,10 +58,10 @@ struct type_t
 };
 
 std::array<data_t, 2> testData
-{
-	data_t{0, "kevin", 50, {}},
-	data_t{0, "dave", nullptr, {}}
-};
+{{
+	{0, "kevin", 50, {}},
+	{0, "dave", nullptr, {}}
+}};
 
 type_t typeData
 {
