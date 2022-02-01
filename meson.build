@@ -41,9 +41,11 @@ else
 endif
 
 mysqlConfig = find_program('mysql_config')
+mysqlCflags = run_command([mysqlConfig, '--cflags'], check: true).stdout().split()
+mysqlLflags = run_command([mysqlConfig, '--libs'], check: true).stdout().split()
 mysql = declare_dependency(
-	compile_args: run_command([mysqlConfig, '--cflags'], check: true).stdout().split(),
-	link_args: run_command([mysqlConfig, '--libs'], check: true).stdout().split()
+	compile_args: mysqlCflags,
+	link_args: mysqlLflags
 )
 
 extended_warnings = [

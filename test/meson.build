@@ -3,7 +3,8 @@ libcrunchpp = dependency('crunch++')
 subdir('data')
 
 tmplORMTests = [
-	'testString', #'testMySQL', 'testMSSQL', 'testMySQLMapper', 'testMSSQLMapper',
+	'testString', 'testMySQL', #'testMSSQL',
+		'testMySQLMapper', 'testMSSQLMapper',
 	'testFixedVector', 'testTypes', 'testDateTime'
 ]
 
@@ -30,7 +31,11 @@ testHelpers = static_library(
 
 objectMap = {
 	'testString': {'tmplORM': ['string.cxx']},
-	'testMySQL': {'tmplORM': ['mysql.cxx', 'string.cxx', 'tmplORM.types.cxx']},
+	'testMySQL': {
+		'tmplORM': ['mysql.cxx', 'string.cxx', 'tmplORM.types.cxx'],
+		'libs': [mysqlCflags, mysqlLflags]
+	},
+	'testMySQLMapper': {'libs': [mysqlCflags, mysqlLflags]},
 	'testMSSQL': {'tmplORM': ['mssql.cxx', 'string.cxx', 'tmplORM.types.cxx'], 'libs': [odbc]},
 	'testFixedVector': {'test': ['fixedVector.cxx']},
 	'testTypes': {'tmplORM': ['string.cxx', 'tmplORM.types.cxx'], 'test': ['tmplORM.types.cxx']},
