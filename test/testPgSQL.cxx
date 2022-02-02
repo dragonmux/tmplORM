@@ -165,6 +165,62 @@ private:
 		tryOk<int8_t>({intBuffer.data(), INT2OID}, -128);
 	}
 
+	void testUint16()
+	{
+		std::array<char, 2> intBuffer{};
+
+		tryIsNull<uint16_t>({nullptr, INT2OID});
+		tryShouldFail<uint16_t>({"", VARCHAROID});
+		tryShouldFail<uint16_t>({"", INT4OID});
+		tryShouldFail<uint16_t>({"", INT8OID});
+		tryShouldFail<uint16_t>({"", FLOAT4OID});
+		tryShouldFail<uint16_t>({"", FLOAT8OID});
+		tryShouldFail<uint16_t>({"", BYTEAOID});
+		tryShouldFail<uint16_t>({"", BOOLOID});
+		tryShouldFail<uint16_t>({"", DATEOID});
+		tryShouldFail<uint16_t>({"", TIMESTAMPOID});
+		tryShouldFail<uint16_t>({"", UUIDOID});
+		substrate::buffer_utils::writeBE<uint16_t>(128, intBuffer.data());
+		tryOk<uint16_t>({intBuffer.data(), INT2OID}, 128);
+		substrate::buffer_utils::writeBE<uint16_t>(255, intBuffer.data());
+		tryOk<uint16_t>({intBuffer.data(), INT2OID}, 255);
+		substrate::buffer_utils::writeBE<uint16_t>(32768, intBuffer.data());
+		tryOk<uint16_t>({intBuffer.data(), INT2OID}, 32768);
+		substrate::buffer_utils::writeBE<uint16_t>(65535, intBuffer.data());
+		tryOk<uint16_t>({intBuffer.data(), INT2OID}, 65535);
+		substrate::buffer_utils::writeBE<uint16_t>(0, intBuffer.data());
+		tryOk<uint16_t>({intBuffer.data(), INT2OID}, 0);
+	}
+
+	void testInt16()
+	{
+		std::array<char, 2> intBuffer{};
+
+		tryIsNull<int16_t>({nullptr, INT2OID});
+		tryShouldFail<int16_t>({"", VARCHAROID});
+		tryShouldFail<int16_t>({"", INT4OID});
+		tryShouldFail<int16_t>({"", INT8OID});
+		tryShouldFail<int16_t>({"", FLOAT4OID});
+		tryShouldFail<int16_t>({"", FLOAT8OID});
+		tryShouldFail<int16_t>({"", BYTEAOID});
+		tryShouldFail<int16_t>({"", BOOLOID});
+		tryShouldFail<int16_t>({"", DATEOID});
+		tryShouldFail<int16_t>({"", TIMESTAMPOID});
+		tryShouldFail<int16_t>({"", UUIDOID});
+		substrate::buffer_utils::writeBE<int16_t>(127, intBuffer.data());
+		tryOk<int16_t>({intBuffer.data(), INT2OID}, 127);
+		substrate::buffer_utils::writeBE<int16_t>(32767, intBuffer.data());
+		tryOk<int16_t>({intBuffer.data(), INT2OID}, 32767);
+		substrate::buffer_utils::writeBE<int16_t>(0, intBuffer.data());
+		tryOk<int16_t>({intBuffer.data(), INT2OID}, 0);
+		substrate::buffer_utils::writeBE<int16_t>(-1, intBuffer.data());
+		tryOk<int16_t>({intBuffer.data(), INT2OID}, -1);
+		substrate::buffer_utils::writeBE<int16_t>(-32767, intBuffer.data());
+		tryOk<int16_t>({intBuffer.data(), INT2OID}, -32767);
+		substrate::buffer_utils::writeBE<int16_t>(-32768, intBuffer.data());
+		tryOk<int16_t>({intBuffer.data(), INT2OID}, -32768);
+	}
+
 	void testDate()
 	{
 		std::array<char, 4> dateBuffer{};
@@ -192,6 +248,8 @@ public:
 		CXX_TEST(testNull)
 		CXX_TEST(testUint8)
 		CXX_TEST(testInt8)
+		CXX_TEST(testUint16)
+		CXX_TEST(testInt16)
 		CXX_TEST(testDate)
 		CXX_TEST(testDateTime)
 	}
