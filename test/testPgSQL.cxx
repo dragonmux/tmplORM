@@ -86,6 +86,26 @@ private:
 		tryFailConversion<T>(value);
 	}
 
+	void testNull()
+	{
+		assertTrue(pgSQLValue_t{}.isNull());
+		assertFalse(pgSQLValue_t{"", ANYOID}.isNull());
+		tryIsNull<uint8_t>({});
+		tryIsNull<int8_t>({});
+		tryIsNull<uint16_t>({});
+		tryIsNull<int16_t>({});
+		tryIsNull<uint32_t>({});
+		tryIsNull<int32_t>({});
+		tryIsNull<uint64_t>({});
+		tryIsNull<int64_t>({});
+		tryIsNull<float>({});
+		tryIsNull<double>({});
+		tryIsNull<bool>({});
+		tryIsNull<ormDate_t>({});
+		tryIsNull<ormDateTime_t>({});
+		//tryIsNull<ormUUID_t>({});
+	}
+
 	void testDate()
 	{
 		std::array<char, 4> dateBuffer{};
@@ -110,7 +130,9 @@ private:
 public:
 	void registerTests() final
 	{
+		CXX_TEST(testNull)
 		CXX_TEST(testDate)
+		CXX_TEST(testDateTime)
 	}
 };
 
