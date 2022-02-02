@@ -177,7 +177,7 @@ float pgSQLValue_t::asFloat() const
 {
 	const auto intValue{asInt<uint32_t, FLOAT4OID, pgSQLErrorType_t::floatError>()};
 	float value{};
-	static_assert(sizeof(float) == 4 && sizeof(uint32_t) == 4);
+	static_assert(sizeof(float) == 4 && sizeof(uint32_t) == 4, "Platform float and uint32_t types are not of suitable size");
 	std::memcpy(&value, &intValue, sizeof(float));
 	return value;
 }
@@ -186,7 +186,7 @@ double pgSQLValue_t::asDouble() const
 {
 	const auto intValue{asInt<uint64_t, FLOAT8OID, pgSQLErrorType_t::doubleError>()};
 	double value{};
-	static_assert(sizeof(double) == 8 && sizeof(uint64_t) == 8);
+	static_assert(sizeof(double) == 8 && sizeof(uint64_t) == 8, "Platform double and uint64_t types are not of suitable size");
 	std::memcpy(&value, &intValue, sizeof(double));
 	return value;
 }
