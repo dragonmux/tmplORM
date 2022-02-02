@@ -97,7 +97,8 @@ private:
 	void testNull()
 	{
 		assertTrue(pgSQLValue_t{}.isNull());
-		assertFalse(pgSQLValue_t{"", ANYOID}.isNull());
+		assertTrue(pgSQLValue_t{nullptr}.isNull());
+		assertFalse(pgSQLValue_t{"", VARCHAROID}.isNull());
 		tryIsNull<uint8_t>({});
 		tryIsNull<int8_t>({});
 		tryIsNull<uint16_t>({});
