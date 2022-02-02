@@ -171,6 +171,26 @@ uint64_t pgSQLValue_t::asUint64() const
 int64_t pgSQLValue_t::asInt64() const
 	{ return asInt<int64_t, INT8OID, pgSQLErrorType_t::int64Error>(); }
 
+// *grumbles* Postgres handles floats badly by union-converting to ints, then
+// sending the "ints" as big endian..
+float pgSQLValue_t::asFloat() const
+{
+	const auto intValue{asInt<uint32_t, FLOAT4OID, pgSQLErrorType_t::floatError>()};
+	float value{};
+	static_assert(sizeof(float) == 4 && sizeof(uint32_t) == 4);
+	std::memcpy(&value, &intValue, sizeof(float));
+	return value;
+}
+
+double pgSQLValue_t::asDouble() const
+{
+	const auto intValue{asInt<uint64_t, FLOAT8OID, pgSQLErrorType_t::doubleError>()};
+	double value{};
+	static_assert(sizeof(double) == 8 && sizeof(uint64_t) == 8);
+	std::memcpy(&value, &intValue, sizeof(double));
+	return value;
+}
+
 // The conversion code here is ripped off wholesale from
 // https://en.wikipedia.org/wiki/Julian_day#Julian_or_Gregorian_calendar_from_Julian_day_number
 // It is insane. This code stinks. The naming is even ?? but there's no way around this.
