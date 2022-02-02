@@ -43,7 +43,15 @@ private:
 
 	// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 	void checkValue(const ormDateTime_t &var, const ormDateTime_t &expected)
-		{ assertTrue(var == expected); }
+	{
+		if (var != expected)
+			printf("Expected %04d-%02u-%02uT%02u:%02u:%02u, got %04d-%02u-%02uT%02u:%02u:%02u\n",
+				expected.year(), expected.month(), expected.day(), expected.hour(), expected.minute(), expected.second(),
+				var.year(), var.month(), var.day(), var.hour(), var.minute(), var.second()
+			);
+		assertTrue(var == expected);
+	}
+
 	// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
 	void checkValue(const ormUUID_t &var, const ormUUID_t &expected)
 		{ assertTrue(var == expected); }
