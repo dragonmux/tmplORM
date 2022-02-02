@@ -106,6 +106,56 @@ private:
 		//tryIsNull<ormUUID_t>({});
 	}
 
+	void testUint8()
+	{
+		std::array<char, 2> intBuffer{};
+
+		tryIsNull<uint8_t>({nullptr, INT2OID});
+		tryShouldFail<uint8_t>({"", VARCHAROID});
+		tryShouldFail<uint8_t>({"", INT4OID});
+		tryShouldFail<uint8_t>({"", INT8OID});
+		tryShouldFail<uint8_t>({"", FLOAT4OID});
+		tryShouldFail<uint8_t>({"", FLOAT8OID});
+		tryShouldFail<uint8_t>({"", BYTEAOID});
+		tryShouldFail<uint8_t>({"", BOOLOID});
+		tryShouldFail<uint8_t>({"", DATEOID});
+		tryShouldFail<uint8_t>({"", TIMESTAMPOID});
+		tryShouldFail<uint8_t>({"", UUIDOID});
+		substrate::buffer_utils::writeBE<uint16_t>(128, intBuffer.data());
+		tryOk<uint8_t>({intBuffer.data(), INT2OID}, 128);
+		substrate::buffer_utils::writeBE<uint16_t>(255, intBuffer.data());
+		tryOk<uint8_t>({intBuffer.data(), INT2OID}, 255);
+		substrate::buffer_utils::writeBE<uint16_t>(0, intBuffer.data());
+		tryOk<uint8_t>({intBuffer.data(), INT2OID}, 0);
+	}
+
+	void testInt8()
+	{
+		std::array<char, 2> intBuffer{};
+
+		tryIsNull<int8_t>({nullptr, INT2OID});
+		tryShouldFail<int8_t>({"", VARCHAROID});
+		tryShouldFail<int8_t>({"", INT4OID});
+		tryShouldFail<int8_t>({"", INT8OID});
+		tryShouldFail<int8_t>({"", FLOAT4OID});
+		tryShouldFail<int8_t>({"", FLOAT8OID});
+		tryShouldFail<int8_t>({"", BYTEAOID});
+		tryShouldFail<int8_t>({"", BOOLOID});
+		tryShouldFail<int8_t>({"", DATEOID});
+		tryShouldFail<int8_t>({"", TIMESTAMPOID});
+		tryShouldFail<int8_t>({"", UUIDOID});
+		substrate::buffer_utils::writeBE<int16_t>(127, intBuffer.data());
+		tryOk<int8_t>({intBuffer.data(), INT2OID}, 127);
+		substrate::buffer_utils::writeBE<int16_t>(0, intBuffer.data());
+		tryOk<int8_t>({intBuffer.data(), INT2OID}, 0);
+		substrate::buffer_utils::writeBE<int16_t>(-1, intBuffer.data());
+		tryOk<int8_t>({intBuffer.data(), INT2OID}, -1);
+		substrate::buffer_utils::writeBE<int16_t>(-127, intBuffer.data());
+		tryOk<int8_t>({intBuffer.data(), INT2OID}, -127);
+		substrate::buffer_utils::writeBE<int16_t>(-128, intBuffer.data());
+		tryOk<int8_t>({intBuffer.data(), INT2OID}, -128);
+	}
+
 	void testDate()
 	{
 		std::array<char, 4> dateBuffer{};
@@ -131,6 +181,8 @@ public:
 	void registerTests() final
 	{
 		CXX_TEST(testNull)
+		CXX_TEST(testUint8)
+		CXX_TEST(testInt8)
 		CXX_TEST(testDate)
 		CXX_TEST(testDateTime)
 	}
