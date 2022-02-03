@@ -20,6 +20,8 @@ using tmplORM::types::baseTypes::ormDateTime_t;
 using systemClock_t = std::chrono::system_clock;
 
 static ormDateTime_t now = systemClock_t::now();
+constexpr static int64_t usPerDay{INT64_C(86400000000)};
+constexpr static int64_t usPerHour{INT64_C(3600000000)};
 
 class testPgSQLValue_t final : public testsuite
 {
@@ -234,7 +236,7 @@ private:
 
 	void testDateTime()
 	{
-		constexpr static auto jan1st2000Midday{jan1st2000 * INT64_C(86400000000)};
+		constexpr static auto jan1st2000Midday{jan1st2000 * usPerDay + (12 * usPerHour)};
 		std::array<char, 8> dateTimeBuffer{};
 
 		tryIsNull<ormDateTime_t>({nullptr});
@@ -246,6 +248,7 @@ public:
 	void registerTests() final
 	{
 		CXX_TEST(testNull)
+		//CXX_TEST(testString)
 		CXX_TEST(testUint8)
 		CXX_TEST(testInt8)
 		CXX_TEST(testUint16)
