@@ -434,7 +434,9 @@ bool tzReadFile(const char *const file) noexcept
 	// this is not to deal with an error but to ensure good state when entering this function
 	badRead();
 
-	size_t charCount{0}, isStdCount{0}, isGmtCount{0};
+	size_t charCount{0};
+	size_t isStdCount{0};
+	size_t isGmtCount{0};
 	uint8_t version{0};
 	auto readHeader = [&]() noexcept -> bool
 	{
@@ -457,9 +459,7 @@ bool tzReadFile(const char *const file) noexcept
 		leapsCount = header.leapCount;
 		isStdCount = header.ttIsStdCount;
 		isGmtCount = header.ttIsGmtCount;
-		if (isStdCount > typesCount || isGmtCount > typesCount)
-			return false;
-		return true;
+		return isStdCount <= typesCount && isGmtCount <= typesCount;
 	};
 
 	if (!readHeader())
@@ -490,11 +490,17 @@ bool tzReadFile(const char *const file) noexcept
 			return false;
 	}
 
-	transitions = substrate::make_unique_nothrow<time_t []>(transitionsCount);
-	typeIndexes = substrate::make_unique_nothrow<uint8_t []>(transitionsCount);
-	types = substrate::make_unique_nothrow<ttInfo_t []>(typesCount);
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
+	transitions = substrate::make_unique_nothrow<time_t []>(transitionsCount + 1);
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
+	typeIndexes = substrate::make_unique_nothrow<uint8_t []>(transitionsCount + 1);
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
+	types = substrate::make_unique_nothrow<ttInfo_t []>(typesCount + 1);
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 	zoneNames = substrate::make_unique_nothrow<char []>(charCount + 1);
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 	leaps = leapsCount ? substrate::make_unique_nothrow<leap_t []>(leapsCount) : nullptr;
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 	tzSpec = tzSpecLen ? substrate::make_unique_nothrow<char []>(tzSpecLen) : nullptr;
 	if (!transitions || !typeIndexes || !types ||
 		!zoneNames || (leapsCount && !leaps) || (tzSpecLen && !tzSpec) ||
