@@ -128,7 +128,7 @@ inline int64_t asInt64(const uint8_t *const value, const size_t width) noexcept
 		return asInt32(value);
 }
 
-size_t safeMul(const size_t a, const size_t b) noexcept
+static inline size_t safeMul(const size_t a, const size_t b) noexcept
 {
 	// If we have an error value on the left, return our error value.
 	if (a == sizeMax || b == sizeMax)
@@ -142,7 +142,7 @@ size_t safeMul(const size_t a, const size_t b) noexcept
 	return a * b;
 }
 
-size_t safeAdd(const size_t a, const size_t b) noexcept
+static inline size_t safeAdd(const size_t a, const size_t b) noexcept
 {
 	// If we have an error value on the left, return our error value.
 	if (a == sizeMax || b == sizeMax)
@@ -154,10 +154,10 @@ size_t safeAdd(const size_t a, const size_t b) noexcept
 	return a + b;
 }
 
-template<typename ...values_t> size_t safeAdd(const size_t a, const size_t b, values_t &&...values) noexcept
+template<typename ...values_t> static inline size_t safeAdd(const size_t a, const size_t b, values_t &&...values) noexcept
 	{ return safeAdd(safeAdd(a, b), values...); }
 
-size_t safeSub(const size_t a, const size_t b) noexcept
+static inline size_t safeSub(const size_t a, const size_t b) noexcept
 {
 	// If we have an error value on the left, return our error value.
 	if (a == sizeMax || b == sizeMax || a < b)
@@ -165,15 +165,23 @@ size_t safeSub(const size_t a, const size_t b) noexcept
 	return a - b;
 }
 
-template<typename ...values_t> size_t safeSub(const size_t a, const size_t b, values_t &&...values) noexcept
+template<typename ...values_t> static inline size_t safeSub(const size_t a, const size_t b, values_t &&...values) noexcept
 	{ return safeSub(safeSub(a, b), values...); }
 
-size_t safeAnd(const size_t a, const size_t b) noexcept
+static inline size_t safeAnd(const size_t a, const size_t b) noexcept
 {
 	// If we have an error value on the left, return our error value.
 	if (a == sizeMax || b == sizeMax)
 		return sizeMax;
 	return a & b;
+}
+
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
+template<typename T> static inline std::unique_ptr<T []> safeAlloc(const size_t numElements)
+{
+	const auto num{std::max(numElements, static_cast<size_t>(1U))};
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
+	return substrate::make_unique_nothrow<T []>(num);
 }
 
 inline bool badRead() noexcept
@@ -206,7 +214,7 @@ fd_t tzOpenFile(const char *const file) noexcept
 
 bool readTransitions(const fd_t &fd, const size_t width) noexcept
 {
-	const auto buffer = substrate::make_unique_nothrow<uint8_t []>(transitionsCount * width);
+	const auto buffer{safeAlloc<uint8_t>(transitionsCount * width)};
 	if (!buffer ||
 		!fd.read(buffer.get(), transitionsCount * width) ||
 		!fd.read(typeIndexes, transitionsCount))
@@ -332,6 +340,7 @@ char *tzString(const char *string, const size_t length) noexcept
 	auto value = substrate::make_unique_nothrow<tzString_t>();
 	if (!value)
 		return nullptr;
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 	value->data = substrate::make_unique_nothrow<char []>(length + 1);
 	if (!value->data)
 		return nullptr;
@@ -490,12 +499,9 @@ bool tzReadFile(const char *const file) noexcept
 			return false;
 	}
 
-	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
-	transitions = substrate::make_unique_nothrow<time_t []>(transitionsCount + 1);
-	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
-	typeIndexes = substrate::make_unique_nothrow<uint8_t []>(transitionsCount + 1);
-	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
-	types = substrate::make_unique_nothrow<ttInfo_t []>(typesCount + 1);
+	transitions = safeAlloc<time_t>(transitionsCount);
+	typeIndexes = safeAlloc<uint8_t>(transitionsCount);
+	types = safeAlloc<ttInfo_t>(typesCount);
 	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 	zoneNames = substrate::make_unique_nothrow<char []>(charCount + 1);
 	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
