@@ -26,7 +26,11 @@ endif
 
 testIncludes = []
 foreach include : includes
-	testIncludes += ['-I@0@'.format(include)]
+	if include.startswith('/')
+		testIncludes += ['-I@0@'.format(include)]
+	else
+		testIncludes += ['-I@0@/@1@'.format(meson.project_source_root(), include)]
+	endif
 endforeach
 
 pkgConfig = find_program('pkg-config')
