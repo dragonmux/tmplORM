@@ -21,11 +21,11 @@ endif
 
 substrateInc = []
 if substrate.type_name() == 'internal'
-	substrateInc = '-I@0@/deps/substrate'.format(meson.project_source_root())
+	substrateInc = ['-I@0@/deps/substrate'.format(meson.project_source_root())]
 endif
 
 testIncludes = []
-foreach include : includes
+foreach include : includes + extraIncludes
 	if include.startswith('/')
 		testIncludes += ['-I@0@'.format(include)]
 	else
@@ -72,7 +72,7 @@ objectMap = {
 	},
 	'testPgSQL': {
 		'tmplORM': ['pgsql.cxx', 'tmplORM.types.cxx'],
-		'libs': pgsqlCflags + pgsqlLflags + [testIncludes]
+		'libs': pgsqlCflags + pgsqlLflags + testIncludes
 	},
 	'testFixedVector': {'test': ['fixedVector.cxx']},
 	'testTypes': {'tmplORM': ['string.cxx', 'tmplORM.types.cxx'], 'test': ['tmplORM.types.cxx']},

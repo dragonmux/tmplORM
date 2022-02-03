@@ -7,7 +7,7 @@ project(
 		'b_ndebug=if-release'
 	],
 	version: '0.2.0',
-	meson_version: '>= 0.52',
+	meson_version: '>= 0.56',
 	subproject_dir: 'deps'
 )
 
@@ -26,6 +26,7 @@ endif
 substrate = dependency('substrate', fallback: ['substrate', 'substrate_dep'], 	default_options: ['build_tests=false'])
 
 includes = []
+extraIncludes = []
 
 if cxx.has_header('/usr/include/postgresql/server/catalog/pg_type_d.h')
 	includes += ['/usr/include/postgresql/server']
@@ -43,7 +44,7 @@ endif
 
 # Deal with ubuntu, and friends.. because of course V_V
 if cxx.has_header('/usr/include/postgresql/libpq-fe.h')
-	includes += ['/usr/include/postgresql']
+	extraIncludes += ['/usr/include/postgresql']
 endif
 
 mysqlConfig = find_program('mysql_config')
@@ -136,6 +137,7 @@ if get_option('build_check')
 		command: executable(
 			'_buildCheck',
 			['buildCheck.cxx'],
+			include_directories: include_directories(extraIncludes),
 			dependencies: [threading, dl, odbc, mysql, rSON, substrate],
 			install: false,
 			build_by_default: false
@@ -161,7 +163,7 @@ if get_option('build_tests')
 endif
 
 tmplORM_dep = declare_dependency(
-	include_directories: include_directories('.'),
+	include_directories: include_directories(['.'] + extraIncludes),
 	link_with: tmplORM,
 	version: meson.project_version()
 )
