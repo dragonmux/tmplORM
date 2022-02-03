@@ -558,7 +558,8 @@ private:
 		char *ret = new (std::nothrow) char[len + 1];
 		if (!ret)
 			return nullptr;
-		return static_cast<char *>(memcpy(ret, str, len + 1));
+		std::memcpy(ret, str, len + 1);
+		return ret;
 	}
 
 	template<typename T, typename = typename std::enable_if<std::is_fundamental<T>::value ||
@@ -571,7 +572,7 @@ private:
 		if (!ret)
 			return nullptr;
 		ret[len] = 0;
-		*reinterpret_cast<T *>(ret) = value;
+		std::memcpy(ret, &value, sizeof(T));
 		return ret;
 	}
 
