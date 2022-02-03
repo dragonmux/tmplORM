@@ -400,6 +400,7 @@ void mySQLRow_t::fetch() noexcept
 		{
 			fields = mysql_num_fields(result);
 			if (fields)
+				// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 				fieldTypes = substrate::make_unique_nothrow<mySQLFieldType_t []>(fields);
 			if (!fieldTypes)
 				return;
@@ -465,6 +466,7 @@ void mySQLValue_t::swap(mySQLValue_t &value) noexcept
 /*!
  * @throws mySQLValueError_t
  */
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 std::unique_ptr<char []> mySQLValue_t::asString() const
 {
 	if (isNull())
@@ -473,6 +475,7 @@ std::unique_ptr<char []> mySQLValue_t::asString() const
 	//else if (type != MYSQL_TYPE_STRING && type != MYSQL_TYPE_VAR_STRING)
 	//	throw mySQLValueError_t(mySQLErrorType_t::stringError);
 	const size_t dataLen = data[len - 1] ? len + 1 : len;
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 	auto str = substrate::make_unique_nothrow<char []>(dataLen);
 	if (!str)
 		return nullptr;
@@ -504,13 +507,14 @@ bool mySQLValue_t::asBool(const uint8_t bit) const
 template<typename T, mySQLErrorType_t errorType> valueOrError_t<T, mySQLValueError_t>
 	checkedConvertInt(const char *const data, const uint64_t len) noexcept
 {
-	using U = substrate::promoted_type_t<typename std::make_unsigned<T>::type>;
-	using I = substrate::promoted_type_t<T>;
+	using UT = typename std::make_unsigned<T>::type;
+	using U = substrate::promoted_type_t<UT>;
 	if (!len)
 		return 0;
 	const bool sign = std::is_signed<T>::value && isMinus(data[0]);
 	const uint64_t numLen = data[len - 1] ? len : len - 1;
-	U preNum = 0, num = 0;
+	U preNum = 0;
+	U num = 0;
 	for (uint64_t i = 0; i < numLen; ++i)
 	{
 		if (sign && i == 0)
@@ -523,11 +527,11 @@ template<typename T, mySQLErrorType_t errorType> valueOrError_t<T, mySQLValueErr
 		preNum = num;
 		num += static_cast<U>(data[i] - '0');
 	}
-	if (num < preNum)
+	if (static_cast<UT>(num) < preNum)
 		return mySQLValueError_t{errorType};
 	else if (sign)
-		return static_cast<T>(-static_cast<I>(num));
-	return static_cast<T>	(num);
+		return static_cast<T>(~num + 1U);
+	return static_cast<T>(num);
 }
 
 /*!
@@ -678,6 +682,7 @@ valueOrError_t<ormUUID_t, mySQLValueError_t> checkedConvertUUID(const char *cons
 	{
 		toInt_t<uint8_t> value{uuid + (i << 1U), 2};
 		if (value.isHex())
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
 			buffer[i] = value.fromHex();
 		else
 			return mySQLValueError_t{mySQLErrorType_t::uuidError};
