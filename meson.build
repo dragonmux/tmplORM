@@ -33,11 +33,12 @@ else
 	grep = find_program('grep')
 	if (build_machine.system() == 'linux' and
 		run_command(grep, '-q', 'ID=arch', '/etc/os-release', check: false).returncode() == 0)
-		error('Please install the "posgresql" package')
+		warning('Please install the "posgresql" package')
 	else
-		error('Cannot find required PostgreSQL header "catalog/pg_type_d.h" - ' +
+		warning('Cannot find required PostgreSQL header "catalog/pg_type_d.h" - ' +
 			'please report this to your distro to have them add it to libpq')
 	endif
+	include += ['fixes']
 endif
 
 mysqlConfig = find_program('mysql_config')
