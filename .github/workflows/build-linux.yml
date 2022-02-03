@@ -104,7 +104,7 @@ jobs:
         working-directory: ${{ runner.temp }}
       - name: Setup MariaDB/MySQL libs
         shell: bash
-        run: sudo apt-get install libmariadb-dev
+        run: sudo apt-get install libmariadb-dev libmariadb-dev-compat
       - name: Setup unixODBC/MSSQL libs
         shell: bash
         run: sudo apt-get install unixodbc-dev
