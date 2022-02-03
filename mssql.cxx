@@ -400,10 +400,11 @@ void tSQLValue_t::operator =(tSQLValue_t &&value) noexcept
 	std::swap(type, value.type);
 }
 
-template<typename T> T reinterpret(const stringPtr_t &data) noexcept
+template<typename T> T tSQLValue_t::reinterpret() const noexcept
 {
 	T value{};
-	memcpy(&value, data.get(), sizeof(T));
+	const auto len{std::min(length, static_cast<uint64_t>(sizeof(T)))};
+	memcpy(&value, data.get(), len);
 	return value;
 }
 
@@ -415,44 +416,44 @@ std::unique_ptr<const char []> tSQLValue_t::asString(const bool release) const
 	return release ? std::move(data) : stringDup(data);
 }
 
-template<int16_t rawType, int16_t, tSQLErrorType_t error, typename T> T asInt(const tSQLValue_t &val, const stringPtr_t &data, const int16_t type)
+template<int16_t rawType, int16_t, tSQLErrorType_t error, typename T> T tSQLValue_t::asInt(const int16_t type) const
 {
-	if (val.isNull() || type != rawType)
+	if (isNull() || type != rawType)
 		throw tSQLValueError_t(error);
-	return reinterpret<T>(data);
+	return reinterpret<T>();
 }
 
 uint8_t tSQLValue_t::asUint8() const
-	{ return asInt<SQL_TINYINT, SQL_C_UTINYINT, tSQLErrorType_t::uint8Error, uint8_t>(*this, data, type); }
+	{ return asInt<SQL_TINYINT, SQL_C_UTINYINT, tSQLErrorType_t::uint8Error, uint8_t>(type); }
 int8_t tSQLValue_t::asInt8() const
-	{ return asInt<SQL_TINYINT, SQL_C_STINYINT, tSQLErrorType_t::int8Error, int8_t>(*this, data, type); }
+	{ return asInt<SQL_TINYINT, SQL_C_STINYINT, tSQLErrorType_t::int8Error, int8_t>(type); }
 uint16_t tSQLValue_t::asUint16() const
-	{ return asInt<SQL_SMALLINT, SQL_C_USHORT, tSQLErrorType_t::uint16Error, uint16_t>(*this, data, type); }
+	{ return asInt<SQL_SMALLINT, SQL_C_USHORT, tSQLErrorType_t::uint16Error, uint16_t>(type); }
 int16_t tSQLValue_t::asInt16() const
-	{ return asInt<SQL_SMALLINT, SQL_C_SSHORT, tSQLErrorType_t::int16Error, int16_t>(*this, data, type); }
+	{ return asInt<SQL_SMALLINT, SQL_C_SSHORT, tSQLErrorType_t::int16Error, int16_t>(type); }
 uint32_t tSQLValue_t::asUint32() const
-	{ return asInt<SQL_INTEGER, SQL_C_ULONG, tSQLErrorType_t::uint32Error, uint32_t>(*this, data, type); }
+	{ return asInt<SQL_INTEGER, SQL_C_ULONG, tSQLErrorType_t::uint32Error, uint32_t>(type); }
 int32_t tSQLValue_t::asInt32() const
-	{ return asInt<SQL_INTEGER, SQL_C_SLONG, tSQLErrorType_t::int32Error, int32_t>(*this, data, type); }
+	{ return asInt<SQL_INTEGER, SQL_C_SLONG, tSQLErrorType_t::int32Error, int32_t>(type); }
 uint64_t tSQLValue_t::asUint64() const
-	{ return asInt<SQL_BIGINT, SQL_C_UBIGINT, tSQLErrorType_t::uint64Error, uint64_t>(*this, data, type); }
+	{ return asInt<SQL_BIGINT, SQL_C_UBIGINT, tSQLErrorType_t::uint64Error, uint64_t>(type); }
 int64_t tSQLValue_t::asInt64() const
-	{ return asInt<SQL_BIGINT, SQL_C_SBIGINT, tSQLErrorType_t::int64Error, int64_t>(*this, data, type); }
+	{ return asInt<SQL_BIGINT, SQL_C_SBIGINT, tSQLErrorType_t::int64Error, int64_t>(type); }
 float tSQLValue_t::asFloat() const
-	{ return asInt<SQL_REAL, SQL_C_FLOAT, tSQLErrorType_t::floatError, float>(*this, data, type); }
+	{ return asInt<SQL_REAL, SQL_C_FLOAT, tSQLErrorType_t::floatError, float>(type); }
 
 double tSQLValue_t::asDouble() const
 {
 	if (isNull() || (type != SQL_FLOAT && type != SQL_DOUBLE))
 		throw tSQLValueError_t(tSQLErrorType_t::doubleError);
-	return reinterpret<double>(data);
+	return reinterpret<double>();
 }
 
 bool tSQLValue_t::asBool() const
 {
 	if (isNull() || type != SQL_BIT)
 		throw tSQLValueError_t(tSQLErrorType_t::boolError);
-	return reinterpret<uint8_t>(data);
+	return reinterpret<uint8_t>();
 }
 
 const void *tSQLValue_t::asBuffer(size_t &bufferLength, const bool release) const
@@ -467,7 +468,7 @@ ormDate_t tSQLValue_t::asDate() const
 {
 	if (isNull() || type != SQL_TYPE_DATE || length < sizeof(SQL_DATE_STRUCT))
 		throw tSQLValueError_t(tSQLErrorType_t::dateError);
-	const auto date = reinterpret<SQL_DATE_STRUCT>(data);
+	const auto date = reinterpret<SQL_DATE_STRUCT>();
 	return {date.year, uint8_t(date.month), uint8_t(date.day)};
 }
 
@@ -477,7 +478,7 @@ ormDateTime_t tSQLValue_t::asDateTime() const
 {
 	if (isNull() || type != SQL_TYPE_TIMESTAMP || length < sizeof(SQL_TIMESTAMP_STRUCT))
 		throw tSQLValueError_t(tSQLErrorType_t::dateTimeError);
-	const auto dateTime = reinterpret<SQL_TIMESTAMP_STRUCT>(data);
+	const auto dateTime = reinterpret<SQL_TIMESTAMP_STRUCT>();
 	return {dateTime.year, uint8_t(dateTime.month), uint8_t(dateTime.day),
 		dateTime.hour, 	dateTime.minute, dateTime.second, dateTime.fraction};
 }
@@ -486,7 +487,7 @@ ormUUID_t tSQLValue_t::asUUID() const
 {
 	if (isNull() || type != SQL_GUID)
 		throw tSQLValueError_t(tSQLErrorType_t::uuidError);
-	return {reinterpret<guid_t>(data), true};
+	return {reinterpret<guid_t>(), true};
 }
 
 tSQLExecError_t::tSQLExecError_t(const tSQLExecErrorType_t error, const int16_t handleType, void *const handle) noexcept : _error(error), _state{{}}, _message()

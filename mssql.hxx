@@ -66,12 +66,28 @@ public:
 	tSQLExecError_t &operator =(const tSQLExecError_t &) = delete;
 };
 
+enum class tSQLErrorType_t : uint8_t
+{
+	noError, binError,
+	stringError, boolError,
+	uint8Error, int8Error,
+	uint16Error, int16Error,
+	uint32Error, int32Error,
+	uint64Error, int64Error,
+	floatError, doubleError,
+	dateError, dateTimeError,
+	uuidError
+};
+
 struct tmplORM_API tSQLValue_t final
 {
 private:
 	mutable stringPtr_t data{};
 	uint64_t length{0};
 	int16_t type{0};
+
+	template<typename T> T reinterpret() const noexcept;
+	template<int16_t rawType, int16_t, tSQLErrorType_t error, typename T> T asInt(int16_t type) const;
 
 public:
 	/*! @brief Default constructor for value objects, constructing the null value by default */
@@ -260,19 +276,6 @@ public:
 	tSQLClient_t(const tSQLClient_t &) = delete;
 	/*! @brief Deleted copy assignment operator for tSQLClient_t as client connections are not copyable */
 	tSQLClient_t &operator =(const tSQLClient_t &) = delete;
-};
-
-enum class tSQLErrorType_t : uint8_t
-{
-	noError, binError,
-	stringError, boolError,
-	uint8Error, int8Error,
-	uint16Error, int16Error,
-	uint32Error, int32Error,
-	uint64Error, int64Error,
-	floatError, doubleError,
-	dateError, dateTimeError,
-	uuidError
 };
 
 struct tmplORM_API tSQLValueError_t final : std::exception
