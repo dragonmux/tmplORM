@@ -121,7 +121,7 @@ jobs:
           submodules: true
       - name: Build + Install crunch
         run: |
-          meson build --prefix=$HOME/.local $BUILD_OPTS
+          meson build --prefix=$HOME/.local -Db_sanitize=address,undefined $BUILD_OPTS
           ninja -C build
           ninja -C build install
           cd ..
@@ -154,7 +154,7 @@ jobs:
       - name: Cleanup
         run: rm -rf build
       - name: Configure
-        run: meson build --prefix=$HOME/.local -Db_coverage=${{ matrix.coverage }} $BUILD_OPTS
+        run: meson build --prefix=$HOME/.local -Db_sanitize=address,undefined -Db_coverage=${{ matrix.coverage }} $BUILD_OPTS
       - name: Build
         run: ninja -C build
       - name: Test
