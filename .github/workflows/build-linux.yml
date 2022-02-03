@@ -62,6 +62,7 @@ jobs:
         run: |
           echo "$HOME/.local/bin" >> $GITHUB_PATH
           echo "GITHUB_WORKSPACE=`pwd`" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=$HOME/.local/lib/`uname -m`-linux-gnu/pkgconfig" >> $GITHUB_ENV
       - name: Coverage environment
         env:
           COVERAGE: ${{ matrix.coverage }}
@@ -138,9 +139,22 @@ jobs:
           ninja -C build install
           cd ..
           rm -rf crunch
-          echo "PKG_CONFIG_PATH=$HOME/.local/lib/`uname -m`-linux-gnu/pkgconfig" >> $GITHUB_ENV
         working-directory: ${{ github.workspace }}/crunch
-      # install rSON?
+      - name: Checkout rSON
+        uses: actions/checkout@v2
+        with:
+          repository: DX-MON/rSON
+          path: rSON
+          lfs: true
+          submodules: true
+      - name: Build + Install rSON
+        run: |
+          meson build --prefix=$HOME/.local $BUILD_OPTS
+          ninja -C build
+          ninja -C build install
+          cd ..
+          rm -rf rSON
+        working-directory: ${{ github.workspace }}/rSON
       - name: Checkout tmplORM
         uses: actions/checkout@v2
         with:
@@ -148,10 +162,18 @@ jobs:
           submodules: true
       - name: Configure
         run: meson build --prefix=$HOME/.local -Dbuild_check=false -Db_coverage=${{ matrix.coverage }} $BUILD_OPTS
+      - name: Build (no rSON)
+        run: ninja -C build
+      - name: Cleanup
+        run: rm -rf build
+      - name: Configure
+        run: meson build --prefix=$HOME/.local -Db_coverage=${{ matrix.coverage }} $BUILD_OPTS
       - name: Build
         run: ninja -C build
       - name: Test
-        run: ninja -C build test
+        run: |
+          ninja -C build buildCheck
+          ninja -C build test
       - name: Install
         run: ninja -C build install
       - name: Codecov
