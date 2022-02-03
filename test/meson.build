@@ -19,6 +19,11 @@ if sanitizer != 'none'
 	crunchCoverage += ['-fsanitize=' + sanitizer]
 endif
 
+substrateInc = []
+if substrate.type_name() == 'internal'
+	substrateInc = '-I../deps/substrate'
+endif
+
 testIncludes = []
 foreach include : includes
 	testIncludes += ['-I@0@'.format(include)]
@@ -79,7 +84,7 @@ foreach test : tmplORMTests
 		test,
 		command: [
 			crunchMake, '-s', '-z', 'defs', '@INPUT@', '-o', '@OUTPUT@', '-I' + tmplORMSrcDir
-		] + crunchCoverage + testLibs,
+		] + substrateInc + crunchCoverage + testLibs,
 		input: [test + '.cxx'] + tmplORMObjs + testObjs,
 		output: test + '.so',
 		build_by_default: true
