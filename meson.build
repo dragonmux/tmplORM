@@ -131,7 +131,7 @@ if get_option('build_check')
 		command: executable(
 			'_buildCheck',
 			['buildCheck.cxx'],
-			dependencies: [threading, dl, odbc, mysql, rSON],
+			dependencies: [threading, dl, odbc, mysql, rSON, substrate],
 			install: false,
 			build_by_default: false
 		)
