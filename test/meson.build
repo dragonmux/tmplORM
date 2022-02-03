@@ -21,7 +21,7 @@ endif
 
 substrateInc = []
 if substrate.type_name() == 'internal'
-	substrateInc = '-I../deps/substrate'
+	substrateInc = '-I@0@/deps/substrate'.format(meson.project_source_root())
 endif
 
 testIncludes = []
