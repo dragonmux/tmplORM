@@ -1,0 +1,159 @@
+name: Build Linux
+
+on:
+  push:
+    branches-ignore:
+      - 'coverityScan'
+  pull_request:
+    branches:
+      - 'main'
+      - 'master'
+
+jobs:
+  build-linux:
+    name: 'build-linux (${{ matrix.os.id }}, ${{ matrix.os.name }}, ${{ matrix.compiler }}, cov=${{ matrix.coverage }})'
+    runs-on: ${{ matrix.os.id }}
+    strategy:
+      matrix:
+        os:
+          - { id: ubuntu-20.04, name: focal }
+        compiler:
+          - 'clang-9'
+          - 'clang-10'
+          - 'clang-11'
+          - 'clang-12'
+          - 'gcc-7'
+          - 'gcc-8'
+          - 'gcc-9'
+          - 'gcc-10'
+          - 'gcc-11'
+        include:
+          - os: { id: ubuntu-18.04, name: bionic }
+            compiler: 'clang-6.0'
+            coverage: false
+          - os: { id: ubuntu-18.04, name: bionic }
+            compiler: 'clang-6.0'
+            coverage: true
+          - os: { id: ubuntu-18.04, name: bionic }
+            compiler: 'clang-7'
+            coverage: false
+          - os: { id: ubuntu-18.04, name: bionic }
+            compiler: 'clang-7'
+            coverage: true
+          - os: { id: ubuntu-18.04, name: bionic }
+            compiler: 'clang-8'
+            coverage: false
+          - os: { id: ubuntu-18.04, name: bionic }
+            compiler: 'clang-8'
+            coverage: true
+          - os: { id: ubuntu-18.04, name: bionic }
+            compiler: 'gcc-6'
+            coverage: false
+          - os: { id: ubuntu-18.04, name: bionic }
+            compiler: 'gcc-6'
+            coverage: false
+        coverage: [false, true]
+      fail-fast: false
+    steps:
+      - name: Runtime environment
+        shell: bash
+        env:
+          WORKSPACE: ${{ github.workspace }}
+        run: |
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "GITHUB_WORKSPACE=`pwd`" >> $GITHUB_ENV
+      - name: Coverage environment
+        env:
+          COVERAGE: ${{ matrix.coverage }}
+        run: |
+          echo "Coverage enabled for build? ${{ matrix.coverage }}"
+          echo -n "COVERAGE=" >> $GITHUB_ENV
+          ([ $COVERAGE == "true" ] && echo 1 || echo 0) >> $GITHUB_ENV
+          echo -n "BUILD_OPTS=" >> $GITHUB_ENV
+          ([ $COVERAGE == "true" ] && echo "--buildtype=debug" || echo "") >> $GITHUB_ENV
+      - name: Setup GCC
+        if: startsWith(matrix.compiler, 'gcc')
+        shell: bash
+        run: |
+          CXX=${CC/#gcc/g++}
+          sudo apt-add-repository ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install $CC $CXX
+          echo "CC=$CC" >> $GITHUB_ENV
+          echo "CXX=$CXX" >> $GITHUB_ENV
+          [ $COVERAGE -ne 0 ] && echo "GCOV=${CC/#gcc/gcov}" >> $GITHUB_ENV || true
+        env:
+          CC: ${{ matrix.compiler }}
+      - name: Setup Clang
+        if: startsWith(matrix.compiler, 'clang')
+        shell: bash
+        run: |
+          wget https://apt.llvm.org/llvm-snapshot.gpg.key
+          sudo apt-key add llvm-snapshot.gpg.key
+          rm llvm-snapshot.gpg.key
+          sudo apt-add-repository "deb https://apt.llvm.org/${{ matrix.os.name }}/ llvm-toolchain-${{ matrix.os.name }} main"
+          sudo apt-get update
+          CXX=${CC/#clang/clang++}
+          sudo apt-get install $CC $CXX
+          echo "CC=$CC" >> $GITHUB_ENV
+          echo "CXX=$CXX" >> $GITHUB_ENV
+          [ $COVERAGE -ne 0 ] && echo "GCOV=/usr/lib/${CC/#clang/llvm}/bin/llvm-cov gcov" >> $GITHUB_ENV || true
+        env:
+          CC: ${{ matrix.compiler }}
+        working-directory: ${{ runner.temp }}
+      - name: Setup MariaDB/MySQL libs
+        shell: bash
+        run: sudo apt-get install libmariadb-dev
+      - name: Setup unixODBC/MSSQL libs
+        shell: bash
+        run: sudo apt-get install unixodbc-dev
+      - name: Setup Postgres libs
+        shell: bash
+        run: sudo apt-get install libpq-dev
+      - name: Setup Meson + Ninja
+        shell: bash
+        run: |
+          sudo python3 -m pip install --upgrade pip setuptools wheel
+          python3 -m pip install --user meson ninja
+        working-directory: ${{ runner.temp }}
+      - name: Version tools
+        shell: bash
+        run: |
+          $CC --version
+          $CXX --version
+          [ $COVERAGE -ne 0 ] && $GCOV --version || true
+          meson --version
+          ninja --version
+      - name: Checkout crunch
+        uses: actions/checkout@v2
+        with:
+          repository: DX-MON/crunch
+          path: crunch
+          lfs: true
+          submodules: true
+      - name: Build + Install crunch
+        run: |
+          meson build --prefix=$HOME/.local $BUILD_OPTS
+          ninja -C build
+          ninja -C build install
+          cd ..
+          rm -rf crunch
+          echo "PKG_CONFIG_PATH=$HOME/.local/lib/`uname -m`-linux-gnu/pkgconfig" >> $GITHUB_ENV
+        working-directory: ${{ github.workspace }}/crunch
+      # install rSON?
+      - name: Checkout tmplORM
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+          submodules: true
+      - name: Configure
+        run: meson build --prefix=$HOME/.local -Dbuild_check=false -Db_coverage=${{ matrix.coverage }} $BUILD_OPTS
+      - name: Build
+        run: ninja -C build
+      - name: Test
+        run: ninja -C build test
+      - name: Install
+        run: ninja -C build install
+      - name: Codecov
+        if: success() && matrix.coverage
+        uses: codecov/codecov-action@v2
