@@ -8,15 +8,25 @@ tmplORMTests = [
 	'testFixedVector', 'testTypes', 'testDateTime'
 ]
 
+crunchExtra = [
+	'-I@0@'.format(tmplORMSrcDir)
+]
 if coverage
-	crunchCoverage = ['--coverage']
-else
-	crunchCoverage = []
+	crunchExtra += ['--coverage']
+endif
+if get_option('debug')
+	crunchExtra += ['--debug']
+endif
+if cxx.get_id() != 'msvc'
+	crunchExtra += ['-z', 'defs']
+endif
+if get_option('b_lto')
+	crunchExtra += ['-flto']
 endif
 
 sanitizer = get_option('b_sanitize')
 if sanitizer != 'none'
-	crunchCoverage += ['-fsanitize=' + sanitizer]
+	crunchExtra += ['-fsanitize=' + sanitizer]
 endif
 
 substrateInc = []
@@ -87,8 +97,8 @@ foreach test : tmplORMTests
 	custom_target(
 		test,
 		command: [
-			crunchMake, '-s', '-z', 'defs', '@INPUT@', '-o', '@OUTPUT@', '-I' + tmplORMSrcDir
-		] + substrateInc + crunchCoverage + testLibs,
+			crunchMake, '-s', '-z', 'defs', '@INPUT@', '-o', '@OUTPUT@'
+		] + crunchExtra + testLibs,
 		input: [test + '.cxx'] + tmplORMObjs + testObjs,
 		output: test + '.so',
 		build_by_default: true
