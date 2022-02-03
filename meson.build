@@ -41,6 +41,11 @@ else
 	includes += ['fixes']
 endif
 
+# Deal with ubuntu, and friends.. because of course V_V
+if cxx.has_header('/usr/include/postgresql/libpq-fe.h')
+	includes += ['/usr/include/postgresql']
+endif
+
 mysqlConfig = find_program('mysql_config')
 mysqlCflags = run_command([mysqlConfig, '--cflags'], check: true).stdout().split()
 mysqlLflags = run_command([mysqlConfig, '--libs'], check: true).stdout().split()
