@@ -38,7 +38,7 @@ else
 		warning('Cannot find required PostgreSQL header "catalog/pg_type_d.h" - ' +
 			'please report this to your distro to have them add it to libpq')
 	endif
-	include += ['fixes']
+	includes += ['fixes']
 endif
 
 mysqlConfig = find_program('mysql_config')
