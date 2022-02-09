@@ -26,7 +26,7 @@ jobs:
       fail-fast: false
     services:
       mssql:
-        image: microsoft/mssql-server-linux
+        image: mcr.microsoft.com/mssql/server:2019-latest
         env:
           ACCEPT_EULA: Y
           SA_PASSWORD: $MSSQL_PASSWORD
