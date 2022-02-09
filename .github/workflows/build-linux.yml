@@ -22,13 +22,6 @@ jobs:
           - 'gcc-9'
           - 'gcc-10'
           - 'gcc-11'
-        include:
-          - os: { id: ubuntu-18.04, name: bionic }
-            compiler: 'gcc-6'
-            coverage: false
-          - os: { id: ubuntu-18.04, name: bionic }
-            compiler: 'gcc-6'
-            coverage: false
         coverage: [false, true]
       fail-fast: false
     steps:
