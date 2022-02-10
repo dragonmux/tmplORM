@@ -93,8 +93,11 @@ namespace tmplORM
 
 			template<bool> struct bindValue_t
 			{
-				template<typename T> void *operator ()(const T &val, managedPtr_t<void> &) const noexcept
-					{ return const_cast<T *>(&val); } // NOLINT(cppcoreguidelines-pro-type-const-cast)
+				template<typename T> void *operator ()(const T &value, managedPtr_t<void> &paramStorage) const noexcept
+				{
+					paramStorage = substrate::make_managed_nothrow<T>(value);
+					return paramStorage.get();
+				}
 
 				void *operator ()(const ormDate_t &value, managedPtr_t<void> &paramStorage) const noexcept
 				{
