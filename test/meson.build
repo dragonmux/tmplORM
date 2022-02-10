@@ -4,8 +4,7 @@ subdir('data')
 
 tmplORMTests = [
 	'testString', 'testMySQL', 'testMSSQL', 'testPgSQL',
-	'testMySQLMapper', 'testMSSQLMapper',
-	'testFixedVector', 'testTypes', 'testDateTime'
+	'testMySQLMapper', 'testMSSQLMapper', 'testTypes', 'testDateTime'
 ]
 
 crunchExtra = [
@@ -60,7 +59,7 @@ endif
 
 testHelpers = static_library(
 	'testHelpers',
-	['fixedVector.cxx', 'tmplORM.types.cxx'],
+	['tmplORM.types.cxx'],
 	pic: true,
 	dependencies: [libcrunchpp, substrate],
 	include_directories: include_directories('..'),
@@ -83,7 +82,6 @@ objectMap = {
 		'tmplORM': ['pgsql.cxx', 'tmplORM.types.cxx'],
 		'libs': pgsqlCflags + pgsqlLflags + testIncludes
 	},
-	'testFixedVector': {'test': ['fixedVector.cxx']},
 	'testTypes': {'tmplORM': ['string.cxx', 'tmplORM.types.cxx'], 'test': ['tmplORM.types.cxx']},
 	'testDateTime': {'tmplORM': ['string.cxx', 'tmplORM.types.cxx']}
 }
