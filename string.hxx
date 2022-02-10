@@ -27,24 +27,32 @@ inline std::string operator ""_s(const char *str, const size_t len) noexcept { r
 struct utf16_t final
 {
 private:
-	std::unique_ptr<char16_t []> str;
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
+	std::unique_ptr<char16_t []> str{nullptr};
 	utf16_t() noexcept = default;
 
 public:
-	utf16_t(const std::nullptr_t) noexcept : str() { }
-	utf16_t(std::unique_ptr<char16_t []> &_str) noexcept : str(std::move(_str)) { }
+	utf16_t(const std::nullptr_t) noexcept { }
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 	utf16_t(std::unique_ptr<char16_t []> &&_str) noexcept : str(std::move(_str)) { }
-	utf16_t(utf16_t &&_str) noexcept : str(std::move(_str.str)) { }
+	utf16_t(utf16_t &&_str) noexcept : utf16_t{} { swap(_str); }
 	~utf16_t() noexcept = default;
-	utf16_t &operator =(utf16_t &&_str) noexcept { str = std::move(_str.str); return *this; }
+	utf16_t &operator =(utf16_t &&_str) noexcept { swap(_str); return *this; }
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 	operator const std::unique_ptr<char16_t []> &() const noexcept { return str; }
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 	operator std::unique_ptr<char16_t []>() noexcept { return std::move(str); }
 	operator const char16_t *() const noexcept { return str.get(); }
 	operator char16_t *() const noexcept { return str.get(); }
-	operator const uint16_t *() const noexcept { return reinterpret_cast<uint16_t *>(str.get()); } // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm [cpp/reinterpret-cast]
-	operator uint16_t *() const noexcept { return reinterpret_cast<uint16_t *>(str.get()); } // NOLINT(cppcoreguidelines-pro-type-reinterpret-cast) lgtm [cpp/reinterpret-cast]
+	// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+	operator const uint16_t *() const noexcept { return reinterpret_cast<uint16_t *>(str.get()); } // lgtm [cpp/reinterpret-cast]
+	// NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+	operator uint16_t *() const noexcept { return reinterpret_cast<uint16_t *>(str.get()); } // lgtm [cpp/reinterpret-cast]
 	operator void *() const noexcept { return static_cast<void *>(str.get()); }
 	explicit operator bool() const noexcept { return bool(str); }
+
+	void swap(utf16_t &_str) noexcept
+		{ str.swap(_str.str); }
 
 	utf16_t(const utf16_t &) = delete;
 	utf16_t &operator =(const utf16_t &) = delete;
