@@ -205,7 +205,6 @@ struct tmplORM_API tSQLQuery_t final
 private:
 	const tSQLClient_t *client{nullptr};
 	void *queryHandle{nullptr};
-	utf16_t query{nullptr};
 	size_t numParams{0};
 	fixedVector_t<substrate::managedPtr_t<void>> paramStorage{};
 	fixedVector_t<long> dataLengths{};
@@ -219,9 +218,9 @@ protected:
 public:
 	/*! @brief Default constructor for prepared query objects, constructing an invalid query by default */
 	tSQLQuery_t() noexcept = default;
-	tSQLQuery_t(tSQLQuery_t &&qry) noexcept : tSQLQuery_t() { *this = std::move(qry); }
+	tSQLQuery_t(tSQLQuery_t &&qry) noexcept : tSQLQuery_t{} { swap(qry); }
 	~tSQLQuery_t() noexcept;
-	void operator =(tSQLQuery_t &&qry) noexcept;
+	void operator =(tSQLQuery_t &&qry) noexcept { swap(qry); }
 	/*!
 	 * @brief Call to determine if this prepared query object is valid
 	 * @returns true if the object is valid, false otherwise
@@ -230,6 +229,7 @@ public:
 	tSQLResult_t execute() const noexcept;
 	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept;
 	template<typename T> void bind(const size_t index, const std::nullptr_t, const fieldLength_t length) noexcept;
+	void swap(tSQLQuery_t &qry) noexcept;
 
 	/*! @brief Deleted copy constructor for tSQLQuery_t as prepared queries are not copyable */
 	tSQLQuery_t(const tSQLQuery_t &) = delete;

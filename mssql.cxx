@@ -200,16 +200,17 @@ bool tSQLClient_t::error(const tSQLExecErrorType_t err, const int16_t handleType
 }
 
 tSQLQuery_t::tSQLQuery_t(const tSQLClient_t *const parent, void *handle, const char *const queryStmt,
-	const size_t paramsCount) noexcept : client{parent}, queryHandle{handle}, query{utf16::convert(queryStmt)},
-		numParams{paramsCount}, paramStorage{paramsCount}, dataLengths{paramsCount}
+	const size_t paramsCount) noexcept : client{parent}, queryHandle{handle}, numParams{paramsCount},
+		paramStorage{paramsCount}, dataLengths{paramsCount}
 {
-	if (!queryHandle || !query || (numParams && !dataLengths) || !client || !queryStmt)
+	if (!queryHandle || (numParams && !dataLengths) || !client || !queryStmt)
 	{
 		client = nullptr;
 		return;
 	}
+	const auto query{utf16::convert(queryStmt)};
 	const auto queryLength{utf16::length(query)};
-	if (queryLength > std::numeric_limits<SQLINTEGER>::max())
+	if (!query || queryLength > std::numeric_limits<SQLINTEGER>::max())
 		error(SQL_ERROR);
 	else
 		error(SQLPrepare(queryHandle, query, static_cast<SQLINTEGER>(queryLength)));
@@ -221,11 +222,10 @@ tSQLQuery_t::~tSQLQuery_t() noexcept
 		error(SQLFreeHandle(SQL_HANDLE_STMT, queryHandle));
 }
 
-void tSQLQuery_t::operator =(tSQLQuery_t &&qry) noexcept
+void tSQLQuery_t::swap(tSQLQuery_t &qry) noexcept
 {
 	std::swap(client, qry.client);
 	std::swap(queryHandle, qry.queryHandle);
-	std::swap(query, qry.query);
 	std::swap(numParams, qry.numParams);
 	std::swap(paramStorage, qry.paramStorage);
 	std::swap(dataLengths, qry.dataLengths);
