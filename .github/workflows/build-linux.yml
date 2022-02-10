@@ -29,19 +29,19 @@ jobs:
         image: mcr.microsoft.com/mssql/server:2019-latest
         env:
           ACCEPT_EULA: Y
-          SA_PASSWORD: $MSSQL_PASSWORD
+          SA_PASSWORD: ${{ secrets.MSSQL_PASSWORD }}
         ports:
           - 1433:1433
       mysql:
         image: mariadb
         env:
-          MYSQL_ROOT_PASSWORD: $MYSQL_PASSWORD
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
         ports:
           - 3306:3306
       pgsql:
         image: postgres
         env:
-          POSTGRES_PASSWORD: $PGSQL_PASSWORD
+          POSTGRES_PASSWORD: ${{ secrets.PGSQL_PASSWORD }}
         ports:
           - 5432:5432
         options: >-
@@ -60,8 +60,11 @@ jobs:
           echo "PKG_CONFIG_PATH=$HOME/.local/lib/`uname -m`-linux-gnu/pkgconfig" >> $GITHUB_ENV
           echo "MSSQL_HOST=127.0.0.1" >> $GITHUB_ENV
           echo "MSSQL_USERNAME=SA" >> $GITHUB_ENV
+          echo "MSSQL_PASSWORD=${{ secrets.MSSQL_PASSWORD }}" >> $GITHUB_ENV
           echo "MYSQL_HOST=127.0.0.1" >> $GITHUB_ENV
           echo "MYSQL_USERNAME=root" >> $GITHUB_ENV
+          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> $GITHUB_ENV
+          echo "PGSQL_PASSWORD=${{ secrets.PGSQL_PASSWORD }}" >> $GITHUB_ENV
       - name: Coverage environment
         env:
           COVERAGE: ${{ matrix.coverage }}
