@@ -137,6 +137,7 @@ jobs:
           [ $COVERAGE -ne 0 ] && $GCOV --version || true
           meson --version
           ninja --version
+          odbcinst -j
       - name: Checkout crunch
         uses: actions/checkout@v2
         with:
