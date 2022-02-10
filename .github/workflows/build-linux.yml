@@ -195,7 +195,7 @@ jobs:
       # down and use the -g option to process gcov output directly.
       - name: Coverage prep
         if: success() && matrix.coverage
-        run: gcovr -r .. -x coverage.xml --gcov-executable "$GCOV"
+        run: gcovr -r .. -x coverage.xml --gcov-executable "$GCOV" -e ../deps -e ../test
         working-directory: build
       - name: Codecov
         if: success() && matrix.coverage
