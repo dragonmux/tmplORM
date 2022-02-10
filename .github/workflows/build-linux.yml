@@ -73,7 +73,8 @@ jobs:
           echo -n "COVERAGE=" >> $GITHUB_ENV
           ([ $COVERAGE == "true" ] && echo 1 || echo 0) >> $GITHUB_ENV
           echo -n "BUILD_OPTS=" >> $GITHUB_ENV
-          ([ $COVERAGE == "true" ] && echo "--buildtype=debug -Db_sanitize=address,undefined" || echo "") >> $GITHUB_ENV
+          ([ $COVERAGE == "true" ] && echo "--buildtype=debug" || echo "") >> $GITHUB_ENV
+        # -Db_sanitize=address,undefined
       - name: Setup GCC
         if: startsWith(matrix.compiler, 'gcc')
         shell: bash
