@@ -35,7 +35,7 @@ jobs:
       mysql:
         image: mariadb
         env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MARIADB_ROOT_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
         ports:
           - 3306:3306
       pgsql:
