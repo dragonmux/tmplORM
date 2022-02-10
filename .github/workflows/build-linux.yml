@@ -82,7 +82,7 @@ jobs:
           CXX=${CC/#gcc/g++}
           sudo apt-add-repository ppa:ubuntu-toolchain-r/test
           sudo apt-get update
-          sudo apt-get install $CC $CXX
+          sudo apt-get install $CC $CXX gcovr
           echo "CC=$CC" >> $GITHUB_ENV
           echo "CXX=$CXX" >> $GITHUB_ENV
           [ $COVERAGE -ne 0 ] && echo "GCOV=${CC/#gcc/gcov}" >> $GITHUB_ENV || true
@@ -98,7 +98,7 @@ jobs:
           sudo apt-add-repository "deb https://apt.llvm.org/${{ matrix.os.name }}/ llvm-toolchain-${{ matrix.os.name }} main"
           sudo apt-get update
           CXX=${CC/#clang/clang++}
-          sudo apt-get install $CC $CXX
+          sudo apt-get install $CC $CXX gcovr
           echo "CC=$CC" >> $GITHUB_ENV
           echo "CXX=$CXX" >> $GITHUB_ENV
           [ $COVERAGE -ne 0 ] && echo "GCOV=/usr/lib/${CC/#clang/llvm}/bin/llvm-cov gcov" >> $GITHUB_ENV || true
@@ -136,6 +136,7 @@ jobs:
           $CC --version
           $CXX --version
           [ $COVERAGE -ne 0 ] && $GCOV --version || true
+          [ $COVERAGE -ne 0 ] && $GCOVR --version || true
           meson --version
           ninja --version
           odbcinst -j
