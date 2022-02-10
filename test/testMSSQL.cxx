@@ -207,9 +207,9 @@ private:
 	{
 		assertNotNull(testClient);
 		assertTrue(testClient->valid());
-		tSQLQuery_t query;
+		tSQLQuery_t query{};
 		assertFalse(query.valid());
-		tSQLResult_t result;
+		tSQLResult_t result{};
 		assertFalse(result.valid());
 
 		query = testClient->prepare(

@@ -205,6 +205,7 @@ struct tmplORM_API tSQLQuery_t final
 private:
 	const tSQLClient_t *client{nullptr};
 	void *queryHandle{nullptr};
+	utf16_t query{nullptr};
 	size_t numParams{0};
 	fixedVector_t<substrate::managedPtr_t<void>> paramStorage{};
 	fixedVector_t<long> dataLengths{};

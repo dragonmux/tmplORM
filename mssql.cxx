@@ -200,15 +200,14 @@ bool tSQLClient_t::error(const tSQLExecErrorType_t err, const int16_t handleType
 }
 
 tSQLQuery_t::tSQLQuery_t(const tSQLClient_t *const parent, void *handle, const char *const queryStmt,
-	const size_t paramsCount) noexcept : client{parent}, queryHandle{handle}, numParams{paramsCount},
-		paramStorage{paramsCount}, dataLengths{paramsCount}
+	const size_t paramsCount) noexcept : client{parent}, queryHandle{handle}, query{utf16::convert(queryStmt)},
+		numParams{paramsCount}, paramStorage{paramsCount}, dataLengths{paramsCount}
 {
-	if (!queryHandle || (numParams && !dataLengths) || !client || !queryStmt)
+	if (!queryHandle || !query || (numParams && !dataLengths) || !client || !queryStmt)
 	{
 		client = nullptr;
 		return;
 	}
-	const auto query = utf16::convert(queryStmt);
 	const auto queryLength{utf16::length(query)};
 	if (queryLength > std::numeric_limits<SQLINTEGER>::max())
 		error(SQL_ERROR);
@@ -226,6 +225,7 @@ void tSQLQuery_t::operator =(tSQLQuery_t &&qry) noexcept
 {
 	std::swap(client, qry.client);
 	std::swap(queryHandle, qry.queryHandle);
+	std::swap(query, qry.query);
 	std::swap(numParams, qry.numParams);
 	std::swap(paramStorage, qry.paramStorage);
 	std::swap(dataLengths, qry.dataLengths);
@@ -246,9 +246,9 @@ bool tSQLQuery_t::error(const int16_t err) const noexcept
 	{ return !client || client->error(err, SQL_HANDLE_STMT, queryHandle); }
 
 tSQLResult_t::tSQLResult_t(const tSQLClient_t *const _client, void *handle, const bool hasData, const bool freeHandle) noexcept :
-	client{_client}, queryHandle{handle}, _hasData{hasData}, _freeHandle{freeHandle}, fields{0}, fieldInfo{}, valueCache{}
+	client{_client}, queryHandle{handle}, _hasData{hasData}, _freeHandle{freeHandle}, fieldInfo{}, valueCache{}
 {
-	int16_t _fields;
+	int16_t _fields{};
 	if (error(SQLNumResultCols(queryHandle, &_fields)) || (uint16_t(_fields) & 0x8000U))
 		return;
 	else if (_fields)
@@ -315,9 +315,12 @@ bool tSQLResult_t::next() const noexcept
 	return !error(SQLFetch(queryHandle));
 }
 
-inline bool isCharType(const int16_t type) noexcept { return type == SQL_LONGVARCHAR || type ==  SQL_VARCHAR || type == SQL_CHAR; }
-inline bool isWCharType(const int16_t type) noexcept { return type == SQL_WLONGVARCHAR || type == SQL_WVARCHAR || type == SQL_WCHAR; }
-inline bool isBinType(const int16_t type) noexcept { return type == SQL_LONGVARBINARY || type == SQL_VARBINARY || type == SQL_BINARY; }
+inline bool isCharType(const int16_t type) noexcept
+	{ return type == SQL_LONGVARCHAR || type ==  SQL_VARCHAR || type == SQL_CHAR; }
+inline bool isWCharType(const int16_t type) noexcept
+	{ return type == SQL_WLONGVARCHAR || type == SQL_WVARCHAR || type == SQL_WCHAR; }
+inline bool isBinType(const int16_t type) noexcept
+	{ return type == SQL_LONGVARBINARY || type == SQL_VARBINARY || type == SQL_BINARY; }
 tSQLValue_t tSQLResult_t::nullValue{};
 
 tSQLValue_t &tSQLResult_t::operator [](const uint16_t idx) const noexcept try
@@ -329,8 +332,8 @@ tSQLValue_t &tSQLResult_t::operator [](const uint16_t idx) const noexcept try
 	const auto column{static_cast<uint16_t>(idx + 1U)};
 
 	// Pitty this can't use C++17 syntax: [const int16_t type, const uint32_t valueLength] = fieldInfo[idx];
-	int16_t type;
-	uint32_t valueLength;
+	int16_t type{};
+	uint32_t valueLength{};
 	std::tie(type, valueLength) = fieldInfo[idx];
 	const int16_t cType = odbcToCType(type);
 	if (isCharType(type) || isWCharType(type) || isBinType(type))
