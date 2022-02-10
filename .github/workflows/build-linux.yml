@@ -138,6 +138,12 @@ jobs:
           meson --version
           ninja --version
           odbcinst -j
+      - name: ODBC debug
+        shell: bash
+        run: |
+          cat /etc/odbc.ini
+          cat /etc/odbcinst.ini
+          dpkg -L msodbcsql17
       - name: Checkout crunch
         uses: actions/checkout@v2
         with:
