@@ -57,13 +57,13 @@ struct type_t final
 	tmplORM::types::uuid_t<typestring<>> uuid;
 };
 
-std::array<data_t, 2> testData
+static std::array<data_t, 2> testData
 {{
 	{0, "kevin", 50, {}},
 	{0, "dave", nullptr, {}}
 }};
 
-type_t typeData
+static type_t typeData
 {
 	0, i64(9223372036854775807), 2147483647,
 	32767, 127, true, "This is a string",
@@ -269,7 +269,7 @@ private:
 	{
 		assertNotNull(testClient);
 		assertTrue(testClient->valid());
-		tSQLResult_t result = testClient->query("SELECT [EntryID], [Name], [Value], [When] FROM [tmplORM];");
+		tSQLResult_t result{testClient->query("SELECT [EntryID], [Name], [Value], [When] FROM [tmplORM];")};
 		if (testClient->error() != tSQLExecErrorType_t::ok)
 			printError("Query", testClient->error());
 		assertTrue(result.valid());
@@ -307,7 +307,7 @@ private:
 		assertTrue(testClient->valid());
 		tSQLResult_t result;
 		assertFalse(result.valid());
-		const bool started = testClient->beginTransact();
+		const bool started{testClient->beginTransact()};
 		if (!started)
 			printError("Start transaction", testClient->error());
 		assertTrue(started);
@@ -325,7 +325,7 @@ private:
 		assertEqual(result.numFields(), 0);
 		assertEqual(result.numRows(), 1);
 
-		const bool rolledBack = testClient->rollback();
+		const bool rolledBack{testClient->rollback()};
 		if (!rolledBack)
 			printError("Abort transaction", testClient->error());
 		assertTrue(rolledBack);
@@ -340,7 +340,7 @@ private:
 		assertEqual(result[0].asString(false).get(), testData[0].name);
 		assertFalse(result.next());
 
-		const bool restarted = testClient->beginTransact();
+		const bool restarted{testClient->beginTransact()};
 		if (!restarted)
 			printError("Start transaction", testClient->error());
 		assertTrue(restarted);
@@ -357,7 +357,7 @@ private:
 		assertEqual(result.numFields(), 0);
 		assertEqual(result.numRows(), 1);
 
-		const bool committed = testClient->commit();
+		const bool committed{testClient->commit()};
 		if (!committed)
 			printError("Commit transaction", testClient->error());
 		assertTrue(committed);
@@ -388,12 +388,12 @@ private:
 			uint16_t(0x1000 | ((time >> 48) & 0x0FFF)),
 			uint16_t((nanoSeconds >> 14) | 0x8000), swapBytes(uint64_t{0x123456789ABCU}) >> 16});
 
-		tSQLQuery_t query = testClient->prepare(
+		tSQLQuery_t query{testClient->prepare(
 			"INSERT INTO [TypeTest] ([Int64], [Int32], [Int16], [Int8], "
 			"[Bool], [String], [Text], [Float], [Double], [Date], "
 			"[DateTime], [UUID]) OUTPUT INSERTED.[EntryID] "
 			"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", 12
-		);
+		)};
 		assertTrue(query.valid());
 		query.bind(0, typeData.int64.value(), fieldLength(typeData.int64));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
@@ -441,7 +441,7 @@ private:
 		assertEqual(result.numRows(), 0);
 		assertEqual(result.numFields(), 13);
 
-		ormDateTime_t dateTime = typeData.dateTime;
+		ormDateTime_t dateTime{typeData.dateTime};
 		// Apply MSSQL rounding..
 		dateTime.nanoSecond((dateTime.nanoSecond() / 100) * 100);
 
@@ -470,9 +470,9 @@ private:
 	{
 		assertNotNull(testClient);
 		assertTrue(testClient->valid());
-		tSQLQuery_t query;
+		tSQLQuery_t query{};
 		assertFalse(query.valid());
-		tSQLResult_t result;
+		tSQLResult_t result{};
 		assertFalse(result.valid());
 
 		query = testClient->prepare(nullptr, 0);
@@ -490,7 +490,7 @@ private:
 		assertNotNull(testClient);
 		assertTrue(testClient->valid());
 		assertTrue(testClient->selectDB("master"));
-		tSQLResult_t result = testClient->query("DROP DATABASE [tmplORM];");
+		tSQLResult_t result{testClient->query("DROP DATABASE [tmplORM];")};
 		if (!result.valid())
 			printError("Query", testClient->error());
 		assertTrue(result.valid());
