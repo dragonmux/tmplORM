@@ -193,3 +193,5 @@ jobs:
       - name: Codecov
         if: success() && matrix.coverage
         uses: codecov/codecov-action@v2
+        with:
+          working-directory: build
