@@ -26,7 +26,9 @@ constexpr static int64_t usPerHour{INT64_C(3600000000)};
 
 class testPgSQL_t final : public testsuite
 {
-	constString_t host, username, password;
+	constString_t host{}, username{}, password{};
+	constexpr static const char *port = "5432";
+	pgSQLClient_t client{};
 
 	bool haveEnvironment() noexcept
 	{
@@ -43,6 +45,7 @@ class testPgSQL_t final : public testsuite
 		assertFalse(testClient.valid());
 		assertFalse(testClient.query("").valid());
 		// assertFalse(testClient.prepare("", 0).valid());
+		assertFalse(testClient.beginTransact());
 		// pgSQLQuery_t testQuery{};
 		// assertFalse(testQuery.valid());
 		// assertFalse(testQuery.execute().valid());
@@ -59,12 +62,36 @@ class testPgSQL_t final : public testsuite
 		assertTrue(testValue.isNull());
 	}
 
+	void testConnect()
+	{
+		assertFalse(client.valid());
+		// const bool connected = client.connect(host, port, username, password, "postgres");
+		// if (!connected)
+		// 	printError("Connection", client.error());
+		// assertTrue(connected);
+		assertTrue(client.connect(host, port, username, password, "postgres"));
+		//assertTrue(client.error() == tSQLExecErrorType_t::ok);
+		assertTrue(client.valid());
+	}
+
+	void testDisconnect()
+	{
+		if (client.valid())
+		{
+			assertTrue(client.beginTransact());
+			client.disconnect();
+		}
+		assertFalse(client.valid());
+	}
+
 public:
 	void registerTests() final
 	{
 		if (!haveEnvironment())
 			skip("No suitable environment found, running only invalidity test");
 		CXX_TEST(testInvalid)
+		CXX_TEST(testConnect)
+		CXX_TEST(testDisconnect)
 	}
 };
 
