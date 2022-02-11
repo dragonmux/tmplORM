@@ -6,8 +6,8 @@
 #include <sql.h>
 #include <sqlext.h>
 #endif
-#include <tmplORM.hxx>
-#include <mssql.hxx>
+#include "tmplORM.hxx"
+#include "mssql.hxx"
 //#include <string.h>
 
 /*!
