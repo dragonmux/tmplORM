@@ -91,10 +91,16 @@ class testPgSQL_t final : public testsuite
 		if (!result.successful())
 			printError(result);
 		assertTrue(result.successful());
+		assertTrue(client.switchDB("tmplORM"));
+		assertTrue(client.valid());
 	}
 
 	void testDestroyDB()
 	{
+		assertTrue(client.valid());
+		client = {};
+		assertFalse(client.valid());
+		assertTrue(client.connect(host, port, username, password, "postgres"));
 		assertTrue(client.valid());
 		const auto result{client.query(R"(DROP DATABASE "tmplORM";)")};
 		assertTrue(result.valid());
