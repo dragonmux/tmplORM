@@ -28,8 +28,6 @@ using std::chrono::milliseconds;
 using tmplORM::types::chrono::durationIn;
 
 static std::unique_ptr<tSQLClient_t> testClient{};
-static constString_t driver, host, username, password;
-constexpr static uint32_t port = 1433;
 static ormDateTime_t now = systemClock_t::now();
 
 struct data_t final
@@ -72,19 +70,22 @@ static type_t typeData
 	ormUUID_t{}
 };
 
-bool haveEnvironment() noexcept
-{
-	driver = getenv("MSSQL_DRIVER");
-	host = getenv("MSSQL_HOST");
-	// port?
-	username = getenv("MSSQL_USERNAME");
-	password = getenv("MSSQL_PASSWORD");
-	return !(driver.empty() || host.empty() || username.empty() || password.empty());
-}
-
 class testMSSQL_t final : public testsuite
 {
 private:
+	constString_t driver, host, username, password;
+	constexpr static uint32_t port = 1433;
+
+	bool haveEnvironment() noexcept
+	{
+		driver = getenv("MSSQL_DRIVER");
+		host = getenv("MSSQL_HOST");
+		// port?
+		username = getenv("MSSQL_USERNAME");
+		password = getenv("MSSQL_PASSWORD");
+		return !(driver.empty() || host.empty() || username.empty() || password.empty());
+	}
+
 	static void printError(const char *prefix, const tSQLExecError_t &error) noexcept
 	{
 		const auto errorNum = uint8_t(error.errorNum());
@@ -95,19 +96,19 @@ private:
 
 	void testInvalid()
 	{
-		tSQLClient_t testClient;
+		tSQLClient_t testClient{};
 		assertFalse(testClient.valid());
 		assertFalse(testClient.query("").valid());
 		assertFalse(testClient.prepare("", 0).valid());
-		tSQLQuery_t testQuery;
+		tSQLQuery_t testQuery{};
 		assertFalse(testQuery.valid());
 		assertFalse(testQuery.execute().valid());
-		tSQLResult_t testResult;
+		tSQLResult_t testResult{};
 		assertFalse(testResult.valid());
 		assertEqual(testResult.numRows(), 0);
 		assertFalse(testResult.next());
 		assertTrue(testResult[0].isNull());
-		tSQLValue_t testValue;
+		tSQLValue_t testValue{};
 		assertTrue(testValue.isNull());
 	}
 
