@@ -11,7 +11,7 @@ extraction:
       - pip3 install --upgrade meson
     configure:
       command:
-        - meson build
+        - meson build -Dbuild_check=false
     index:
       build_command:
         - ninja -C build
