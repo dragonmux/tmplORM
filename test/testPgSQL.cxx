@@ -5,6 +5,7 @@
 #include <crunch++.h>
 #include "pgsql.hxx"
 #include "tmplORM.pgsql.hxx"
+#include "constString.hxx"
 
 /*!
  * @internal
@@ -22,6 +23,46 @@ using systemClock_t = std::chrono::system_clock;
 static ormDateTime_t now = systemClock_t::now();
 constexpr static int64_t usPerDay{INT64_C(86400000000)};
 constexpr static int64_t usPerHour{INT64_C(3600000000)};
+
+class testPgSQL_t final : public testsuite
+{
+	constString_t host, username, password;
+
+	bool haveEnvironment() noexcept
+	{
+		host = getenv("PGSQL_HOST");
+		// port?
+		username = getenv("PGSQL_USERNAME");
+		password = getenv("PGSQL_PASSWORD");
+		return !(host.empty() || username.empty() || password.empty());
+	}
+
+	void testInvalid()
+	{
+		pgSQLClient_t testClient{};
+		assertFalse(testClient.valid());
+		assertFalse(testClient.query("").valid());
+		// assertFalse(testClient.prepare("", 0).valid());
+		// pgSQLQuery_t testQuery{};
+		// assertFalse(testQuery.valid());
+		// assertFalse(testQuery.execute().valid());
+		pgSQLResult_t testResult{};
+		assertFalse(testResult.valid());
+		assertEqual(testResult.numRows(), 0);
+		assertFalse(testResult.next());
+		assertTrue(testResult[0].isNull());
+		pgSQLValue_t testValue{};
+		assertTrue(testValue.isNull());
+	}
+
+public:
+	void registerTests() final
+	{
+		if (!haveEnvironment())
+			skip("No suitable environment found, running only invalidity test");
+		CXX_TEST(testInvalid)
+	}
+};
 
 class testPgSQLValue_t final : public testsuite
 {
@@ -258,4 +299,4 @@ public:
 	}
 };
 
-CRUNCHpp_TESTS(testPgSQLValue_t);
+CRUNCHpp_TESTS(testPgSQL_t, testPgSQLValue_t);
