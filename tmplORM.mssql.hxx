@@ -73,8 +73,8 @@ namespace tmplORM
 			{ constexpr static const int16_t typeC = SQL_C_CHAR; constexpr static const int16_t typeODBC = SQL_VARCHAR; };
 		template<> struct bind_t<const char *>
 			{ constexpr static const int16_t typeC = SQL_C_CHAR; constexpr static const int16_t typeODBC = SQL_VARCHAR; };
- 		template<> struct bind_t<void *>
- 			{ constexpr static int16_t typeC = SQL_C_BINARY; constexpr static int16_t typeODBC = SQL_BINARY; };
+		template<> struct bind_t<void *>
+			{ constexpr static int16_t typeC = SQL_C_BINARY; constexpr static int16_t typeODBC = SQL_BINARY; };
 		template<> struct bind_t<ormDate_t>
 			{ constexpr static const int16_t typeC = SQL_C_TYPE_DATE; constexpr static const int16_t typeODBC = SQL_TYPE_DATE; };
 		template<> struct bind_t<ormDateTime_t>
