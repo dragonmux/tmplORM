@@ -54,6 +54,8 @@ class testPgSQL_t final : public testsuite
 		assertFalse(testClient.query("").valid());
 		// assertFalse(testClient.prepare("", 0).valid());
 		assertFalse(testClient.beginTransact());
+		assertTrue(testClient.commit());
+		assertTrue(testClient.rollback());
 		// pgSQLQuery_t testQuery{};
 		// assertFalse(testQuery.valid());
 		// assertFalse(testQuery.execute().valid());
@@ -96,6 +98,10 @@ class testPgSQL_t final : public testsuite
 		if (!result.successful())
 			printError(result);
 		assertTrue(result.successful());
+		assertNotNull(result.error());
+		assertEqual(result.numFields(), 0);
+		assertEqual(result.numRows(), 0);
+		//assertFalse(result[0].valid());
 		assertTrue(client.switchDB("tmplORM"));
 		assertTrue(client.valid());
 	}
