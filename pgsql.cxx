@@ -194,6 +194,12 @@ void pgSQLResult_t::swap(pgSQLResult_t &res) noexcept
 
 pgSQLValue_t::pgSQLValue_t(std::nullptr_t) noexcept : type{ANYOID} { }
 
+void pgSQLValue_t::swap(pgSQLValue_t &value) noexcept
+{
+	std::swap(data, value.data);
+	std::swap(type, value.type);
+}
+
 template<typename T> inline T pgSQLValue_t::reinterpret() const noexcept
 {
 	T value{};

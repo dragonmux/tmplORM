@@ -50,6 +50,10 @@ public:
 	pgSQLValue_t() noexcept = default;
 	pgSQLValue_t(std::nullptr_t) noexcept;
 	pgSQLValue_t(const char *const value, Oid _type) noexcept : data{static_cast<const void *>(value)}, type{_type} { }
+	pgSQLValue_t(pgSQLValue_t &&value) noexcept : pgSQLValue_t{} { swap(value); }
+	~pgSQLValue_t() noexcept = default;
+	void operator =(pgSQLValue_t &&value) noexcept { swap(value); }
+	void swap(pgSQLValue_t &value) noexcept;
 
 	bool valid() const noexcept { return data || type != InvalidOid; }
 	bool isNull() const noexcept { return !data; }
