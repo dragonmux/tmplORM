@@ -172,6 +172,8 @@ private:
 	// also has no sense to it re signed vs unsigned so everything is signed, even when it shouldn't be
 	fixedVector_t<int> dataLengths{};
 
+	static Oid typeToOID(pgSQLType_t type) noexcept;
+
 protected:
 	pgSQLQuery_t(PGconn *conn, const char *queryStmt, size_t paramsCount) noexcept;
 	friend struct pgSQLClient_t;

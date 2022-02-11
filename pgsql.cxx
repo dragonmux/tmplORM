@@ -121,6 +121,34 @@ pgSQLResult_t pgSQLQuery_t::execute() const noexcept
 		params.data(), dataLengths.data(), paramFormats.data(), 1)};
 }
 
+Oid pgSQLQuery_t::typeToOID(pgSQLType_t type) noexcept
+{
+	switch (type)
+	{
+		case pgSQLType_t::boolean:
+			return BOOLOID;
+		case pgSQLType_t::int2:
+			return INT2OID;
+		case pgSQLType_t::int4:
+			return INT4OID;
+		case pgSQLType_t::int8:
+			return INT8OID;
+		case pgSQLType_t::float4:
+			return FLOAT4OID;
+		case pgSQLType_t::float8:
+			return FLOAT8OID;
+		case pgSQLType_t::date:
+			return DATEOID;
+		case pgSQLType_t::time:
+			return TIMEOID;
+		case pgSQLType_t::dateTime:
+			return TIMESTAMPOID;
+		case pgSQLType_t::null:
+		default:
+			return ANYOID;
+	}
+}
+
 void pgSQLQuery_t::swap(pgSQLQuery_t &qry) noexcept
 {
 	std::swap(connection, qry.connection);
