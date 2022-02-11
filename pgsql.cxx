@@ -33,6 +33,8 @@ bool pgSQLClient_t::connect(const char *const host, const char *const port, cons
 	if (valid())
 		return false;
 	connection = PQsetdbLogin(host, port, nullptr, nullptr, db, user, passwd);
+	if (PQstatus(connection) != CONNECTION_OK)
+		disconnect();
 	return valid();
 }
 
