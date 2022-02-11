@@ -144,7 +144,7 @@ namespace tmplORM
 					{ return const_cast<T *>(val); } // NOLINT(cppcoreguidelines-pro-type-const-cast)
 			};
 
-			template<typename T> using bindValue_ = bindValue_t<std::is_pointer<T>::value>;
+			template<typename T> using bindValue = bindValue_t<std::is_pointer<T>::value>;
 			template<typename T> size_t bindDigits(size_t value) noexcept { return value; }
 			// 27 here might seem arbitrary but it's because of MSSQL and ODBC.
 			// More specifically, https://docs.microsoft.com/en-us/sql/odbc/reference/appendixes/column-size
@@ -173,7 +173,7 @@ namespace tmplORM
 					dataLengths[index] = dataLen;
 
 				error(SQLBindParameter(queryHandle, index + 1, SQL_PARAM_INPUT, dataType, odbcDataType,
-					bindDigits<T>(length.second), bindScale<T>(), bindValue_<T>{}(value, paramStorage[index]),
+					bindDigits<T>(length.second), bindScale<T>(), bindValue<T>{}(value, paramStorage[index]),
 					dataLen, lenPtr));
 			}
 
