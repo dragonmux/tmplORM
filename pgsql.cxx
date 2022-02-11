@@ -49,6 +49,32 @@ void pgSQLClient_t::disconnect() noexcept
 	}
 }
 
+bool pgSQLClient_t::switchDB(const char *const db) noexcept
+{
+	if (!valid())
+		return false;
+	auto *const settings{PQconninfo(connection)};
+	if (!settings)
+		return false;
+	disconnect();
+	const auto findSetting{[&](const char *const name) -> const char *
+	{
+		for (size_t i{}; settings[i].keyword != nullptr; ++i)
+		{
+			if (strcmp(settings[i].keyword, name) == 0)
+				return settings[i].val;
+		}
+		return nullptr;
+	}};
+	const auto *const host{findSetting("host")};
+	const auto *const port{findSetting("port")};
+	const auto *const user{findSetting("user")};
+	const auto *const passwd{findSetting("password")};
+	const auto result{connect(host, port, user, passwd, db)};
+	PQconninfoFree(settings);
+	return result;
+}
+
 bool pgSQLClient_t::beginTransact() noexcept
 {
 	if (needsCommit || !valid())
