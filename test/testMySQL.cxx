@@ -28,8 +28,6 @@ using std::chrono::milliseconds;
 using tmplORM::types::chrono::durationIn;
 
 static std::unique_ptr<mySQLClient_t> testClient{};
-static constString_t host, username, password;
-constexpr static uint32_t port = 3306;
 static ormDateTime_t now = systemClock_t::now();
 
 struct data_t
@@ -72,18 +70,21 @@ type_t typeData
 	ormUUID_t{}
 };
 
-bool haveEnvironment() noexcept
-{
-	host = getenv("MYSQL_HOST");
-	// port?
-	username = getenv("MYSQL_USERNAME");
-	password = getenv("MYSQL_PASSWORD");
-	return !(host.empty() || username.empty() || password.empty());
-}
-
 class testMySQL_t final : public testsuite
 {
 private:
+	constString_t host, username, password;
+	constexpr static uint32_t port = 3306;
+
+	bool haveEnvironment() noexcept
+	{
+		host = getenv("MYSQL_HOST");
+		// port?
+		username = getenv("MYSQL_USERNAME");
+		password = getenv("MYSQL_PASSWORD");
+		return !(host.empty() || username.empty() || password.empty());
+	}
+
 	static void printError(const char *prefix, const mySQLClient_t &client)
 	{
 		const auto errorStr = client.error();
