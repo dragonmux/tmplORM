@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <libpq-fe.h>
+#include <substrate/managed_ptr>
 #include "tmplORM.hxx"
 
 /*!
@@ -18,6 +19,7 @@ namespace tmplORM
 	{
 		namespace driver
 		{
+struct pgSQLClient_t;
 using namespace tmplORM::types::baseTypes;
 
 enum class pgSQLErrorType_t : uint8_t
@@ -138,6 +140,43 @@ public:
 	pgSQLResult_t &operator =(const pgSQLResult_t &) = delete;
 };
 
+struct tmplORM_API pgSQLQuery_t final
+{
+private:
+	PGconn *connection{nullptr};
+	const char *query{nullptr};
+	size_t numParams{0};
+	fixedVector_t<Oid> paramTypes{};
+	fixedVector_t<const char *> params{};
+	fixedVector_t<substrate::managedPtr_t<void>> paramStorage{};
+	// Postgres did a stupid and assumed 'int' was 32-bit at least and that that was big enough. The API
+	// also has no sense to it re signed vs unsigned so everything is signed, even when it shouldn't be
+	fixedVector_t<int> dataLengths{};
+
+protected:
+	pgSQLQuery_t(PGconn *conn, const char *queryStmt, size_t paramsCount) noexcept;
+	friend struct pgSQLClient_t;
+
+public:
+	/*! @brief Default constructor for prepared query objects, constructing an invalid query by default */
+	constexpr pgSQLQuery_t() noexcept = default;
+	pgSQLQuery_t(pgSQLQuery_t &&qry) noexcept : pgSQLQuery_t{} { swap(qry); }
+	~pgSQLQuery_t() noexcept = default;
+	void operator =(pgSQLQuery_t &&qry) noexcept { swap(qry); }
+	/*!
+	 * @brief Call to determine if this prepared query object is valid
+	 * @returns true if the object is valid, false otherwise
+	 */
+	bool valid() const noexcept { return connection && query; }
+	pgSQLResult_t execute() const noexcept;
+	void swap(pgSQLQuery_t &qry) noexcept;
+
+	/*! @brief Deleted copy constructor for pgSQLQuery_t as prepared queries are not copyable */
+	pgSQLQuery_t(const pgSQLQuery_t &) = delete;
+	/*! @brief Deleted copy assignment operator for pgSQLQuery_t as prepared queries are not copyable */
+	pgSQLQuery_t &operator =(const pgSQLQuery_t &) = delete;
+};
+
 struct tmplORM_API pgSQLClient_t final
 {
 private:
@@ -162,6 +201,7 @@ public:
 	bool commit() noexcept { return endTransact(true); }
 	bool rollback() noexcept { return endTransact(false); }
 	pgSQLResult_t query(const char *queryStmt) const noexcept;
+	pgSQLQuery_t prepare(const char *queryStmt, const size_t paramsCount) const noexcept;
 
 	/*! @brief Deleted move constructor for pgSQLClient_t as client connections are not movable */
 	pgSQLClient_t(const pgSQLClient_t &) = delete;

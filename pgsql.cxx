@@ -97,6 +97,38 @@ bool pgSQLClient_t::endTransact(const bool commitSuccess) noexcept
 pgSQLResult_t pgSQLClient_t::query(const char *const queryStmt) const noexcept
 	{ return {PQexec(connection, queryStmt)}; }
 
+pgSQLQuery_t pgSQLClient_t::prepare(const char *const queryStmt, const size_t paramsCount) const noexcept
+{
+	if (!valid() || !queryStmt)
+		return {};
+	return {connection, queryStmt, paramsCount};
+}
+
+pgSQLQuery_t::pgSQLQuery_t(PGconn *const conn, const char *const queryStmt, const size_t paramsCount) noexcept :
+	connection{conn}, query{queryStmt}, numParams{paramsCount}, paramTypes{paramsCount} { }
+
+pgSQLResult_t pgSQLQuery_t::execute() const noexcept
+{
+	if (!valid() || numParams > static_cast<size_t>(std::numeric_limits<int>::max()))
+		return {};
+	fixedVector_t<int> paramFormats{numParams};
+	if (!paramFormats)
+		return {};
+	// Postgres uses 1 to indicate binary, and 0 for string.
+	for (auto &format : paramFormats)
+		format = 1;
+	return {PQexecParams(connection, query, static_cast<int>(numParams), paramTypes.data(),
+		params.data(), dataLengths.data(), paramFormats.data(), 1)};
+}
+
+void pgSQLQuery_t::swap(pgSQLQuery_t &qry) noexcept
+{
+	std::swap(connection, qry.connection);
+	std::swap(query, qry.query);
+	std::swap(numParams, qry.numParams);
+	paramTypes.swap(qry.paramTypes);
+}
+
 pgSQLResult_t::pgSQLResult_t(PGresult *res) noexcept : result{res}
 {
 	if (!result)
