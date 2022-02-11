@@ -84,12 +84,12 @@ class testPgSQL_t final : public testsuite
 				OWNER postgres
 				TEMPLATE template0
 				ENCODING 'UTF8'
-				LOCALE 'C.UTF8'
+				LOCALE 'C'
 			;)"
 		)};
-		if (!result.valid())
-			printError(result);
 		assertTrue(result.valid());
+		if (!result.successful())
+			printError(result);
 		assertTrue(result.successful());
 	}
 
@@ -97,9 +97,9 @@ class testPgSQL_t final : public testsuite
 	{
 		assertTrue(client.valid());
 		const auto result{client.query(R"(DROP DATABASE "tmplORM";)")};
-		if (!result.valid())
-			printError(result);
 		assertTrue(result.valid());
+		if (!result.successful())
+			printError(result);
 		assertTrue(result.successful());
 	}
 
