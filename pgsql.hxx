@@ -35,6 +35,21 @@ enum class pgSQLErrorType_t : uint8_t
 	uuidError
 };
 
+enum class pgSQLType_t
+{
+	null,
+	boolean,
+	int2,
+	int4,
+	int8,
+	float4,
+	float8,
+	date,
+	time,
+	dateTime,
+	uuid
+};
+
 struct tmplORM_API pgSQLValue_t final
 {
 private:
