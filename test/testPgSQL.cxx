@@ -39,6 +39,13 @@ class testPgSQL_t final : public testsuite
 		return !(host.empty() || username.empty() || password.empty());
 	}
 
+	static void printError(const pgSQLResult_t &result) noexcept
+	{
+		const auto errorNum{result.errorNum()};
+		const auto error{result.error()};
+		printf("Query failed (%u): %s\n", errorNum, error);
+	}
+
 	void testInvalid()
 	{
 		pgSQLClient_t testClient{};
@@ -65,13 +72,35 @@ class testPgSQL_t final : public testsuite
 	void testConnect()
 	{
 		assertFalse(client.valid());
-		// const bool connected = client.connect(host, port, username, password, "postgres");
-		// if (!connected)
-		// 	printError("Connection", client.error());
-		// assertTrue(connected);
 		assertTrue(client.connect(host, port, username, password, "postgres"));
-		//assertTrue(client.error() == tSQLExecErrorType_t::ok);
 		assertTrue(client.valid());
+	}
+
+	void testCreateDB()
+	{
+		assertTrue(client.valid());
+		const auto result{client.query(R"(
+			CREATE DATABASE "tmplORM" WITH
+				OWNER postgres
+				TEMPLATE template0
+				ENCODING 'UTF8'
+				LOCALE 'C.UTF8'
+			;)"
+		)};
+		if (!result.valid())
+			printError(result);
+		assertTrue(result.valid());
+		assertTrue(result.successful());
+	}
+
+	void testDestroyDB()
+	{
+		assertTrue(client.valid());
+		const auto result{client.query(R"(DROP DATABASE "tmplORM";)")};
+		if (!result.valid())
+			printError(result);
+		assertTrue(result.valid());
+		assertTrue(result.successful());
 	}
 
 	void testDisconnect()
@@ -91,6 +120,8 @@ public:
 			skip("No suitable environment found, running only invalidity test");
 		CXX_TEST(testInvalid)
 		CXX_TEST(testConnect)
+		CXX_TEST(testCreateDB)
+		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
 	}
 };
