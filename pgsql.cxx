@@ -19,20 +19,12 @@ constexpr static int32_t postgresDateEpoch{2451545};
 
 pgSQLClient_t::pgSQLClient_t(pgSQLClient_t &&con) noexcept : pgSQLClient_t()
 	{ std::swap(connection, con.connection); }
-
-pgSQLClient_t::~pgSQLClient_t() noexcept
-{
-	if (connection)
-	{
-		if (needsCommit)
-			rollback();
-		PQfinish(connection);
-	}
-}
+pgSQLClient_t::~pgSQLClient_t() noexcept { disconnect(); }
 
 void pgSQLClient_t::operator=(pgSQLClient_t &&con) noexcept
 {
 	std::swap(connection, con.connection);
+	std::swap(needsCommit, con.needsCommit);
 }
 
 bool pgSQLClient_t::connect(const char *const host, const char *const port, const char *const user,
@@ -42,6 +34,17 @@ bool pgSQLClient_t::connect(const char *const host, const char *const port, cons
 		return false;
 	connection = PQsetdbLogin(host, port, nullptr, nullptr, db, user, passwd);
 	return valid();
+}
+
+void pgSQLClient_t::disconnect() noexcept
+{
+	if (connection)
+	{
+		if (needsCommit)
+			rollback();
+		PQfinish(connection);
+		connection = nullptr;
+	}
 }
 
 bool pgSQLClient_t::beginTransact() noexcept

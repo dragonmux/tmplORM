@@ -155,6 +155,7 @@ public:
 	 */
 	bool valid() const noexcept { return connection; }
 	bool connect(const char *host, const char *port, const char *user, const char *passwd, const char *db) noexcept;
+	void disconnect() noexcept;
 	bool beginTransact() noexcept;
 	bool endTransact(bool commitSuccess) noexcept;
 	bool commit() noexcept { return endTransact(true); }
