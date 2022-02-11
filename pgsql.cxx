@@ -137,12 +137,20 @@ Oid pgSQLQuery_t::typeToOID(pgSQLType_t type) noexcept
 			return FLOAT4OID;
 		case pgSQLType_t::float8:
 			return FLOAT8OID;
+		case pgSQLType_t::unicode:
+			return VARCHAROID;
+		case pgSQLType_t::unicodeText:
+			return TEXTOID;
+		case pgSQLType_t::binary:
+			return BYTEAOID;
 		case pgSQLType_t::date:
 			return DATEOID;
 		case pgSQLType_t::time:
 			return TIMEOID;
 		case pgSQLType_t::dateTime:
 			return TIMESTAMPOID;
+		case pgSQLType_t::uuid:
+			return UUIDOID;
 		case pgSQLType_t::null:
 		default:
 			return ANYOID;
