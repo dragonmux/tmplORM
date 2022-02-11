@@ -21,6 +21,7 @@ namespace tmplORM
 		{
 struct pgSQLClient_t;
 using namespace tmplORM::types::baseTypes;
+using tmplORM::common::fieldLength_t;
 
 enum class pgSQLErrorType_t : uint8_t
 {
@@ -193,6 +194,8 @@ public:
 	 */
 	bool valid() const noexcept { return connection && query; }
 	pgSQLResult_t execute() const noexcept;
+	template<typename T> void bind(const size_t index, const T &value, const fieldLength_t length) noexcept;
+	template<typename T> void bind(const size_t index, const std::nullptr_t, const fieldLength_t length) noexcept;
 	void swap(pgSQLQuery_t &qry) noexcept;
 
 	/*! @brief Deleted copy constructor for pgSQLQuery_t as prepared queries are not copyable */

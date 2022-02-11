@@ -37,10 +37,54 @@ namespace tmplORM
 		template<> struct stringType_t<ormUUID_t> { using value = ts("UUID"); };
 		template<typename T> using stringType = typename stringType_t<T>::value;
 
-		template<typename> struct bind_t { };
-
 		namespace driver
 		{
+			template<typename> struct bind_t { };
+			template<> struct bind_t<int8_t> { constexpr static auto value = pgSQLType_t::int2; };
+			template<> struct bind_t<int16_t> { constexpr static auto value = pgSQLType_t::int2; };
+			template<> struct bind_t<int32_t> { constexpr static auto value = pgSQLType_t::int4; };
+			template<> struct bind_t<int64_t> { constexpr static auto value = pgSQLType_t::int8; };
+			template<> struct bind_t<bool> { constexpr static auto value = pgSQLType_t::boolean; };
+			template<> struct bind_t<float> { constexpr static auto value = pgSQLType_t::float4; };
+			template<> struct bind_t<double> { constexpr static auto value = pgSQLType_t::float8; };
+			template<> struct bind_t<char *> { constexpr static auto value = pgSQLType_t::unicode; };
+			template<> struct bind_t<void *> { constexpr static auto value = pgSQLType_t::binary; };
+			template<> struct bind_t<ormDate_t> { constexpr static auto value = pgSQLType_t::date; };
+			//template<> struct bind_t<ormTime_t> { constexpr static auto value = pgSQLType_t::time; };
+			template<> struct bind_t<ormDateTime_t> { constexpr static auto value = pgSQLType_t::dateTime; };
+			template<> struct bind_t<ormUUID_t> { constexpr static auto value = pgSQLType_t::uuid; };
+
+			template<typename T> struct bindLength_t { constexpr static int32_t length = sizeof(T); };
+			template<> struct bindLength_t<ormDate_t> { constexpr static int32_t length = sizeof(int32_t); };
+			template<> struct bindLength_t<ormDateTime_t> { constexpr static int32_t length = sizeof(int64_t); };
+
+			template<bool> struct bindValue_t
+			{
+			};
+
+			template<> struct bindValue_t<true>
+			{
+				static const char *bind(const void *const value, managedPtr_t<void> &) noexcept
+					{ return static_cast<const char *>(value); }
+			};
+
+			template<typename T> using bindValue = bindValue_t<std::is_pointer<T>::value>;
+
+			template<typename T> void pgSQLQuery_t::bind(const size_t index, const T &value,
+				const fieldLength_t length) noexcept
+			{
+				paramTypes[index] = typeToOID(bind_t<T>::value);
+				params[index] = bindValue<T>::bind(value, paramStorage[index]);
+				dataLengths[index] = length.first ? length.first : bindLength_t<T>::length;
+			}
+
+			template<typename T> void pgSQLQuery_t::bind(const size_t index, const nullptr_t,
+				const fieldLength_t length) noexcept
+			{
+				paramTypes[index] = typeToOID(pgSQLType_t::null);
+				params[index] = nullptr;
+				dataLengths[index] = 0;
+			}
 		} // namespace driver
 
 		template<typename name> using doubleQuote = tycat<ts("\""), name, ts("\"")>;
