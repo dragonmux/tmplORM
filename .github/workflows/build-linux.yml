@@ -64,6 +64,8 @@ jobs:
           echo "MYSQL_HOST=127.0.0.1" >> $GITHUB_ENV
           echo "MYSQL_USERNAME=root" >> $GITHUB_ENV
           echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> $GITHUB_ENV
+          echo "PGSQL_HOST=127.0.0.1" >> $GITHUB_ENV
+          echo "PGSQL_USERNAME=postgres" >> $GITHUB_ENV
           echo "PGSQL_PASSWORD=${{ secrets.PGSQL_PASSWORD }}" >> $GITHUB_ENV
       - name: Coverage environment
         env:
