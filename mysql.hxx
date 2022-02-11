@@ -220,7 +220,8 @@ public:
 	 * @returns true if the object is valid, false otherwise
 	 */
 	bool valid() const noexcept { return columns.valid(); }
-	template<typename T> void bind(const size_t index, const fieldLength_t length) noexcept { columns.bindOut<T>(index, length); }
+	template<typename T> void bind(const size_t index, const fieldLength_t length) noexcept
+		{ columns.bindOut<T>(index, length); }
 	void bindForBuffer(const size_t index) noexcept;
 	uint64_t numRows() const noexcept;
 	bool next() const noexcept;
