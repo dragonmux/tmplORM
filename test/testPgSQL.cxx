@@ -52,13 +52,13 @@ class testPgSQL_t final : public testsuite
 		assertFalse(testClient.valid());
 		assertFalse(testClient.switchDB(nullptr));
 		assertFalse(testClient.query("").valid());
-		// assertFalse(testClient.prepare("", 0).valid());
+		assertFalse(testClient.prepare("", 0).valid());
 		assertFalse(testClient.beginTransact());
 		assertTrue(testClient.commit());
 		assertTrue(testClient.rollback());
-		// pgSQLQuery_t testQuery{};
-		// assertFalse(testQuery.valid());
-		// assertFalse(testQuery.execute().valid());
+		pgSQLQuery_t testQuery{};
+		assertFalse(testQuery.valid());
+		assertFalse(testQuery.execute().valid());
 		pgSQLResult_t testResult{};
 		assertFalse(testResult.valid());
 		assertEqual(testResult.errorNum(), static_cast<uint32_t>(PGRES_COMMAND_OK));
