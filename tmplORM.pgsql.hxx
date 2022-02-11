@@ -1,6 +1,7 @@
 #ifndef tmplORM_PGSQL_HXX
 #define tmplORM_PGSQL_HXX
 
+#include <substrate/buffer_utils>
 #include "tmplORM.hxx"
 #include "pgsql.hxx"
 
@@ -60,6 +61,12 @@ namespace tmplORM
 
 			template<bool> struct bindValue_t
 			{
+				template<typename T> static const char *bind(const T &value, managedPtr_t<void> &paramStorage) noexcept
+				{
+					paramStorage = substrate::make_managed_nothrow<T>();
+					substrate::buffer_utils::writeBE(value, paramStorage.get());
+					return static_cast<const char *>(paramStorage.get());
+				}
 			};
 
 			template<> struct bindValue_t<true>
