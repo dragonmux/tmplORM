@@ -50,6 +50,7 @@ class testPgSQL_t final : public testsuite
 	{
 		pgSQLClient_t testClient{};
 		assertFalse(testClient.valid());
+		assertFalse(testClient.switchDB(nullptr));
 		assertFalse(testClient.query("").valid());
 		// assertFalse(testClient.prepare("", 0).valid());
 		assertFalse(testClient.beginTransact());
@@ -72,7 +73,11 @@ class testPgSQL_t final : public testsuite
 	void testConnect()
 	{
 		assertFalse(client.valid());
+		assertFalse(client.connect(nullptr, nullptr, nullptr, nullptr, nullptr));
+		assertFalse(client.valid());
 		assertTrue(client.connect(host, port, username, password, "postgres"));
+		assertTrue(client.valid());
+		assertFalse(client.connect(nullptr, nullptr, nullptr, nullptr, nullptr));
 		assertTrue(client.valid());
 	}
 
@@ -93,6 +98,15 @@ class testPgSQL_t final : public testsuite
 		assertTrue(result.successful());
 		assertTrue(client.switchDB("tmplORM"));
 		assertTrue(client.valid());
+	}
+
+	void testSwitchDB()
+	{
+		pgSQLClient_t testClient{};
+		assertFalse(testClient.valid());
+		assertTrue(testClient.connect(host, port, username, password, "postgres"));
+		assertTrue(testClient.switchDB(nullptr));
+		assertTrue(testClient.valid());
 	}
 
 	void testCreateTable()
@@ -171,6 +185,7 @@ public:
 		CXX_TEST(testInvalid)
 		CXX_TEST(testConnect)
 		CXX_TEST(testCreateDB)
+		CXX_TEST(testSwitchDB)
 		CXX_TEST(testCreateTable)
 		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
