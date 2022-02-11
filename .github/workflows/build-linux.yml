@@ -191,8 +191,6 @@ jobs:
           ninja -C build test
       - name: Install
         run: ninja -C build install
-      # If these next steps don't work, grab https://uploader.codecov.io/latest/linux/codecov
-      # down and use the -g option to process gcov output directly.
       - name: Coverage prep
         if: success() && matrix.coverage
         run: gcovr -r .. -x coverage.xml --gcov-executable "$GCOV" -e ../deps -e ../test
