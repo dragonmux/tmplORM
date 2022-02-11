@@ -48,10 +48,14 @@ class testPgSQL_t final : public testsuite
 		// assertFalse(testQuery.execute().valid());
 		pgSQLResult_t testResult{};
 		assertFalse(testResult.valid());
+		assertEqual(testResult.errorNum(), static_cast<uint32_t>(PGRES_COMMAND_OK));
+		assertNull(testResult.error());
+		assertTrue(testResult.successful());
 		assertEqual(testResult.numRows(), 0);
 		assertFalse(testResult.next());
-		assertTrue(testResult[0].isNull());
+		assertFalse(testResult[0].valid());
 		pgSQLValue_t testValue{};
+		assertFalse(testValue.valid());
 		assertTrue(testValue.isNull());
 	}
 
