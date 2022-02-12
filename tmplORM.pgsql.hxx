@@ -137,7 +137,7 @@ namespace tmplORM
 			template<typename T> void pgSQLQuery_t::bind(const size_t index, const nullptr_t,
 				const fieldLength_t length) noexcept
 			{
-				paramTypes[index] = typeToOID(pgSQLType_t::null);
+				paramTypes[index] = typeToOID(bind_t<T>::value);
 				params[index] = nullptr;
 				dataLengths[index] = 0;
 			}

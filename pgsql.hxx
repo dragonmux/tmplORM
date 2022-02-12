@@ -38,7 +38,6 @@ enum class pgSQLErrorType_t : uint8_t
 
 enum class pgSQLType_t
 {
-	null,
 	boolean,
 	int2,
 	int4,

@@ -152,9 +152,8 @@ Oid pgSQLQuery_t::typeToOID(pgSQLType_t type) noexcept
 			return TIMESTAMPOID;
 		case pgSQLType_t::uuid:
 			return UUIDOID;
-		case pgSQLType_t::null:
 		default:
-			return ANYOID;
+			return InvalidOid;
 	}
 }
 
