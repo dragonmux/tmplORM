@@ -312,7 +312,7 @@ private:
 	{
 		assertNotNull(testClient);
 		assertTrue(testClient->valid());
-		tSQLResult_t result;
+		tSQLResult_t result{};
 		assertFalse(result.valid());
 		const bool started{testClient->beginTransact()};
 		if (!started)
@@ -384,23 +384,27 @@ private:
 	{
 		assertNotNull(testClient);
 		assertTrue(testClient->valid());
-		tSQLResult_t result;
+		tSQLResult_t result{};
 		assertFalse(result.valid());
 
 		// Set up our UUID value.
-		const auto now = systemClock_t::now().time_since_epoch();
-		const uint64_t time = durationIn<milliseconds>(now);
-		const auto nanoSeconds = (now - milliseconds{time}).count();
-		typeData.uuid.value(ormUUID_t{uint32_t(time), uint16_t(time >> 32),
-			uint16_t(0x1000 | ((time >> 48) & 0x0FFF)),
-			uint16_t((nanoSeconds >> 14) | 0x8000), swapBytes(uint64_t{0x123456789ABCU}) >> 16});
+		const auto now{systemClock_t::now().time_since_epoch()};
+		const uint64_t time{durationIn<milliseconds>(now)};
+		const auto nanoSeconds{(now - milliseconds{time}).count()};
+		typeData.uuid.value(ormUUID_t{uint32_t(time), uint16_t(time >> 32U),
+			uint16_t(0x1000U | ((time >> 48U) & 0x0FFFU)),
+			uint16_t((nanoSeconds >> 14U) | 0x8000U), swapBytes(u64(0x123456789ABC)) >> 16U});
 
-		tSQLQuery_t query{testClient->prepare(
-			"INSERT INTO [TypeTest] ([Int64], [Int32], [Int16], [Int8], "
-			"[Bool], [String], [Text], [Float], [Double], [Date], "
-			"[DateTime], [UUID]) OUTPUT INSERTED.[EntryID] "
-			"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", 12
-		)};
+		auto query
+		{
+			testClient->prepare(R"(
+				INSERT INTO [TypeTest] ([Int64], [Int32], [Int16], [Int8],
+				[Bool], [String], [Text], [Float], [Double], [Date],
+				[DateTime], [UUID]) OUTPUT INSERTED.[EntryID]
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+				)", 12
+			)
+		};
 		assertTrue(query.valid());
 		query.bind(0, typeData.int64.value(), fieldLength(typeData.int64));
 		assertTrue(testClient->error() == tSQLExecErrorType_t::ok);
