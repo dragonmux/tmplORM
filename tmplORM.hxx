@@ -14,7 +14,9 @@
 #include <tmplORM.extern.hxx>
 #include <tmplORM.types.hxx>
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ts(x) typestring_is(x)
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ts_(x) ts(x)()
 
 using substrate::fixedVector_t;
@@ -37,7 +39,9 @@ namespace tmplORM
 
 		// This is strictly only required to work around a bug in MSVC++, however it turns out to be useful when writing the generator aliases per-engine.
 		template<typename> struct toString { };
+		// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 		template<char... C> struct toString<typestring<C...>> { static const char value[sizeof...(C) + 1]; };
+		// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 		template<char... C> const char toString<typestring<C...>>::value[sizeof...(C) + 1] = {C..., '\0'};
 
 	}
@@ -49,9 +53,9 @@ namespace tmplORM
 	protected:
 		constexpr static const size_t N = sizeof...(Fields);
 		// NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-		std::tuple<Fields...> _fields;
+		std::tuple<Fields...> _fields{};
 
-		constexpr fields_t() noexcept : _fields{} { }
+		constexpr fields_t() noexcept = default;
 		constexpr fields_t(Fields &&...fields) noexcept : _fields{fields...} { }
 
 	public:
@@ -88,14 +92,14 @@ namespace tmplORM
 		constexpr char toUpper(const char x) noexcept { return isLowerCase(x) ? char(x - 0x20) : x; }
 		constexpr bool isUnderscore(const char x) noexcept { return x == '_'; }
 
-		template<char...> struct isUpperCase__t;
-		template<char x, char... C> struct isUpperCase__t<x, C...>
-			{ constexpr static bool value = isUpperCase(x) && isUpperCase__t<C...>::value; };
-		template<> struct isUpperCase__t<> { constexpr static bool value = true; };
+		template<char...> struct isUpperCaseC_t;
+		template<char x, char... C> struct isUpperCaseC_t<x, C...>
+			{ constexpr static bool value = isUpperCase(x) && isUpperCaseC_t<C...>::value; };
+		template<> struct isUpperCaseC_t<> { constexpr static bool value = true; };
 
 		template<typename> struct isUpperCase_t;
 		template<char... C> struct isUpperCase_t<typestring<C...>>
-			{ constexpr static bool value = isUpperCase__t<C...>::value; };
+			{ constexpr static bool value = isUpperCaseC_t<C...>::value; };
 
 		template<char...> struct hasUnderscore_t;
 		template<char x, char... C> struct hasUnderscore_t<x, C...>
@@ -143,14 +147,14 @@ namespace tmplORM
 		{
 		protected:
 			// NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-			T _value;
+			T _value{};
 
 		/*private:
-			bool _modified;*/
+			bool _modified{false};*/
 
 		public:
-			constexpr type_t() noexcept : _value()/*, _modified(false)*/ { }
-			constexpr type_t(const T value) noexcept : _value(value)/*, _modified(false)*/ { }
+			constexpr type_t() noexcept = default;
+			constexpr type_t(const T value) noexcept : _value{value} { }
 
 			constexpr const char *fieldName() const noexcept { return _fieldName::data(); }
 			const T &value() const noexcept { return _value; }
@@ -216,7 +220,7 @@ namespace tmplORM
 		template<typename T> struct nullable_t : public T
 		{
 		private:
-			bool _null;
+			bool _null{true};
 
 			template<typename value_t = typename T::type> typename std::enable_if<std::is_same<value_t, typename T::type>::value && !std::is_pointer<value_t>::value, value_t>::type
 				_value() const noexcept { return T::value(); }
@@ -229,7 +233,7 @@ namespace tmplORM
 			using T::operator !=;
 			constexpr static bool nullable = true;
 
-			constexpr nullable_t() noexcept : T{}, _null{true} { }
+			constexpr nullable_t() noexcept = default;
 			constexpr nullable_t(const nullptr_t) noexcept : nullable_t{} { }
 			constexpr nullable_t(const type &value) noexcept : T{value}, _null{false} { }
 			bool isNull() const noexcept { return _null; }
@@ -242,19 +246,23 @@ namespace tmplORM
 
 			void operator =(const nullptr_t) noexcept { value(nullptr); }
 			void operator =(const type &_value) noexcept { value(_value); }
-			const type value() const noexcept { return _value(); }
+			type value() const noexcept { return _value(); }
 			type value() noexcept { return T::value(); }
 			void value(const type &_value) noexcept { _null = false; T::value(_value); }
 			operator type() const noexcept { return _value(); }
 
 			template<typename U = type, typename = enableIf<isSame<U, const char *>::value>>
+				// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 				void operator =(const std::unique_ptr<char []> &_value) noexcept { value(_value.get()); }
 			template<typename U = type, typename = enableIf<isSame<U, const char *>::value>>
+				// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 				void operator =(std::unique_ptr<char []> &&_value) noexcept { value(_value.release()); }
 			template<typename U = type, typename = enableIf<isSame<U, const char *>::value>>
+				// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 				void value(const std::unique_ptr<char []> &_value) noexcept { value(_value.get()); }
 			// TODO: This is bad.. it works, but it leaks.
 			template<typename U = type, typename = enableIf<isSame<U, const char *>::value>>
+				// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 				void value(std::unique_ptr<char []> &&_value) noexcept { value(_value.release()); }
 		};
 
@@ -276,10 +284,14 @@ namespace tmplORM
 			constexpr unicode_t(const type value) noexcept : parentType_t{value} { }
 			size_t length() const noexcept { return value() ? std::char_traits<char>::length(value()) : 0; }
 
+			// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 			void operator =(const std::unique_ptr<char []> &_value) noexcept { value(_value); }
+			// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 			void operator =(std::unique_ptr<char []> &&_value) noexcept { value(std::move(_value)); }
+			// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 			void value(const std::unique_ptr<char []> &_value) noexcept { value(_value.get()); }
 			// TODO: This is bad.. it works, but it leaks.
+			// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 			void value(std::unique_ptr<char []> &&_value) noexcept { value(_value.release()); }
 		};
 
@@ -301,10 +313,14 @@ namespace tmplORM
 			constexpr unicodeText_t(const type value) noexcept : parentType_t{value} { }
 			size_t length() const noexcept { return value() ? std::char_traits<char>::length(value()) : 0; }
 
+			// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 			void operator =(const std::unique_ptr<char []> &_value) noexcept { value(_value); }
+			// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 			void operator =(std::unique_ptr<char []> &&_value) noexcept { value(std::move(_value)); }
+			// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 			void value(const std::unique_ptr<char []> &_value) noexcept { value(_value.get()); }
 			// TODO: This is bad.. it works, but it leaks.
+			// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 			void value(std::unique_ptr<char []> &&_value) noexcept { value(_value.release()); }
 		};
 
@@ -457,7 +473,7 @@ namespace tmplORM
 				void value(const ormDateTime_t &_value) noexcept { value(static_cast<const ormTime_t &>(_value)); }
 			};
 
-			template<typename _fieldName> struct dateTime_t : public type_t<_fieldName, _dateTime_t>
+			template<typename _fieldName> struct dateTime_t : type_t<_fieldName, _dateTime_t>
 			{
 			private:
 				using parentType_t = type_t<_fieldName, _dateTime_t>;
