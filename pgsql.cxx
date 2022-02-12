@@ -95,7 +95,7 @@ bool pgSQLClient_t::endTransact(const bool commitSuccess) noexcept
 }
 
 pgSQLResult_t pgSQLClient_t::query(const char *const queryStmt) const noexcept
-	{ return {PQexec(connection, queryStmt)}; }
+	{ return {PQexecParams(connection, queryStmt, 0, nullptr, nullptr, nullptr, nullptr, 1)}; }
 
 pgSQLQuery_t pgSQLClient_t::prepare(const char *const queryStmt, const size_t paramsCount) const noexcept
 {
