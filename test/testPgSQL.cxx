@@ -16,13 +16,56 @@
  */
 
 using namespace tmplORM::pgsql::driver;
+using irqus::typestring;
+using tmplORM::pgsql::fieldLength;
 using tmplORM::types::baseTypes::ormDateTime_t;
 
 using systemClock_t = std::chrono::system_clock;
+#define u64(n)		UINT64_C(n)
+#define i64(n)		INT64_C(n)
 
 static ormDateTime_t now = systemClock_t::now();
-constexpr static int64_t usPerDay{INT64_C(86400000000)};
-constexpr static int64_t usPerHour{INT64_C(3600000000)};
+constexpr static int64_t usPerDay{i64(86400000000)};
+constexpr static int64_t usPerHour{i64(3600000000)};
+
+struct data_t final
+{
+	tmplORM::types::int32_t<typestring<>> entryID;
+	tmplORM::types::unicode_t<typestring<>, 50> name;
+	tmplORM::types::nullable_t<tmplORM::types::int32_t<typestring<>>> value;
+	tmplORM::types::dateTime_t<typestring<>> when;
+};
+
+struct type_t final
+{
+	tmplORM::types::int32_t<typestring<>> entryID;
+	tmplORM::types::int64_t<typestring<>> int64;
+	tmplORM::types::int32_t<typestring<>> int32;
+	tmplORM::types::int16_t<typestring<>> int16;
+	tmplORM::types::bool_t<typestring<>> boolean;
+	tmplORM::types::unicode_t<typestring<>, 50> string;
+	tmplORM::types::unicodeText_t<typestring<>> text;
+	tmplORM::types::float_t<typestring<>> decimalF;
+	tmplORM::types::double_t<typestring<>> decimalD;
+	tmplORM::types::date_t<typestring<>> date;
+	tmplORM::types::dateTime_t<typestring<>> dateTime;
+	tmplORM::types::uuid_t<typestring<>> uuid;
+};
+
+static std::array<data_t, 2> testData
+{{
+	{0, "kevin", 50, {}},
+	{0, "dave", nullptr, {}}
+}};
+
+static type_t typeData
+{
+	0, i64(9223372036854775807), 2147483647,
+	32767, true, "This is a string", "This is some text",
+	2.125, 5.325, ormDate_t{2018, 07, 04},
+	ormDateTime_t{2018, 07, 04, 12, 34, 56, 789012345},
+	ormUUID_t{}
+};
 
 class testPgSQL_t final : public testsuite
 {
@@ -159,6 +202,33 @@ class testPgSQL_t final : public testsuite
 		assertTrue(result.successful());
 	}
 
+	void testPrepared() try
+	{
+		assertTrue(client.valid());
+		pgSQLQuery_t query{};
+		assertFalse(query.valid());
+		pgSQLResult_t result{};
+		assertFalse(result.valid());
+
+		query = client.prepare(R"(
+			INSERT INTO "tmplORM" ("Name", "Value")
+			VALUES ($1, $2) RETURNING "EntryID";)", 2
+		);
+		assertTrue(query.valid());
+		query.bind(0, testData[0].name.value(), fieldLength(testData[0].name));
+		query.bind(1, testData[0].value.value(), fieldLength(testData[0].value));
+		result = query.execute();
+		assertTrue(result.valid());
+		if (!result.successful())
+			printError(result);
+		assertTrue(result.successful());
+	}
+	catch (const pgSQLValueError_t &error)
+	{
+		puts(error.error());
+		fail("Exception throw while converting value");
+	}
+
 	void testDestroyDB()
 	{
 		assertTrue(client.valid());
@@ -193,6 +263,7 @@ public:
 		CXX_TEST(testCreateDB)
 		CXX_TEST(testSwitchDB)
 		CXX_TEST(testCreateTable)
+		CXX_TEST(testPrepared)
 		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
 	}
