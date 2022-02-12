@@ -293,6 +293,12 @@ private:
 		assertTrue(result[2].isNull());
 		// Apply MSSQL rounding..
 		now.nanoSecond((now.nanoSecond() / 100) * 100);
+		if (result[3].asDateTime() != now)
+		{
+			const auto nowStr{now.asString()};
+			const auto resStr{result[3].asDateTime().asString()};
+			printf("Got %s, expected %s\n", resStr.get(), nowStr.get());
+		}
 		assertTrue(result[3].asDateTime() == now);
 		assertFalse(result.next());
 	}
