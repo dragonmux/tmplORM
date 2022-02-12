@@ -221,7 +221,7 @@ bool pgSQLResult_t::next() noexcept
 
 pgSQLValue_t pgSQLResult_t::operator [](const uint32_t idx) const noexcept
 {
-	if (idx > fields || !valid())
+	if (!valid() || row >= rows || idx > fields)
 		return {};
 	else if (PQgetisnull(result, static_cast<int>(row), static_cast<int>(idx)) == 1)
 		return {nullptr};
