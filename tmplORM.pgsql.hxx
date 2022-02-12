@@ -251,6 +251,12 @@ namespace tmplORM
 		template<typename tableName, typename... fields> using update_ = toString<typename update_t<sizeof...(fields) ==
 			countPrimary<fields...>::count, tableName, fields...>::value>;
 
+		template<typename field_t> constexpr fieldLength_t fieldLength(const field_t &) noexcept { return {0, 0}; }
+		template<typename fieldName, size_t length> fieldLength_t fieldLength(const unicode_t<fieldName, length> &field) noexcept
+			{ return {field.length(), length}; }
+		template<typename fieldName> fieldLength_t fieldLength(const unicodeText_t<fieldName> &field) noexcept
+			{ return {field.length(), 0}; }
+
 		template<typename> struct createName_t { };
 		template<typename fieldName, typename T> struct createName_t<type_t<fieldName, T>>
 			{ using value = tycat<doubleQuote<fieldName>, ts(" "), stringType<T>>; };
