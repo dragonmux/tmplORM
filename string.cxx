@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: BSD-3-Clause
 #include <cstring>
 #include <new>
 #include <limits>
@@ -7,37 +8,49 @@
 /*!
  * @file
  * @author Rachel Mant
- * @date 2016-2020
+ * @date 2016-2022
  * @brief Implementation of various string helpers which ideally would be in the STL
  */
 
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays,cert-dcl50-cpp)
 std::unique_ptr<const char []> formatString(const char *format, ...) noexcept
 {
 	va_list args;
+	// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
 	va_start(args, format);
+	// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
 	auto ret = vaFormatString(format, args);
+	// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
 	va_end(args);
 	return ret;
 }
 
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 std::unique_ptr<const char []> vaFormatString(const char *format, va_list args) noexcept
 {
 	va_list lenArgs{};
+	// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
 	va_copy(lenArgs, args);
-	const size_t len = vsnprintf(nullptr, 0, format, lenArgs) + 1;
+	// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
+	const size_t len = static_cast<size_t>(vsnprintf(nullptr, 0, format, lenArgs)) + 1U;
+	// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
 	va_end(lenArgs);
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 	auto ret = substrate::make_unique_nothrow<char []>(len);
 	if (!ret)
 		return nullptr;
 	vsprintf(ret.get(), format, args);
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 	return std::unique_ptr<const char []>(ret.release());
 }
 
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 std::unique_ptr<char []> stringDup(const char *const str) noexcept
 {
 	if (!str)
 		return nullptr;
 	const size_t length = strlen(str) + 1;
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 	auto ret = substrate::make_unique_nothrow<char []>(length);
 	if (!ret)
 		return nullptr;
@@ -91,18 +104,17 @@ size_t countUnits(const char *const str) noexcept
 			else if ((byteA & 0x70U) == 0x60U)
 			{
 				// 3 code units.. check that the second and third units are valid and return 0 if not
-				if (!isMultiValid(byteB, safeIndex(str, ++i, len)))
-					return 0;
-				// Also check that the code unit is valid (not D800-DF00)
-				else if ((byteA & 0x0FU) == 0x0DU && (byteB & 0x20U))
+				if (!isMultiValid(byteB, safeIndex(str, ++i, len)) ||
+					// Also check that the code unit is valid (not D800-DF00)
+					((byteA & 0x0FU) == 0x0DU && (byteB & 0x20U)))
 					return 0;
 			}
 			else if ((byteA & 0x78U) == 0x70U)
 			{
 				// 4 code units.. check that the second, third and fourth units are valid
-				if (!isMultiValid(byteB, safeIndex(str, i + 1, len), safeIndex(str, i + 2, len)))
+				if (!isMultiValid(byteB, safeIndex(str, i + 1, len), safeIndex(str, i + 2U, len)))
 					return 0;
-				i += 2;
+				i += 2U;
 				++count;
 			}
 			else
@@ -160,6 +172,7 @@ utf16_t utf16::convert(const char *const str) noexcept
 	const size_t lenUTF16 = countUnits(str);
 	if (!lenUTF16)
 		return nullptr;
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 	auto result = substrate::make_unique_nothrow<char16_t []>(lenUTF16);
 	if (!result)
 		return nullptr;
@@ -201,6 +214,7 @@ utf8_t utf16::convert(const char16_t *const str) noexcept
 	const size_t lenUTF8 = countUnits(str);
 	if (!lenUTF8)
 		return nullptr;
+	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
 	auto result = substrate::make_unique_nothrow<char []>(lenUTF8);
 	if (!result)
 		return nullptr;
