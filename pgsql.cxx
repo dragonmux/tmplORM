@@ -337,7 +337,7 @@ ormDate_t pgSQLValue_t::asDate() const
 
 ormDateTime_t pgSQLValue_t::asDateTime() const
 {
-	auto timestamp = asInt<int64_t, TIMESTAMPOID, pgSQLErrorType_t::dateTimeError>();
+	auto timestamp{asInt<int64_t, TIMESTAMPOID, pgSQLErrorType_t::dateTimeError>()};
 	const auto microseconds{static_cast<uint32_t>(timestamp % 1000000)};
 	timestamp /= 1000000;
 	const auto seconds{static_cast<uint8_t>(timestamp % 60)};
