@@ -222,6 +222,14 @@ class testPgSQL_t final : public testsuite
 		if (!result.successful())
 			printError(result);
 		assertTrue(result.successful());
+
+		// assertTrue(result.hasData());
+		assertEqual(result.numRows(), 1);
+		assertEqual(result.numFields(), 1);
+		assertTrue(result[0].valid());
+		assertFalse(result[0].isNull());
+		testData[0].entryID = result[0];
+		assertEqual(testData[0].entryID, 1);
 	}
 	catch (const pgSQLValueError_t &error)
 	{
