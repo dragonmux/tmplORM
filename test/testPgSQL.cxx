@@ -89,6 +89,9 @@ class testPgSQL_t final : public testsuite
 		printf("Query failed (%u): %s\n", errorNum, error);
 	}
 
+	static void printError(const pgSQLClient_t &client, const char *const prefix) noexcept
+		{ printf("%s failed: %s\n", prefix, client.error()); }
+
 	void testInvalid()
 	{
 		pgSQLClient_t testClient{};
@@ -304,6 +307,80 @@ class testPgSQL_t final : public testsuite
 		fail("Exception thrown while converting value");
 	}
 
+	void testTransact()
+	{
+		assertTrue(client.valid());
+		pgSQLResult_t result{};
+		assertFalse(result.valid());
+		const auto started{client.beginTransact()};
+		if (!started)
+			printError(client, "Start transaction");
+		assertTrue(started);
+		assertFalse(client.beginTransact());
+
+		result = client.query(R"(UPDATE "tmplORM" SET "Name" = 'Karl' WHERE "EntryID" = '1';)");
+		assertTrue(result.valid());
+		if (!result.successful())
+		{
+			printError(result);
+			client.rollback();
+		}
+		assertTrue(result.successful());
+		assertFalse(result.hasData());
+		assertEqual(result.numRows(), 0);
+		assertEqual(result.numFields(), 0);
+
+		const bool rolledBack{client.rollback()};
+		if (!rolledBack)
+			printError(client, "Abort transaction");
+		assertTrue(rolledBack);
+		//assertFalse(client.rollback());
+
+		result = client.query(R"(SELECT "Name" FROM "tmplORM" WHERE "EntryID" = '1';)");
+		assertTrue(result.valid());
+		if (!result.successful())
+			printError(result);
+		assertTrue(result.successful());
+		assertTrue(result.hasData());
+		assertEqual(result.numRows(), 1);
+		assertEqual(result.numFields(), 1);
+		assertEqual(result[0].asString(), testData[0].name);
+		assertFalse(result.next());
+
+		const auto restarted{client.beginTransact()};
+		if (!restarted)
+			printError(client, "Start transaction");
+		assertTrue(restarted);
+
+		result = client.query(R"(UPDATE "tmplORM" SET "Name" = 'Karl' WHERE "EntryID" = '1';)");
+		assertTrue(result.valid());
+		if (!result.successful())
+		{
+			printError(result);
+			client.rollback();
+		}
+		assertTrue(result.successful());
+		assertFalse(result.hasData());
+		assertEqual(result.numRows(), 0);
+		assertEqual(result.numFields(), 0);
+
+		const auto committed{client.commit()};
+		if (!committed)
+			printError(client, "Commit transaction");
+		assertTrue(committed);
+
+		result = client.query(R"(SELECT "Name" FROM "tmplORM" WHERE "EntryID" = '1';)");
+		assertTrue(result.valid());
+		if (!result.successful())
+			printError(result);
+		assertTrue(result.successful());
+		assertTrue(result.hasData());
+		assertEqual(result.numRows(), 1);
+		assertEqual(result.numFields(), 1);
+		assertEqual(result[0].asString(), "Karl");
+		assertFalse(result.next());
+	}
+
 	void testDestroyDB()
 	{
 		assertTrue(client.valid());
@@ -340,6 +417,7 @@ public:
 		CXX_TEST(testCreateTable)
 		CXX_TEST(testPrepared)
 		CXX_TEST(testResult)
+		CXX_TEST(testTransact)
 		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
 	}
