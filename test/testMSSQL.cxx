@@ -144,7 +144,7 @@ private:
 	{
 		assertNotNull(testClient);
 		assertTrue(testClient->valid());
-		tSQLResult_t result = testClient->query("CREATE DATABASE [tmplORM] COLLATE latin1_general_100_CI_AI_SC;");
+		const auto result = testClient->query("CREATE DATABASE [tmplORM] COLLATE latin1_general_100_CI_AI_SC;");
 		if (!result.valid())
 			printError("Query", testClient->error());
 		assertTrue(result.valid());
@@ -270,7 +270,7 @@ private:
 	{
 		assertNotNull(testClient);
 		assertTrue(testClient->valid());
-		tSQLResult_t result{testClient->query("SELECT [EntryID], [Name], [Value], [When] FROM [tmplORM];")};
+		auto result{testClient->query("SELECT [EntryID], [Name], [Value], [When] FROM [tmplORM];")};
 		if (testClient->error() != tSQLExecErrorType_t::ok)
 			printError("Query", testClient->error());
 		assertTrue(result.valid());
@@ -282,7 +282,7 @@ private:
 		assertFalse(result[2].isNull());
 		assertEqual(result[2], testData[0].value);
 		testData[0].when = result[3];
-		auto when = testData[0].when.value();
+		const auto when{testData[0].when.value()};
 		assertNotEqual(when.year(), 0);
 		assertNotEqual(when.month(), 0);
 		assertNotEqual(when.day(), 0);
