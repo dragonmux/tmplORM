@@ -3,6 +3,7 @@
 #define tmplORM_TYPES_HXX
 
 #include <cstring>
+#include <substrate/promotion_helpers>
 #include <substrate/conversions>
 #include "string.hxx"
 
@@ -459,21 +460,22 @@ namespace tmplORM
 				// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 				std::unique_ptr<char []> asString() const noexcept
 				{
+					using arithUInt_t = substrate::promoted_type_t<uint8_t>;
 					std::array<uint8_t, sizeof(guid_t)> buffer{};
 					// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
 					auto str = substrate::make_unique_nothrow<char []>(36);
 					if (!str)
 						return nullptr;
 					memcpy(buffer.data(), asPointer(), sizeof(guid_t));
-					for (uint8_t i{0}, j{0}; i < 16; ++i)
+					for (size_t i{0}, j{0}; i < 16U; ++i)
 					{
 						// This works because internally we keep things big endian
 						// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
-						const uint8_t value = buffer[i];
+						const arithUInt_t value = buffer[i];
 						if (i == 4 || i == 6 || i == 8 || i == 10)
 							str[j++] = '-';
-						str[j++] = asHex(value >> 4U);
-						str[j++] = asHex(value & 0x0FU);
+						str[j++] = asHex(static_cast<uint8_t>(value >> 4U));
+						str[j++] = asHex(static_cast<uint8_t>(value & 0x0FU));
 					}
 					return str;
 				}
