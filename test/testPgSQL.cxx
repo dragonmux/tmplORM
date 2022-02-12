@@ -263,6 +263,33 @@ class testPgSQL_t final : public testsuite
 		fail("Exception throw while converting value");
 	}
 
+	void testResult() try
+	{
+		assertTrue(client.valid());
+		auto result{client.query(R"(SELECT "EntryID", "Name", "Value", "When" FROM "tmplORM";)")};
+		assertTrue(result.valid());
+		if (!result.successful())
+			printError(result);
+		assertTrue(result.successful());
+		assertTrue(result.hasData());
+		assertEqual(result.numRows(), 2);
+		assertEqual(result.numFields(), 4);
+
+		assertEqual(result[0], testData[0].entryID);
+		assertEqual(result[1].asString(), testData[0].name);
+		assertFalse(result[2].isNull());
+		assertEqual(result[2], testData[0].value);
+		const auto timestamp{result[3]};
+		testData[0].when = timestamp;
+		const auto when{testData[0].when.value()};
+		assertTrue(result.next());
+	}
+	catch (const pgSQLValueError_t &error)
+	{
+		puts(error.error());
+		fail("Exception thrown while converting value");
+	}
+
 	void testDestroyDB()
 	{
 		assertTrue(client.valid());
@@ -298,6 +325,7 @@ public:
 		CXX_TEST(testSwitchDB)
 		CXX_TEST(testCreateTable)
 		CXX_TEST(testPrepared)
+		CXX_TEST(testResult)
 		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
 	}
