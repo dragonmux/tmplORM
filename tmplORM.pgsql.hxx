@@ -48,7 +48,7 @@ namespace tmplORM
 			template<> struct bind_t<bool> { constexpr static auto value = pgSQLType_t::boolean; };
 			template<> struct bind_t<float> { constexpr static auto value = pgSQLType_t::float4; };
 			template<> struct bind_t<double> { constexpr static auto value = pgSQLType_t::float8; };
-			template<> struct bind_t<char *> { constexpr static auto value = pgSQLType_t::unicode; };
+			template<> struct bind_t<const char *> { constexpr static auto value = pgSQLType_t::unicode; };
 			template<> struct bind_t<void *> { constexpr static auto value = pgSQLType_t::binary; };
 			template<> struct bind_t<ormDate_t> { constexpr static auto value = pgSQLType_t::date; };
 			//template<> struct bind_t<ormTime_t> { constexpr static auto value = pgSQLType_t::time; };
