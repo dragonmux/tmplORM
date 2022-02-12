@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: BSD-3-Clause
 #ifndef tmplORM_TYPES_HXX
 #define tmplORM_TYPES_HXX
 
@@ -8,7 +9,7 @@
 /*!
  * @file
  * @author Rachel Mant
- * @date 2017-2020
+ * @date 2017-2022
  * @brief Defines core base types for the ORM
  */
 
@@ -357,8 +358,10 @@ namespace tmplORM
 
 			inline bool operator !=(const ormDateTime_t &a, const ormDateTime_t &b) noexcept { return !(a == b); }
 			//inline bool operator ==(const ormDate_t &a, const ormDateTime_t &b) noexcept { return a == ormDate_t(b); }
-			inline bool operator ==(const ormDateTime_t &a, const ormDate_t &b) noexcept { return static_cast<const ormDate_t &>(a) == b; }
-			inline bool operator ==(const ormDateTime_t &a, const ormTime_t &b) noexcept { return static_cast<const ormTime_t &>(a) == b; }
+			inline bool operator ==(const ormDateTime_t &a, const ormDate_t &b) noexcept
+				{ return static_cast<const ormDate_t &>(a) == b; }
+			inline bool operator ==(const ormDateTime_t &a, const ormTime_t &b) noexcept
+				{ return static_cast<const ormTime_t &>(a) == b; }
 
 			struct guid_t final
 			{
