@@ -232,6 +232,30 @@ class testPgSQL_t final : public testsuite
 		testData[0].entryID = result[0];
 		assertEqual(testData[0].entryID, 1);
 		assertFalse(result.next());
+
+		testData[1].when = now;
+		query = client.prepare(R"(
+			INSERT INTO "tmplORM" ("Name", "Value", "When")
+			VALUES ($1, $2, $3) RETURNING "EntryID";)", 3
+		);
+		assertTrue(query.valid());
+		query.bind(0, testData[1].name.value(), fieldLength(testData[1].name));
+		query.bind<const char *>(1, nullptr, fieldLength(testData[1].value));
+		query.bind(2, testData[1].when.value(), fieldLength(testData[1].when));
+		result = query.execute();
+		assertTrue(result.valid());
+		if (!result.successful())
+			printError(result);
+		assertTrue(result.successful());
+
+		assertTrue(result.hasData());
+		assertEqual(result.numRows(), 1);
+		assertEqual(result.numFields(), 1);
+		assertTrue(result[0].valid());
+		assertFalse(result[0].isNull());
+		testData[1].entryID = result[0];
+		assertEqual(testData[0].entryID, 2);
+		assertFalse(result.next());
 	}
 	catch (const pgSQLValueError_t &error)
 	{
