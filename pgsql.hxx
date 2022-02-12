@@ -233,6 +233,7 @@ public:
 	bool rollback() noexcept { return endTransact(false); }
 	pgSQLResult_t query(const char *queryStmt) const noexcept;
 	pgSQLQuery_t prepare(const char *queryStmt, const size_t paramsCount) const noexcept;
+	const char *error() const noexcept;
 
 	/*! @brief Deleted move constructor for pgSQLClient_t as client connections are not movable */
 	pgSQLClient_t(const pgSQLClient_t &) = delete;

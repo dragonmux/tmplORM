@@ -104,6 +104,9 @@ pgSQLQuery_t pgSQLClient_t::prepare(const char *const queryStmt, const size_t pa
 	return {connection, queryStmt, paramsCount};
 }
 
+const char *pgSQLClient_t::error() const noexcept
+	{ return valid() ? PQerrorMessage(connection) : nullptr; }
+
 pgSQLQuery_t::pgSQLQuery_t(PGconn *const conn, const char *const queryStmt, const size_t paramsCount) noexcept :
 	connection{conn}, query{queryStmt}, numParams{paramsCount}, paramTypes{paramsCount},
 	params{paramsCount}, paramStorage{paramsCount}, dataLengths{paramsCount} { }
