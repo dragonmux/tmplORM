@@ -888,7 +888,7 @@ void computeChange(tzRule_t &rule, const int16_t year) noexcept
 		time += durationIn<seconds>(days{rule.day});
 		break;
 	case tzRuleType_t::M:
-		const auto _month{rule.month - 1U};
+		const auto _month{static_cast<uint16_t>(rule.month - 1U)};
 		const auto &daysFor{monthDays[isLeap(year)]};
 		for (uint16_t i = 0; i < _month; ++i)
 			time += durationIn<seconds>(days{daysFor[i]});
