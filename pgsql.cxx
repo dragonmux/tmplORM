@@ -105,7 +105,8 @@ pgSQLQuery_t pgSQLClient_t::prepare(const char *const queryStmt, const size_t pa
 }
 
 pgSQLQuery_t::pgSQLQuery_t(PGconn *const conn, const char *const queryStmt, const size_t paramsCount) noexcept :
-	connection{conn}, query{queryStmt}, numParams{paramsCount}, paramTypes{paramsCount} { }
+	connection{conn}, query{queryStmt}, numParams{paramsCount}, paramTypes{paramsCount},
+	params{paramsCount}, paramStorage{paramsCount}, dataLengths{paramsCount} { }
 
 pgSQLResult_t pgSQLQuery_t::execute() const noexcept
 {
@@ -163,6 +164,9 @@ void pgSQLQuery_t::swap(pgSQLQuery_t &qry) noexcept
 	std::swap(query, qry.query);
 	std::swap(numParams, qry.numParams);
 	paramTypes.swap(qry.paramTypes);
+	params.swap(qry.params);
+	paramStorage.swap(qry.paramStorage);
+	dataLengths.swap(qry.dataLengths);
 }
 
 pgSQLResult_t::pgSQLResult_t(PGresult *res) noexcept : result{res}
