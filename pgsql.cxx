@@ -205,6 +205,12 @@ bool pgSQLResult_t::successful() const noexcept
 	return result == PGRES_COMMAND_OK || result == PGRES_TUPLES_OK || result == PGRES_SINGLE_TUPLE;
 }
 
+bool pgSQLResult_t::hasData() const noexcept
+{
+	const auto result{errorNum()};
+	return result == PGRES_TUPLES_OK || result == PGRES_SINGLE_TUPLE;
+}
+
 uint32_t pgSQLResult_t::numRows() const noexcept { return valid() ? static_cast<uint32_t>(PQntuples(result)) : 0; }
 
 bool pgSQLResult_t::next() noexcept

@@ -150,6 +150,7 @@ public:
 	uint32_t errorNum() const noexcept;
 	const char *error() const noexcept;
 	bool successful() const noexcept;
+	bool hasData() const noexcept;
 	uint32_t numRows() const noexcept;
 	uint32_t numFields() const noexcept { return fields; }
 	bool next() noexcept;
