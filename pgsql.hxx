@@ -75,6 +75,7 @@ public:
 
 	bool valid() const noexcept { return data || type != InvalidOid; }
 	bool isNull() const noexcept { return !data; }
+	const char *asString() const;
 	bool asBool() const;
 	uint8_t asUint8() const;
 	int8_t asInt8() const;
@@ -90,6 +91,8 @@ public:
 	ormDateTime_t asDateTime() const;
 	ormUUID_t asUUID() const;
 
+	/*! @brief Auto-converter for strings */
+	operator const char *() const { return asString(); }
 	/*! @brief Auto-converter for booleans */
 	explicit operator bool() const { return asBool(); }
 	/*! @brief Auto-converter for uint8_t's */

@@ -261,6 +261,13 @@ template<typename T, Oid oid, pgSQLErrorType_t error> inline T pgSQLValue_t::asI
 	return substrate::buffer_utils::readBE<T>(data);
 }
 
+const char *pgSQLValue_t::asString() const
+{
+	if (isNull() || (type != VARCHAROID && type != TEXTOID))
+		throw pgSQLValueError_t{pgSQLErrorType_t::stringError};
+	return static_cast<const char *>(data);
+}
+
 bool pgSQLValue_t::asBool() const
 {
 	if (isNull() || type != BOOLOID)
