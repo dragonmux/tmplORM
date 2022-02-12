@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: BSD-3-Clause
 #ifndef tmplORM_HXX
 #define tmplORM_HXX
 
@@ -11,8 +12,8 @@
 #include <type_traits>
 #include <substrate/fixed_vector>
 #include <typestring/typestring.hh>
-#include <tmplORM.extern.hxx>
-#include <tmplORM.types.hxx>
+#include "tmplORM.extern.hxx"
+#include "tmplORM.types.hxx"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ts(x) typestring_is(x)
@@ -52,10 +53,11 @@ namespace tmplORM
 	{
 	protected:
 		constexpr static const size_t N = sizeof...(Fields);
-		// NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes)
-		std::tuple<Fields...> _fields{};
+		// NOLINTNEXTLINE(cppcoreguidelines-non-private-member-variables-in-classes,modernize-use-default-member-init)
+		std::tuple<Fields...> _fields;
 
-		constexpr fields_t() noexcept = default;
+		// NOLINTNEXTLINE(modernize-use-default-member-init)
+		constexpr fields_t() noexcept : _fields{} { }
 		constexpr fields_t(Fields &&...fields) noexcept : _fields{fields...} { }
 
 	public:
@@ -71,10 +73,10 @@ namespace tmplORM
 			{ return std::get<fieldIndex<typestring<C...>, Fields...>::index>(_fields); }
 	};
 
-	template<typename _tableName, typename... Fields> struct model_t : public fields_t<Fields...>
+	template<typename _tableName, typename... Fields> struct model_t : fields_t<Fields...>
 	{
 	public:
-		constexpr model_t() noexcept : fields_t<Fields...>{} {}
+		constexpr model_t() noexcept = default;
 		constexpr model_t(Fields... fields) noexcept : fields_t<Fields...>{&fields...} { }
 
 		static_assert(common::hasPrimaryKey<Fields...>(), "Model must have a primary key!");
@@ -280,7 +282,7 @@ namespace tmplORM
 			using parentType_t::operator ==;
 			using parentType_t::operator !=;
 
-			constexpr unicode_t() noexcept : parentType_t{} { }
+			constexpr unicode_t() noexcept = default;
 			constexpr unicode_t(const type value) noexcept : parentType_t{value} { }
 			size_t length() const noexcept { return value() ? std::char_traits<char>::length(value()) : 0; }
 
@@ -309,7 +311,7 @@ namespace tmplORM
 			using parentType_t::operator ==;
 			using parentType_t::operator !=;
 
-			constexpr unicodeText_t() noexcept : parentType_t{} { }
+			constexpr unicodeText_t() noexcept = default;
 			constexpr unicodeText_t(const type value) noexcept : parentType_t{value} { }
 			size_t length() const noexcept { return value() ? std::char_traits<char>::length(value()) : 0; }
 
@@ -372,7 +374,7 @@ namespace tmplORM
 			struct _dateTime_t : public _date_t, public _time_t
 			{
 			public:
-				constexpr _dateTime_t() noexcept : _date_t{}, _time_t{} { }
+				constexpr _dateTime_t() noexcept = default;
 				constexpr _dateTime_t(const ::int16_t year, const uint8_t month, const uint8_t day,
 					const duration_t &time) noexcept : _date_t{year, month, day}, _time_t{time} { }
 				constexpr _dateTime_t(const ::int16_t year, const uint8_t month, const uint8_t day) noexcept :
@@ -387,7 +389,7 @@ namespace tmplORM
 
 			public:
 				using type = ormDate_t;
-				constexpr date_t() noexcept : parentType_t{} { }
+				constexpr date_t() noexcept = default;
 				date_t(const date_t &value) noexcept : parentType_t{value._value} { }
 				date_t(date_t &&value) noexcept : parentType_t{value._value} { }
 				date_t(const ormDate_t _value) noexcept : parentType_t{} { value(_value); }
@@ -426,7 +428,7 @@ namespace tmplORM
 
 			public:
 				using type = ormTime_t;
-				constexpr time_t() noexcept : parentType_t{} { }
+				constexpr time_t() noexcept = default;
 				time_t(const time_t &value) noexcept : parentType_t{value._value} { }
 				time_t(time_t &&value) noexcept : parentType_t{value._value} { }
 				time_t(const ormTime_t _value) noexcept : parentType_t{} { value(_value); }
@@ -480,7 +482,7 @@ namespace tmplORM
 
 			public:
 				using type = ormDateTime_t;
-				constexpr dateTime_t() noexcept : parentType_t{} {}
+				constexpr dateTime_t() noexcept = default;
 				dateTime_t(const dateTime_t &value) noexcept : parentType_t{value._value} { }
 				dateTime_t(dateTime_t &&value) noexcept : parentType_t{value._value} { }
 				dateTime_t(const ormDateTime_t _value) noexcept : parentType_t{} { value(_value); }
