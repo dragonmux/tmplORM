@@ -96,7 +96,7 @@ namespace tmplORM
 
 				static const char *bind(const ormDateTime_t &value, managedPtr_t<void> &paramStorage) noexcept
 				{
-					const int64_t timestamp
+					const int64_t dateTime
 					{
 						[&]()
 						{
@@ -113,7 +113,7 @@ namespace tmplORM
 						}()
 					};
 					paramStorage = substrate::make_managed_nothrow<int64_t>();
-					substrate::buffer_utils::writeBE(timestamp, paramStorage.get());
+					substrate::buffer_utils::writeBE(dateTime, paramStorage.get());
 					return static_cast<const char *>(paramStorage.get());
 				}
 			};
