@@ -92,7 +92,7 @@ public:
 	ormUUID_t asUUID() const;
 
 	/*! @brief Auto-converter for strings */
-	operator const char *() const { return asString(); }
+	explicit operator const char *() const { return asString(); }
 	/*! @brief Auto-converter for booleans */
 	explicit operator bool() const { return asBool(); }
 	/*! @brief Auto-converter for uint8_t's */
