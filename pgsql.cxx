@@ -173,6 +173,7 @@ pgSQLResult_t::pgSQLResult_t(PGresult *res) noexcept : result{res}
 {
 	if (!result)
 		return;
+	rows = static_cast<uint32_t>(PQntuples(result));
 	fields = static_cast<uint32_t>(PQnfields(result));
 	fieldInfo = {fields};
 	if (!fieldInfo.valid())
@@ -211,12 +212,11 @@ bool pgSQLResult_t::hasData() const noexcept
 	return result == PGRES_TUPLES_OK || result == PGRES_SINGLE_TUPLE;
 }
 
-uint32_t pgSQLResult_t::numRows() const noexcept { return valid() ? static_cast<uint32_t>(PQntuples(result)) : 0; }
-
 bool pgSQLResult_t::next() noexcept
 {
-	++row;
-	return false;
+	if (row < rows)
+		++row;
+	return row != rows;
 }
 
 pgSQLValue_t pgSQLResult_t::operator [](const uint32_t idx) const noexcept
@@ -233,6 +233,7 @@ pgSQLValue_t pgSQLResult_t::operator [](const uint32_t idx) const noexcept
 void pgSQLResult_t::swap(pgSQLResult_t &res) noexcept
 {
 	std::swap(result, res.result);
+	std::swap(rows, res.rows);
 	std::swap(fields, res.fields);
 	std::swap(row, res.row);
 	fieldInfo.swap(res.fieldInfo);

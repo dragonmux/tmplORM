@@ -130,6 +130,7 @@ struct tmplORM_API pgSQLResult_t final
 {
 private:
 	PGresult *result{nullptr};
+	uint32_t rows{0};
 	uint32_t fields{0};
 	uint32_t row{0};
 	// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
@@ -151,7 +152,7 @@ public:
 	const char *error() const noexcept;
 	bool successful() const noexcept;
 	bool hasData() const noexcept;
-	uint32_t numRows() const noexcept;
+	uint32_t numRows() const noexcept { return rows; }
 	uint32_t numFields() const noexcept { return fields; }
 	bool next() noexcept;
 	pgSQLValue_t operator [](const uint32_t idx) const noexcept;
