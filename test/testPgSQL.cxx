@@ -107,6 +107,7 @@ class testPgSQL_t final : public testsuite
 		assertEqual(testResult.errorNum(), static_cast<uint32_t>(PGRES_COMMAND_OK));
 		assertNull(testResult.error());
 		assertTrue(testResult.successful());
+		assertFalse(testResult.hasData());
 		assertEqual(testResult.numRows(), 0);
 		assertFalse(testResult.next());
 		assertFalse(testResult[0].valid());
@@ -144,7 +145,7 @@ class testPgSQL_t final : public testsuite
 		assertNotNull(result.error());
 		assertEqual(result.numFields(), 0);
 		assertEqual(result.numRows(), 0);
-		//assertFalse(result[0].valid());
+		assertFalse(result[0].valid());
 		assertTrue(client.switchDB("tmplORM"));
 		assertTrue(client.valid());
 	}
@@ -223,13 +224,14 @@ class testPgSQL_t final : public testsuite
 			printError(result);
 		assertTrue(result.successful());
 
-		// assertTrue(result.hasData());
+		assertTrue(result.hasData());
 		assertEqual(result.numRows(), 1);
 		assertEqual(result.numFields(), 1);
 		assertTrue(result[0].valid());
 		assertFalse(result[0].isNull());
 		testData[0].entryID = result[0];
 		assertEqual(testData[0].entryID, 1);
+		assertFalse(result.next());
 	}
 	catch (const pgSQLValueError_t &error)
 	{
