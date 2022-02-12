@@ -61,10 +61,59 @@ namespace tmplORM
 
 			template<bool> struct bindValue_t
 			{
+				constexpr static int32_t postgresDateEpoch{2451545};
+
+				// The conversion code here is ripped off wholesale from
+				// https://en.wikipedia.org/wiki/Julian_day#Converting_Gregorian_calendar_date_to_Julian_Day_Number
+				// It is insane. This code stinks. The naming is even ?? but there's no way around this.
+				// Postgres dug us into this mess
+				static int32_t dateToJulianDate(const ormDate_t &date)
+				{
+					const auto a{(date.month() - 14) / 12};
+					const auto b{1461 * (date.year() + 4800 + a)};
+					const auto c{367 * (date.month() - 2 - 12 * a)};
+					const auto d{3 * ((date.year() + 4900 + a) / 100)};
+					return b / 4 + c / 12 - d / 4 + date.day() - 32075;
+				}
+
+				static inline int32_t dateToPgDate(const ormDate_t &date)
+					{ return dateToJulianDate(date) - postgresDateEpoch; }
+
 				template<typename T> static const char *bind(const T &value, managedPtr_t<void> &paramStorage) noexcept
 				{
 					paramStorage = substrate::make_managed_nothrow<T>();
 					substrate::buffer_utils::writeBE(value, paramStorage.get());
+					return static_cast<const char *>(paramStorage.get());
+				}
+
+				static const char *bind(const ormDate_t &value, managedPtr_t<void> &paramStorage) noexcept
+				{
+					const auto date{dateToPgDate(value)};
+					paramStorage = substrate::make_managed_nothrow<int32_t>();
+					substrate::buffer_utils::writeBE(date, paramStorage.get());
+					return static_cast<const char *>(paramStorage.get());
+				}
+
+				static const char *bind(const ormDateTime_t &value, managedPtr_t<void> &paramStorage) noexcept
+				{
+					const int64_t timestamp
+					{
+						[&]()
+						{
+							int64_t timestamp{dateToPgDate(value)};
+							timestamp *= 24;
+							timestamp += value.hour();
+							timestamp *= 60;
+							timestamp += value.minute();
+							timestamp *= 60;
+							timestamp += value.second();
+							timestamp *= 1000000;
+							timestamp += value.nanoSecond() / 1000;
+							return timestamp;
+						}()
+					};
+					paramStorage = substrate::make_managed_nothrow<int64_t>();
+					substrate::buffer_utils::writeBE(timestamp, paramStorage.get());
 					return static_cast<const char *>(paramStorage.get());
 				}
 			};
