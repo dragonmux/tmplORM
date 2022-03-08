@@ -64,7 +64,7 @@ static type_t typeData
 	32767, true, "This is a string", "This is some text",
 	2.125, 5.325, ormDate_t{2018, 07, 04},
 	ormDateTime_t{2018, 07, 04, 12, 34, 56, 789012345},
-	ormUUID_t{}
+	ormUUID_t{0xbf052777, 0x89b7, 0x4ed6, 0xbc04, 0x4e36e9d63287}
 };
 
 class testPgSQL_t final : public testsuite
@@ -395,9 +395,9 @@ class testPgSQL_t final : public testsuite
 					"Int64", "Int32", "Int16", "Bool", "String", "Text",
 					"Float", "Double", "Date", "DateTime", "UUID"
 				)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, GEN_RANDOM_UUID())
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 				RETURNING "EntryID";
-			)", 10)
+			)", 11)
 		};
 		assertTrue(query.valid());
 		query.bind(0, typeData.int64.value(), fieldLength(typeData.int64));
@@ -410,7 +410,7 @@ class testPgSQL_t final : public testsuite
 		query.bind(7, typeData.decimalD.value(), fieldLength(typeData.decimalD));
 		query.bind(8, typeData.date.value(), fieldLength(typeData.date));
 		query.bind(9, typeData.dateTime.value(), fieldLength(typeData.dateTime));
-		//query.bind(11, typeData.uuid.value(), fieldLength(typeData.uuid));
+		query.bind(10, typeData.uuid.value(), fieldLength(typeData.uuid));
 		result = query.execute();
 		assertTrue(result.valid());
 		if (!result.successful())
