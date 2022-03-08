@@ -381,6 +381,48 @@ class testPgSQL_t final : public testsuite
 		assertFalse(result.next());
 	}
 
+	void testBind() try
+	{
+		assertTrue(client.valid());
+		pgSQLResult_t result{};
+		assertFalse(result.valid());
+
+		auto query
+		{
+			client.prepare(R"(
+				INSERT INTO "TypeTest"
+				(
+					"Int64", "Int32", "Int16", "Bool", "String", "Text",
+					"Float", "Double", "Date", "DateTime", "UUID"
+				)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, GEN_RANDOM_UUID())
+				RETURNING "EntryID";
+			)", 10)
+		};
+		assertTrue(query.valid());
+		query.bind(0, typeData.int64.value(), fieldLength(typeData.int64));
+		query.bind(1, typeData.int32.value(), fieldLength(typeData.int32));
+		query.bind(2, typeData.int16.value(), fieldLength(typeData.int16));
+		query.bind(3, typeData.boolean.value(), fieldLength(typeData.boolean));
+		query.bind(4, typeData.string.value(), fieldLength(typeData.string));
+		query.bind(5, typeData.text.value(), fieldLength(typeData.text));
+		query.bind(6, typeData.decimalF.value(), fieldLength(typeData.decimalF));
+		query.bind(7, typeData.decimalD.value(), fieldLength(typeData.decimalD));
+		query.bind(8, typeData.date.value(), fieldLength(typeData.date));
+		query.bind(9, typeData.dateTime.value(), fieldLength(typeData.dateTime));
+		//query.bind(11, typeData.uuid.value(), fieldLength(typeData.uuid));
+		result = query.execute();
+		assertTrue(result.valid());
+		if (!result.successful())
+			printError(result);
+		assertTrue(result.successful());
+	}
+	catch (const pgSQLValueError_t &error)
+	{
+		puts(error.error());
+		fail("Exception thrown while converting value");
+	}
+
 	void testDestroyDB()
 	{
 		assertTrue(client.valid());
@@ -418,6 +460,7 @@ public:
 		CXX_TEST(testPrepared)
 		CXX_TEST(testResult)
 		CXX_TEST(testTransact)
+		CXX_TEST(testBind)
 		CXX_TEST(testDestroyDB)
 		CXX_TEST(testDisconnect)
 	}
