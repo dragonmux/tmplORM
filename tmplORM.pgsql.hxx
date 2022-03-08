@@ -375,17 +375,17 @@ namespace tmplORM
 
 		template<size_t bindIndex, typename field_t> struct bindField_t<bindIndex, field_t, false>
 		{
-			template<typename query_t> static void bind(const field_t &field, query_t &query) noexcept
+			static void bind(const field_t &field, driver::pgSQLQuery_t &query) noexcept
 				{ query.bind(bindIndex, field.value(), fieldLength(field)); }
 		};
 
 		template<size_t bindIndex, typename field_t> struct bindField_t<bindIndex, field_t, true>
 		{
 			using value_t = typename field_t::type;
-			template<typename query_t> static void bind(const field_t &field, query_t &query) noexcept
+			static void bind(const field_t &field, driver::pgSQLQuery_t &query) noexcept
 			{
 				if (field.isNull())
-					query.template bind<value_t>(bindIndex, nullptr, fieldLength(field_t()));
+					query.template bind<value_t>(bindIndex, nullptr, fieldLength(field_t{}));
 				else
 					query.bind(bindIndex, field.value(), fieldLength(field));
 			}
@@ -396,18 +396,18 @@ namespace tmplORM
 		{
 			constexpr static size_t bindIndex = bindIdx - 1;
 
-			template<typename fieldName, typename T, typename field_t, typename query_t>
-				static void bindField(const type_t<fieldName, T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
+			template<typename fieldName, typename T, typename field_t> static void bindField(const type_t<fieldName, T> &,
+				const field_t &field, const std::tuple<fields_t...> &fields, driver::pgSQLQuery_t &query) noexcept
 			{
 				bindInsert_t<index - 1, bindIndex, fields_t...>::bind(fields, query);
 				bindField_t<bindIndex, field_t>::bind(field, query);
 			}
 
-			template<typename T, typename field_t, typename query_t>
-				static void bindField(const autoInc_t<T> &, const field_t &, const std::tuple<fields_t...> &fields, query_t &query) noexcept
-			{ bindInsert_t<index - 1, bindIdx, fields_t...>::bind(fields, query); }
+			template<typename T, typename field_t> static void bindField(const autoInc_t<T> &, const field_t &,
+					const std::tuple<fields_t...> &fields, driver::pgSQLQuery_t &query) noexcept
+				{ bindInsert_t<index - 1, bindIdx, fields_t...>::bind(fields, query); }
 
-			template<typename query_t> static void bind(const std::tuple<fields_t...> &fields, query_t &query) noexcept
+			static void bind(const std::tuple<fields_t...> &fields, driver::pgSQLQuery_t &query) noexcept
 			{
 				const auto &field = std::get<index>(fields);
 				bindField(field, field, fields, query);
@@ -416,20 +416,20 @@ namespace tmplORM
 
 		/*! @brief End (base) case for bindInsert_t that terminates the recursion */
 		template<size_t index, typename... fields> struct bindInsert_t<index, 0, fields...>
-			{ template<typename query_t> static void bind(const std::tuple<fields...> &, query_t &) noexcept { } };
+			{ static void bind(const std::tuple<fields...> &, driver::pgSQLQuery_t &) noexcept { } };
 		/*! @brief Helper type for bindInsert_t that makes the binding type easier to use */
 		template<typename... fields> using bindInsert = bindInsert_t<sizeof...(fields) - 1, countInsert_t<fields...>::count, fields...>;
 
 		template<size_t index, typename... fields_t> struct bindInsertAll_t
 		{
-			template<typename fieldName, typename T, typename field_t, typename query_t>
-				static void bindField(const type_t<fieldName, T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
+			template<typename fieldName, typename T, typename field_t> static void bindField(const type_t<fieldName, T> &,
+				const field_t &field, const std::tuple<fields_t...> &fields, driver::pgSQLQuery_t &query) noexcept
 			{
 				bindInsertAll_t<index - 1, fields_t...>::bind(fields, query);
 				bindField_t<index, field_t>::bind(field, query);
 			}
 
-			template<typename query_t> static void bind(const std::tuple<fields_t...> &fields, query_t &query) noexcept
+			static void bind(const std::tuple<fields_t...> &fields, driver::pgSQLQuery_t &query) noexcept
 			{
 				const auto &field = std::get<index>(fields);
 				bindField(field, field, fields, query);
@@ -437,7 +437,7 @@ namespace tmplORM
 		};
 
 		template<typename... fields> struct bindInsertAll_t<size_t(-1), fields...>
-			{ template<typename query_t> static void bind(const std::tuple<fields...> &, query_t &) noexcept { } };
+			{ static void bind(const std::tuple<fields...> &, driver::pgSQLQuery_t &) noexcept { } };
 		template<typename... fields> using bindInsertAll = bindInsertAll_t<sizeof...(fields) - 1, fields...>;
 
 		/*! @brief Binds a model's fields to a prepared query state for an UPDATE query on that model, ensuring that the key fields are bound last */
@@ -447,21 +447,21 @@ namespace tmplORM
 			constexpr static size_t bindIndex = bindIdx - 1;
 			constexpr static size_t keyBindIndex = keyBindIdx - 1;
 
-			template<typename fieldName, typename T, typename field_t, typename query_t>
-				static void bindField(const type_t<fieldName, T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
+			template<typename fieldName, typename T, typename field_t> static void bindField(const type_t<fieldName, T> &,
+				const field_t &field, const std::tuple<fields_t...> &fields, driver::pgSQLQuery_t &query) noexcept
 			{
 				bindUpdate_t<index, bindIndex, keyBindIdx, fields_t...>::bind(fields, query);
 				bindField_t<bindIndex, field_t>::bind(field, query);
 			}
 
-			template<typename T, typename field_t, typename query_t>
-				static void bindField(const primary_t<T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
+			template<typename T, typename field_t> static void bindField(const primary_t<T> &, const field_t &field,
+				const std::tuple<fields_t...> &fields, driver::pgSQLQuery_t &query) noexcept
 			{
 				bindUpdate_t<index, bindIdx, keyBindIndex, fields_t...>::bind(fields, query);
 				bindField_t<keyBindIndex, field_t>::bind(field, query);
 			}
 
-			template<typename query_t> static void bind(const std::tuple<fields_t...> &fields, query_t &query) noexcept
+			static void bind(const std::tuple<fields_t...> &fields, driver::pgSQLQuery_t &query) noexcept
 			{
 				const auto &field = std::get<index>(fields);
 				bindField(field, field, fields, query);
@@ -470,7 +470,7 @@ namespace tmplORM
 
 		/*! @brief End (base) case for bindUpdate_t that terminates the recursion */
 		template<size_t keyBindIndex, typename... fields> struct bindUpdate_t<0, 0, keyBindIndex, fields...>
-			{ template<typename query_t> static void bind(const std::tuple<fields...> &, query_t &) noexcept { } };
+			{ static void bind(const std::tuple<fields...> &, driver::pgSQLQuery_t &) noexcept { } };
 		/*! @brief Helper type for bindUpdate_t that makes the binding type easier to use */
 		template<typename... fields> using bindUpdate = bindUpdate_t<sizeof...(fields), countUpdate_t<fields...>::count, sizeof...(fields), fields...>;
 
@@ -480,18 +480,18 @@ namespace tmplORM
 			constexpr static size_t index = idx - 1;
 			constexpr static size_t bindIndex = bindIdx - 1;
 
-			template<typename fieldName, typename T, typename field_t, typename query_t>
-				static void bindField(const type_t<fieldName, T> &, const field_t &, const std::tuple<fields_t...> &fields, query_t &query) noexcept
-			{ bindDelete_t<index, bindIdx, fields_t...>::bind(fields, query); }
+			template<typename fieldName, typename T, typename field_t > static void bindField(const type_t<fieldName, T> &,
+					const field_t &, const std::tuple<fields_t...> &fields, driver::pgSQLQuery_t &query) noexcept
+				{ bindDelete_t<index, bindIdx, fields_t...>::bind(fields, query); }
 
-			template<typename T, typename field_t, typename query_t>
-				static void bindField(const primary_t<T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
+			template<typename T, typename field_t> static void bindField(const primary_t<T> &, const field_t &field,
+				const std::tuple<fields_t...> &fields, driver::pgSQLQuery_t &query) noexcept
 			{
 				bindDelete_t<index, bindIndex, fields_t...>::bind(fields, query);
 				bindField_t<bindIndex, field_t>::bind(field, query);
 			}
 
-			template<typename query_t> static void bind(const std::tuple<fields_t...> &fields, query_t &query) noexcept
+			static void bind(const std::tuple<fields_t...> &fields, driver::pgSQLQuery_t &query) noexcept
 			{
 				const auto &field = std::get<index>(fields);
 				bindField(field, field, fields, query);

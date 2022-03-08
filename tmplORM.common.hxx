@@ -171,7 +171,7 @@ inline namespace common
 		template<typename query_t> static void bind(const field_t &field, query_t &query) noexcept
 		{
 			if (field.isNull())
-				query.template bind<value_t>(bindIndex, nullptr, fieldLength(field_t()));
+				query.template bind<value_t>(bindIndex, nullptr, fieldLength(field_t{}));
 			else
 				query.bind(bindIndex, field.value(), fieldLength(field));
 		}
