@@ -286,16 +286,17 @@ namespace tmplORM
 				return database.query(create::value).valid();
 			}
 
-			template<typename T, typename tableName, typename... fields_t> fixedVector_t<T> select(const model_t<tableName, fields_t...> &) noexcept
+			template<typename T, typename tableName, typename... fields_t> fixedVector_t<T>
+				select(const model_t<tableName, fields_t...> &) noexcept
 			{
 				using select = select_<tableName, fields_t...>;
-				tSQLResult_t result(database.query(select::value));
+				auto result{database.query(select::value)};
 				fixedVector_t<T> data{result.numRows()};
 				if (!data.valid())
 					return {};
 				for (size_t i = 0; i < result.numRows(); ++i, result.next())
 				{
-					T value;
+					T value{};
 					if (!result.valid())
 						return {};
 					bindSelect<fields_t...>::bind(value.fields(), result);
@@ -327,7 +328,7 @@ namespace tmplORM
 			template<typename tableName, typename... fields_t> bool add(model_t<tableName, fields_t...> &model) noexcept
 			{
 				using insert = add_<tableName, fields_t...>;
-				tSQLQuery_t query(database.prepare(insert::value, countInsert_t<fields_t...>::count));
+				tSQLQuery_t query{database.prepare(insert::value, countInsert_t<fields_t...>::count)};
 				bindInsert<fields_t...>::bind(model.fields(), query);
 				tSQLResult_t result(query.execute());
 				if (result.valid())
@@ -341,7 +342,7 @@ namespace tmplORM
 			template<typename tableName, typename... fields_t> bool add(const model_t<tableName, fields_t...> &model) noexcept
 			{
 				using insert = addAll_<tableName, fields_t...>;
-				tSQLQuery_t query(database.prepare(insert::value, sizeof...(fields_t)));
+				tSQLQuery_t query{database.prepare(insert::value, sizeof...(fields_t))};
 				// This binds the fields in order so we insert a value for every column.
 				bindInsertAll<fields_t...>::bind(model.fields(), query);
 				// This either works or doesn't.. thankfully.. so, we can just execute-and-quit.
@@ -353,7 +354,7 @@ namespace tmplORM
 				using update = update_<tableName, fields_t...>;
 				if (std::is_same<update, toString<typestring<>>>::value)
 					return false;
-				tSQLQuery_t query(database.prepare(update::value, sizeof...(fields_t)));
+				tSQLQuery_t query{database.prepare(update::value, sizeof...(fields_t))};
 				// This binds the fields, primary key last so it tags to the WHERE clause for this query.
 				bindUpdate<fields_t...>::bind(model.fields(), query);
 				// This either works or doesn't.. thankfully.. so, we can just execute-and-quit.
@@ -363,7 +364,7 @@ namespace tmplORM
 			template<typename tableName, typename... fields_t> bool del(const model_t<tableName, fields_t...> &model) noexcept
 			{
 				using del = del_<tableName, fields_t...>;
-				tSQLQuery_t query(database.prepare(del::value, countPrimary<fields_t...>::count));
+				tSQLQuery_t query{database.prepare(del::value, countPrimary<fields_t...>::count)};
 				// This binds the primary key fields only, in the order they're given in the WHERE clause for this query.
 				bindDelete<fields_t...>::bind(model.fields(), query);
 				// This either works or doesn't.. thankfully.. so, we can just execute-and-quit.
