@@ -115,7 +115,7 @@ inline namespace common
 	template<typename tableName, typename... fields> using update_ = toString<typename update_t<sizeof...(fields) ==
 		countPrimary<fields...>::count, tableName, fields...>::value>;
 
-	/*! @brief Binds a model's fields to a prepared query state for a SELECT query on that model, ensuring that auto-increment fields are not bound */
+	/*! @brief Binds a model's fields to the result of a SELECT query on that model, ensuring that auto-increment fields are not bound */
 	template<size_t idx, typename... fields_t> struct bindSelect_t
 	{
 		constexpr static size_t index = idx - 1;
@@ -141,7 +141,7 @@ inline namespace common
 		template<typename result_t> static void bind(std::tuple<fields_t...> &fields, const result_t &result)
 		{
 			bindSelect_t<index, fields_t...>::bind(fields, result);
-			value_t<typename fieldType_t<index, fields_t...>::type>::assign(std::get<index>(fields), result[index]);
+			value_t<fieldType_<index, fields_t...>>::assign(std::get<index>(fields), result[index]);
 		}
 	};
 
