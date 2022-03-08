@@ -353,6 +353,20 @@ ormDateTime_t pgSQLValue_t::asDateTime() const
 	return {date.year(), date.month(), date.day(), hours, minutes, seconds, microseconds * 1000U};
 }
 
+ormUUID_t pgSQLValue_t::asUUID() const
+{
+	using substrate::buffer_utils::readBE;
+	const auto *const buffer{static_cast<const uint8_t *>(data)};
+	const auto a{readBE<uint32_t>(buffer + 0)};
+	const auto b{readBE<uint16_t>(buffer + 4)};
+	const auto c{readBE<uint16_t>(buffer + 6)};
+	const auto d{readBE<uint16_t>(buffer + 8)};
+	uint64_t e{};
+	std::memcpy(&e, buffer + 10, 6);
+	const guid_t result{a, b, c, d | (e << 16U)};
+	return {result};
+}
+
 const char *pgSQLValueError_t::error() const noexcept
 {
 	switch (errorType)
