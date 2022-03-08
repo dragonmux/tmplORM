@@ -408,7 +408,7 @@ namespace tmplORM
 			struct ormUUID_t final
 			{
 			private:
-				/*! @brief union for storing UUIDs - all data must be kept in Big Endian form. */
+				/*! @brief struct for storing UUIDs - all data must be kept in Big Endian form. */
 				guid_t _uuid;
 				friend bool operator ==(const ormUUID_t &a, const ormUUID_t &b) noexcept;
 
@@ -463,7 +463,7 @@ namespace tmplORM
 					using arithUInt_t = substrate::promoted_type_t<uint8_t>;
 					std::array<uint8_t, sizeof(guid_t)> buffer{};
 					// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
-					auto str = substrate::make_unique_nothrow<char []>(36);
+					auto str = substrate::make_unique_nothrow<char []>(37);
 					if (!str)
 						return nullptr;
 					memcpy(buffer.data(), asPointer(), sizeof(guid_t));
@@ -477,6 +477,7 @@ namespace tmplORM
 						str[j++] = asHex(static_cast<uint8_t>(value >> 4U));
 						str[j++] = asHex(static_cast<uint8_t>(value & 0x0FU));
 					}
+					str[36] = 0;
 					return str;
 				}
 
@@ -485,7 +486,7 @@ namespace tmplORM
 				{
 					std::array<uint8_t, sizeof(guid_t)> buffer{};
 					// NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays, modernize-avoid-c-arrays)
-					auto str = substrate::make_unique_nothrow<char []>(32);
+					auto str = substrate::make_unique_nothrow<char []>(33);
 					if (!str)
 						return nullptr;
 					memcpy(buffer.data(), asPointer(), sizeof(guid_t));
@@ -497,6 +498,7 @@ namespace tmplORM
 						str[j++] = asHex(value >> 4U);
 						str[j++] = asHex(value & 0x0FU);
 					}
+					str[32] = 0;
 					return str;
 				}
 			};
