@@ -156,6 +156,7 @@ inline namespace common
 		{ return {field.length(), length}; }
 	template<typename fieldName> fieldLength_t fieldLength(const unicodeText_t<fieldName> &field) noexcept
 		{ return {field.length(), 0}; }
+
 	template<size_t bindIndex, typename field_t, bool = field_t::nullable> struct bindField_t;
 
 	template<size_t bindIndex, typename field_t> struct bindField_t<bindIndex, field_t, false>

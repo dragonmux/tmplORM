@@ -371,6 +371,75 @@ namespace tmplORM
 		template<typename fieldName> fieldLength_t fieldLength(const unicodeText_t<fieldName> &field) noexcept
 			{ return {field.length(), 0}; }
 
+		template<size_t bindIndex, typename field_t, bool = field_t::nullable> struct bindField_t;
+
+		template<size_t bindIndex, typename field_t> struct bindField_t<bindIndex, field_t, false>
+		{
+			template<typename query_t> static void bind(const field_t &field, query_t &query) noexcept
+				{ query.bind(bindIndex, field.value(), fieldLength(field)); }
+		};
+
+		template<size_t bindIndex, typename field_t> struct bindField_t<bindIndex, field_t, true>
+		{
+			using value_t = typename field_t::type;
+			template<typename query_t> static void bind(const field_t &field, query_t &query) noexcept
+			{
+				if (field.isNull())
+					query.template bind<value_t>(bindIndex, nullptr, fieldLength(field_t()));
+				else
+					query.bind(bindIndex, field.value(), fieldLength(field));
+			}
+		};
+
+		/*! @brief Binds a model's fields to a prepared query state for an INSERT query on that model, ensuring that auto-increment fields are not bound */
+		template<size_t index, size_t bindIdx, typename... fields_t> struct bindInsert_t
+		{
+			constexpr static size_t bindIndex = bindIdx - 1;
+
+			template<typename fieldName, typename T, typename field_t, typename query_t>
+				static void bindField(const type_t<fieldName, T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
+			{
+				bindInsert_t<index - 1, bindIndex, fields_t...>::bind(fields, query);
+				bindField_t<bindIndex, field_t>::bind(field, query);
+			}
+
+			template<typename T, typename field_t, typename query_t>
+				static void bindField(const autoInc_t<T> &, const field_t &, const std::tuple<fields_t...> &fields, query_t &query) noexcept
+			{ bindInsert_t<index - 1, bindIdx, fields_t...>::bind(fields, query); }
+
+			template<typename query_t> static void bind(const std::tuple<fields_t...> &fields, query_t &query) noexcept
+			{
+				const auto &field = std::get<index>(fields);
+				bindField(field, field, fields, query);
+			}
+		};
+
+		/*! @brief End (base) case for bindInsert_t that terminates the recursion */
+		template<size_t index, typename... fields> struct bindInsert_t<index, 0, fields...>
+			{ template<typename query_t> static void bind(const std::tuple<fields...> &, query_t &) noexcept { } };
+		/*! @brief Helper type for bindInsert_t that makes the binding type easier to use */
+		template<typename... fields> using bindInsert = bindInsert_t<sizeof...(fields) - 1, countInsert_t<fields...>::count, fields...>;
+
+		template<size_t index, typename... fields_t> struct bindInsertAll_t
+		{
+			template<typename fieldName, typename T, typename field_t, typename query_t>
+				static void bindField(const type_t<fieldName, T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
+			{
+				bindInsertAll_t<index - 1, fields_t...>::bind(fields, query);
+				bindField_t<index, field_t>::bind(field, query);
+			}
+
+			template<typename query_t> static void bind(const std::tuple<fields_t...> &fields, query_t &query) noexcept
+			{
+				const auto &field = std::get<index>(fields);
+				bindField(field, field, fields, query);
+			}
+		};
+
+		template<typename... fields> struct bindInsertAll_t<size_t(-1), fields...>
+			{ template<typename query_t> static void bind(const std::tuple<fields...> &, query_t &) noexcept { } };
+		template<typename... fields> using bindInsertAll = bindInsertAll_t<sizeof...(fields) - 1, fields...>;
+
 		template<typename> struct createName_t { };
 		template<typename fieldName, typename T> struct createName_t<type_t<fieldName, T>>
 			{ using value = tycat<doubleQuote<fieldName>, ts(" "), stringType<T>>; };
@@ -482,6 +551,30 @@ namespace tmplORM
 				if (result.valid())
 					return {};
 				return data;
+			}
+
+			template<typename tableName, typename... fields_t> bool add(model_t<tableName, fields_t...> &model) noexcept
+			{
+				using insert = add_<tableName, fields_t...>;
+				auto query{database.prepare(insert::value, countInsert_t<fields_t...>::count)};
+				bindInsert<fields_t...>::bind(model.fields(), query);
+				auto result(query.execute());
+				if (result.valid())
+				{
+					setAutoInc_t<hasAutoInc<fields_t...>()>::set(model, result[0]);
+					return true;
+				}
+				return false;
+			}
+
+			template<typename tableName, typename... fields_t> bool add(const model_t<tableName, fields_t...> &model) noexcept
+			{
+				using insert = addAll_<tableName, fields_t...>;
+				auto query{database.prepare(insert::value, sizeof...(fields_t))};
+				// This binds the fields in order so we insert a value for every column.
+				bindInsertAll<fields_t...>::bind(model.fields(), query);
+				// This either works or doesn't.. thankfully.. so, we can just execute-and-quit.
+				return query.execute().valid();
 			}
 
 			template<typename tableName, typename... fields> bool deleteTable(const model_t<tableName, fields...> &)
