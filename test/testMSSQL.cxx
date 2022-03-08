@@ -402,8 +402,7 @@ private:
 				[Bool], [String], [Text], [Float], [Double], [Date],
 				[DateTime], [UUID]) OUTPUT INSERTED.[EntryID]
 				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-				)", 12
-			)
+			)", 12)
 		};
 		assertTrue(query.valid());
 		query.bind(0, typeData.int64.value(), fieldLength(typeData.int64));
