@@ -86,6 +86,28 @@ namespace tmplORM
 					return static_cast<const char *>(paramStorage.get());
 				}
 
+				static const char *bind(const bool &value, managedPtr_t<void> &paramStorage) noexcept
+				{
+					paramStorage = substrate::make_managed_nothrow<uint8_t>(uint8_t(value ? 1U : 0U));
+					return static_cast<const char *>(paramStorage.get());
+				}
+
+				static const char *bind(const float &value, managedPtr_t<void> &paramStorage) noexcept
+				{
+					uint32_t rawValue{};
+					static_assert(sizeof(uint32_t) == sizeof(float), "float and uint32_t aren't the same width");
+					std::memcpy(&rawValue, &value, sizeof(uint32_t));
+					return bind(rawValue, paramStorage);
+				}
+
+				static const char *bind(const double &value, managedPtr_t<void> &paramStorage) noexcept
+				{
+					uint64_t rawValue{};
+					static_assert(sizeof(uint64_t) == sizeof(double), "double and uint64_t aren't the same width");
+					std::memcpy(&rawValue, &value, sizeof(uint64_t));
+					return bind(rawValue, paramStorage);
+				}
+
 				static const char *bind(const ormDate_t &value, managedPtr_t<void> &paramStorage) noexcept
 				{
 					const auto date{dateToPgDate(value)};
