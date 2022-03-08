@@ -138,6 +138,15 @@ namespace tmplORM
 					substrate::buffer_utils::writeBE(dateTime, paramStorage.get());
 					return static_cast<const char *>(paramStorage.get());
 				}
+
+				static const char *bind(const ormUUID_t &value, managedPtr_t<void> &paramStorage) noexcept
+				{
+					// This works because internally ormUUID_t keeps things big endian anyway.
+					const auto *const uuid{value.asPointer()};
+					paramStorage = substrate::make_managed_nothrow<guid_t>();
+					std::memcpy(paramStorage.get(), uuid, sizeof(guid_t));
+					return static_cast<const char *>(paramStorage.get());
+				}
 			};
 
 			template<> struct bindValue_t<true>
