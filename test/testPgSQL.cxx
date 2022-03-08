@@ -102,6 +102,7 @@ class testPgSQL_t final : public testsuite
 		assertFalse(testClient.beginTransact());
 		assertTrue(testClient.commit());
 		assertTrue(testClient.rollback());
+		assertNull(testClient.error());
 		pgSQLQuery_t testQuery{};
 		assertFalse(testQuery.valid());
 		assertFalse(testQuery.execute().valid());
@@ -334,7 +335,6 @@ class testPgSQL_t final : public testsuite
 		if (!rolledBack)
 			printError(client, "Abort transaction");
 		assertTrue(rolledBack);
-		//assertFalse(client.rollback());
 
 		result = client.query(R"(SELECT "Name" FROM "tmplORM" WHERE "EntryID" = '1';)");
 		assertTrue(result.valid());
