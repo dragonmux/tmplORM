@@ -416,6 +416,43 @@ class testPgSQL_t final : public testsuite
 		if (!result.successful())
 			printError(result);
 		assertTrue(result.successful());
+		assertTrue(result.hasData());
+		assertEqual(result.numRows(), 1);
+		assertEqual(result.numFields(), 1);
+		typeData.entryID = result[0];
+		assertEqual(typeData.entryID, 1);
+		assertFalse(result.next());
+
+		result = client.query(R"(
+			SELECT
+				"EntryID", "Int64", "Int32", "Int16", "Bool", "String",
+				"Text", "Float", "Double", "Date", "DateTime", "UUID"
+			FROM "TypeTest";
+		)");
+		assertTrue(result.valid());
+		if (!result.successful())
+			printError(result);
+		assertTrue(result.successful());
+		assertTrue(result.hasData());
+		assertEqual(result.numRows(), 1);
+		assertEqual(result.numFields(), 12);
+
+		ormDateTime_t dateTime{typeData.dateTime};
+		// Apply PgSQL rounding..
+		dateTime.nanoSecond((dateTime.nanoSecond() / 1000) * 1000);
+
+		assertEqual(result[0], typeData.entryID);
+		assertEqual(result[1], typeData.int64);
+		assertEqual(result[2], typeData.int32);
+		assertEqual(result[3], typeData.int16);
+		assertEqual(bool{result[4]}, typeData.boolean);
+		assertEqual(result[5].asString(), typeData.string);
+		assertEqual(result[6].asString(), typeData.text);
+		assertEqual(float{result[7]}, typeData.decimalF);
+		assertEqual(result[8], typeData.decimalD);
+		assertTrue(ormDate_t{result[9]} == typeData.date);
+		assertTrue(result[10] == dateTime);
+		//assertTrue(result[11] == typeData.uuid);
 	}
 	catch (const pgSQLValueError_t &error)
 	{
