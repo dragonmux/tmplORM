@@ -77,7 +77,7 @@ bool pgSQLClient_t::switchDB(const char *const db) noexcept
 
 bool pgSQLClient_t::beginTransact() noexcept
 {
-	if (needsCommit || !valid())
+	if (!valid() || needsCommit)
 		return false;
 	const auto result{query("BEGIN")};
 	needsCommit = result.errorNum() == PGRES_COMMAND_OK;
@@ -86,7 +86,7 @@ bool pgSQLClient_t::beginTransact() noexcept
 
 bool pgSQLClient_t::endTransact(const bool commitSuccess) noexcept
 {
-	if (needsCommit && valid())
+	if (valid() && needsCommit)
 	{
 		const auto result{query(commitSuccess ? "COMMIT" : "ROLLBACK")};
 		needsCommit = result.errorNum() != PGRES_COMMAND_OK;
