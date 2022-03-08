@@ -474,6 +474,36 @@ namespace tmplORM
 		/*! @brief Helper type for bindUpdate_t that makes the binding type easier to use */
 		template<typename... fields> using bindUpdate = bindUpdate_t<sizeof...(fields), countUpdate_t<fields...>::count, sizeof...(fields), fields...>;
 
+		/*! @brief Binds key fields from a model to a prepared query state for a DELETE query on that model */
+		template<size_t idx, size_t bindIdx, typename... fields_t> struct bindDelete_t
+		{
+			constexpr static size_t index = idx - 1;
+			constexpr static size_t bindIndex = bindIdx - 1;
+
+			template<typename fieldName, typename T, typename field_t, typename query_t>
+				static void bindField(const type_t<fieldName, T> &, const field_t &, const std::tuple<fields_t...> &fields, query_t &query) noexcept
+			{ bindDelete_t<index, bindIdx, fields_t...>::bind(fields, query); }
+
+			template<typename T, typename field_t, typename query_t>
+				static void bindField(const primary_t<T> &, const field_t &field, const std::tuple<fields_t...> &fields, query_t &query) noexcept
+			{
+				bindDelete_t<index, bindIndex, fields_t...>::bind(fields, query);
+				bindField_t<bindIndex, field_t>::bind(field, query);
+			}
+
+			template<typename query_t> static void bind(const std::tuple<fields_t...> &fields, query_t &query) noexcept
+			{
+				const auto &field = std::get<index>(fields);
+				bindField(field, field, fields, query);
+			}
+		};
+
+		/*! @brief End (base) case for bindDelete_t that terminates the recursion */
+		template<size_t index, typename... fields> struct bindDelete_t<index, 0, fields...>
+			{ template<typename query_t> static void bind(const std::tuple<fields...> &, query_t &) noexcept { } };
+		/*! @brief Helper type for bindDelete_t that makes the binding type easier to use */
+		template<typename... fields> using bindDelete = bindDelete_t<sizeof...(fields), countPrimary<fields...>::count, fields...>;
+
 		template<typename> struct createName_t { };
 		template<typename fieldName, typename T> struct createName_t<type_t<fieldName, T>>
 			{ using value = tycat<doubleQuote<fieldName>, ts(" "), stringType<T>>; };
@@ -619,6 +649,16 @@ namespace tmplORM
 				auto query{database.prepare(update::value, sizeof...(fields_t))};
 				// This binds the fields, primary key last so it tags to the WHERE clause for this query.
 				bindUpdate<fields_t...>::bind(model.fields(), query);
+				// This either works or doesn't.. thankfully.. so, we can just execute-and-quit.
+				return query.execute().valid();
+			}
+
+			template<typename tableName, typename... fields_t> bool del(const model_t<tableName, fields_t...> &model) noexcept
+			{
+				using del = del_<tableName, fields_t...>;
+				auto query{database.prepare(del::value, countPrimary<fields_t...>::count)};
+				// This binds the primary key fields only, in the order they're given in the WHERE clause for this query.
+				bindDelete<fields_t...>::bind(model.fields(), query);
 				// This either works or doesn't.. thankfully.. so, we can just execute-and-quit.
 				return query.execute().valid();
 			}
