@@ -334,4 +334,4 @@ inline namespace common
 		{ template<typename query_t> static void bind(const std::tuple<fields...> &, query_t &) noexcept { } };
 	/*! @brief Helper type for bindDelete_t that makes the binding type easier to use */
 	template<typename... fields> using bindDelete = bindDelete_t<sizeof...(fields), countPrimary<fields...>::count, fields...>;
-}
+} // namespace common
