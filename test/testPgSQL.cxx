@@ -64,7 +64,7 @@ static type_t typeData
 	32767, true, "This is a string", "This is some text",
 	2.125, 5.325, ormDate_t{2018, 07, 04},
 	ormDateTime_t{2018, 07, 04, 12, 34, 56, 789012345},
-	ormUUID_t{0xbf052777, 0x89b7, 0x4ed6, 0xbc04, 0x4e36e9d63287}
+	ormUUID_t{0xbf052777, 0x89b7, 0x4ed6, 0xbc04, 0x8732d6e9364e} // 0x4e36e9d63287
 };
 
 class testPgSQL_t final : public testsuite
@@ -452,7 +452,8 @@ class testPgSQL_t final : public testsuite
 		assertEqual(result[8], typeData.decimalD);
 		assertTrue(ormDate_t{result[9]} == typeData.date);
 		assertTrue(result[10] == dateTime);
-		//assertTrue(result[11] == typeData.uuid);
+		assertTrue(result[11] == typeData.uuid);
+		assertFalse(result.next());
 	}
 	catch (const pgSQLValueError_t &error)
 	{
