@@ -331,6 +331,40 @@ namespace tmplORM
 		template<typename tableName, typename... fields> using update_ = toString<typename update_t<sizeof...(fields) ==
 			countPrimary<fields...>::count, tableName, fields...>::value>;
 
+		/*! @brief Binds a  model's fields to the result of a SELECT query on that model, ensuring that auto-increment fields are not bound */
+		template<size_t idx, typename... fields_t> struct bindSelect_t
+		{
+			constexpr static size_t index = idx - 1;
+
+			template<typename field_t, bool = field_t::nullable> struct value_t
+			{
+				static void assign(field_t &field, const driver::pgSQLValue_t &result) { field = result; }
+			};
+
+			template<typename field_t> struct value_t<field_t, true>
+			{
+				static void assign(field_t &field, const driver::pgSQLValue_t &result)
+				{
+					if (result.isNull())
+						field = nullptr;
+					else
+						field = result;
+				}
+			};
+
+			static void bind(std::tuple<fields_t...> &fields, const driver::pgSQLResult_t &result)
+			{
+				bindSelect_t<index, fields_t...>::bind(fields, result);
+				value_t<fieldType_<index, fields_t...>>::assign(std::get<index>(fields), result[index]);
+			}
+		};
+
+		/*! @brief End (base) case for bindSelect_t that terminates the recursion */
+		template<typename... fields> struct bindSelect_t<0, fields...>
+			{ template<typename result_t> static void bind(std::tuple<fields...> &, const result_t &) noexcept { } };
+		/*! @brief Helper type for bindSelect_t that makes the binding type easier to use */
+		template<typename... fields> using bindSelect = bindSelect_t<sizeof...(fields), fields...>;
+
 		template<typename field_t> constexpr fieldLength_t fieldLength(const field_t &) noexcept { return {0, 0}; }
 		template<typename fieldName, size_t length> fieldLength_t fieldLength(const unicode_t<fieldName, length> &field) noexcept
 			{ return {field.length(), length}; }
@@ -427,6 +461,27 @@ namespace tmplORM
 				using create = createTable_<tableName, fields...>;
 				auto result{database.query(create::value)};
 				return result.valid() && result.successful() && result.numRows() == 0;
+			}
+
+			template<typename T, typename tableName, typename... fields_t> fixedVector_t<T>
+				select(const model_t<tableName, fields_t...> &) noexcept
+			{
+				using select = select_<tableName, fields_t...>;
+				auto result{database.query(select::value)};
+				fixedVector_t<T> data{result.numRows()};
+				if (!data.valid() || !result.hasData())
+					return {};
+				for (size_t i = 0; i < result.numRows(); ++i, result.next())
+				{
+					T value{};
+					if (!result.valid())
+						return {};
+					bindSelect<fields_t...>::bind(value.fields(), result);
+					data[i] = std::move(value);
+				}
+				if (result.valid())
+					return {};
+				return data;
 			}
 
 			template<typename tableName, typename... fields> bool deleteTable(const model_t<tableName, fields...> &)
